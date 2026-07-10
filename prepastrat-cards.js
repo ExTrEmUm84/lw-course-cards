@@ -28,6 +28,7 @@
     ".ps-mcard{display:flex !important;flex-direction:column !important;padding:32px !important;min-height:270px !important;}",
     ".ps-mhead{display:flex !important;align-items:center !important;gap:14px !important;margin-bottom:24px !important;}",
     ".ps-micon{width:44px !important;height:44px !important;border-radius:10px !important;display:flex !important;align-items:center !important;justify-content:center !important;color:#fff !important;font-weight:800 !important;font-size:20px !important;font-family:Figtree,sans-serif !important;flex:none !important;}",
+    ".ps-micon svg{width:24px !important;height:24px !important;stroke:#fff !important;fill:none !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-mlabel{font-family:Figtree,sans-serif !important;font-size:18px !important;color:#676879 !important;line-height:1.2 !important;}",
     ".ps-mlabel b{color:#1c1f26 !important;font-weight:800 !important;}",
     ".ps-mtitle{font-family:Figtree,sans-serif !important;font-size:25px !important;line-height:1.25 !important;font-weight:700 !important;color:#323338 !important;margin:0 0 auto !important;}",
@@ -48,6 +49,16 @@
 
   // --- 3) Construction des cartes ---
   var S="#pageContent";
+  // Un pictogramme par niveau (thème progressif) — cycle si plus de 6 niveaux
+  var ICONS=[
+    '<svg viewBox="0 0 24 24"><path d="M3 9l9-4 9 4-9 4-9-4z"/><path d="M7 11v4c0 1.1 2.2 2 5 2s5-.9 5-2v-4"/></svg>',            // 1 livre / intro
+    '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',                                    // 2 loupe / screening
+    '<svg viewBox="0 0 24 24"><path d="M4 18l6-6 3 3 7-7"/><path d="M16 8h5v5"/></svg>',                                          // 3 courbe / montée
+    '<svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>',                                                   // 4 éclair / accélération
+    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg>',// 5 cible / derniers tours
+    '<svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v1a3 3 0 0 0 3 3"/><path d="M17 6h3v1a3 3 0 0 1-3 3"/></svg>' // 6 trophée / MBB
+  ];
+  function iconFor(level){ var i=(parseInt(level,10)-1); if(isNaN(i)||i<0) i=0; return ICONS[i % ICONS.length]; }
   function build(){
     document.querySelectorAll(S+" .lw-course-card").forEach(function(card){
       if(card.dataset.psM) return;
@@ -61,7 +72,7 @@
       var href=link ? link.getAttribute("href") : "#";
       var d=document.createElement("div");
       d.className="ps-mcard";
-      d.innerHTML='<div class="ps-mhead"><span class="ps-micon">'+level+'</span>'
+      d.innerHTML='<div class="ps-mhead"><span class="ps-micon">'+iconFor(level)+'</span>'
                 + '<span class="ps-mlabel"><b>PrepaStrat</b> Niveau '+level+'</span></div>'
                 + '<h3 class="ps-mtitle">'+name+'</h3>'
                 + '<a class="ps-mlink" href="'+href+'">En savoir plus</a>';
