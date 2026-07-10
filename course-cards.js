@@ -1,11 +1,10 @@
 /* ============================================================
-   PREPASTRAT — Cartes cours "style monday produit" (dynamique)
+   Cartes de cours LearnWorlds — style "monday produit" (dynamique)
    ------------------------------------------------------------
-   Fichier hébergé sur GitHub, chargé dans LearnWorlds via jsDelivr :
-     <script src="https://cdn.jsdelivr.net/gh/USER/REPO@main/prepastrat-cards.js"></script>
-   (à mettre dans le Code personnalisé de la page ou du site.)
+   Hébergé sur GitHub, chargé via jsDelivr dans le Code personnalisé :
+     <script src="https://cdn.jsdelivr.net/gh/ExTrEmUm84/lw-course-cards@main/course-cards.js"></script>
 
-   Cible l'élément natif "Courses" (.lw-course-card) -> tes vrais cours.
+   Cible l'élément natif "Courses" (.lw-course-card).
    Titre requis : "Niveau #N - Nom du cours".
    ============================================================ */
 (function(){
@@ -31,6 +30,8 @@
     ".ps-micon svg{width:24px !important;height:24px !important;stroke:#fff !important;fill:none !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-mlabel{font-family:Figtree,sans-serif !important;font-size:18px !important;color:#676879 !important;line-height:1.2 !important;}",
     ".ps-mlabel b{color:#1c1f26 !important;font-weight:800 !important;}",
+    ".ps-mbrand{font-family:Figtree,sans-serif !important;font-size:17px !important;font-weight:800 !important;color:#1c1f26 !important;line-height:1 !important;}",
+    ".ps-mtag{display:inline-flex !important;align-items:center !important;padding:4px 11px !important;border-radius:999px !important;font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:700 !important;line-height:1 !important;letter-spacing:.01em !important;white-space:nowrap !important;}",
     ".ps-mtitle{font-family:Figtree,sans-serif !important;font-size:25px !important;line-height:1.25 !important;font-weight:700 !important;color:#323338 !important;margin:0 0 auto !important;}",
     ".ps-mlink{display:inline-block !important;margin-top:26px !important;color:#323338 !important;font-family:Figtree,sans-serif !important;font-size:17px !important;font-weight:600 !important;text-decoration:underline !important;text-underline-offset:4px !important;}",
     ".ps-mlink:hover{color:#0073EA !important;}",
@@ -40,6 +41,12 @@
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+4) .ps-micon{background:#E2445C !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+5) .ps-micon{background:#FDAB3D !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+6) .ps-micon{background:#A25DDC !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+1) .ps-mtag{background:#EDEDFF !important;color:#4B4BE0 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+2) .ps-mtag{background:#E6F9F0 !important;color:#12A85F !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+3) .ps-mtag{background:#E1F7EC !important;color:#009257 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+4) .ps-mtag{background:#FDECEF !important;color:#D22B45 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+5) .ps-mtag{background:#FFF3E0 !important;color:#D98500 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+6) .ps-mtag{background:#F3EAFB !important;color:#8A45C9 !important;}",
     "@media(max-width:820px){#pageContent .lw-cols.multiple-rows{grid-template-columns:1fr !important;}}"
   ].join("\n");
 
@@ -73,7 +80,8 @@
       var d=document.createElement("div");
       d.className="ps-mcard";
       d.innerHTML='<div class="ps-mhead"><span class="ps-micon">'+iconFor(level)+'</span>'
-                + '<span class="ps-mlabel"><b>PrepaStrat</b> Niveau '+level+'</span></div>'
+                + '<span class="ps-mbrand">PrepaStrat</span>'
+                + '<span class="ps-mtag">Niveau '+level+'</span></div>'
                 + '<h3 class="ps-mtitle">'+name+'</h3>'
                 + '<a class="ps-mlink" href="'+href+'">En savoir plus</a>';
       card.appendChild(d);

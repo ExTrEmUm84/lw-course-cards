@@ -1,13 +1,16 @@
-# prepastrat-lw-cards
+# lw-course-cards
 
-Code de style (CSS/JS) pour les cartes de cours LearnWorlds de PrepaStrat.
+Style (CSS/JS) des cartes de cours LearnWorlds — design type monday, dynamique.
+Cible l'élément natif "Courses" et affiche les vrais cours automatiquement.
 
 ## Utilisation
 Dans LearnWorlds → Code personnalisé de la page (ou du site), coller :
 
 ```html
-<script src="https://cdn.jsdelivr.net/gh/extremum/prepastrat-lw-cards@main/prepastrat-cards.js"></script>
+<script src="https://cdn.jsdelivr.net/gh/ExTrEmUm84/lw-course-cards@main/course-cards.js"></script>
 ```
 
-- Rollback : remplacer `@main` par un tag/commit (ex. `@v1`).
-- Cache jsDelivr : purge automatique après un push (quelques minutes), ou ajouter `?v=2`.
+- **Rollback** : remplacer `@main` par un tag/commit (ex. `@v1`).
+- **Cache jsDelivr** : purge automatique après un push (quelques minutes), ou ajouter `?v=2`.
+
+Pré-requis de contenu : le titre de chaque cours au format `Niveau #N - Nom du cours`.
