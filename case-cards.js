@@ -98,7 +98,7 @@
       var pills=fields.map(function(fld){
         var key=keyFor(fld.label);
         var cls="ps-pill "+(key==="diff" ? diffClass(fld.value) : "ps-f-"+key);
-        return '<span class="'+cls+'"><b>'+fld.label+'</b> '+clean(fld.value)+'</span>';
+        return '<span class="'+cls+'">'+clean(fld.value)+'</span>';
       }).join("");
       var d=document.createElement("div");
       d.className="ps-cc";
