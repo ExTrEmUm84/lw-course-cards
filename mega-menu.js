@@ -72,6 +72,19 @@
     ".lw-topbar-submenu-item.ps-mm-hide{display:none !important;}",
     ".lw-topbar-submenu.ps-mm-empty{display:none !important;}",
 
+    /* ---------- menu centré, drapeaux inchangés ----------
+       La colonne de droite est en `justify-content:flex-end` et contient, à la
+       suite : le menu puis les 2 drapeaux. Centrer cette colonne centrerait
+       aussi les drapeaux. On sort donc LA SEULE colonne du menu du flux et on
+       la centre sur la rangée du header : les drapeaux restent à leur place
+       (mesuré : x 1306->1406 avant comme après) et le panneau du mega menu,
+       ancré sur le menu, suit automatiquement. */
+    ".ps-navrow{position:relative !important;}",
+    ".ps-navrow .ps-navcenter{position:absolute !important;left:50% !important;top:50% !important;transform:translate(-50%,-50%) !important;}",
+    /* garde-fou : sous ~1100px le menu centré finirait par toucher le logo ou
+       les drapeaux -> on rend la main à la mise en page native */
+    "@media(max-width:1100px){.ps-navrow .ps-navcenter{position:static !important;transform:none !important;}}",
+
     /* ---------- barre de nav : typo moderne ---------- */
     NAV+".lw-topbar-option-link-lbl{font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;letter-spacing:-.01em !important;color:#1c1f26 !important;transition:color .15s ease !important;}",
     NAV+".lw-topbar-option:hover > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:#6161FF !important;}",
@@ -122,6 +135,20 @@
       s.classList.toggle("ps-mm-empty", s.querySelectorAll(".lw-topbar-submenu-item:not(.ps-mm-hide)").length===0);
     });
     openMenus();
+    centerNav();
+  }
+
+  /* Centre le menu sans toucher aux drapeaux (cf. CSS .ps-navcenter).
+     On marque en JS plutôt qu'en CSS : il faut la colonne .flex-item qui
+     contient la nav, et garantir que la rangée est bien le bloc conteneur. */
+  function centerNav(){
+    var nav=document.querySelector("nav.lw-topbar-menu");
+    if(!nav) return;
+    var col=nav.closest(".flex-item");
+    var rowEl=nav.closest(".lw-cols.js-same-content-wrapper");
+    if(!col || !rowEl) return;                 // structure inattendue -> on ne touche à rien
+    rowEl.classList.add("ps-navrow");
+    col.classList.add("ps-navcenter");
   }
 
   /* ------------------------------------------------------------------
