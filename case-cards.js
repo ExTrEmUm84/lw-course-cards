@@ -42,8 +42,10 @@
     ".ps-diff-deb{background:#E6F9F0 !important;color:#12A85F !important;}",
     ".ps-diff-int{background:#FFF3E0 !important;color:#D98500 !important;}",
     ".ps-diff-adv{background:#FDECEF !important;color:#D22B45 !important;}",
-    ".ps-cc-link{display:inline-block !important;margin-top:18px !important;color:#323338 !important;font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;text-decoration:underline !important;text-underline-offset:4px !important;}",
-    ".ps-cc-link:hover{color:#0073EA !important;}",
+    ".ps-cc-link{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:#6161FF !important;font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
+    ".ps-cc-link::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
+    ".ps-cc-link:hover{color:#4B4BE0 !important;}",
+    ".ps-cc-link:hover::after{transform:translateX(5px) !important;}",
     "@media(max-width:820px){#pageContent .lw-cols.multiple-rows{grid-template-columns:1fr !important;}}"
   ].join("\n");
   var st=document.getElementById("ps-casecards-style");
