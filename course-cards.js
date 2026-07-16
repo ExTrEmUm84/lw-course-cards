@@ -97,17 +97,14 @@
        celui-ci `static`, il s'ancre sur la carte (déjà `position:relative`)
        et couvre les 434px. Vérifié : image, centre, titre et bouton mènent
        tous au cours. */
-    /* ---- ILLUSTRATION EN ROND (choix de Ziad le 17/07) --------------------
-       L'illustration passe d'un bandeau pleine largeur à un rond de 180px posé
-       sur une bande teintée à la couleur du niveau.
+    /* ---- ILLUSTRATION EN ROND QUI SORT DE LA CARTE (Ziad, 17/07) ----------
+       L'illustration passe d'un bandeau pleine largeur à un rond de 180px dont
+       la MOITIÉ HAUTE déborde au-dessus de la carte, sur le fond de page.
 
        🔴 `position:static` EST OBLIGATOIRE (cf. le commentaire ci-dessus) : il
-       fait que le lien natif s'ancre sur la CARTE et la rende cliquable en
-       entier. Ma 1re version du rond utilisait un `::before` sur la carte, ce
-       qui imposait `position:relative` sur l'image pour l'empiler au-dessus —
-       et **cassait la carte cliquable**. D'où la bande en `linear-gradient`
-       SUR LA CARTE : aucun pseudo-élément, aucun empilement, l'image reste
-       static. Vérifié après coup : le lien couvre toujours toute la carte.
+       fait que le lien natif s'ancre sur la CARTE. Ne jamais passer l'image en
+       `position:relative` : une version intermédiaire le faisait (pour l'empiler
+       au-dessus d'un `::before`) et **cassait la carte cliquable**.
 
        L'image source fait 400x225 (16:9) : un rond ROGNE forcément les côtés
        (~44% de la largeur). C'est assumé — la variante `contain` a été
@@ -117,21 +114,33 @@
        fait déjà ce travail.
        `background-position:50% 45%` : légèrement remonté, les scènes ont leur
        sujet au-dessus du centre géométrique. */
-    "#pageContent .cards-grandpa .lw-course-card > .learnworlds-image{position:static !important;width:180px !important;height:180px !important;min-height:0 !important;flex:none !important;border-radius:50% !important;background-size:cover !important;background-position:50% 45% !important;margin:23px auto 0 !important;border:5px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.10) !important;}",
-    /* Bande teintée = un dégradé à arrêt net SUR LA CARTE (226 = 180 + 2x23).
-       🔴 Sélecteur `.cards-grandpa > .lw-cols > .col.lw-course-card` = (1,4,0),
-       et non `.cards-grandpa .lw-course-card` = (1,2,0) : la règle de la carte
-       plus haut dans ce fichier (`#pageContent .lw-cols > .col.lw-course-card`,
-       (1,3,0)) pose `background:#fff !important` et ÉCRASERAIT un sélecteur plus
-       faible. Vérifié à l'écran : avec (1,2,0), `backgroundImage` valait `none`
-       — aucune bande. Deux `!important` : c'est la spécificité qui tranche. */
-    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{background:linear-gradient(#F1F1FF 0,#F1F1FF 226px,#fff 226px) !important;}",
-    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card[data-ps-lvl='2']{background:linear-gradient(#E3F8EE 0,#E3F8EE 226px,#fff 226px) !important;}",
-    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card[data-ps-lvl='3']{background:linear-gradient(#FFF3E0 0,#FFF3E0 226px,#fff 226px) !important;}",
-    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card[data-ps-lvl='4']{background:linear-gradient(#FDECEF 0,#FDECEF 226px,#fff 226px) !important;}",
-    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card[data-ps-lvl='5']{background:linear-gradient(#F3EAFB 0,#F3EAFB 226px,#fff 226px) !important;}",
-    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card[data-ps-lvl='6']{background:linear-gradient(#E6F1FD 0,#E6F1FD 226px,#fff 226px) !important;}",
-    "#pageContent .cards-grandpa .lw-course-card a.lw-course-card--stretched-link{z-index:3 !important;}",
+    /* `margin-top:-90px` = la moitié du rond -> il remonte au-dessus de la
+       carte, qui démarre donc à mi-hauteur du cercle. */
+    "#pageContent .cards-grandpa .lw-course-card > .learnworlds-image{position:static !important;width:180px !important;height:180px !important;min-height:0 !important;flex:none !important;border-radius:50% !important;background-size:cover !important;background-position:50% 45% !important;margin:-90px auto 0 !important;border:5px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.10) !important;}",
+    /* LE ROND SORT DE LA CARTE PAR LE HAUT (choix de Ziad le 17/07).
+       Plus AUCUNE bande teintée : la carte est blanche, elle démarre à
+       MI-HAUTEUR du rond, et la moitié haute du cercle déborde au-dessus, sur
+       le fond de page. ⚠️ La couleur du niveau ne vit donc plus que dans la
+       pastille.
+       - `overflow:visible` sur la carte : son `overflow:hidden` natif rognerait
+         la moitié qui dépasse. Il ne servait qu'aux coins de l'illustration en
+         bandeau, qui n'existe plus ; les chevrons, eux, sont déjà insérés en JS
+         précisément à cause de ce `overflow:hidden`.
+       - `padding-top:90px` sur le RAIL : il porte `overflow-x:auto`, donc son
+         débordement vertical n'est PAS `visible` (spec CSS : un axe en `auto`
+         force l'autre hors de `visible`) -> sans cette réserve, la moitié qui
+         dépasse serait rognée par le conteneur de défilement. */
+    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{background:#fff !important;overflow:visible !important;}",
+    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{padding-top:90px !important;}",
+    /* `top:-90px` : le lien natif est en `inset:0`, il s'arrêtait donc au bord
+       de la carte et **la moitié du rond qui dépasse n'était PAS cliquable**
+       (vérifié : `elementFromPoint` y renvoyait le div de l'image, pas le lien)
+       — or c'est la cible la plus évidente. On l'étend de la hauteur du
+       débordement.
+       ⚠️ Contrepartie assumée : une bande invisible de 90px devient cliquable
+       au-dessus de la carte, de part et d'autre du rond. Elle reste dans la
+       colonne de la carte, donc un clic y mène bien au bon cours. */
+    "#pageContent .cards-grandpa .lw-course-card a.lw-course-card--stretched-link{z-index:3 !important;top:-90px !important;}",
     /* LISERÉ BLEU qui se dessine au survol.
        `pathLength="1"` normalise le tracé : 1 = tout le périmètre, quelle que
        soit la taille de la carte (ici 1402,54px). dashoffset -> 0 = tracé
@@ -229,6 +238,18 @@
        la mise en page. `right:0` se résout sur la boîte de padding = x 1350,
        soit le bord droit des cartes. */
     "#pageContent .ps-desc{position:relative !important;}",
+    /* 🔴 SANS CETTE RÈGLE, LE BAS DE LA TUILE PASSE DERRIÈRE LES CARTES.
+       Un z-index sur la tuile n'y peut RIEN : il est enfermé dans la branche du
+       hero. Mesuré : la tuile (121px) est plus HAUTE que la description (112px),
+       elle déborde donc de 9px — et la section des cartes commence exactement
+       où le hero s'arrête. Or les `.learnworlds-section-content` des DEUX
+       sections sont toutes deux en `z-index:1` : à égalité, l'ordre du DOM
+       tranche, et la section des cartes (qui vient après) peint par-dessus.
+       -> on remonte la branche du hero. `:has(.ps-kpi)` ne cible que la section
+       qui porte la tuile (même technique que la barre de filtres sur la page
+       Cas). ⚠️ Plus la description est courte, plus la tuile déborde : c'est
+       pour ça que le défaut n'apparaissait que « parfois ». */
+    "#pageContent .learnworlds-section-content:has(.ps-kpi){z-index:5 !important;}",
     ".ps-kpi{position:absolute !important;top:0 !important;right:0 !important;width:352px !important;display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;padding:20px 22px !important;background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;box-shadow:0 4px 14px rgba(15,23,42,.05) !important;font-family:Figtree,sans-serif !important;}",
     ".ps-kpi-num{font-family:Figtree,sans-serif !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
     ".ps-kpi-lbl{font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:500 !important;color:#676879 !important;margin-top:2px !important;}",
@@ -413,7 +434,11 @@
     cles.forEach(function(k){ total += (vus[k]||0); });
     var pct=Math.round(total/cles.length);
 
-    if(!kpi){
+    /* on reconstruit aussi si le contenu a disparu : sans ce contrôle, les
+       `querySelector(...).textContent` plus bas jetteraient sur un null et
+       tueraient mountKpi(). */
+    if(!kpi || !kpi.querySelector(".ps-kpi-num")){
+      if(kpi) kpi.remove();
       kpi=document.createElement("div");
       kpi.className="ps-kpi";
       kpi.innerHTML='<div class="ps-kpi-txt">'
