@@ -5,8 +5,17 @@
    le menu est présent sur toutes les pages :
      <script src="https://cdn.jsdelivr.net/gh/ExTrEmUm84/lw-course-cards@main/mega-menu.js"></script>
 
-   Transforme les dropdowns natifs (.lw-topbar-submenu) en panneau
-   type monday : grille 2 colonnes, icône colorée + titre.
+   1) Typo moderne (Figtree) sur toute la barre de nav.
+   2) Dropdowns natifs (.lw-topbar-submenu) -> panneau type monday :
+      UNE SEULE LIGNE occupant la largeur du menu, picto coloré + titre.
+
+   ⚠️ Le menu MOBILE (burger) réutilise les mêmes classes mais vit HORS
+   de `nav.lw-topbar-menu`. Toutes les règles de mise en page sont donc
+   scopées sous `nav.lw-topbar-menu` pour ne pas casser le tiroir mobile.
+
+   ⚠️ LearnWorlds pose `bottom:0` sur le panneau. Un `top:100%` sans
+   `bottom:auto` rend la hauteur définie -> les items s'écrasent à 0px.
+   Le `bottom:auto !important` ci-dessous est INDISPENSABLE.
    ============================================================ */
 (function(){
   "use strict";
@@ -45,20 +54,44 @@
     if(/profil/.test(l)) return "user";
     if(/messagerie/.test(l)) return "mail";
     if(/compte/.test(l)) return "gear";
-    if(/connexion/.test(l)) return "out";
+    if(/connexion|déconnexion|deconnexion/.test(l)) return "out";
     return "def";
   }
 
   var C=["#6161FF","#00C875","#E2445C","#FDAB3D","#A25DDC","#0073EA"];
+  var NAV=" nav.lw-topbar-menu ";           // scope desktop
   var CSS=[
-    ".lw-topbar-submenu.js-submenu-list{min-width:300px !important;padding:12px !important;border-radius:16px !important;background:#fff !important;border:1px solid #E6E9EF !important;box-shadow:0 20px 50px rgba(15,23,42,.16) !important;grid-template-columns:1fr 1fr !important;gap:2px !important;font-family:Figtree,sans-serif !important;margin-top:8px !important;}",
-    ".lw-topbar-option:hover .lw-topbar-submenu.js-submenu-list{display:grid !important;}",
-    ".lw-topbar-submenu-item{list-style:none !important;margin:0 !important;}",
-    ".lw-topbar-submenu-item > .lw-topbar-option-link{display:flex !important;align-items:center !important;gap:11px !important;padding:9px 12px !important;border-radius:10px !important;text-decoration:none !important;transition:background .15s ease !important;height:auto !important;white-space:nowrap !important;}",
-    ".lw-topbar-submenu-item > .lw-topbar-option-link:hover{background:#F5F7FB !important;}",
-    ".ps-mm-ic{width:34px !important;height:34px !important;border-radius:9px !important;flex:none !important;display:flex !important;align-items:center !important;justify-content:center !important;color:#fff !important;}",
-    ".ps-mm-ic svg{width:19px !important;height:19px !important;stroke:#fff !important;fill:none !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
-    ".ps-mm-t{font-family:Figtree,sans-serif !important;font-weight:700 !important;font-size:14.5px !important;color:#1c1f26 !important;line-height:1.2 !important;}"
+    /* ---------- pictos + libellés (desktop ET tiroir mobile) ---------- */
+    ".ps-mm-ic{border-radius:11px !important;flex:none !important;display:flex !important;align-items:center !important;justify-content:center !important;color:#fff !important;}",
+    ".ps-mm-ic svg{stroke:#fff !important;fill:none !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    ".ps-mm-t{font-family:Figtree,sans-serif !important;font-weight:600 !important;color:#1c1f26 !important;line-height:1.3 !important;}",
+    /* tiroir mobile : on garde la ligne picto + libellé */
+    ".ps-mm-ic{width:34px !important;height:34px !important;}",
+    ".ps-mm-ic svg{width:19px !important;height:19px !important;}",
+    ".ps-mm-t{font-size:14.5px !important;}",
+    ".lw-topbar-submenu-item.ps-mm-hide{display:none !important;}",
+    ".lw-topbar-submenu.ps-mm-empty{display:none !important;}",
+
+    /* ---------- barre de nav : typo moderne ---------- */
+    NAV+".lw-topbar-option-link-lbl{font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;letter-spacing:-.01em !important;color:#1c1f26 !important;transition:color .15s ease !important;}",
+    NAV+".lw-topbar-option:hover > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:#6161FF !important;}",
+    NAV+".lw-topbar-option > .lw-topbar-option-link svg{transition:transform .2s ease !important;}",
+    NAV+".lw-topbar-option:hover > .lw-topbar-option-link svg{transform:rotate(180deg) !important;}",
+
+    /* ---------- panneau : une seule ligne, largeur du menu ---------- */
+    /* on ancre le panneau sur la barre entière (et non sur l'item survolé) */
+    NAV+"ul.lw-topbar-options{position:relative !important;}",
+    NAV+"li.lw-topbar-option{position:static !important;}",
+    NAV+".lw-topbar-submenu.js-submenu-list{display:none;position:absolute !important;top:100% !important;bottom:auto !important;left:0 !important;right:auto !important;width:100% !important;min-width:0 !important;max-width:none !important;height:auto !important;max-height:none !important;overflow:visible !important;transform:none !important;margin-top:12px !important;padding:10px !important;border-radius:18px !important;background:#fff !important;border:1px solid #E6E9EF !important;box-shadow:0 24px 60px rgba(15,23,42,.18) !important;gap:4px !important;font-family:Figtree,sans-serif !important;grid-template-columns:none !important;align-items:stretch !important;}",
+    NAV+".lw-topbar-option:hover .lw-topbar-submenu.js-submenu-list{display:flex !important;}",
+    /* pont invisible : garde le survol vivant entre la barre et le panneau */
+    NAV+".lw-topbar-submenu.js-submenu-list::before{content:\"\" !important;position:absolute !important;left:0 !important;right:0 !important;top:-13px !important;height:13px !important;display:block !important;}",
+    NAV+".lw-topbar-submenu-item:not(.ps-mm-hide){list-style:none !important;margin:0 !important;padding:0 !important;flex:1 1 0 !important;min-width:0 !important;display:flex !important;}",
+    NAV+".lw-topbar-submenu-item > .lw-topbar-option-link{display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:flex-start !important;text-align:center !important;gap:9px !important;padding:16px 8px 14px !important;border-radius:12px !important;width:100% !important;white-space:normal !important;text-decoration:none !important;transition:background .15s ease !important;}",
+    NAV+".lw-topbar-submenu-item > .lw-topbar-option-link:hover{background:#F5F7FB !important;}",
+    NAV+".ps-mm-ic{width:38px !important;height:38px !important;}",
+    NAV+".ps-mm-ic svg{width:21px !important;height:21px !important;}",
+    NAV+".ps-mm-t{font-size:13px !important;white-space:normal !important;}"
   ];
   C.forEach(function(c,i){ CSS.push(".lw-topbar-submenu-item:nth-child(6n+"+(i+1)+") .ps-mm-ic{background:"+c+" !important;}"); });
   var st=document.getElementById("ps-megamenu-style");
@@ -70,10 +103,16 @@
       if(link.dataset.psMm) return;
       var label=(link.textContent||"").replace(/\s+/g," ").trim();
       var li=link.closest(".lw-topbar-submenu-item");
-      if(/^submenu link$/i.test(label) || !label){ if(li) li.style.display="none"; return; }
+      /* placeholder LW : masqué via une CLASSE (un display:none inline
+         perdrait face aux !important des règles ci-dessus) */
+      if(/^submenu link$/i.test(label) || !label){ if(li) li.classList.add("ps-mm-hide"); return; }
       link.innerHTML='<span class="ps-mm-ic">'+(ICON[pick(label)]||ICON.def)+'</span>'
                    + '<span class="ps-mm-t">'+label+'</span>';
       link.dataset.psMm="1";
+    });
+    /* panneaux sans aucune entrée réelle : ne pas afficher de boîte vide */
+    document.querySelectorAll(".lw-topbar-submenu").forEach(function(s){
+      s.classList.toggle("ps-mm-empty", s.querySelectorAll(".lw-topbar-submenu-item:not(.ps-mm-hide)").length===0);
     });
   }
 
