@@ -40,7 +40,7 @@
        `background-image` sur un `div.learnworlds-image`, PREMIER enfant de la
        carte (pas une balise <img>) — inutile donc d'aller relire son URL, il
        suffit de la ré-autoriser et de la styler. */
-    "#pageContent .lw-course-card > *:not(.ps-mcard):not(.learnworlds-image){display:none !important;}",
+    "#pageContent .lw-course-card > *:not(.ps-mcard):not(.learnworlds-image):not(.ps-mline){display:none !important;}",
     ".ps-mcard{display:flex !important;flex-direction:column !important;padding:32px !important;min-height:270px !important;}",
     /* En-tête sur 2 lignes : le niveau seul dessus (c'est LE repère de la carte),
        les compteurs en dessous, plus discrets. */
@@ -91,6 +91,25 @@
     ".ps-chev svg{width:40px !important;height:40px !important;fill:none !important;stroke-width:3.6 !important;stroke-linejoin:round !important;stroke-linecap:butt !important;}",
     ".ps-chev svg .c1{stroke:#B4BAC4 !important;}",
     ".ps-chev svg .c2{stroke:#656E7E !important;}",
+    /* CARTE ENTIEREMENT CLIQUABLE — on réutilise le lien natif de LW
+       (a.lw-course-card--stretched-link, inset:0). Il ne couvrait que
+       l'illustration parce qu'il s'ancrait sur le bloc image ; en rendant
+       celui-ci `static`, il s'ancre sur la carte (déjà `position:relative`)
+       et couvre les 434px. Vérifié : image, centre, titre et bouton mènent
+       tous au cours. */
+    "#pageContent .cards-grandpa .lw-course-card > .learnworlds-image{position:static !important;}",
+    "#pageContent .cards-grandpa .lw-course-card a.lw-course-card--stretched-link{z-index:3 !important;}",
+    /* LISERÉ BLEU qui se dessine au survol.
+       `pathLength="1"` normalise le tracé : dasharray:1 = tout le périmètre,
+       quelle que soit la taille de la carte (ici ~1400px). dashoffset 1 ->
+       invisible, 0 -> tracé complet ; la transition dessine le trait.
+       stroke-width:4 mais la carte porte `overflow:hidden` : la moitié
+       extérieure est rognée, il en reste 2px collés au bord. */
+    ".ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;pointer-events:none !important;z-index:4 !important;}",
+    ".ps-mline rect{fill:none !important;stroke:#6161FF !important;stroke-width:4 !important;stroke-dasharray:1 !important;stroke-dashoffset:1 !important;transition:stroke-dashoffset .55s ease !important;}",
+    "#pageContent .cards-grandpa .lw-course-card:hover .ps-mline rect{stroke-dashoffset:0 !important;}",
+    "@media(prefers-reduced-motion:reduce){.ps-mline rect{transition:none !important;}}",
+
     /* ================= CARROUSEL (scopé au conteneur des cartes) ============ */
     /* le rail : 3 cartes visibles, défilement horizontal aimanté */
     "#pageContent .cards-grandpa{position:relative !important;}",
@@ -270,6 +289,7 @@
       a.textContent=label;
       d.appendChild(a);
       card.appendChild(d);
+      card.appendChild(liseret());
       /* la couleur suit le NIVEAU (cf. CSS [data-ps-lvl]) : les chevrons
          intercalés décalent nth-child, qui compte tous les frères */
       card.dataset.psLvl=(((parseInt(level,10)-1)%6)+1);
@@ -278,6 +298,23 @@
     mountChevrons();
     mountCarousel();
     heroText();
+  }
+
+  /* Le liseré : un rect SVG qui épouse la carte. createElementNS obligatoire —
+     un innerHTML SVG créerait des éléments HTML inertes. */
+  function liseret(){
+    var NS="http://www.w3.org/2000/svg";
+    var s=document.createElementNS(NS,"svg");
+    s.setAttribute("class","ps-mline");
+    s.setAttribute("preserveAspectRatio","none");
+    s.setAttribute("aria-hidden","true");          // purement décoratif
+    var r=document.createElementNS(NS,"rect");
+    r.setAttribute("x","0"); r.setAttribute("y","0");
+    r.setAttribute("width","100%"); r.setAttribute("height","100%");
+    r.setAttribute("rx","16");                     // = le radius de la carte
+    r.setAttribute("pathLength","1");
+    s.appendChild(r);
+    return s;
   }
 
   /* Chevrons intercalés entre les cartes, pour lire la progression des niveaux
