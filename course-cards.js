@@ -90,6 +90,14 @@
     "#pageContent .cards-grandpa .ps-mhead{gap:11px !important;margin-bottom:20px !important;}",
     "#pageContent .cards-grandpa .ps-micon{width:40px !important;height:40px !important;}",
     "#pageContent .cards-grandpa .ps-mlink{margin-top:20px !important;}",
+    /* Bouton « Charger plus » masqué (demande de Ziad). Les 6 niveaux tiennent
+       dans le carrousel, le bouton n'a plus d'utilité. `.lw-load-more` ne
+       désigne que ces boutons sur la page (vérifié : 2, un par bloc de cours,
+       et rien d'autre) — on peut donc poser un `display` ici sans risque, à la
+       différence de `.lw-cols.multiple-rows`.
+       ⚠️ Si un jour tu ajoutes des cours au-delà du lot initial chargé par LW,
+       ils deviendront inatteignables : il faudra retirer cette règle. */
+    "#pageContent .lw-load-more{display:none !important;}",
     /* les flèches */
     ".ps-car-btn{position:absolute !important;top:50% !important;transform:translateY(-50%) !important;width:44px !important;height:44px !important;border-radius:50% !important;background:#fff !important;border:1px solid #E6E9EF !important;box-shadow:0 4px 14px rgba(15,23,42,.12) !important;display:flex !important;align-items:center !important;justify-content:center !important;cursor:pointer !important;padding:0 !important;z-index:5 !important;transition:background .15s ease, box-shadow .15s ease, opacity .2s ease !important;}",
     ".ps-car-btn:hover{background:#F5F7FB !important;box-shadow:0 6px 18px rgba(15,23,42,.16) !important;}",
