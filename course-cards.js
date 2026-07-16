@@ -28,7 +28,12 @@
 
   // --- 2) Styles (injectés une seule fois) ---
   var CSS = [
-    "#pageContent .lw-cols.multiple-rows{display:grid !important;grid-template-columns:1fr 1fr !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;overflow:visible !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
+    /* ⚠️ NE JAMAIS poser `display` sur `.lw-cols.multiple-rows` NON scopé : le
+       sélecteur matche aussi les barres de filtres, que LearnWorlds masque avec
+       un `display:none` INLINE quand on désactive les filtres dans l'éditeur.
+       Un `display:… !important` en feuille de style écrase cet inline -> les
+       filtres restent visibles malgré la désactivation. Ici : alignement seul. */
+    "#pageContent .lw-cols.with-filters{max-width:1000px !important;margin:0 auto !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
     "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
     "#pageContent .lw-course-card > *:not(.ps-mcard){display:none !important;}",
@@ -57,12 +62,13 @@
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+4) .ps-mtag{background:#FDECEF !important;color:#D22B45 !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+5) .ps-mtag{background:#FFF3E0 !important;color:#D98500 !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+6) .ps-mtag{background:#F3EAFB !important;color:#8A45C9 !important;}",
-    "@media(max-width:820px){#pageContent .lw-cols.multiple-rows{grid-template-columns:1fr !important;}}",
 
     /* ================= CARROUSEL (scopé au conteneur des cartes) ============ */
     /* le rail : 3 cartes visibles, défilement horizontal aimanté */
     "#pageContent .cards-grandpa{position:relative !important;}",
-    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:flex !important;grid-template-columns:none !important;flex-wrap:nowrap !important;overflow-x:auto !important;scroll-snap-type:x mandatory !important;scrollbar-width:none !important;-ms-overflow-style:none !important;gap:24px !important;padding:14px 0 26px !important;}",
+    /* le rail porte lui-même sa largeur/fond/police : le `display:flex` n'est posé
+       QUE sur ce sélecteur scopé, jamais sur `.lw-cols.multiple-rows` nu (cf. plus haut) */
+    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;scroll-snap-type:x mandatory !important;scrollbar-width:none !important;-ms-overflow-style:none !important;gap:24px !important;padding:14px 0 26px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
     "#pageContent .cards-grandpa > .lw-cols.multiple-rows::-webkit-scrollbar{display:none !important;}",
     /* 3 cartes : largeur = (100% - 2 gouttières) / 3 */
     "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{flex:0 0 calc((100% - 48px) / 3) !important;scroll-snap-align:start !important;}",
