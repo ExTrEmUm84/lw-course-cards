@@ -61,31 +61,39 @@
     ".ps-mlink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-mlink:hover{color:#4B4BE0 !important;}",
     ".ps-mlink:hover::after{transform:translateX(5px) !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+1) .ps-mtag{background:#EDEDFF !important;color:#4B4BE0 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+2) .ps-mtag{background:#E6F9F0 !important;color:#12A85F !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+3) .ps-mtag{background:#E1F7EC !important;color:#009257 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+4) .ps-mtag{background:#FDECEF !important;color:#D22B45 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+5) .ps-mtag{background:#FFF3E0 !important;color:#D98500 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+6) .ps-mtag{background:#F3EAFB !important;color:#8A45C9 !important;}",
-    /* la barre reprend la teinte pleine de la pastille du niveau */
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+1) .ps-mprog-bar{background:#4B4BE0 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+2) .ps-mprog-bar{background:#12A85F !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+3) .ps-mprog-bar{background:#009257 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+4) .ps-mprog-bar{background:#D22B45 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+5) .ps-mprog-bar{background:#D98500 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+6) .ps-mprog-bar{background:#8A45C9 !important;}",
 
+    /* Couleur par NIVEAU, et non par position : les chevrons intercalés entre
+       les cartes décalent nth-child et le cycle sautait (vérifié : Niveau 4
+       récupérait la couleur du Niveau 1). data-ps-lvl est posé dans build(). */
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='1'] .ps-mtag{background:#EDEDFF !important;color:#4B4BE0 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='1'] .ps-mprog-bar{background:#4B4BE0 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='2'] .ps-mtag{background:#E6F9F0 !important;color:#12A85F !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='2'] .ps-mprog-bar{background:#12A85F !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='3'] .ps-mtag{background:#E1F7EC !important;color:#009257 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='3'] .ps-mprog-bar{background:#009257 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='4'] .ps-mtag{background:#FDECEF !important;color:#D22B45 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='4'] .ps-mprog-bar{background:#D22B45 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='5'] .ps-mtag{background:#FFF3E0 !important;color:#D98500 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='5'] .ps-mprog-bar{background:#D98500 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='6'] .ps-mtag{background:#F3EAFB !important;color:#8A45C9 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='6'] .ps-mprog-bar{background:#8A45C9 !important;}",
+    /* Timeline : double chevron entre les cartes, le 1er clair et le 2e foncé,
+       pour donner le sens de la progression. */
+    ".ps-chev{flex:none !important;width:40px !important;display:flex !important;align-items:center !important;justify-content:center !important;align-self:stretch !important;}",
+    ".ps-chev svg{width:40px !important;height:40px !important;fill:none !important;stroke-width:3.6 !important;stroke-linejoin:round !important;stroke-linecap:butt !important;}",
+    ".ps-chev svg .c1{stroke:#B4BAC4 !important;}",
+    ".ps-chev svg .c2{stroke:#656E7E !important;}",
     /* ================= CARROUSEL (scopé au conteneur des cartes) ============ */
     /* le rail : 3 cartes visibles, défilement horizontal aimanté */
     "#pageContent .cards-grandpa{position:relative !important;}",
     /* le rail porte lui-même sa largeur/fond/police : le `display:flex` n'est posé
        QUE sur ce sélecteur scopé, jamais sur `.lw-cols.multiple-rows` nu (cf. plus haut) */
-    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;scroll-snap-type:x mandatory !important;scrollbar-width:none !important;-ms-overflow-style:none !important;gap:24px !important;padding:14px 0 26px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
+    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;scroll-snap-type:x mandatory !important;scrollbar-width:none !important;-ms-overflow-style:none !important;gap:16px !important;padding:14px 0 26px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
     "#pageContent .cards-grandpa > .lw-cols.multiple-rows::-webkit-scrollbar{display:none !important;}",
     /* 3 cartes : largeur = (100% - 2 gouttières) / 3.
        flex-direction:column : la carte est déjà en flex côté LW, il faut la
        passer en colonne pour empiler l'illustration puis le contenu. */
-    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{flex:0 0 calc((100% - 48px) / 3) !important;scroll-snap-align:start !important;flex-direction:column !important;}",
+    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{flex:0 0 calc((100% - 80px - 64px) / 3) !important;scroll-snap-align:start !important;flex-direction:column !important;}",
     /* l'illustration : bandeau haut, coins découpés par le overflow:hidden de la carte */
     "#pageContent .cards-grandpa .lw-course-card > .learnworlds-image{display:block !important;width:100% !important;height:168px !important;padding:0 !important;margin:0 !important;flex:none !important;background-size:cover !important;background-position:50% 50% !important;}",
     /* Densité réduite pour tenir sur ~317px + le corps prend la hauteur restante
@@ -114,8 +122,8 @@
     ".ps-car-next{right:4px !important;}",
     /* responsive : 2 puis 1 carte, flèches collées aux bords */
     "@media(max-width:1100px){.ps-car-prev{left:-2px !important;} .ps-car-next{right:-2px !important;}}",
-    "@media(max-width:1040px){#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{flex:0 0 calc((100% - 24px) / 2) !important;}}",
-    "@media(max-width:700px){#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{flex:0 0 86% !important;}}",
+    "@media(max-width:1040px){#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{flex:0 0 calc((100% - 40px - 48px) / 2) !important;}}",
+    "@media(max-width:700px){#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{flex:0 0 86% !important;} .ps-chev{display:none !important;}}",
 
     /* ================= TITRES (hero premium) =============================== */
     /* Alignés à gauche SUR LES CARTES : le conteneur natif fait 1120px alors que
@@ -240,10 +248,36 @@
       a.className="ps-mlink"; a.href=href; a.textContent="En savoir plus";
       d.appendChild(a);
       card.appendChild(d);
+      /* la couleur suit le NIVEAU (cf. CSS [data-ps-lvl]) : les chevrons
+         intercalés décalent nth-child, qui compte tous les frères */
+      card.dataset.psLvl=(((parseInt(level,10)-1)%6)+1);
       card.dataset.psM="1";
     });
+    mountChevrons();
     mountCarousel();
     heroText();
+  }
+
+  /* Chevrons intercalés entre les cartes, pour lire la progression des niveaux
+     comme une timeline. Insérés en JS car un ::after sur la carte serait rogné :
+     elle porte `overflow:hidden` (nécessaire aux coins ronds de l'illustration).
+     Idempotent : l'observer rappelle build() à chaque mutation, y compris celles
+     que cette fonction provoque — d'où le contrôle du frère suivant. */
+  var CHEV='<svg viewBox="0 0 24 24"><path class="c1" d="M4 6l6 6-6 6"/><path class="c2" d="M13 6l6 6-6 6"/></svg>';
+  function mountChevrons(){
+    var track=document.querySelector(S+" .cards-grandpa > .lw-cols.multiple-rows");
+    if(!track) return;
+    var cards=[].slice.call(track.querySelectorAll(".lw-course-card"));
+    cards.forEach(function(c,i){
+      var nxt=c.nextElementSibling;
+      var deja=nxt && nxt.classList && nxt.classList.contains("ps-chev");
+      if(i===cards.length-1){ if(deja) nxt.remove(); return; }   // jamais après la dernière
+      if(deja) return;
+      var ch=document.createElement("div");
+      ch.className="ps-chev"; ch.setAttribute("aria-hidden","true");   // décoratif
+      ch.innerHTML=CHEV;
+      c.after(ch);
+    });
   }
 
   // --- 4) Hero : machine à écrire sur les segments marqués "#" ---
