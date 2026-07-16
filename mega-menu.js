@@ -97,29 +97,42 @@
     NAV+".lw-topbar-option-link-lbl{font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;letter-spacing:-.01em !important;color:#1c1f26 !important;transition:color .15s ease !important;}",
     NAV+".lw-topbar-option:hover > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:#6161FF !important;}",
     NAV+".lw-topbar-option > .lw-topbar-option-link svg{transition:transform .2s ease !important;}",
-    NAV+".lw-topbar-option:hover > .lw-topbar-option-link svg{transform:rotate(180deg) !important;}",
+    /* le chevron ne pivote plus au survol : il indique l'état OUVERT, et
+       l'ouverture se fait maintenant au clic (cf. .ps-mm-on plus bas) */
 
     /* ---------- panneau : une seule ligne, largeur du menu ---------- */
     /* on ancre le panneau sur la barre entière (et non sur l'item survolé) */
     NAV+"ul.lw-topbar-options{position:relative !important;}",
     NAV+"li.lw-topbar-option{position:static !important;}",
-    NAV+".lw-topbar-submenu.js-submenu-list{position:absolute !important;top:100% !important;bottom:auto !important;left:0 !important;right:auto !important;width:100% !important;min-width:0 !important;max-width:none !important;height:auto !important;max-height:none !important;overflow:visible !important;transform:none !important;margin-top:12px !important;padding:10px !important;border-radius:18px !important;background:#fff !important;border:1px solid #E6E9EF !important;box-shadow:0 24px 60px rgba(15,23,42,.18) !important;gap:4px !important;font-family:Figtree,sans-serif !important;grid-template-columns:none !important;align-items:stretch !important;}",
+    /* BANDE PLEINE LARGEUR sous le header (motif Boks).
+       `left:50% + translateX(-50%) + width:100vw` : le menu étant centré sur la
+       page, la bande se centre sur lui et couvre donc toute la largeur (mesuré :
+       -10 -> 1702, soit la page entière). Pas d'ancrage sur la section : ses
+       parents `.lw-cols` et `.learnworlds-section-content` sont déjà
+       `position:relative` en natif, on ne peut pas s'y accrocher sans les
+       neutraliser — et la rangée doit rester relative pour centrer le menu.
+       ⚠️ `page-content` porte `overflow:hidden auto` : inutile de dépasser 1702. */
+    NAV+".lw-topbar-submenu.js-submenu-list{position:absolute !important;top:100% !important;bottom:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:100vw !important;min-width:0 !important;max-width:100vw !important;height:auto !important;max-height:none !important;overflow:visible !important;margin-top:0 !important;padding:22px 24px !important;border-radius:0 !important;border:0 !important;border-top:1px solid #E6E9EF !important;border-bottom:1px solid #E6E9EF !important;background:#F5F6F8 !important;box-shadow:none !important;gap:48px !important;font-family:Figtree,sans-serif !important;grid-template-columns:none !important;justify-content:center !important;align-items:center !important;}",
     /* Ouverture pilotée en JS (classe), PAS en :hover — cf. openMenus() :
        le panneau fait toute la largeur du menu alors que son déclencheur est
        étroit ; en diagonale la souris sort du li AVANT d'atteindre le panneau,
        le :hover tombe et le menu disparaît. Un délai de grâce corrige ça. */
     NAV+".lw-topbar-submenu.js-submenu-list:not(.ps-mm-open){display:none !important;}",
     NAV+".lw-topbar-submenu.js-submenu-list.ps-mm-open{display:flex !important;}",
-    /* pont invisible qui comble les 12px entre la barre et le panneau.
-       top:0 (et NON -13px) : calibré et vérifié — à -13px le pont se posait SUR
-       les libellés du menu (et interceptait leurs clics) sans combler l'espace. */
-    NAV+".lw-topbar-submenu.js-submenu-list::before{content:\"\" !important;position:absolute !important;left:0 !important;right:0 !important;top:0 !important;height:13px !important;display:block !important;}",
-    NAV+".lw-topbar-submenu-item:not(.ps-mm-hide){list-style:none !important;margin:0 !important;padding:0 !important;flex:1 1 0 !important;min-width:0 !important;display:flex !important;}",
-    NAV+".lw-topbar-submenu-item > .lw-topbar-option-link{display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:flex-start !important;text-align:center !important;gap:9px !important;padding:16px 8px 14px !important;border-radius:12px !important;width:100% !important;white-space:normal !important;text-decoration:none !important;transition:background .15s ease !important;}",
-    NAV+".lw-topbar-submenu-item > .lw-topbar-option-link:hover{background:#F5F7FB !important;}",
+    /* Plus de pont ::before : la bande touche la barre (margin-top:0), il n'y a
+       plus d'espace à combler — et le clic rend la question du survol caduque. */
+    /* items sur UNE ligne : picto + libellé côte à côte, comme chez Boks */
+    NAV+".lw-topbar-submenu-item:not(.ps-mm-hide){list-style:none !important;margin:0 !important;padding:0 !important;flex:0 0 auto !important;min-width:0 !important;display:flex !important;}",
+    NAV+".lw-topbar-submenu-item > .lw-topbar-option-link{display:flex !important;flex-direction:row !important;align-items:center !important;justify-content:flex-start !important;text-align:left !important;gap:12px !important;padding:8px 4px !important;border-radius:10px !important;width:auto !important;white-space:nowrap !important;text-decoration:none !important;transition:opacity .15s ease !important;}",
+    NAV+".lw-topbar-submenu-item > .lw-topbar-option-link:hover{background:transparent !important;opacity:.7 !important;}",
     NAV+".ps-mm-ic{width:38px !important;height:38px !important;}",
     NAV+".ps-mm-ic svg{width:21px !important;height:21px !important;}",
-    NAV+".ps-mm-t{font-size:13px !important;white-space:normal !important;}"
+    NAV+".ps-mm-t{font-size:14px !important;white-space:nowrap !important;}",
+    /* item de la barre dont le panneau est ouvert : on le marque, comme Boks */
+    NAV+"li.lw-topbar-option.ps-mm-on > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:#6161FF !important;}",
+    NAV+"li.lw-topbar-option.ps-mm-on > .lw-topbar-option-link svg{transform:rotate(180deg) !important;}",
+    /* sous 900px la bande deviendrait illisible sur une ligne : on la scrolle */
+    "@media(max-width:900px){"+NAV+".lw-topbar-submenu.js-submenu-list{justify-content:flex-start !important;overflow-x:auto !important;gap:28px !important;}}"
   ];
   C.forEach(function(c,i){ CSS.push(".lw-topbar-submenu-item:nth-child(6n+"+(i+1)+") .ps-mm-ic{background:"+c+" !important;}"); });
   var st=document.getElementById("ps-megamenu-style");
@@ -146,35 +159,49 @@
   }
 
   /* ------------------------------------------------------------------
-     Ouverture / fermeture des panneaux — avec DÉLAI DE GRÂCE.
-     Pourquoi pas un simple :hover ? Le panneau occupe toute la largeur du
-     menu, mais son déclencheur est étroit ("Cas" ne fait que ~24px). Pour
-     atteindre un item à l'autre bout du panneau, la souris part en diagonale
-     et quitte le li par le CÔTÉ, quelques pixels au-dessus du panneau : le
-     :hover tombe et le menu se ferme sous le curseur. Mesuré : rupture en
-     (1091,70) pour "Cas". Aucun pont CSS ne couvre ce cas sans recouvrir les
-     autres items de la barre -> on ferme 200ms après la sortie.
+     Ouverture au CLIC (et non au survol).
+
+     ⚠️ Conséquence assumée : 3 des 4 items à panneau sont de vrais liens
+     ("Formations PrepaStrat" -> /, "Cas" -> /social, "Mon compte" -> /account).
+     Le clic ouvre le panneau au lieu de naviguer. Ces destinations restent
+     atteignables depuis le panneau ("Etudes de cas", "Compte"…). "Blog" n'a
+     pas de panneau : son lien fonctionne normalement.
+
+     Le clic règle au passage le défaut du survol : le panneau fait toute la
+     largeur alors que son déclencheur est étroit ("Cas" ~24px), donc la souris
+     quittait le li par le côté avant d'atteindre le panneau (rupture mesurée
+     en (1091,70)) et le menu se fermait sous le curseur.
      ------------------------------------------------------------------ */
-  var GRACE=200, closeT=null;
   function closeAll(){
     document.querySelectorAll("nav.lw-topbar-menu .lw-topbar-submenu.ps-mm-open")
       .forEach(function(s){ s.classList.remove("ps-mm-open"); });
+    document.querySelectorAll("nav.lw-topbar-menu li.lw-topbar-option.ps-mm-on")
+      .forEach(function(l){ l.classList.remove("ps-mm-on"); });
   }
   function openMenus(){
     document.querySelectorAll("nav.lw-topbar-menu li.lw-topbar-option").forEach(function(li){
-      if(li.dataset.psHov) return;
+      if(li.dataset.psClick) return;
       var sub=li.querySelector(".lw-topbar-submenu");
-      if(!sub || sub.classList.contains("ps-mm-empty")) return;   // ex : Blog
-      li.dataset.psHov="1";
-      /* mouseenter/mouseleave suivent le DOM : entrer dans le panneau (enfant
-         du li) ré-arme l'ouverture même s'il est géométriquement hors du li. */
-      li.addEventListener("mouseenter",function(){
-        clearTimeout(closeT); closeAll(); sub.classList.add("ps-mm-open");
-      });
-      li.addEventListener("mouseleave",function(){
-        clearTimeout(closeT); closeT=setTimeout(closeAll,GRACE);
+      if(!sub || sub.classList.contains("ps-mm-empty")) return;   // ex : Blog -> lien normal
+      var trigger=li.querySelector(":scope > .lw-topbar-option-link");
+      if(!trigger) return;
+      li.dataset.psClick="1";
+      trigger.addEventListener("click",function(e){
+        e.preventDefault();      // sinon on navigue au lieu d'ouvrir
+        e.stopPropagation();     // sinon le listener document referme aussitôt
+        var ouvert=sub.classList.contains("ps-mm-open");
+        closeAll();
+        if(!ouvert){ sub.classList.add("ps-mm-open"); li.classList.add("ps-mm-on"); }
       });
     });
+  }
+  /* fermeture : clic ailleurs, ou Échap. Posés une seule fois. */
+  if(!window.__psMmBound){
+    window.__psMmBound=1;
+    document.addEventListener("click",function(e){
+      if(!e.target.closest || !e.target.closest("nav.lw-topbar-menu")) closeAll();
+    });
+    document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeAll(); });
   }
 
   var scheduled=false;

@@ -255,13 +255,17 @@
       var a=document.createElement("a");
       /* Le libellé suit l'avancement. "Continuer" est le mot qu'emploie
          LearnWorlds lui-même sur sa carte native — on garde son vocabulaire.
-         Pas de progression (visiteur anonyme, ou cours jamais ouvert) ->
-         "En savoir plus". */
+         La distinction anonyme / inscrit-à-0% tient parce que LW ne met PAS de
+         barre de progression pour un visiteur anonyme (vérifié : il affiche
+         "S'inscrire gratuitement" à la place). Donc :
+           pas de barre -> NaN -> "En savoir plus"  (il n'est pas inscrit)
+           barre à 0%          -> "Commencer"       (inscrit, jamais ouvert) */
       a.className="ps-mlink"; a.href=href;
       var label="En savoir plus";
       if(!isNaN(pct)){
         if(pct>=100){ label="Terminé"; a.classList.add("ps-done"); }
         else if(pct>0){ label="Continuer"; }
+        else { label="Commencer"; }
       }
       a.textContent=label;
       d.appendChild(a);
