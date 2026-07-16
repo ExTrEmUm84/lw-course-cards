@@ -166,8 +166,13 @@
        flex-direction:column : la carte est déjà en flex côté LW, il faut la
        passer en colonne pour empiler l'illustration puis le contenu. */
     "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{flex:0 0 calc((100% - 80px - 64px) / 3) !important;scroll-snap-align:start !important;flex-direction:column !important;}",
-    /* l'illustration : bandeau haut, coins découpés par le overflow:hidden de la carte */
-    "#pageContent .cards-grandpa .lw-course-card > .learnworlds-image{display:block !important;width:100% !important;height:168px !important;padding:0 !important;margin:0 !important;flex:none !important;background-size:cover !important;background-position:50% 50% !important;}",
+    /* ⚠️ L'ancienne règle « illustration en bandeau » (width:100%; height:168px)
+       vivait ICI, avec le MÊME sélecteur que celle du rond plus haut. À
+       spécificité égale c'est la DERNIÈRE qui gagne : elle écrasait
+       silencieusement la largeur, la hauteur et les marges du rond — seul le
+       `border-radius:50%` passait (elle ne le pose pas), ce qui donnait un
+       ovale de 283x168 tout en laissant croire que la règle du rond
+       s'appliquait. Supprimée : le rond est défini une seule fois, plus haut. */
     /* Densité réduite pour tenir sur ~317px + le corps prend la hauteur restante
        sous l'illustration (d'où les CTA alignés d'une carte à l'autre).
        min-height:0 annule le 270px de .ps-mcard : sans ça, image + corps
