@@ -84,7 +84,25 @@
     CYCLE(4, "#FDAB3D", "#FFF3E0"),
     CYCLE(5, "#A25DDC", "#F3EAFB"),
     CYCLE(6, "#0073EA", "#E6F1FD"),
+    /* ================= TITRES (hero) — porté de case-cards.js ==============
+       Alignés sur les CARTES : le conteneur natif du titre fait 1120px
+       (mesuré : 290->1410) alors que la grille fait 1000px (350->1350). Sans
+       `max-width:1000px`, le titre et la description débordent de 60px à
+       gauche des cartes — c'est le décalage que Ziad a signalé. */
+    S+" h1.learnworlds-heading{font-family:Figtree,sans-serif !important;font-size:56px !important;font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:#1c1f26 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    /* LW sert le H1 avec ses "#" : masqué tant que heroText() ne l'a pas
+       transformé, sinon les "#" s'affichent en clair une demi-seconde.
+       `visibility` et non `display` : la place reste réservée. Filet de
+       sécurité à 2,5s, sinon un titre sans "#" resterait invisible. */
+    S+" h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
+    S+" h2.learnworlds-subheading{font-family:Figtree,sans-serif !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:#1c1f26 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    S+" .ps-desc{font-family:Figtree,sans-serif !important;font-size:17px !important;line-height:1.65 !important;color:#676879 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
+    ".ps-tw{display:inline-block !important;text-align:left !important;color:#6161FF !important;white-space:nowrap !important;}",
+    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:#6161FF !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
+    "@keyframes ps-blink{50%{opacity:0}}",
+
     "@media(max-width:1040px){"+GRID+"{grid-template-columns:1fr 1fr !important;}}",
+    "@media(max-width:820px){"+S+" h1.learnworlds-heading{font-size:36px !important;}"+S+" h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}"+S+" .ps-desc{padding-right:0 !important;}}",
     "@media(max-width:700px){"+GRID+"{grid-template-columns:1fr !important;}}"
   ].join("\n");
 
@@ -117,8 +135,92 @@
     return "doc";
   }
 
-  // --- 4) Construction ---
+  /* --- 4) Hero : machine à écrire sur les segments marqués "#" ---
+     Porté de case-cards.js. "Nos fiches secteur pour #le conseil #la stratégie"
+     -> préfixe + phrases qui se tapent / s'effacent en boucle. */
+  function heroText(){
+    /* .learnworlds-main-text = la description du haut, MAIS AUSSI celle de
+       chaque carte, le bouton des catégories du FILTRE et le pied de page.
+       🔴 L'exclusion du filtre est indispensable : cette page a une barre de
+       filtres, et sans elle le bouton "categories …" reçoit le style de
+       description (17px + padding-right:38% sur un bouton). Même piège que sur
+       la page Cas. */
+    var grandpa=document.querySelector(S+" .cards-grandpa");
+    if(grandpa){
+      document.querySelectorAll(S+" .learnworlds-main-text").forEach(function(el){
+        if(el.closest(".cards-grandpa")) return;                                     // carte
+        if(el.closest(".lw-filters, .lw-cols.with-filters")) return;                 // barre de filtres
+        if(!(grandpa.compareDocumentPosition(el) & Node.DOCUMENT_POSITION_PRECEDING)) return; // pied de page
+        el.classList.add("ps-desc");
+      });
+    }
+
+    var h1=document.querySelector(S+" h1.learnworlds-heading");
+    if(!h1 || h1.dataset.psTw) return;
+    /* data-ps-tw posé AVANT toute autre condition : c'est lui qui lève le
+       masquage CSS. Posé seulement en cas de succès, un titre sans "#"
+       resterait invisible pour toujours. */
+    h1.dataset.psTw="1";
+    var raw=(h1.textContent||"").replace(/\s+/g," ").trim();
+    var i=raw.indexOf("#");
+    if(i<0) return;                                   // pas de # -> titre natif
+    var prefix=raw.slice(0,i).trim();
+    var parts=raw.slice(i).split("#").map(function(s){ return s.trim(); }).filter(Boolean);
+    if(!parts.length) return;
+    h1.setAttribute("aria-label", prefix+" "+parts.join(", "));   // le texte animé est aria-hidden
+
+    var pre=document.createElement("span");
+    pre.textContent=prefix+" ";                       // textContent : pas d'injection HTML
+    var slot=document.createElement("span");
+    slot.className="ps-tw"; slot.setAttribute("aria-hidden","true");
+    var txt=document.createElement("span"); txt.className="ps-tw-txt";
+    var cur=document.createElement("span"); cur.className="ps-tw-cur";
+    slot.appendChild(txt); slot.appendChild(cur);
+    h1.textContent=""; h1.appendChild(pre); h1.appendChild(slot);
+
+    /* largeur réservée = phrase la plus longue (mesurée police chargée), sinon
+       le titre tremble à chaque lettre */
+    function reserve(){
+      var w=0, keep=txt.textContent;
+      slot.style.minWidth="0px";
+      parts.forEach(function(p){ txt.textContent=p; w=Math.max(w, txt.getBoundingClientRect().width); });
+      txt.textContent=keep;
+      slot.style.minWidth=Math.ceil(w)+"px";
+    }
+    if(document.fonts && document.fonts.ready) document.fonts.ready.then(reserve); else reserve();
+    var rt; window.addEventListener("resize",function(){ clearTimeout(rt); rt=setTimeout(reserve,150); });
+
+    if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){
+      txt.textContent=parts[0]; return;               // pas d'animation si l'utilisateur la refuse
+    }
+    /* La 1re phrase est affichée EN ENTIER dès le départ, le cycle ne démarre
+       qu'après la pause : sinon le slot part vide et se remplit lettre par
+       lettre, ce qui se lit comme un retard d'affichage. */
+    var p=0, c=parts[0].length, del=true;
+    txt.textContent=parts[0];
+    function tick(){
+      var full=parts[p];
+      c += del ? -1 : 1;
+      txt.textContent=full.slice(0,c);
+      var d = del ? 34 : 58;                          // frappe / effacement
+      if(!del && c>=full.length){ del=true; d=1700; } // pause phrase complète
+      else if(del && c<=0){ del=false; p=(p+1)%parts.length; d=320; }
+      setTimeout(tick,d);
+    }
+    setTimeout(tick,1700);                            // phrase lisible avant le 1er effacement
+  }
+
+  /* Filet de sécurité du masquage CSS : si heroText() n'a jamais tourné, on
+     révèle le titre brut au bout de 2,5s — un titre avec des "#" vaut mieux
+     qu'un titre absent. */
+  setTimeout(function(){
+    var h=document.querySelector(S+" h1.learnworlds-heading");
+    if(h && !h.dataset.psTw) h.dataset.psTw="1";
+  },2500);
+
+  // --- 5) Construction ---
   function build(){
+    heroText();
     document.querySelectorAll(S+" .cards-grandpa .lw-course-card").forEach(function(card){
       if(card.dataset.psS) return;
       var h=card.querySelector(".learnworlds-heading3");

@@ -184,6 +184,27 @@
        padding-right : garde une longueur de ligne lisible (~620px) tout en
        laissant le bord GAUCHE calé sur les cartes. */
     "#pageContent .ps-desc{font-family:Figtree,sans-serif !important;font-size:17px !important;line-height:1.65 !important;color:#676879 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
+    /* ---- TUILE DE PROGRESSION GLOBALE, à droite de la description ----
+       Ancrée DANS `.ps-desc` : ce bloc fait déjà exactement 1000px (350->1350),
+       est déjà `position:relative` en natif, et son `padding-right:38%` laisse
+       ~425px vides à droite — la place est donc déjà là, inutile de toucher à
+       la mise en page. `right:0` se résout sur la boîte de padding = x 1350,
+       soit le bord droit des cartes. */
+    "#pageContent .ps-desc{position:relative !important;}",
+    ".ps-kpi{position:absolute !important;top:0 !important;right:0 !important;width:352px !important;display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;padding:20px 22px !important;background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;box-shadow:0 4px 14px rgba(15,23,42,.05) !important;font-family:Figtree,sans-serif !important;}",
+    ".ps-kpi-num{font-family:Figtree,sans-serif !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
+    ".ps-kpi-lbl{font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:500 !important;color:#676879 !important;margin-top:2px !important;}",
+    ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:#F1F1FF !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+    /* ⚠️ SVG et non police d'icône : un glyphe de police se ferait écraser par
+       tout `font-family` posé plus haut. (Cf. les pictos des tuiles du profil,
+       cassés par un `*{font-family}`.) */
+    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:#6161FF !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    ".ps-kpi-bar{height:7px !important;border-radius:999px !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
+    ".ps-kpi-bar-in{height:100% !important;border-radius:999px !important;background:#6161FF !important;transition:width .6s ease !important;}",
+    ".ps-kpi-txt{flex:1 1 auto !important;min-width:0 !important;}",
+    /* sous 1100px la place à droite disparaît : la tuile repasse dans le flux */
+    "@media(max-width:1100px){.ps-kpi{position:static !important;width:auto !important;max-width:352px !important;margin-top:20px !important;}#pageContent .ps-desc{padding-right:0 !important;}}",
+
     /* machine à écrire : le slot réserve la largeur de la phrase la plus longue
        pour que le titre centré ne tremble pas à chaque lettre */
     ".ps-tw{display:inline-block !important;text-align:left !important;color:#6161FF !important;white-space:nowrap !important;}",
@@ -310,6 +331,67 @@
     mountChevrons();
     mountCarousel();
     heroText();
+    mountKpi();
+  }
+
+  /* --- Tuile de progression globale ---------------------------------------
+     Règle voulue par Ziad : « finir un cours entier = 1/6 » -> c'est la MOYENNE
+     des avancements des 6 cours. Un cours à 100% et cinq à 0% donnent
+     100/6 ≈ 17%, soit bien 1/6.
+
+     🔴 DÉDUPLICATION PAR LIEN, OBLIGATOIRE. La page porte **9** `.lw-course-card`
+     et non 6 : le 2e bloc sous le carrousel republie les cours 1 à 3 (mesuré :
+     9 cartes, 6 liens uniques). Une moyenne sur toutes les cartes compterait
+     trois cours deux fois et fausserait le résultat.
+
+     Visiteur anonyme : LearnWorlds ne met AUCUNE barre de progression (il
+     affiche « S'inscrire gratuitement ») -> aucune donnée, on n'affiche pas la
+     tuile plutôt que d'annoncer un faux 0%.
+     Un cours sans barre alors que d'autres en ont = non commencé -> compte
+     pour 0 au numérateur, mais reste au dénominateur. */
+  var ICON_KPI='<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/><path d="M15 7h4v4"/></svg>';
+  function mountKpi(){
+    var desc=document.querySelector(S+" .ps-desc");
+    if(!desc) return;
+
+    var vus=Object.create(null);
+    document.querySelectorAll(S+" .cards-grandpa .lw-course-card").forEach(function(card){
+      var a=card.querySelector("a.card-link[href], a[href]");
+      var cle=a ? a.getAttribute("href") : null;
+      if(!cle || cle in vus) return;                 // déjà compté : doublon du 2e bloc
+      var nat=card.querySelector(".lw-course-card-progress-bar");
+      var p=nat ? parseInt((nat.style.width||"").replace("%",""),10) : NaN;
+      vus[cle]=isNaN(p) ? null : Math.max(0, Math.min(100, p));
+    });
+
+    var cles=Object.keys(vus);
+    var avecBarre=cles.filter(function(k){ return vus[k]!==null; });
+    var kpi=desc.querySelector(".ps-kpi");
+    if(!cles.length || !avecBarre.length){         // anonyme -> pas de donnée
+      if(kpi) kpi.remove();
+      return;
+    }
+    var total=0;
+    cles.forEach(function(k){ total += (vus[k]||0); });
+    var pct=Math.round(total/cles.length);
+
+    if(!kpi){
+      kpi=document.createElement("div");
+      kpi.className="ps-kpi";
+      kpi.innerHTML='<div class="ps-kpi-txt">'
+                  +   '<div class="ps-kpi-num"></div>'
+                  +   '<div class="ps-kpi-lbl"></div>'
+                  +   '<div class="ps-kpi-bar"><div class="ps-kpi-bar-in"></div></div>'
+                  + '</div>'
+                  + '<span class="ps-kpi-ic" aria-hidden="true">'+ICON_KPI+'</span>';
+      desc.appendChild(kpi);
+    }
+    /* textContent : jamais de concaténation HTML */
+    kpi.querySelector(".ps-kpi-num").textContent=pct+" %";
+    kpi.querySelector(".ps-kpi-lbl").textContent="Progression sur "+cles.length+" cours";
+    kpi.querySelector(".ps-kpi-bar-in").style.width=pct+"%";
+    /* la barre est décorative : le chiffre est déjà lisible juste au-dessus */
+    kpi.setAttribute("aria-label","Progression globale : "+pct+" % sur "+cles.length+" cours");
   }
 
   /* Le liseré : un rect SVG qui épouse la carte. createElementNS obligatoire —
