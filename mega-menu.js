@@ -111,8 +111,15 @@
        parents `.lw-cols` et `.learnworlds-section-content` sont déjà
        `position:relative` en natif, on ne peut pas s'y accrocher sans les
        neutraliser — et la rangée doit rester relative pour centrer le menu.
-       ⚠️ `page-content` porte `overflow:hidden auto` : inutile de dépasser 1702. */
-    NAV+".lw-topbar-submenu.js-submenu-list{position:absolute !important;top:100% !important;bottom:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:100vw !important;min-width:0 !important;max-width:100vw !important;height:auto !important;max-height:none !important;overflow:visible !important;margin-top:0 !important;padding:22px 24px !important;border-radius:0 !important;border:0 !important;border-top:1px solid #E6E9EF !important;border-bottom:1px solid #E6E9EF !important;background:#F5F6F8 !important;box-shadow:none !important;gap:48px !important;font-family:Figtree,sans-serif !important;grid-template-columns:none !important;justify-content:center !important;align-items:center !important;}",
+       ⚠️ `page-content` porte `overflow:hidden auto` : inutile de dépasser 1702.
+
+       ÉCART SOUS LE HEADER — `--ps-mm-gap` (cf. measureGap()).
+       `top:100%` se résout sur `ul.lw-topbar-options`, qui fait exactement la
+       hauteur du TEXTE (mesuré : 26 -> 49px). Sans marge, la bande démarrait
+       donc à 49, soit 26px À L'INTÉRIEUR du header (la section va de 0 à 75) :
+       le bord venait mordre sous les libellés. On ne peut pas ancrer le panneau
+       sur la section (cf. ci-dessus), d'où la marge mesurée en JS. */
+    NAV+".lw-topbar-submenu.js-submenu-list{position:absolute !important;top:100% !important;bottom:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:100vw !important;min-width:0 !important;max-width:100vw !important;height:auto !important;max-height:none !important;overflow:visible !important;margin-top:var(--ps-mm-gap,26px) !important;padding:12px 24px !important;border-radius:0 !important;border:0 !important;border-top:1px solid #E6E9EF !important;border-bottom:1px solid #E6E9EF !important;background:#F5F6F8 !important;box-shadow:none !important;gap:48px !important;font-family:Figtree,sans-serif !important;grid-template-columns:none !important;justify-content:center !important;align-items:center !important;}",
     /* Ouverture pilotée en JS (classe), PAS en :hover — cf. openMenus() :
        le panneau fait toute la largeur du menu alors que son déclencheur est
        étroit ; en diagonale la souris sort du li AVANT d'atteindre le panneau,
@@ -139,7 +146,27 @@
   if(!st){ st=document.createElement("style"); st.id="ps-megamenu-style"; document.head.appendChild(st); }
   st.textContent=CSS.join("\n");
 
+  /* Écart entre la barre et la bande.
+     La bande se positionne en `top:100%` de `ul.lw-topbar-options`, qui est
+     collée au texte du menu — pas au bas du header. On mesure donc ce qui
+     manque pour atteindre le bas de la section du header (26px sur le thème
+     actuel, header non sticky et de hauteur fixe). Mesuré plutôt que codé en
+     dur : suit le padding du header s'il change dans le Customizer, et le
+     passage en < 1100px où la colonne du menu repasse dans le flux.
+     Le panneau est `position:absolute` : ouvert, il ne change pas la hauteur
+     de la section, la mesure reste donc valable dans les deux états. */
+  function measureGap(){
+    var ul=document.querySelector("nav.lw-topbar-menu ul.lw-topbar-options");
+    if(!ul) return;
+    var sec=ul.closest("section.learnworlds-section");
+    if(!sec) return;
+    var gap=Math.round(sec.getBoundingClientRect().bottom-ul.getBoundingClientRect().bottom);
+    if(!isFinite(gap) || gap<0 || gap>60) return;   // mesure aberrante -> on garde le repli CSS
+    ul.closest("nav.lw-topbar-menu").style.setProperty("--ps-mm-gap",gap+"px");
+  }
+
   function build(){
+    measureGap();
     document.querySelectorAll(".lw-topbar-submenu-item > .lw-topbar-option-link").forEach(function(link){
       if(link.dataset.psMm) return;
       var label=(link.textContent||"").replace(/\s+/g," ").trim();
@@ -210,5 +237,6 @@
   function start(){ build(); obs.observe(document.body,{childList:true,subtree:true}); }
   if(document.readyState!=="loading") start(); else document.addEventListener("DOMContentLoaded",start);
   window.addEventListener("load",build);
+  window.addEventListener("resize",measureGap);
   [200,600,1200,2500].forEach(function(d){ setTimeout(build,d); });
 })();
