@@ -42,8 +42,12 @@
        suffit de la ré-autoriser et de la styler. */
     "#pageContent .lw-course-card > *:not(.ps-mcard):not(.learnworlds-image){display:none !important;}",
     ".ps-mcard{display:flex !important;flex-direction:column !important;padding:32px !important;min-height:270px !important;}",
-    ".ps-mhead{display:flex !important;align-items:center !important;gap:14px !important;margin-bottom:24px !important;}",
-    ".ps-mtag{display:inline-flex !important;align-items:center !important;padding:4px 11px !important;border-radius:999px !important;font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:700 !important;line-height:1 !important;letter-spacing:.01em !important;white-space:nowrap !important;}",
+    /* En-tête sur 2 lignes : le niveau seul dessus (c'est LE repère de la carte),
+       les compteurs en dessous, plus discrets. */
+    ".ps-mhead{display:flex !important;flex-direction:column !important;align-items:flex-start !important;gap:10px !important;margin-bottom:24px !important;}",
+    ".ps-mtag{display:inline-flex !important;align-items:center !important;padding:7px 16px !important;border-radius:999px !important;font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:800 !important;line-height:1 !important;letter-spacing:-.01em !important;white-space:nowrap !important;}",
+    /* la rangée des compteurs, sous le niveau */
+    ".ps-mmetas{display:flex !important;align-items:center !important;gap:8px !important;flex-wrap:wrap !important;}",
     /* compteurs (« 8 leçons », « 3 quiz ») : pastille neutre, pour que la
        couleur reste réservée au niveau — qui est le vrai repère de la carte */
     ".ps-mmeta{display:inline-flex !important;align-items:center !important;padding:4px 10px !important;border-radius:999px !important;background:#F1F2F6 !important;color:#676879 !important;font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:600 !important;line-height:1 !important;white-space:nowrap !important;}",
@@ -199,11 +203,18 @@
       var tag=document.createElement("span");
       tag.className="ps-mtag"; tag.textContent="Niveau "+level;
       head.appendChild(tag);
-      metas.forEach(function(mt){
-        var s=document.createElement("span");
-        s.className="ps-mmeta"; s.textContent=metaText(mt.label,mt.value);   // textContent : pas d'injection
-        head.appendChild(s);
-      });
+      /* compteurs regroupés sur leur propre ligne, sous le niveau ; pas de
+         rangée vide si le cours n'a pas encore les champs dans sa description */
+      if(metas.length){
+        var row=document.createElement("div");
+        row.className="ps-mmetas";
+        metas.forEach(function(mt){
+          var s=document.createElement("span");
+          s.className="ps-mmeta"; s.textContent=metaText(mt.label,mt.value);   // textContent : pas d'injection
+          row.appendChild(s);
+        });
+        head.appendChild(row);
+      }
       var t=document.createElement("h3");
       t.className="ps-mtitle"; t.textContent=name;
       d.appendChild(head); d.appendChild(t);
