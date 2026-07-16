@@ -97,7 +97,40 @@
        celui-ci `static`, il s'ancre sur la carte (déjà `position:relative`)
        et couvre les 434px. Vérifié : image, centre, titre et bouton mènent
        tous au cours. */
-    "#pageContent .cards-grandpa .lw-course-card > .learnworlds-image{position:static !important;}",
+    /* ---- ILLUSTRATION EN ROND (choix de Ziad le 17/07) --------------------
+       L'illustration passe d'un bandeau pleine largeur à un rond de 180px posé
+       sur une bande teintée à la couleur du niveau.
+
+       🔴 `position:static` EST OBLIGATOIRE (cf. le commentaire ci-dessus) : il
+       fait que le lien natif s'ancre sur la CARTE et la rende cliquable en
+       entier. Ma 1re version du rond utilisait un `::before` sur la carte, ce
+       qui imposait `position:relative` sur l'image pour l'empiler au-dessus —
+       et **cassait la carte cliquable**. D'où la bande en `linear-gradient`
+       SUR LA CARTE : aucun pseudo-élément, aucun empilement, l'image reste
+       static. Vérifié après coup : le lien couvre toujours toute la carte.
+
+       L'image source fait 400x225 (16:9) : un rond ROGNE forcément les côtés
+       (~44% de la largeur). C'est assumé — la variante `contain` a été
+       essayée et rejetée : le rond coupe quand même les coins, et les chiffres
+       dessinés dans l'illustration s'y retrouvaient tranchés en deux.
+       Le chiffre de l'illustration disparaît donc : la pastille « Niveau N »
+       fait déjà ce travail.
+       `background-position:50% 45%` : légèrement remonté, les scènes ont leur
+       sujet au-dessus du centre géométrique. */
+    "#pageContent .cards-grandpa .lw-course-card > .learnworlds-image{position:static !important;width:180px !important;height:180px !important;min-height:0 !important;flex:none !important;border-radius:50% !important;background-size:cover !important;background-position:50% 45% !important;margin:23px auto 0 !important;border:5px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.10) !important;}",
+    /* Bande teintée = un dégradé à arrêt net SUR LA CARTE (226 = 180 + 2x23).
+       🔴 Sélecteur `.cards-grandpa > .lw-cols > .col.lw-course-card` = (1,4,0),
+       et non `.cards-grandpa .lw-course-card` = (1,2,0) : la règle de la carte
+       plus haut dans ce fichier (`#pageContent .lw-cols > .col.lw-course-card`,
+       (1,3,0)) pose `background:#fff !important` et ÉCRASERAIT un sélecteur plus
+       faible. Vérifié à l'écran : avec (1,2,0), `backgroundImage` valait `none`
+       — aucune bande. Deux `!important` : c'est la spécificité qui tranche. */
+    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{background:linear-gradient(#F1F1FF 0,#F1F1FF 226px,#fff 226px) !important;}",
+    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card[data-ps-lvl='2']{background:linear-gradient(#E3F8EE 0,#E3F8EE 226px,#fff 226px) !important;}",
+    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card[data-ps-lvl='3']{background:linear-gradient(#FFF3E0 0,#FFF3E0 226px,#fff 226px) !important;}",
+    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card[data-ps-lvl='4']{background:linear-gradient(#FDECEF 0,#FDECEF 226px,#fff 226px) !important;}",
+    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card[data-ps-lvl='5']{background:linear-gradient(#F3EAFB 0,#F3EAFB 226px,#fff 226px) !important;}",
+    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card[data-ps-lvl='6']{background:linear-gradient(#E6F1FD 0,#E6F1FD 226px,#fff 226px) !important;}",
     "#pageContent .cards-grandpa .lw-course-card a.lw-course-card--stretched-link{z-index:3 !important;}",
     /* LISERÉ BLEU qui se dessine au survol.
        `pathLength="1"` normalise le tracé : 1 = tout le périmètre, quelle que
