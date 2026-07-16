@@ -61,6 +61,14 @@
     ".ps-mlink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-mlink:hover{color:#4B4BE0 !important;}",
     ".ps-mlink:hover::after{transform:translateX(5px) !important;}",
+    /* Cours terminé : "Terminé" est un ÉTAT, pas une action — la flèche qui
+       pousse en avant n'a plus de sens, on met une coche. Le lien reste
+       cliquable (on peut revenir sur un cours fini), mais il ne réclame plus.
+       Vert (et non violet) : c'est un statut d'accomplissement. */
+    ".ps-mlink.ps-done{color:#12A85F !important;}",
+    ".ps-mlink.ps-done:hover{color:#009257 !important;}",
+    ".ps-mlink.ps-done::after{content:\"\\2713\" !important;}",
+    ".ps-mlink.ps-done:hover::after{transform:none !important;}",
 
     /* Couleur par NIVEAU, et non par position : les chevrons intercalés entre
        les cartes décalent nth-child et le cycle sautait (vérifié : Niveau 4
@@ -245,7 +253,17 @@
       }
 
       var a=document.createElement("a");
-      a.className="ps-mlink"; a.href=href; a.textContent="En savoir plus";
+      /* Le libellé suit l'avancement. "Continuer" est le mot qu'emploie
+         LearnWorlds lui-même sur sa carte native — on garde son vocabulaire.
+         Pas de progression (visiteur anonyme, ou cours jamais ouvert) ->
+         "En savoir plus". */
+      a.className="ps-mlink"; a.href=href;
+      var label="En savoir plus";
+      if(!isNaN(pct)){
+        if(pct>=100){ label="Terminé"; a.classList.add("ps-done"); }
+        else if(pct>0){ label="Continuer"; }
+      }
+      a.textContent=label;
       d.appendChild(a);
       card.appendChild(d);
       /* la couleur suit le NIVEAU (cf. CSS [data-ps-lvl]) : les chevrons
