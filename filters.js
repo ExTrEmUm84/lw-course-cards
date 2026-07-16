@@ -47,11 +47,36 @@
 
   // Masquage via classe + règle !important : résiste aux ré-affichages
   // (LearnWorlds ou un autre script qui remettrait display inline).
+  // + Style "dropdown modernisé" (variante B) de la barre de filtres.
   function ensureStyle(){
     if(document.getElementById("ps-filters-style")) return;
+    if(!document.getElementById("ps-figtree")){
+      var f=document.createElement("link");
+      f.id="ps-figtree"; f.rel="stylesheet";
+      f.href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700&display=swap";
+      (document.head||document.documentElement).appendChild(f);
+    }
     var s=document.createElement("style");
     s.id="ps-filters-style";
-    s.textContent=".ps-cat-hidden{display:none !important;}";
+    s.textContent=[
+      ".ps-cat-hidden{display:none !important;}",
+      /* --- barre de recherche moderne --- */
+      "#pageContent .-search-box{display:inline-flex !important;align-items:center !important;border:1.5px solid #E6E9EF !important;border-radius:12px !important;background:#fff !important;padding:0 6px 0 0 !important;box-shadow:0 1px 2px rgba(0,0,0,.04) !important;overflow:hidden !important;height:46px !important;transition:border-color .15s ease, box-shadow .15s ease !important;}",
+      "#pageContent .-search-box:focus-within{border-color:#3887B4 !important;box-shadow:0 0 0 3px rgba(56,135,180,.15) !important;}",
+      "#pageContent .-search-box .learnworlds-input, #pageContent .-search-box input{border:0 !important;box-shadow:none !important;height:44px !important;font-family:Figtree,sans-serif !important;font-size:15px !important;background:transparent !important;color:#323338 !important;}",
+      /* --- bouton "tout" en pill --- */
+      "#pageContent .learnworlds-button.filter.text-only{display:inline-flex !important;align-items:center !important;justify-content:center !important;height:44px !important;padding:0 18px !important;border-radius:999px !important;border:1.5px solid #E6E9EF !important;background:#fff !important;color:#4B5563 !important;font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:600 !important;margin-right:10px !important;cursor:pointer !important;transition:all .15s ease !important;}",
+      "#pageContent .learnworlds-button.filter.text-only:hover{border-color:#3887B4 !important;color:#3887B4 !important;background:#F3F9FC !important;}",
+      /* --- bouton "categories" en pill --- */
+      "#pageContent .lw-filter-option.with-submenu{display:inline-flex !important;align-items:center !important;height:44px !important;padding:0 18px !important;border-radius:999px !important;border:1.5px solid #E6E9EF !important;background:#fff !important;font-family:Figtree,sans-serif !important;cursor:pointer !important;transition:all .15s ease !important;}",
+      "#pageContent .lw-filter-option.with-submenu:hover{border-color:#3887B4 !important;background:#F3F9FC !important;}",
+      "#pageContent .lw-filter-option-lbl{font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:600 !important;color:#4B5563 !important;}",
+      "#pageContent .lw-filter-option.with-submenu:hover .lw-filter-option-lbl{color:#3887B4 !important;}",
+      /* --- panneau déroulant --- */
+      "#pageContent .lw-filter-option.with-submenu .lw-topbar-submenu{border-radius:14px !important;box-shadow:0 16px 40px rgba(15,23,42,.14) !important;border:1px solid #E6E9EF !important;padding:8px !important;margin-top:10px !important;min-width:220px !important;background:#fff !important;}",
+      "#pageContent .lw-topbar-submenu-item.filter{list-style:none !important;padding:9px 14px !important;border-radius:9px !important;font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:500 !important;color:#323338 !important;cursor:pointer !important;transition:background .12s ease, color .12s ease !important;}",
+      "#pageContent .lw-topbar-submenu-item.filter:hover{background:#F3F9FC !important;color:#3887B4 !important;}"
+    ].join("\n");
     (document.head||document.documentElement).appendChild(s);
   }
   function applyHide(){
