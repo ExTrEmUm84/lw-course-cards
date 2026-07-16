@@ -35,7 +35,26 @@
     "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
     "#pageContent .lw-course-card > *:not(.ps-cc){display:none !important;}",
     ".ps-cc{display:flex !important;flex-direction:column !important;padding:26px !important;min-height:180px !important;}",
-    ".ps-cc-title{font-family:Figtree,sans-serif !important;font-size:21px !important;font-weight:800 !important;color:#243B6B !important;line-height:1.25 !important;margin:0 0 14px !important;}",
+    /* En-tête : picto + titre sur une ligne.
+       `align-items:flex-start` et non `center` : sur un titre qui passe sur 2
+       lignes, un centrage ferait descendre le picto au milieu du bloc au lieu
+       de le garder en regard de la 1re ligne. Le `margin-top:2px` du picto le
+       recale optiquement sur la hauteur de capitale. */
+    ".ps-cc-head{display:flex !important;align-items:flex-start !important;gap:12px !important;margin:0 0 14px !important;}",
+    ".ps-cc-ic{flex:0 0 auto !important;width:36px !important;height:36px !important;margin-top:2px !important;border-radius:10px !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;background:#EEF1F6 !important;color:#4B5563 !important;}",
+    ".ps-cc-ic svg{width:20px !important;height:20px !important;fill:none !important;stroke:currentColor !important;stroke-width:1.7 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    /* `class="f"` = aplat léger, le reste en trait : c'est ce contraste qui
+       donne la densité à petite taille (même convention que sector-cards.js). */
+    ".ps-cc-ic svg .f{fill:currentColor !important;fill-opacity:.18 !important;}",
+    /* une teinte par famille de picto, prise dans la palette des pastilles */
+    ".ps-cc-ic.ps-ic-pill{background:#E1F7EC !important;color:#009257 !important;}",
+    ".ps-cc-ic.ps-ic-chart{background:#E8F1FE !important;color:#0A6ED8 !important;}",
+    ".ps-cc-ic.ps-ic-car{background:#FFF3E0 !important;color:#C77700 !important;}",
+    ".ps-cc-ic.ps-ic-build{background:#EDEDFF !important;color:#4B4BE0 !important;}",
+    ".ps-cc-ic.ps-ic-plane{background:#EAF5FC !important;color:#2F7DA8 !important;}",
+    ".ps-cc-ic.ps-ic-cart{background:#FDEFF3 !important;color:#C2286A !important;}",
+    ".ps-cc-ic.ps-ic-bank{background:#F3EAFB !important;color:#8A45C9 !important;}",
+    ".ps-cc-title{font-family:Figtree,sans-serif !important;font-size:25px !important;font-weight:800 !important;color:#243B6B !important;line-height:1.2 !important;letter-spacing:-.02em !important;margin:0 !important;}",
     ".ps-cc-pills{display:flex !important;flex-wrap:wrap !important;gap:7px !important;margin-bottom:auto !important;}",
     ".ps-pill{display:inline-flex !important;align-items:center !important;gap:5px !important;padding:4px 11px !important;border-radius:999px !important;font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:600 !important;line-height:1.1 !important;background:#EEF1F6 !important;color:#4B5563 !important;}",
     ".ps-pill b{font-weight:700 !important;opacity:.62 !important;text-transform:uppercase !important;font-size:10px !important;letter-spacing:.03em !important;}",
@@ -84,6 +103,36 @@
   var st=document.getElementById("ps-casecards-style");
   if(!st){ st=document.createElement("style"); st.id="ps-casecards-style"; document.head.appendChild(st); }
   st.textContent=CSS;
+
+  /* --- Pictos des cartes : choisis par mot-clé du TITRE ---
+     Repris de sector-cards.js (même jeu, même convention `class="f"`), avec
+     deux ajouts pour cette page : "tourisme" -> avion, et un panier pour
+     l'agroalimentaire. Testé sur les 12 titres réels : 9 tombaient juste, 3
+     retombaient sur le picto neutre (McDonald's, Tourisme, Succession) ; les
+     deux règles ci-dessous en récupèrent deux. "Succession" reste sur `doc`,
+     qui convient — un picto neutre vaut mieux qu'un contresens.
+     ⚠️ Pas basé sur le champ "Secteur" de la description : 11 cartes /12 n'en
+     ont pas, le titre est aujourd'hui la seule donnée fiable. */
+  var ICON={
+    pill:'<svg viewBox="0 0 24 24"><path class="f" d="m10.5 20.5 10-10a4.95 4.95 0 1 0-7-7l-10 10a4.95 4.95 0 1 0 7 7Z"/><path d="m8.5 8.5 7 7"/></svg>',
+    plane:'<svg viewBox="0 0 24 24"><path class="f" d="M17.8 19.2 16 11l3.5-3.5C21 6 21.5 4 21 3c-1-.5-3 0-4.5 1.5L13 8 4.8 6.2c-.5-.1-.9.1-1.1.5l-.3.5c-.2.5-.1 1 .3 1.3L9 12l-2 3H4l-1 1 3 2 2 3 1-1v-3l3-2 3.5 5.3c.3.4.8.5 1.3.3l.5-.2c.4-.3.6-.7.5-1.2Z"/></svg>',
+    chart:'<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><rect class="f" x="7" y="12" width="3.2" height="6" rx="1"/><rect class="f" x="12.4" y="6.5" width="3.2" height="11.5" rx="1"/><rect class="f" x="17.8" y="9.5" width="3.2" height="8.5" rx="1"/><path d="m7 9 4-3.5 4 2 5-4.5"/></svg>',
+    build:'<svg viewBox="0 0 24 24"><path class="f" d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"/><path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"/><path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"/><path d="M10 6h4M10 10h4M10 14h4"/></svg>',
+    car:'<svg viewBox="0 0 24 24"><path class="f" d="M19 17h2c.6 0 1-.4 1-1v-3c0-.9-.7-1.7-1.5-1.9C18.7 10.6 16 10 16 10s-1.3-1.4-2.2-2.3c-.5-.4-1.1-.7-1.8-.7H5c-.6 0-1.1.4-1.4.9l-1.4 2.9A3.7 3.7 0 0 0 2 12v4c0 .6.4 1 1 1h2"/><path d="M9 17h6"/><circle cx="7" cy="17" r="2"/><circle cx="17" cy="17" r="2"/></svg>',
+    cart:'<svg viewBox="0 0 24 24"><circle cx="9.5" cy="20" r="1.4"/><circle cx="18" cy="20" r="1.4"/><path class="f" d="M6.4 6h15l-1.7 8a2 2 0 0 1-2 1.6h-8a2 2 0 0 1-2-1.6L6.4 6Z"/><path d="M2.5 3h2.3l.7 3"/></svg>',
+    bank:'<svg viewBox="0 0 24 24"><path d="M3 21h18"/><path class="f" d="M5 21V7l8-4v18Z"/><path class="f" d="M19 21V11l-6-4v14Z"/><path d="M8.5 9h.01M8.5 13h.01M8.5 17h.01"/></svg>',
+    doc:'<svg viewBox="0 0 24 24"><path class="f" d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v4a2 2 0 0 0 2 2h4"/><path d="M16 13H8M16 17H8M10 9H8"/></svg>'
+  };
+  function pickIcon(l){ l=(l||"").toLowerCase();
+    if(/pharma|sant[ée]|m[ée]dic|biotech/.test(l)) return "pill";
+    if(/a[ée]ro|avion|spatial|d[ée]fense|tourisme|voyage|h[ôo]tel|loisir/.test(l)) return "plane";
+    if(/agro|alimentaire|food|restaur|mcdonald|boisson/.test(l)) return "cart";
+    if(/bilan|financ|comptab|banque|assurance/.test(l)) return "chart";
+    if(/automobile|transport|livraison|mobilit/.test(l)) return "car";
+    if(/industrie|[ée]nergie|manufactur|luxe|retail|distribution|m[ée]tallurg/.test(l)) return "build";
+    if(/immobilier|public|secteur/.test(l)) return "bank";
+    return "doc";
+  }
 
   var LABELS=["Cabinet","Année","Annee","Secteur","Type","Difficulté","Difficulte","Niveau","Durée","Duree","Format","Fonction"];
   function parse(desc){
@@ -224,9 +273,16 @@
       }).join("");
       var d=document.createElement("div");
       d.className="ps-cc";
-      d.innerHTML='<h3 class="ps-cc-title">'+title+'</h3>'
+      var ico=pickIcon(title);
+      d.innerHTML='<div class="ps-cc-head">'
+                +   '<span class="ps-cc-ic ps-ic-'+ico+'" aria-hidden="true">'+ICON[ico]+'</span>'
+                +   '<h3 class="ps-cc-title"></h3>'
+                + '</div>'
                 + '<div class="ps-cc-pills">'+pills+'</div>'
                 + '<a class="ps-cc-link" href="'+href+'">En savoir plus</a>';
+      /* titre posé en textContent (et non concaténé dans le innerHTML) : il
+         vient du Customizer, un "&" ou un "<" y serait interprété comme du HTML. */
+      d.querySelector(".ps-cc-title").textContent=title;
       card.appendChild(d);
     });
   }
