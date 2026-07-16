@@ -30,10 +30,17 @@
 (function(){
   "use strict";
 
-  function surLaPage(){ return document.body && /(^|\s)slug-profile(\s|$)/.test(document.body.className); }
-  if(!surLaPage()) return;
+  /* 🔴 LE GARDE S'ÉVALUE TARD, JAMAIS AU CHARGEMENT.
+     LearnWorlds pose la balise dans le <HEAD> : à l'exécution du fichier,
+     `document.body` est **null**. Un `if(!surLaPage()) return;` en tête d'IIFE
+     tuait donc le script DÉFINITIVEMENT — il se chargeait sans rien faire.
+     ⚠️ Mes tests ne l'avaient pas vu parce qu'ils INJECTAIENT le script après
+     le chargement de la page (body déjà présent) : injecter tardivement
+     n'équivaut PAS à une balise dans le <head>. */
+  function surLaPage(){ return !!document.body && /(^|\s)slug-profile(\s|$)/.test(document.body.className); }
 
-  if(!document.getElementById("ps-figtree")){
+  function figtree(){
+    if(document.getElementById("ps-figtree")) return;
     var f=document.createElement("link");
     f.id="ps-figtree"; f.rel="stylesheet";
     f.href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap";
@@ -155,9 +162,14 @@
     "@media(max-width:700px){"+S+" .ps-pf-courses > .lw-cols.multiple-rows{grid-template-columns:1fr !important;}}"
   ].join("\n");
 
-  var st=document.getElementById("ps-profile-style");
-  if(!st){ st=document.createElement("style"); st.id="ps-profile-style"; (document.head||document.documentElement).appendChild(st); }
-  st.textContent=CSS;
+  /* Posée depuis build(), donc APRÈS le garde : le CSS est scopé `#pageContent`
+     et non `body.slug-profile`, il ne doit pas atterrir sur une autre page si
+     la balise venait à être posée ailleurs. */
+  function styles(){
+    var st=document.getElementById("ps-profile-style");
+    if(!st){ st=document.createElement("style"); st.id="ps-profile-style"; (document.head||document.documentElement).appendChild(st); }
+    if(st.textContent!==CSS) st.textContent=CSS;
+  }
 
   /* ---- compteurs "Leçons : 8 # Quiz : 3", repris de course-cards.js ---- */
   var META=["Leçons","Lecons","Quiz"];
@@ -193,7 +205,9 @@
   }
 
   function build(){
-    marquer();
+    /* garde évalué ICI, pas au chargement : cf. l'avertissement en tête */
+    if(!surLaPage()) return;
+    figtree(); styles(); marquer();
     document.querySelectorAll(S+" .ps-pf-courses .lw-course-card").forEach(function(card){
       if(card.dataset.psPf) return;
       var h=card.querySelector(".learnworlds-heading3"); if(!h) return;
