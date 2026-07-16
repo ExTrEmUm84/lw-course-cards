@@ -100,13 +100,25 @@
     "#pageContent .cards-grandpa .lw-course-card > .learnworlds-image{position:static !important;}",
     "#pageContent .cards-grandpa .lw-course-card a.lw-course-card--stretched-link{z-index:3 !important;}",
     /* LISERÉ BLEU qui se dessine au survol.
-       `pathLength="1"` normalise le tracé : dasharray:1 = tout le périmètre,
-       quelle que soit la taille de la carte (ici ~1400px). dashoffset 1 ->
-       invisible, 0 -> tracé complet ; la transition dessine le trait.
+       `pathLength="1"` normalise le tracé : 1 = tout le périmètre, quelle que
+       soit la taille de la carte (ici 1402,54px). dashoffset -> 0 = tracé
+       complet ; la transition dessine le trait.
        stroke-width:4 mais la carte porte `overflow:hidden` : la moitié
-       extérieure est rognée, il en reste 2px collés au bord. */
+       extérieure est rognée, il en reste 2px collés au bord.
+
+       🔴 POURQUOI 1.02 ET PAS 1 — le liseré « bloquait à 99% ».
+       Avec dasharray:1 (= pile le périmètre) la fin du tiret ne rejoignait pas
+       son début : un cran net restait visible en `x+rx` (16,0), le point de
+       départ du tracé d'un rect arrondi. Le tracé est pourtant une boucle
+       fermée (getPointAtLength(0) == getPointAtLength(len)) : c'est un défaut
+       de précision du raccord, pas une erreur de longueur. 2% de rab font
+       chevaucher le tiret sur lui-même au raccord → couture invisible.
+       ⚠️ dashoffset AU REPOS DOIT VALOIR AUTANT QUE dasharray (1.02, pas 1) :
+       le motif fait 2x1.02 ; à offset 1, le tiret déborde de 0.02 sur le début
+       du tracé → ~28px de trait bleu visible SANS survol (constaté à l'écran).
+       Le tour se ferme donc à offset 0.02, soit 98% de la durée — invisible. */
     ".ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;pointer-events:none !important;z-index:4 !important;}",
-    ".ps-mline rect{fill:none !important;stroke:#6161FF !important;stroke-width:4 !important;stroke-dasharray:1 !important;stroke-dashoffset:1 !important;transition:stroke-dashoffset .55s ease !important;}",
+    ".ps-mline rect{fill:none !important;stroke:#6161FF !important;stroke-width:4 !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset .55s ease !important;}",
     "#pageContent .cards-grandpa .lw-course-card:hover .ps-mline rect{stroke-dashoffset:0 !important;}",
     "@media(prefers-reduced-motion:reduce){.ps-mline rect{transition:none !important;}}",
 
