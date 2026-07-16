@@ -101,6 +101,28 @@
       ".ps-ff-cur{font-weight:700 !important;}",
       ".ps-ff-arrow{width:9px !important;height:9px !important;border-right:2px solid currentColor !important;border-bottom:2px solid currentColor !important;transform:rotate(45deg) translateY(-2px) !important;transition:transform .18s ease !important;}",
       ".ps-ff.ps-ff-open .ps-ff-arrow{transform:rotate(-135deg) translateY(2px) !important;}",
+      /* ---- RECHERCHE SUR SA PROPRE LIGNE, FILTRES SUR LA SUIVANTE ----
+         En natif, `.one-row` est une rangée flex à 2 colonnes : la recherche
+         (span_4, 323px) et les filtres (span_8, 661px). Une fois deux pastilles
+         sélectionnées elles portent leur valeur ("Année : 2022"), s'élargissent
+         et ne tiennent plus dans 661px -> la barre passait sur 2 lignes
+         (mesuré : 6 pastilles, 2 lignes, hauteur 88px).
+         -> on empile les 2 colonnes : les filtres récupèrent les 1000px et
+         tiennent sur une ligne.
+         ⚠️ `:has(.lw-filters)` est INDISPENSABLE : la page compte **18**
+         `.one-row` (hero, cartes, pied de page…). Un `.one-row` nu les casserait
+         toutes.
+         ⚠️ `margin-left:0` sur la colonne : elle porte une gouttière native de
+         16px qui, à pleine largeur, poussait la barre à 358->1358 alors que la
+         grille des cartes fait 350->1350.
+         ⚠️ `justify-content:flex-start` sur la rangée : elle centre ses items en
+         natif -> la recherche se retrouvait centrée (670->1030) au lieu d'être
+         calée à gauche.
+         `max-width` sur la recherche : sans elle, le champ s'étirait à 1000px. */
+      "#pageContent .one-row:has(.lw-filters){flex-wrap:wrap !important;justify-content:flex-start !important;}",
+      "#pageContent .one-row:has(.lw-filters) > .col{flex:0 0 100% !important;max-width:100% !important;margin-left:0 !important;margin-right:0 !important;}",
+      "#pageContent .one-row:has(.lw-filters) > .-search-box{max-width:360px !important;margin-bottom:16px !important;}",
+      "#pageContent .lw-filters{justify-content:flex-start !important;}",
       /* 🔴 SANS CETTE RÈGLE, LE MENU PASSE DERRIÈRE LES CARTES.
          Le `z-index:50` du menu ne sert à rien seul : il est enfermé dans la
          branche de la barre. Mesuré : la barre (`.lw-cols.no-gutter`) ET la
@@ -278,6 +300,26 @@
       if(!e.target.closest || !e.target.closest(".ps-ff")) closeMenus();
     });
     document.addEventListener("keydown",function(e){ if(e.key==="Escape") closeMenus(); });
+
+    /* 🔴 Le bouton natif "tout" doit AUSSI remettre nos sélecteurs à zéro.
+       En natif il ne réinitialise que le filtre Secteurs de LearnWorlds : nos
+       filtres restaient actifs et les cartes restaient masquées. Constaté :
+       après un clic sur "tout", 11 cartes /12 toujours masquées et deux
+       sélecteurs encore actifs -> le bouton ne faisait visiblement RIEN.
+       On l'identifie par sa POSITION (1er bouton-pastille du conteneur), pas
+       par son libellé : le site est bilingue FR/EN, "tout" devient "all".
+       Le 2e bouton est celui sans libellé (cf. .ps-f-blank), déjà masqué.
+       Délégué sur document et posé une seule fois : LearnWorlds reconstruit la
+       barre, un écouteur posé sur le bouton lui-même partirait avec. */
+    document.addEventListener("click",function(e){
+      if(!e.target.closest) return;
+      var btn=e.target.closest("#pageContent .learnworlds-button.filter.text-only");
+      if(!btn) return;
+      var wrap=btn.closest(".learnworlds-button-wrapper.lw-filters");
+      if(!wrap || btn!==wrap.querySelector(".learnworlds-button.filter.text-only")) return;  // pas le "tout"
+      FIELDS.forEach(function(f){ delete state[f.key]; });
+      setTimeout(refresh,0);   // après le handler natif, qui recharge les cartes
+    });
   }
 
   function mountFieldFilters(){
