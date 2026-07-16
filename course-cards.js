@@ -43,23 +43,15 @@
     "#pageContent .lw-course-card > *:not(.ps-mcard):not(.learnworlds-image){display:none !important;}",
     ".ps-mcard{display:flex !important;flex-direction:column !important;padding:32px !important;min-height:270px !important;}",
     ".ps-mhead{display:flex !important;align-items:center !important;gap:14px !important;margin-bottom:24px !important;}",
-    ".ps-micon{width:44px !important;height:44px !important;border-radius:10px !important;display:flex !important;align-items:center !important;justify-content:center !important;color:#fff !important;font-weight:800 !important;font-size:20px !important;font-family:Figtree,sans-serif !important;flex:none !important;}",
-    ".ps-micon svg{width:24px !important;height:24px !important;stroke:#fff !important;fill:none !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
-    ".ps-mlabel{font-family:Figtree,sans-serif !important;font-size:18px !important;color:#676879 !important;line-height:1.2 !important;}",
-    ".ps-mlabel b{color:#1c1f26 !important;font-weight:800 !important;}",
-    ".ps-mbrand{font-family:Figtree,sans-serif !important;font-size:17px !important;font-weight:800 !important;color:#1c1f26 !important;line-height:1 !important;}",
     ".ps-mtag{display:inline-flex !important;align-items:center !important;padding:4px 11px !important;border-radius:999px !important;font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:700 !important;line-height:1 !important;letter-spacing:.01em !important;white-space:nowrap !important;}",
+    /* compteurs (« 8 leçons », « 3 quiz ») : pastille neutre, pour que la
+       couleur reste réservée au niveau — qui est le vrai repère de la carte */
+    ".ps-mmeta{display:inline-flex !important;align-items:center !important;padding:4px 10px !important;border-radius:999px !important;background:#F1F2F6 !important;color:#676879 !important;font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:600 !important;line-height:1 !important;white-space:nowrap !important;}",
     ".ps-mtitle{font-family:Figtree,sans-serif !important;font-size:25px !important;line-height:1.25 !important;font-weight:700 !important;color:#323338 !important;margin:0 0 auto !important;}",
     ".ps-mlink{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:26px !important;color:#6161FF !important;font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-mlink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-mlink:hover{color:#4B4BE0 !important;}",
     ".ps-mlink:hover::after{transform:translateX(5px) !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+1) .ps-micon{background:#6161FF !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+2) .ps-micon{background:#33D391 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+3) .ps-micon{background:#00C875 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+4) .ps-micon{background:#E2445C !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+5) .ps-micon{background:#FDAB3D !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+6) .ps-micon{background:#A25DDC !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+1) .ps-mtag{background:#EDEDFF !important;color:#4B4BE0 !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+2) .ps-mtag{background:#E6F9F0 !important;color:#12A85F !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+3) .ps-mtag{background:#E1F7EC !important;color:#009257 !important;}",
@@ -88,7 +80,6 @@
     "#pageContent .cards-grandpa .ps-mcard{padding:24px !important;min-height:0 !important;flex:1 1 auto !important;}",
     "#pageContent .cards-grandpa .ps-mtitle{font-size:21px !important;}",
     "#pageContent .cards-grandpa .ps-mhead{gap:11px !important;margin-bottom:20px !important;}",
-    "#pageContent .cards-grandpa .ps-micon{width:40px !important;height:40px !important;}",
     "#pageContent .cards-grandpa .ps-mlink{margin-top:20px !important;}",
     /* Bouton « Charger plus » masqué (demande de Ziad). Les 6 niveaux tiennent
        dans le carrousel, le bouton n'a plus d'utilité. `.lw-load-more` ne
@@ -144,16 +135,36 @@
 
   // --- 3) Construction des cartes ---
   var S="#pageContent";
-  // Un pictogramme par niveau (thème progressif) — cycle si plus de 6 niveaux
-  var ICONS=[
-    '<svg viewBox="0 0 24 24"><path d="M3 9l9-4 9 4-9 4-9-4z"/><path d="M7 11v4c0 1.1 2.2 2 5 2s5-.9 5-2v-4"/></svg>',            // 1 livre / intro
-    '<svg viewBox="0 0 24 24"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>',                                    // 2 loupe / screening
-    '<svg viewBox="0 0 24 24"><path d="M4 18l6-6 3 3 7-7"/><path d="M16 8h5v5"/></svg>',                                          // 3 courbe / montée
-    '<svg viewBox="0 0 24 24"><path d="M13 2 4 14h6l-1 8 9-12h-6l1-8z"/></svg>',                                                   // 4 éclair / accélération
-    '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4"/><circle cx="12" cy="12" r="1"/></svg>',// 5 cible / derniers tours
-    '<svg viewBox="0 0 24 24"><path d="M8 21h8"/><path d="M12 17v4"/><path d="M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M7 6H4v1a3 3 0 0 0 3 3"/><path d="M17 6h3v1a3 3 0 0 1-3 3"/></svg>' // 6 trophée / MBB
-  ];
-  function iconFor(level){ var i=(parseInt(level,10)-1); if(isNaN(i)||i<0) i=0; return ICONS[i % ICONS.length]; }
+
+  /* Compteurs lus dans la DESCRIPTION du cours, format "Label : valeur", séparés
+     par "#" — même convention que les cartes Cas :
+         Leçons : 8 # Quiz : 3
+     Pourquoi pas depuis le sommaire du cours ? Parce qu'il n'existe nulle part
+     avant que le JS de LearnWorlds ne le fabrique : ni dans le HTML servi (412 Ko
+     vérifiés, aucune trace des unités), ni dans un <script>, ni dans une API
+     (/api/learner/products ne renvoie que access, titleId, id, cohorts,
+     includedInProducts). Il faudrait charger les 6 pages de cours entières dans
+     des iframes (~2,5 Mo) et lire leur DOM — inacceptable pour le temps
+     d'affichage. La description est donc la source, tenue à jour à la main. */
+  var META=["Leçons","Lecons","Quiz"];
+  function parseMeta(desc){
+    var re=new RegExp("("+META.join("|")+")\\s*:\\s*","gi"), m, ms=[];
+    while((m=re.exec(desc))!==null){ ms.push({label:m[1], vs:re.lastIndex, start:m.index}); }
+    var out=[];
+    for(var i=0;i<ms.length;i++){
+      var end=(i+1<ms.length)?ms[i+1].start:desc.length;
+      var v=desc.slice(ms[i].vs,end).replace(/^[#\s]+/,"").replace(/[\s,;|#]+$/,"").trim();
+      if(v) out.push({label:ms[i].label, value:v});
+    }
+    return out;
+  }
+  /* "Leçons"+"8" -> "8 leçons" ; "Leçons"+"1" -> "1 leçon" ; "Quiz" invariable */
+  function metaText(label,value){
+    var l=label.toLowerCase();
+    if(/^le[çc]ons?$/.test(l)) l = (value==="1" ? "leçon" : "leçons");
+    return value+" "+l;
+  }
+
   function build(){
     document.querySelectorAll(S+" .lw-course-card").forEach(function(card){
       if(card.dataset.psM) return;
@@ -165,13 +176,27 @@
       if(!level || !name) return;
       var link=card.querySelector("a.card-link[href], a[href]");
       var href=link ? link.getAttribute("href") : "#";
+      /* compteurs éventuels ("Leçons : 8 # Quiz : 3") ; absents -> pas de pastille */
+      var dEl=card.querySelector(".lw-course-card-descr");
+      var metas=dEl ? parseMeta((dEl.textContent||"").replace(/\s+/g," ").trim()) : [];
+
       var d=document.createElement("div");
       d.className="ps-mcard";
-      d.innerHTML='<div class="ps-mhead"><span class="ps-micon">'+iconFor(level)+'</span>'
-                + '<span class="ps-mbrand">PrepaStrat</span>'
-                + '<span class="ps-mtag">Niveau '+level+'</span></div>'
-                + '<h3 class="ps-mtitle">'+name+'</h3>'
-                + '<a class="ps-mlink" href="'+href+'">En savoir plus</a>';
+      var head=document.createElement("div");
+      head.className="ps-mhead";
+      var tag=document.createElement("span");
+      tag.className="ps-mtag"; tag.textContent="Niveau "+level;
+      head.appendChild(tag);
+      metas.forEach(function(mt){
+        var s=document.createElement("span");
+        s.className="ps-mmeta"; s.textContent=metaText(mt.label,mt.value);   // textContent : pas d'injection
+        head.appendChild(s);
+      });
+      var t=document.createElement("h3");
+      t.className="ps-mtitle"; t.textContent=name;
+      var a=document.createElement("a");
+      a.className="ps-mlink"; a.href=href; a.textContent="En savoir plus";
+      d.appendChild(head); d.appendChild(t); d.appendChild(a);
       card.appendChild(d);
       card.dataset.psM="1";
     });
