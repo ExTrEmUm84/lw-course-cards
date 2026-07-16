@@ -214,16 +214,22 @@
     if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){
       txt.textContent=parts[0]; return;               // pas d'animation si l'utilisateur la refuse
     }
-    var p=0, c=0, del=false;
-    (function tick(){
+    /* La 1re phrase est affichée EN ENTIER dès le départ, le cycle ne démarre
+       qu'après la pause. Sinon le slot part vide et se remplit lettre par lettre
+       (~600ms) : au chargement le titre reste incomplet, et ça se lit comme un
+       retard d'affichage plutôt que comme une animation. */
+    var p=0, c=parts[0].length, del=true;
+    txt.textContent=parts[0];
+    function tick(){
       var full=parts[p];
       c += del ? -1 : 1;
       txt.textContent=full.slice(0,c);
-      var d = del ? 34 : 58;
-      if(!del && c>=full.length){ del=true; d=1700; }
+      var d = del ? 34 : 58;                          // frappe / effacement
+      if(!del && c>=full.length){ del=true; d=1700; } // pause phrase complète
       else if(del && c<=0){ del=false; p=(p+1)%parts.length; d=320; }
       setTimeout(tick,d);
-    })();
+    }
+    setTimeout(tick,1700);                            // phrase lisible avant le 1er effacement
   }
 
   // --- 5) Carrousel : deux flèches + défilement d'une carte à la fois ---
@@ -281,6 +287,14 @@
     prev.disabled = track.scrollLeft<=2;
     next.disabled = track.scrollLeft>=max-2;
   }
+
+  /* Le H1 est SERVI DANS LE HTML par LearnWorlds, avec ses "#" en clair
+     ("Nos formations pour #le conseil #la stratégie"). Si on attend
+     DOMContentLoaded pour le transformer, il s'affiche tel quel entre-temps.
+     -> on le traite dès l'exécution du script, avant le premier rendu.
+     (Les cartes, elles, sont rendues plus tard par le JS de LW : c'est
+     l'observer qui s'en charge.) */
+  heroText();
 
   var scheduled=false;
   function schedule(){ if(scheduled) return; scheduled=true; requestAnimationFrame(function(){ scheduled=false; build(); }); }
