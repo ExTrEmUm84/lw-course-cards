@@ -112,9 +112,12 @@
          à la grille (même précédent que mega-menu.js). Aucun `display` posé
          sur un `.lw-cols` nu : cf. la règle du piège n°1. */
       "#pageContent .lw-cols.no-gutter:has(.lw-filters){z-index:20 !important;}",
-      ".ps-ff-menu{display:none !important;position:absolute !important;top:calc(100% + 10px) !important;left:0 !important;z-index:50 !important;min-width:200px !important;max-height:280px !important;overflow-y:auto !important;margin:0 !important;padding:8px !important;list-style:none !important;border-radius:14px !important;border:1px solid #E6E9EF !important;background:#fff !important;box-shadow:0 16px 40px rgba(15,23,42,.14) !important;}",
+      ".ps-ff-menu{display:none !important;position:absolute !important;top:calc(100% + 10px) !important;left:0 !important;z-index:50 !important;min-width:200px !important;max-height:280px !important;overflow-y:auto !important;margin:0 !important;padding:8px !important;list-style:none !important;text-align:left !important;border-radius:14px !important;border:1px solid #E6E9EF !important;background:#fff !important;box-shadow:0 16px 40px rgba(15,23,42,.14) !important;}",
       ".ps-ff.ps-ff-open .ps-ff-menu{display:block !important;}",
-      ".ps-ff-item{list-style:none !important;padding:9px 14px !important;border-radius:9px !important;font-size:14px !important;font-weight:500 !important;color:#323338 !important;white-space:nowrap !important;cursor:pointer !important;transition:background .12s ease, color .12s ease !important;}",
+      /* text-align:left explicite : la barre de filtres est alignée à DROITE sur
+         la page, et les options en héritaient (constaté à l'écran : "Tous" et
+         "2022" collés à droite du panneau). */
+      ".ps-ff-item{list-style:none !important;padding:9px 14px !important;border-radius:9px !important;font-size:14px !important;font-weight:500 !important;color:#323338 !important;white-space:nowrap !important;text-align:left !important;cursor:pointer !important;transition:background .12s ease, color .12s ease !important;}",
       ".ps-ff-item:hover{background:#F3F9FC !important;color:#3887B4 !important;}",
       ".ps-ff-item.ps-ff-sel{background:#EAF5FC !important;color:#3887B4 !important;font-weight:700 !important;}",
       /* masquage des cartes filtrées : classe + !important (résiste aux
