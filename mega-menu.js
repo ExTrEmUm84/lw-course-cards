@@ -82,10 +82,17 @@
     /* on ancre le panneau sur la barre entière (et non sur l'item survolé) */
     NAV+"ul.lw-topbar-options{position:relative !important;}",
     NAV+"li.lw-topbar-option{position:static !important;}",
-    NAV+".lw-topbar-submenu.js-submenu-list{display:none;position:absolute !important;top:100% !important;bottom:auto !important;left:0 !important;right:auto !important;width:100% !important;min-width:0 !important;max-width:none !important;height:auto !important;max-height:none !important;overflow:visible !important;transform:none !important;margin-top:12px !important;padding:10px !important;border-radius:18px !important;background:#fff !important;border:1px solid #E6E9EF !important;box-shadow:0 24px 60px rgba(15,23,42,.18) !important;gap:4px !important;font-family:Figtree,sans-serif !important;grid-template-columns:none !important;align-items:stretch !important;}",
-    NAV+".lw-topbar-option:hover .lw-topbar-submenu.js-submenu-list{display:flex !important;}",
-    /* pont invisible : garde le survol vivant entre la barre et le panneau */
-    NAV+".lw-topbar-submenu.js-submenu-list::before{content:\"\" !important;position:absolute !important;left:0 !important;right:0 !important;top:-13px !important;height:13px !important;display:block !important;}",
+    NAV+".lw-topbar-submenu.js-submenu-list{position:absolute !important;top:100% !important;bottom:auto !important;left:0 !important;right:auto !important;width:100% !important;min-width:0 !important;max-width:none !important;height:auto !important;max-height:none !important;overflow:visible !important;transform:none !important;margin-top:12px !important;padding:10px !important;border-radius:18px !important;background:#fff !important;border:1px solid #E6E9EF !important;box-shadow:0 24px 60px rgba(15,23,42,.18) !important;gap:4px !important;font-family:Figtree,sans-serif !important;grid-template-columns:none !important;align-items:stretch !important;}",
+    /* Ouverture pilotée en JS (classe), PAS en :hover — cf. openMenus() :
+       le panneau fait toute la largeur du menu alors que son déclencheur est
+       étroit ; en diagonale la souris sort du li AVANT d'atteindre le panneau,
+       le :hover tombe et le menu disparaît. Un délai de grâce corrige ça. */
+    NAV+".lw-topbar-submenu.js-submenu-list:not(.ps-mm-open){display:none !important;}",
+    NAV+".lw-topbar-submenu.js-submenu-list.ps-mm-open{display:flex !important;}",
+    /* pont invisible qui comble les 12px entre la barre et le panneau.
+       top:0 (et NON -13px) : calibré et vérifié — à -13px le pont se posait SUR
+       les libellés du menu (et interceptait leurs clics) sans combler l'espace. */
+    NAV+".lw-topbar-submenu.js-submenu-list::before{content:\"\" !important;position:absolute !important;left:0 !important;right:0 !important;top:0 !important;height:13px !important;display:block !important;}",
     NAV+".lw-topbar-submenu-item:not(.ps-mm-hide){list-style:none !important;margin:0 !important;padding:0 !important;flex:1 1 0 !important;min-width:0 !important;display:flex !important;}",
     NAV+".lw-topbar-submenu-item > .lw-topbar-option-link{display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:flex-start !important;text-align:center !important;gap:9px !important;padding:16px 8px 14px !important;border-radius:12px !important;width:100% !important;white-space:normal !important;text-decoration:none !important;transition:background .15s ease !important;}",
     NAV+".lw-topbar-submenu-item > .lw-topbar-option-link:hover{background:#F5F7FB !important;}",
@@ -113,6 +120,39 @@
     /* panneaux sans aucune entrée réelle : ne pas afficher de boîte vide */
     document.querySelectorAll(".lw-topbar-submenu").forEach(function(s){
       s.classList.toggle("ps-mm-empty", s.querySelectorAll(".lw-topbar-submenu-item:not(.ps-mm-hide)").length===0);
+    });
+    openMenus();
+  }
+
+  /* ------------------------------------------------------------------
+     Ouverture / fermeture des panneaux — avec DÉLAI DE GRÂCE.
+     Pourquoi pas un simple :hover ? Le panneau occupe toute la largeur du
+     menu, mais son déclencheur est étroit ("Cas" ne fait que ~24px). Pour
+     atteindre un item à l'autre bout du panneau, la souris part en diagonale
+     et quitte le li par le CÔTÉ, quelques pixels au-dessus du panneau : le
+     :hover tombe et le menu se ferme sous le curseur. Mesuré : rupture en
+     (1091,70) pour "Cas". Aucun pont CSS ne couvre ce cas sans recouvrir les
+     autres items de la barre -> on ferme 200ms après la sortie.
+     ------------------------------------------------------------------ */
+  var GRACE=200, closeT=null;
+  function closeAll(){
+    document.querySelectorAll("nav.lw-topbar-menu .lw-topbar-submenu.ps-mm-open")
+      .forEach(function(s){ s.classList.remove("ps-mm-open"); });
+  }
+  function openMenus(){
+    document.querySelectorAll("nav.lw-topbar-menu li.lw-topbar-option").forEach(function(li){
+      if(li.dataset.psHov) return;
+      var sub=li.querySelector(".lw-topbar-submenu");
+      if(!sub || sub.classList.contains("ps-mm-empty")) return;   // ex : Blog
+      li.dataset.psHov="1";
+      /* mouseenter/mouseleave suivent le DOM : entrer dans le panneau (enfant
+         du li) ré-arme l'ouverture même s'il est géométriquement hors du li. */
+      li.addEventListener("mouseenter",function(){
+        clearTimeout(closeT); closeAll(); sub.classList.add("ps-mm-open");
+      });
+      li.addEventListener("mouseleave",function(){
+        clearTimeout(closeT); closeT=setTimeout(closeAll,GRACE);
+      });
     });
   }
 
