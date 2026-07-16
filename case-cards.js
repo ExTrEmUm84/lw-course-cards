@@ -22,7 +22,15 @@
   }
 
   var CSS=[
-    "#pageContent .lw-cols.multiple-rows{display:grid !important;grid-template-columns:1fr 1fr !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;overflow:visible !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
+    /* ⚠️ Scopé sous `.cards-grandpa >`. `#pageContent .lw-cols.multiple-rows` nu
+       matche AUSSI la barre de filtres : elle se retrouvait alors enfermée dans
+       une colonne de la grille (488px au lieu de 1000), d'où un champ de
+       recherche écrasé à 157px. Et un `display:…!important` sur ce sélecteur nu
+       écrase le `display:none` INLINE que LearnWorlds pose quand on désactive
+       les filtres -> ils resteraient visibles. Jamais de `display` en nu. */
+    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:grid !important;grid-template-columns:1fr 1fr !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;overflow:visible !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
+    /* la barre de filtres : alignement seul, aucun `display` */
+    "#pageContent .lw-cols.with-filters{max-width:1000px !important;margin:0 auto !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
     "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
     "#pageContent .lw-course-card > *:not(.ps-cc){display:none !important;}",
@@ -46,7 +54,7 @@
     ".ps-cc-link::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-cc-link:hover{color:#4B4BE0 !important;}",
     ".ps-cc-link:hover::after{transform:translateX(5px) !important;}",
-    "@media(max-width:820px){#pageContent .lw-cols.multiple-rows{grid-template-columns:1fr !important;}}"
+    "@media(max-width:820px){#pageContent .cards-grandpa > .lw-cols.multiple-rows{grid-template-columns:1fr !important;}}"
   ].join("\n");
   var st=document.getElementById("ps-casecards-style");
   if(!st){ st=document.createElement("style"); st.id="ps-casecards-style"; document.head.appendChild(st); }
