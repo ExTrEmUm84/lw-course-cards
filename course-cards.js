@@ -126,12 +126,15 @@
          la moitié qui dépasse. Il ne servait qu'aux coins de l'illustration en
          bandeau, qui n'existe plus ; les chevrons, eux, sont déjà insérés en JS
          précisément à cause de ce `overflow:hidden`.
-       - `padding-top:90px` sur le RAIL : il porte `overflow-x:auto`, donc son
+       - la réserve de 90px en haut du RAIL est posée dans SA règle, plus bas
+         (`padding:90px 0 26px`) : il porte `overflow-x:auto`, donc son
          débordement vertical n'est PAS `visible` (spec CSS : un axe en `auto`
          force l'autre hors de `visible`) -> sans cette réserve, la moitié qui
-         dépasse serait rognée par le conteneur de défilement. */
+         dépasse est rognée par le conteneur de défilement.
+         ⚠️ NE PAS ajouter ici une 2e règle `padding-top` sur le rail : elle
+         serait écrasée par celle plus bas, qui a le MÊME sélecteur et vient
+         après (piège déjà rencontré deux fois dans ce fichier). */
     "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{background:#fff !important;overflow:visible !important;}",
-    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{padding-top:90px !important;}",
     /* `top:-90px` : le lien natif est en `inset:0`, il s'arrêtait donc au bord
        de la carte et **la moitié du rond qui dépasse n'était PAS cliquable**
        (vérifié : `elementFromPoint` y renvoyait le div de l'image, pas le lien)
@@ -169,7 +172,7 @@
     "#pageContent .cards-grandpa{position:relative !important;}",
     /* le rail porte lui-même sa largeur/fond/police : le `display:flex` n'est posé
        QUE sur ce sélecteur scopé, jamais sur `.lw-cols.multiple-rows` nu (cf. plus haut) */
-    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;scroll-snap-type:x mandatory !important;scrollbar-width:none !important;-ms-overflow-style:none !important;gap:16px !important;padding:14px 0 26px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
+    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;scroll-snap-type:x mandatory !important;scrollbar-width:none !important;-ms-overflow-style:none !important;gap:16px !important;padding:90px 0 26px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
     "#pageContent .cards-grandpa > .lw-cols.multiple-rows::-webkit-scrollbar{display:none !important;}",
     /* 3 cartes : largeur = (100% - 2 gouttières) / 3.
        flex-direction:column : la carte est déjà en flex côté LW, il faut la
