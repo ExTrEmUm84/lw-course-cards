@@ -162,14 +162,24 @@
     ].join("\n");
     (document.head||document.documentElement).appendChild(s);
   }
-  /* ================= RENOMMAGE "categories" -> "Secteurs" =================
+  /* ================= RENOMMAGE DU FILTRE "categories" =====================
+     PARAMÉTRABLE PAR PAGE — le libellé dépend de ce que les catégories
+     désignent là où le script tourne : "Secteurs" sur la page Cas, mais ce
+     serait FAUX sur /fiches-secteur-clone (fiches cabinet). D'où un réglage
+     par page, posé AVANT le chargement du script :
+         <script>window.PS_CAT_LABEL="Secteurs";</script>
+         <script src=".../filters.js"></script>
+     Non défini -> on ne renomme pas, on garde le libellé natif. C'est le
+     défaut sûr : une nouvelle page n'hérite pas d'un nom qui ne la concerne
+     pas.
      Cosmétique et posé par-dessus le natif : le vrai nom du groupe de tags
      reste "categories" partout ailleurs dans LearnWorlds. Réappliqué à chaque
      run() (toutes les 1,2s) car LearnWorlds réécrit le libellé quand il
      reconstruit la barre. Le span ne contient que le libellé : le <ul> des
      options est un frère, on ne l'écrase donc pas. */
-  var CAT_LABEL="Secteurs";
+  var CAT_LABEL=(typeof window.PS_CAT_LABEL==="string" && window.PS_CAT_LABEL.trim()) ? window.PS_CAT_LABEL.trim() : null;
   function renameCategories(){
+    if(!CAT_LABEL) return;
     document.querySelectorAll("#pageContent .lw-filter-option-lbl").forEach(function(el){
       if((el.textContent||"").trim()!==CAT_LABEL) el.textContent=CAT_LABEL;
     });
