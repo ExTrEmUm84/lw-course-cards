@@ -78,8 +78,17 @@
          Sélecteur volontairement plus spécifique que la règle ci-dessus, sinon
          `display:inline-flex !important` l'emporterait sur le masquage. */
       "#pageContent .learnworlds-button.filter.text-only.ps-f-blank{display:none !important;}",
-      /* --- bouton "categories" en pill --- */
-      "#pageContent .lw-filter-option.with-submenu{display:inline-flex !important;align-items:center !important;height:44px !important;padding:0 18px !important;border-radius:999px !important;border:1.5px solid #E6E9EF !important;background:#fff !important;font-family:Figtree,sans-serif !important;cursor:pointer !important;transition:all .15s ease !important;}",
+      /* --- bouton "Secteurs" (ex-"categories") en pill ---
+         `margin:0 10px 0 0` corrige DEUX défauts natifs de cette pastille :
+         1) elle était la SEULE sans marge droite -> "Secteurs" et "Cabinet" se
+            touchaient (écart mesuré : 0px, contre 10px partout ailleurs).
+         2) elle portait un `margin-bottom:3px` natif -> sa boîte de marges
+            faisait 47px au lieu de 44. La barre étant en `align-items:center`,
+            c'est la BOÎTE DES MARGES qui est centrée : la pastille se
+            retrouvait 1,5px plus haut que les autres (mesuré : top 438,1 contre
+            439,6). Hauteur et bordure étaient pourtant identiques — le coupable
+            n'était pas la taille mais la marge. */
+      "#pageContent .lw-filter-option.with-submenu{display:inline-flex !important;align-items:center !important;height:44px !important;padding:0 18px !important;margin:0 10px 0 0 !important;border-radius:999px !important;border:1.5px solid #E6E9EF !important;background:#fff !important;font-family:Figtree,sans-serif !important;cursor:pointer !important;transition:all .15s ease !important;}",
       "#pageContent .lw-filter-option.with-submenu:hover{border-color:#3887B4 !important;background:#F3F9FC !important;}",
       "#pageContent .lw-filter-option-lbl{font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:600 !important;color:#4B5563 !important;}",
       "#pageContent .lw-filter-option.with-submenu:hover .lw-filter-option-lbl{color:#3887B4 !important;}",
@@ -122,7 +131,11 @@
       "#pageContent .one-row:has(.lw-filters){flex-wrap:wrap !important;justify-content:flex-start !important;}",
       "#pageContent .one-row:has(.lw-filters) > .col{flex:0 0 100% !important;max-width:100% !important;margin-left:0 !important;margin-right:0 !important;}",
       "#pageContent .one-row:has(.lw-filters) > .-search-box{max-width:360px !important;margin-bottom:16px !important;}",
-      "#pageContent .lw-filters{justify-content:flex-start !important;}",
+      /* row-gap : la barre est en flex-wrap:wrap. Sur un écran étroit elle
+         repasse sur 2 lignes, et les marges des pastilles sont horizontales
+         seulement -> les rangées se toucheraient. (Pas de `gap` tout court :
+         il s'ajouterait aux margin-right de 10px et doublerait l'écart.) */
+      "#pageContent .lw-filters{justify-content:flex-start !important;row-gap:10px !important;}",
       /* 🔴 SANS CETTE RÈGLE, LE MENU PASSE DERRIÈRE LES CARTES.
          Le `z-index:50` du menu ne sert à rien seul : il est enfermé dans la
          branche de la barre. Mesuré : la barre (`.lw-cols.no-gutter`) ET la
