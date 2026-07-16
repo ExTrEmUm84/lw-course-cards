@@ -128,7 +128,14 @@
          natif -> la recherche se retrouvait centrée (670->1030) au lieu d'être
          calée à gauche.
          `max-width` sur la recherche : sans elle, le champ s'étirait à 1000px. */
-      "#pageContent .one-row:has(.lw-filters){flex-wrap:wrap !important;justify-content:flex-start !important;}",
+      /* 🔴 `max-width:1000px` : la rangée des filtres doit être calée sur la
+         GRILLE DES CARTES, qui fait 1000px sur toutes les pages. Le conteneur
+         natif, lui, varie : 1000px sur la page Cas (ça tombait juste par
+         hasard) mais **1120px sur Fiches cabinet** -> recherche et filtres
+         démarraient à 290 quand le hero et les cartes étaient à 350.
+         Alignement seul (max-width + marges auto), jamais de `display` : cf. la
+         règle du piège n°1. */
+      "#pageContent .one-row:has(.lw-filters){flex-wrap:wrap !important;justify-content:flex-start !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
       "#pageContent .one-row:has(.lw-filters) > .col{flex:0 0 100% !important;max-width:100% !important;margin-left:0 !important;margin-right:0 !important;}",
       "#pageContent .one-row:has(.lw-filters) > .-search-box{max-width:360px !important;margin-bottom:16px !important;}",
       /* row-gap : la barre est en flex-wrap:wrap. Sur un écran étroit elle
