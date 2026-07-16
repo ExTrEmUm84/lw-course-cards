@@ -36,7 +36,11 @@
     "#pageContent .lw-cols.with-filters{max-width:1000px !important;margin:0 auto !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
     "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
-    "#pageContent .lw-course-card > *:not(.ps-mcard){display:none !important;}",
+    /* On masque le natif SAUF l'illustration : LearnWorlds la pose en
+       `background-image` sur un `div.learnworlds-image`, PREMIER enfant de la
+       carte (pas une balise <img>) — inutile donc d'aller relire son URL, il
+       suffit de la ré-autoriser et de la styler. */
+    "#pageContent .lw-course-card > *:not(.ps-mcard):not(.learnworlds-image){display:none !important;}",
     ".ps-mcard{display:flex !important;flex-direction:column !important;padding:32px !important;min-height:270px !important;}",
     ".ps-mhead{display:flex !important;align-items:center !important;gap:14px !important;margin-bottom:24px !important;}",
     ".ps-micon{width:44px !important;height:44px !important;border-radius:10px !important;display:flex !important;align-items:center !important;justify-content:center !important;color:#fff !important;font-weight:800 !important;font-size:20px !important;font-family:Figtree,sans-serif !important;flex:none !important;}",
@@ -70,10 +74,18 @@
        QUE sur ce sélecteur scopé, jamais sur `.lw-cols.multiple-rows` nu (cf. plus haut) */
     "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;scroll-snap-type:x mandatory !important;scrollbar-width:none !important;-ms-overflow-style:none !important;gap:24px !important;padding:14px 0 26px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
     "#pageContent .cards-grandpa > .lw-cols.multiple-rows::-webkit-scrollbar{display:none !important;}",
-    /* 3 cartes : largeur = (100% - 2 gouttières) / 3 */
-    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{flex:0 0 calc((100% - 48px) / 3) !important;scroll-snap-align:start !important;}",
-    /* densité réduite pour tenir sur ~317px */
-    "#pageContent .cards-grandpa .ps-mcard{padding:24px !important;min-height:250px !important;}",
+    /* 3 cartes : largeur = (100% - 2 gouttières) / 3.
+       flex-direction:column : la carte est déjà en flex côté LW, il faut la
+       passer en colonne pour empiler l'illustration puis le contenu. */
+    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{flex:0 0 calc((100% - 48px) / 3) !important;scroll-snap-align:start !important;flex-direction:column !important;}",
+    /* l'illustration : bandeau haut, coins découpés par le overflow:hidden de la carte */
+    "#pageContent .cards-grandpa .lw-course-card > .learnworlds-image{display:block !important;width:100% !important;height:168px !important;padding:0 !important;margin:0 !important;flex:none !important;background-size:cover !important;background-position:50% 50% !important;}",
+    /* Densité réduite pour tenir sur ~317px + le corps prend la hauteur restante
+       sous l'illustration (d'où les CTA alignés d'une carte à l'autre).
+       min-height:0 annule le 270px de .ps-mcard : sans ça, image + corps
+       gonflent la carte. Tout dans UNE règle — deux règles de même sélecteur et
+       même spécificité, c'est la dernière qui gagne, piège garanti. */
+    "#pageContent .cards-grandpa .ps-mcard{padding:24px !important;min-height:0 !important;flex:1 1 auto !important;}",
     "#pageContent .cards-grandpa .ps-mtitle{font-size:21px !important;}",
     "#pageContent .cards-grandpa .ps-mhead{gap:11px !important;margin-bottom:20px !important;}",
     "#pageContent .cards-grandpa .ps-micon{width:40px !important;height:40px !important;}",
