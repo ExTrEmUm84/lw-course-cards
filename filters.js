@@ -64,9 +64,20 @@
       "#pageContent .-search-box{display:inline-flex !important;align-items:center !important;border:1.5px solid #E6E9EF !important;border-radius:12px !important;background:#fff !important;padding:0 6px 0 0 !important;box-shadow:0 1px 2px rgba(0,0,0,.04) !important;overflow:hidden !important;height:46px !important;transition:border-color .15s ease, box-shadow .15s ease !important;}",
       "#pageContent .-search-box:focus-within{border-color:#3887B4 !important;box-shadow:0 0 0 3px rgba(56,135,180,.15) !important;}",
       "#pageContent .-search-box .learnworlds-input, #pageContent .-search-box input{border:0 !important;box-shadow:none !important;height:44px !important;font-family:Figtree,sans-serif !important;font-size:15px !important;background:transparent !important;color:#323338 !important;}",
+      /* Le bouton loupe garde sinon SA bordure native (1px rgba(32,56,102,.2),
+         radius 0 7px 7px 0) : elle dessinait un 2e rectangle arrondi À
+         L'INTÉRIEUR de notre champ -> effet "double ligne". On neutralise la
+         bordure du bouton, le champ porte le seul contour. */
+      "#pageContent .-search-box button, #pageContent .-search-box .learnworlds-button{border:0 !important;box-shadow:none !important;background:transparent !important;border-radius:0 11px 11px 0 !important;height:44px !important;}",
       /* --- bouton "tout" en pill --- */
       "#pageContent .learnworlds-button.filter.text-only{display:inline-flex !important;align-items:center !important;justify-content:center !important;height:44px !important;padding:0 18px !important;border-radius:999px !important;border:1.5px solid #E6E9EF !important;background:#fff !important;color:#4B5563 !important;font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:600 !important;margin-right:10px !important;cursor:pointer !important;transition:all .15s ease !important;}",
       "#pageContent .learnworlds-button.filter.text-only:hover{border-color:#3887B4 !important;color:#3887B4 !important;background:#F3F9FC !important;}",
+      /* Pastille de filtre SANS libellé : LearnWorlds en génère (mesuré : 36x2px,
+         donc invisible en natif). Notre style de pastille ci-dessus (hauteur 44 +
+         bordure + rayon) lui donnait du volume -> capsule vide visible.
+         Sélecteur volontairement plus spécifique que la règle ci-dessus, sinon
+         `display:inline-flex !important` l'emporterait sur le masquage. */
+      "#pageContent .learnworlds-button.filter.text-only.ps-f-blank{display:none !important;}",
       /* --- bouton "categories" en pill --- */
       "#pageContent .lw-filter-option.with-submenu{display:inline-flex !important;align-items:center !important;height:44px !important;padding:0 18px !important;border-radius:999px !important;border:1.5px solid #E6E9EF !important;background:#fff !important;font-family:Figtree,sans-serif !important;cursor:pointer !important;transition:all .15s ease !important;}",
       "#pageContent .lw-filter-option.with-submenu:hover{border-color:#3887B4 !important;background:#F3F9FC !important;}",
@@ -86,6 +97,16 @@
       if(!n) return;
       if(empty[n]) li.classList.add("ps-cat-hidden");
       else li.classList.remove("ps-cat-hidden");
+    });
+    hideBlankPills();
+  }
+
+  /* Masque les pastilles de filtre sans libellé (cf. règle .ps-f-blank).
+     Pas faisable en CSS : le bouton contient une espace, donc :empty ne
+     matche pas. */
+  function hideBlankPills(){
+    document.querySelectorAll("#pageContent .learnworlds-button.filter.text-only").forEach(function(b){
+      b.classList.toggle("ps-f-blank", !(b.textContent||"").trim());
     });
   }
 
