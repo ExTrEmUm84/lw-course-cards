@@ -59,7 +59,19 @@
        thématiques — une règle nue les toucherait toutes. */
     S+" .ps-pf-tiles .lw-body-bg{background:#fff !important;border:1px solid rgba(255,255,255,.5) !important;border-radius:16px !important;box-shadow:0 4px 14px rgba(15,23,42,.06) !important;padding:18px 20px !important;transition:transform .2s ease, box-shadow .2s ease !important;}",
     S+" .ps-pf-tiles .lw-body-bg:hover{transform:translateY(-2px) !important;box-shadow:0 10px 26px rgba(15,23,42,.10) !important;}",
-    S+" .ps-pf-tiles .lw-body-bg *{"+FT+"}",
+    /* 🔴 JAMAIS `.lw-body-bg *` ICI — la police se pose sur la TUILE et se
+       propage par héritage. Le `*` a réellement cassé les pictos des 4 tuiles :
+       ils sont portés par des `span.learnworlds-icon` dont le glyphe vient
+       d'une POLICE D'ICÔNES ; forcer Figtree dessus les transforme en carrés
+       vides (constaté à l'écran, puis confirmé : police du ::before = Figtree
+       au lieu de la police d'icône). Par héritage, tout élément qui déclare sa
+       propre police — les icônes — la garde. Même leçon que account-page.js. */
+    S+" .ps-pf-tiles .lw-body-bg{"+FT+"}",
+    /* les classes de texte de LW déclarent leur police et ne prennent donc pas
+       l'héritage : on les surcharge nommément, sans jamais toucher aux icônes */
+    [S+" .ps-pf-tiles .learnworlds-main-text", S+" .ps-pf-tiles .learnworlds-main-text-small",
+     S+" .ps-pf-tiles .learnworlds-heading3", S+" .ps-pf-tiles .learnworlds-heading4",
+     S+" .ps-pf-tiles p", S+" .ps-pf-tiles .talign-l"].join(",")+"{"+FT+"}",
 
     /* ============ 3) titres de section ============ */
     /* On garde LEURS couleurs (rouge / vert / bleu) : c'est un choix éditorial
@@ -81,7 +93,15 @@
     S+" .ps-pf-courses .lw-course-card > .learnworlds-image{position:static !important;}",
     S+" .ps-pf-courses .lw-course-card a.lw-course-card--stretched-link{z-index:3 !important;}",
 
-    ".ps-pfc{display:flex !important;flex-direction:column !important;padding:24px !important;}",
+    /* 🔴 `flex:1 1 auto` : la carte native est en `flex-direction:column` et
+       répartit son espace libre. Sans ça, `.ps-pfc` s'arrête à son contenu et
+       les cartes les moins remplies (pas de compteurs, pas de progression) le
+       voyaient POUSSÉ VERS LE BAS : pastille à 514 contre 433 sur la carte
+       complète, alors que les 3 cartes et leurs images font la même hauteur.
+       En remplissant la hauteur, le contenu repart du haut et c'est le
+       `margin-bottom:auto` du titre qui plaque le CTA en bas.
+       (Même leçon que le `height:100%` de sector-cards.js.) */
+    ".ps-pfc{display:flex !important;flex-direction:column !important;flex:1 1 auto !important;padding:24px !important;}",
     ".ps-pfc-head{display:flex !important;flex-direction:column !important;align-items:flex-start !important;gap:10px !important;margin-bottom:16px !important;}",
     ".ps-pfc-tag{display:inline-flex !important;align-items:center !important;padding:5px 13px !important;border-radius:999px !important;"+FT+"font-size:14px !important;font-weight:800 !important;line-height:1.2 !important;background:#EDEDFF !important;color:#4B4BE0 !important;}",
     /* 🔴 couleur par NIVEAU (data-ps-lvl), JAMAIS par nth-child : sur la page
