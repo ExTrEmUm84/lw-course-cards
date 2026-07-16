@@ -47,6 +47,11 @@
     /* compteurs (« 8 leçons », « 3 quiz ») : pastille neutre, pour que la
        couleur reste réservée au niveau — qui est le vrai repère de la carte */
     ".ps-mmeta{display:inline-flex !important;align-items:center !important;padding:4px 10px !important;border-radius:999px !important;background:#F1F2F6 !important;color:#676879 !important;font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:600 !important;line-height:1 !important;white-space:nowrap !important;}",
+    /* Progression : reprise de la donnée native de LearnWorlds (elle est dans la
+       carte, on la masquait simplement). La barre prend la couleur du niveau. */
+    ".ps-mprog{height:6px !important;border-radius:999px !important;background:#EDEFF4 !important;overflow:hidden !important;margin-top:18px !important;}",
+    ".ps-mprog-bar{height:100% !important;border-radius:999px !important;transition:width .4s ease !important;}",
+    ".ps-mprog-txt{font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:600 !important;color:#676879 !important;margin-top:7px !important;}",
     ".ps-mtitle{font-family:Figtree,sans-serif !important;font-size:25px !important;line-height:1.25 !important;font-weight:700 !important;color:#323338 !important;margin:0 0 auto !important;}",
     ".ps-mlink{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:26px !important;color:#6161FF !important;font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-mlink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
@@ -58,6 +63,13 @@
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+4) .ps-mtag{background:#FDECEF !important;color:#D22B45 !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+5) .ps-mtag{background:#FFF3E0 !important;color:#D98500 !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+6) .ps-mtag{background:#F3EAFB !important;color:#8A45C9 !important;}",
+    /* la barre reprend la teinte pleine de la pastille du niveau */
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+1) .ps-mprog-bar{background:#4B4BE0 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+2) .ps-mprog-bar{background:#12A85F !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+3) .ps-mprog-bar{background:#009257 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+4) .ps-mprog-bar{background:#D22B45 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+5) .ps-mprog-bar{background:#D98500 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:nth-child(6n+6) .ps-mprog-bar{background:#8A45C9 !important;}",
 
     /* ================= CARROUSEL (scopé au conteneur des cartes) ============ */
     /* le rail : 3 cartes visibles, défilement horizontal aimanté */
@@ -194,9 +206,28 @@
       });
       var t=document.createElement("h3");
       t.className="ps-mtitle"; t.textContent=name;
+      d.appendChild(head); d.appendChild(t);
+
+      /* Progression : LearnWorlds la met DÉJÀ dans la carte (on la masquait).
+         On lit la largeur INLINE de sa barre plutôt que le texte "72% Complété" :
+         pas de dépendance à la langue ni au format d'affichage.
+         Affichée seulement si > 0 : un visiteur anonyme n'a pas de progression,
+         et un apprenant qui débute n'a pas besoin de 6 barres vides. */
+      var nat=card.querySelector(".lw-course-card-progress-bar");
+      var pct=nat ? parseInt((nat.style.width||"").replace("%",""),10) : NaN;
+      if(!isNaN(pct) && pct>0){
+        var pw=document.createElement("div"); pw.className="ps-mprog";
+        var pb=document.createElement("div"); pb.className="ps-mprog-bar";
+        pb.style.width=Math.min(pct,100)+"%";
+        pw.appendChild(pb);
+        var pt=document.createElement("div");
+        pt.className="ps-mprog-txt"; pt.textContent=pct+" % complété";
+        d.appendChild(pw); d.appendChild(pt);
+      }
+
       var a=document.createElement("a");
       a.className="ps-mlink"; a.href=href; a.textContent="En savoir plus";
-      d.appendChild(head); d.appendChild(t); d.appendChild(a);
+      d.appendChild(a);
       card.appendChild(d);
       card.dataset.psM="1";
     });
