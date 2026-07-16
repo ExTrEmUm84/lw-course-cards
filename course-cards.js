@@ -107,6 +107,15 @@
        le rail des cartes fait 1000px centré. Un simple text-align:left décalerait
        les titres de 60px à gauche des cartes -> on reprend la même largeur 1000px. */
     "#pageContent h1.learnworlds-heading{font-family:Figtree,sans-serif !important;font-size:56px !important;font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:#1c1f26 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    /* ⚠️ LearnWorlds SERT le H1 dans le HTML, "#" compris. Le loader étant en
+       <head>, notre CSS est en place avant que le titre soit peint, mais
+       heroText() ne peut le transformer qu'une fois le DOM prêt (~500ms) : sans
+       ça, les "#" s'affichent en clair pendant une demi-seconde.
+       -> on masque le titre tant qu'il n'est pas traité. `visibility` (et non
+       `display`) : la place reste réservée, donc aucun décalage à l'apparition.
+       heroText() pose data-ps-tw dès qu'il voit le titre, même s'il n'y a pas de
+       "#" à animer — et un filet de sécurité le révèle après 2,5s au pire. */
+    "#pageContent h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
     "#pageContent h2.learnworlds-subheading{font-family:Figtree,sans-serif !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:#1c1f26 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     /* .learnworlds-main-text existe AUSSI dans chaque carte : on ne stylise que
        la description marquée en JS (cf. heroText), jamais la classe nue.
@@ -181,13 +190,16 @@
 
     var h1=document.querySelector(S+" h1.learnworlds-heading");
     if(!h1 || h1.dataset.psTw) return;
+    /* data-ps-tw posé AVANT toute autre condition : c'est lui qui lève le
+       masquage CSS. Si on le posait seulement en cas de succès, un titre sans
+       "#" resterait invisible pour toujours. */
+    h1.dataset.psTw="1";
     var raw=(h1.textContent||"").replace(/\s+/g," ").trim();
     var i=raw.indexOf("#");
-    if(i<0) return;                                   // pas de # -> on ne touche à rien
+    if(i<0) return;                                   // pas de # -> titre natif, rien à animer
     var prefix=raw.slice(0,i).trim();
     var parts=raw.slice(i).split("#").map(function(s){ return s.trim(); }).filter(Boolean);
     if(!parts.length) return;
-    h1.dataset.psTw="1";
     /* le texte animé est masqué aux lecteurs d'écran : on rend la phrase complète */
     h1.setAttribute("aria-label", prefix+" "+parts.join(", "));
 
@@ -288,13 +300,13 @@
     next.disabled = track.scrollLeft>=max-2;
   }
 
-  /* Le H1 est SERVI DANS LE HTML par LearnWorlds, avec ses "#" en clair
-     ("Nos formations pour #le conseil #la stratégie"). Si on attend
-     DOMContentLoaded pour le transformer, il s'affiche tel quel entre-temps.
-     -> on le traite dès l'exécution du script, avant le premier rendu.
-     (Les cartes, elles, sont rendues plus tard par le JS de LW : c'est
-     l'observer qui s'en charge.) */
-  heroText();
+  /* Filet de sécurité du masquage ci-dessus (.ps-hero-style) : si heroText()
+     n'avait jamais tourné, le titre resterait invisible. Au pire on le révèle
+     brut au bout de 2,5s — un titre avec des "#" vaut mieux qu'un titre absent. */
+  setTimeout(function(){
+    var h=document.querySelector(S+" h1.learnworlds-heading");
+    if(h && !h.dataset.psTw) h.dataset.psTw="1";
+  },2500);
 
   var scheduled=false;
   function schedule(){ if(scheduled) return; scheduled=true; requestAnimationFrame(function(){ scheduled=false; build(); }); }
