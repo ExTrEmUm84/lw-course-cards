@@ -97,20 +97,40 @@
        Les cartes plus bas restent donc en violet, seuls les contrôles de
        filtre sont en bleu. Le bleu est écrit en dur comme dans filters.js
        (ce n'est pas un token). */
-    R + ".psa-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}",
-    R + ".psa-input," + R + ".psa-select{" +
-      "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);" +
-      "color:#323338;border:1.5px solid var(--ps-border,#E6E9EF);background:#fff;" +
-      "outline:none;box-shadow:0 1px 2px rgba(0,0,0,.04);" +
-      "transition:border-color .15s ease,box-shadow .15s ease,color .15s ease,background .15s ease;}",
-    /* Champ de recherche : boîte 46px, coins 12px, comme `.-search-box`. */
-    R + ".psa-input{flex:1 1 280px;min-width:0;height:46px;padding:0 16px;border-radius:12px;font-size:15px;}",
+    /* position:relative + z-index : le panneau des filtres (absolu, plus bas)
+       doit passer AU-DESSUS de la grille des cartes. La barre et la grille sont
+       sœurs ; sans contexte d'empilement sur la barre, le menu passe derrière.
+       Même problème résolu dans filters.js par la remontée de la branche. */
+    R + ".psa-bar{position:relative;z-index:5;display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}",
+    /* Champ de recherche : boîte 46px, coins 12px, focus bleu, comme
+       `.-search-box` de filters.js. */
+    R + ".psa-input{flex:1 1 280px;min-width:0;height:46px;padding:0 16px;" +
+      "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);font-size:15px;color:#323338;" +
+      "border:1.5px solid var(--ps-border,#E6E9EF);border-radius:12px;background:#fff;outline:none;" +
+      "box-shadow:0 1px 2px rgba(0,0,0,.04);transition:border-color .15s ease,box-shadow .15s ease;}",
     R + ".psa-input:focus{border-color:#3887B4;box-shadow:0 0 0 3px rgba(56,135,180,.15);}",
-    /* Menus : pilules 44px comme les filtres `.ps-ff` — survol bleu clair. */
-    R + ".psa-select{flex:0 0 auto;height:44px;padding:0 16px;cursor:pointer;" +
-      "border-radius:var(--ps-r-pill,999px);font-size:14px;font-weight:600;color:#4B5563;}",
-    R + ".psa-select:hover{border-color:#3887B4;color:#3887B4;background:#F3F9FC;}",
-    R + ".psa-select:focus{border-color:#3887B4;box-shadow:0 0 0 3px rgba(56,135,180,.15);}",
+
+    /* ─── Filtres = composant `.ps-ff` de filters.js, repris à l'identique ───
+       Un vrai menu custom (pilule + panneau), PAS un <select> natif : le
+       panneau natif du système ne peut pas être stylé. Seule adaptation à ma
+       barre : `margin:0` au lieu de `margin-right:10px` (j'espace avec `gap`). */
+    R + " .ps-ff{position:relative;display:inline-flex;align-items:center;gap:7px;height:44px;padding:0 16px;margin:0;" +
+      "border-radius:var(--ps-r-pill,999px);border:1.5px solid var(--ps-border,#E6E9EF);background:#fff;" +
+      "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);font-size:14px;font-weight:600;" +
+      "color:#4B5563;cursor:pointer;user-select:none;transition:all .15s ease;}",
+    R + " .ps-ff:hover{border-color:#3887B4;color:#3887B4;background:#F3F9FC;}",
+    R + " .ps-ff.ps-ff-on{border-color:#3887B4;background:#F3F9FC;color:#3887B4;}",
+    R + " .ps-ff:focus-visible{outline:2px solid #3887B4;outline-offset:2px;}",
+    R + " .ps-ff-cur{font-weight:700;}",
+    R + " .ps-ff-arrow{width:9px;height:9px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;transform:rotate(45deg) translateY(-2px);transition:transform .18s ease;}",
+    R + " .ps-ff.ps-ff-open .ps-ff-arrow{transform:rotate(-135deg) translateY(2px);}",
+    R + " .ps-ff-menu{display:none;position:absolute;top:calc(100% + 10px);left:0;z-index:50;min-width:200px;max-height:280px;overflow-y:auto;margin:0;padding:8px;list-style:none;text-align:left;" +
+      "border-radius:14px;border:1px solid var(--ps-border,#E6E9EF);background:#fff;box-shadow:0 16px 40px rgba(15,23,42,.14);}",
+    R + " .ps-ff.ps-ff-open .ps-ff-menu{display:block;}",
+    R + " .ps-ff-item{list-style:none;padding:9px 14px;border-radius:9px;font-size:14px;font-weight:500;color:#323338;white-space:nowrap;text-align:left;cursor:pointer;transition:background .12s ease,color .12s ease;}",
+    R + " .ps-ff-item:hover{background:#F3F9FC;color:#3887B4;}",
+    R + " .ps-ff-item.ps-ff-sel{background:#EAF5FC;color:#3887B4;font-weight:700;}",
+
     R + ".psa-count{margin:0 0 20px;color:var(--ps-text-soft,#676879);font-size:14px;}",
 
     /* Grille */
@@ -160,7 +180,6 @@
       "background-size:400% 100%;animation:psa-shimmer 1.3s ease-in-out infinite;}",
     "@keyframes psa-shimmer{0%{background-position:100% 0}100%{background-position:-100% 0}}",
 
-    "@media (max-width:520px){" + R + ".psa-select{flex:1 1 100%;}}",
     "@media (prefers-reduced-motion:reduce){" + R + ".psa-card," + R + ".psa-skeleton{transition:none;animation:none;}}",
 
     /* ─── Titre de page ─────────────────────────────────────────────────
@@ -201,7 +220,11 @@
 
   // --- Rendu ------------------------------------------------------------
   var membres = [];
-  var grid, count, empty, qEl, promoEl, filiereEl, tsEl;
+  var grid, count, empty, qEl, tsEl;
+  /* État des filtres : "" = « toutes ». Remplace les .value des anciens
+     <select> — les facettes .ps-ff n'ont pas de valeur native. */
+  var filtre = { filiere: "", promo: "" };
+  var facettes = {}; /* key -> { box, label, resetTxt, valeurs } */
 
   function el(tag, cls, txt) {
     var n = document.createElement(tag);
@@ -285,8 +308,8 @@
 
   function rendre() {
     var q = qEl.value.trim().toLowerCase();
-    var promo = promoEl.value;
-    var filiere = filiereEl.value;
+    var promo = filtre.promo;
+    var filiere = filtre.filiere;
 
     var vus = membres.filter(function (m) {
       return (!promo || String(m.promo) === promo) &&
@@ -304,25 +327,82 @@
     empty.textContent = "Aucun membre ne correspond à cette recherche.";
   }
 
-  /** Remplit un <select> avec les valeurs réellement présentes chez les membres. */
-  function remplirSelect(sel, valeurs, tri) {
+  // --- Filtres (composant .ps-ff) ---------------------------------------
+  /** Valeurs distinctes réellement présentes chez les membres, triées. */
+  function distinctes(cle, tri) {
     var vues = {};
-    valeurs.filter(Boolean).forEach(function (v) { vues[v] = 1; });
-    Object.keys(vues).sort(tri).forEach(function (v) {
-      var o = document.createElement("option");
-      o.value = o.textContent = v;
-      sel.appendChild(o);
+    membres.map(function (m) { return m[cle]; }).filter(Boolean).forEach(function (v) { vues[v] = 1; });
+    return Object.keys(vues).sort(tri);
+  }
+
+  function fermerFacettes() {
+    var els = grid.ownerDocument.querySelectorAll("#" + MOUNT + " .ps-ff.ps-ff-open");
+    for (var i = 0; i < els.length; i++) els[i].classList.remove("ps-ff-open");
+  }
+
+  /** Crée la pilule d'une facette. Le contenu (label, options) est (re)peint
+      par peindreFacette dès que les valeurs sont connues. */
+  function creerFacette(cle, label, resetTxt) {
+    var box = el("div", "ps-ff");
+    box.setAttribute("data-ps-f", cle);
+    box.setAttribute("role", "button");
+    box.setAttribute("tabindex", "0");
+    box.setAttribute("aria-haspopup", "listbox");
+    box.addEventListener("click", function (e) {
+      if (e.target.closest(".ps-ff-menu")) return; /* clic sur une option : géré par le <li> */
+      e.stopPropagation();                         /* sinon le listener document referme aussitôt */
+      var ouvert = box.classList.contains("ps-ff-open");
+      fermerFacettes();
+      if (!ouvert) box.classList.add("ps-ff-open");
+      box.setAttribute("aria-expanded", ouvert ? "false" : "true");
     });
+    box.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" || e.key === " ") { e.preventDefault(); box.click(); }
+    });
+    facettes[cle] = { box: box, label: label, resetTxt: resetTxt, valeurs: [] };
+    return box;
+  }
+
+  function peindreFacette(cle) {
+    var f = facettes[cle], box = f.box, sel = filtre[cle];
+    box.classList.toggle("ps-ff-on", !!sel);
+    box.replaceChildren();
+
+    var lbl = el("span", "ps-ff-lbl");
+    lbl.appendChild(document.createTextNode(sel ? f.label + " : " : f.label));
+    if (sel) lbl.appendChild(el("span", "ps-ff-cur", sel)); /* textContent : pas d'injection */
+    box.appendChild(lbl);
+    box.appendChild(el("span", "ps-ff-arrow"));
+
+    var menu = el("ul", "ps-ff-menu");
+    menu.setAttribute("role", "listbox");
+    var options = [{ v: "", t: f.resetTxt }];
+    f.valeurs.forEach(function (v) { options.push({ v: v, t: v }); });
+    options.forEach(function (o) {
+      var li = el("li", "ps-ff-item" + (filtre[cle] === o.v ? " ps-ff-sel" : ""), o.t);
+      li.setAttribute("role", "option");
+      li.addEventListener("click", function (e) {
+        e.stopPropagation();
+        filtre[cle] = o.v;
+        fermerFacettes();
+        peindreFacette(cle);
+        rendre();
+      });
+      menu.appendChild(li);
+    });
+    box.appendChild(menu);
   }
 
   function remplirFiltres() {
-    /* Promos décroissantes : la sortie la plus proche en premier. */
-    remplirSelect(promoEl, membres.map(function (m) { return m.promo; }), function (a, b) {
+    /* Promos décroissantes (sortie la plus proche en premier), filières A→Z. */
+    facettes.promo.valeurs = distinctes("promo", function (a, b) {
       return String(b).localeCompare(String(a), "fr", { numeric: true });
     });
-    remplirSelect(filiereEl, membres.map(function (m) { return m.filiere; }), function (a, b) {
+    facettes.filiere.valeurs = distinctes("filiere", function (a, b) {
       return String(a).localeCompare(String(b), "fr", { numeric: true });
     });
+    peindreFacette("filiere");
+    peindreFacette("promo");
   }
 
   function squelettes(n) {
@@ -484,17 +564,16 @@
     qEl.autocomplete = "off";
     qEl.setAttribute("aria-label", "Rechercher dans l'annuaire");
 
-    filiereEl = el("select", "psa-select");
-    filiereEl.setAttribute("aria-label", "Filtrer par filière");
-    filiereEl.appendChild(new Option("Toutes les filières", ""));
-
-    promoEl = el("select", "psa-select");
-    promoEl.setAttribute("aria-label", "Filtrer par promo");
-    promoEl.appendChild(new Option("Toutes les promos", ""));
+    /* La pilule affiche le nom du champ ("Filière"), le menu porte le reset
+       ("Toutes les filières") — comme les filtres "Année"/"Type" de la page Cas. */
+    var filiereBox = creerFacette("filiere", "Filière", "Toutes les filières");
+    filiereBox.setAttribute("aria-label", "Filtrer par filière");
+    var promoBox = creerFacette("promo", "Promo", "Toutes les promos");
+    promoBox.setAttribute("aria-label", "Filtrer par promo");
 
     bar.appendChild(qEl);
-    bar.appendChild(filiereEl);
-    bar.appendChild(promoEl);
+    bar.appendChild(filiereBox);
+    bar.appendChild(promoBox);
 
     count = el("p", "psa-count");
     count.setAttribute("aria-live", "polite");
@@ -514,8 +593,19 @@
       clearTimeout(t);
       t = setTimeout(rendre, 120);
     });
-    promoEl.addEventListener("change", rendre);
-    filiereEl.addEventListener("change", rendre);
+
+    /* Ferme les menus au clic dehors et à Échap. Posé une seule fois : le
+       flag survit aux remontages éventuels. Scopé sous #psa-root pour ne
+       jamais interférer avec les filtres d'une autre page. */
+    if (!window.__psaFacetBound) {
+      window.__psaFacetBound = 1;
+      document.addEventListener("click", function (e) {
+        if (!e.target.closest || !e.target.closest("#" + MOUNT + " .ps-ff")) fermerFacettes();
+      });
+      document.addEventListener("keydown", function (e) {
+        if (e.key === "Escape") fermerFacettes();
+      });
+    }
 
     squelettes(8);
     turnstile();
