@@ -160,6 +160,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
 
     <h2>Marque</h2>
     <div class="row"><label>Violet principal</label><code>--ps-accent</code><input type="color" id="accent"></div>
+    <div class="lien"><input type="checkbox" id="deriv" checked><label for="deriv" style="flex:none">déduire le survol et la teinte du violet principal</label></div>
     <div class="row"><label>Violet au survol</label><code>-hover</code><input type="color" id="accentHover"></div>
     <div class="row"><label>Violet teinté (fonds)</label><code>-tint</code><input type="color" id="accentTint"></div>
 
@@ -304,7 +305,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     accent:"#6161FF", accentHover:"#4B4BE0", accentTint:"#EDEDFF",
     text:"#1c1f26", textSoft:"#676879", border:"#E6E9EF", surfaceSoft:"#F7F8FB",
     font:"Figtree,-apple-system,Segoe UI,Roboto,sans-serif",
-    rCard:16, rPill:999, rBtn:10,
+    rCard:16, rPill:999, rBtn:10, deriv:true,
     lvl:[["#4B4BE0","#EDEDFF"],["#12A85F","#E6F9F0"],["#009257","#E1F7EC"],["#D22B45","#FDECEF"],["#D98500","#FFF3E0"],["#8A45C9","#F3EAFB"]],
     f:[["#6161FF","#EDEDFF"],["#00C875","#E3F8EE"],["#E2445C","#FDECEF"],["#FDAB3D","#FFF3E0"],["#A25DDC","#F3EAFB"],["#0073EA","#E6F1FD"]],
     lvl1Link:true, f1Link:true
@@ -319,6 +320,45 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     if(h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
     var n=parseInt(h,16);
     return [(n>>16)&255,(n>>8)&255,n&255].join(",");
+  }
+
+  /* 🔴 Déduire le survol et la teinte du violet principal.
+     Sans ça, changer le seul « violet principal » laissait la pastille
+     « Niveau 1 » inchangée — elle suit `--ps-accent-HOVER`, pas `--ps-accent`
+     (constaté à l'écran le 17/07). On repartait donc avec une palette
+     incohérente sans s'en rendre compte. Décochable pour garder la main. */
+  function hex2hsl(hex){
+    var h=hex.replace("#",""); if(h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var r=parseInt(h.slice(0,2),16)/255, g=parseInt(h.slice(2,4),16)/255, b=parseInt(h.slice(4,6),16)/255;
+    var mx=Math.max(r,g,b), mn=Math.min(r,g,b), d=mx-mn, H=0, L=(mx+mn)/2;
+    var Sa = d===0 ? 0 : d/(1-Math.abs(2*L-1));
+    if(d!==0){
+      if(mx===r) H=60*(((g-b)/d)%6);
+      else if(mx===g) H=60*((b-r)/d+2);
+      else H=60*((r-g)/d+4);
+    }
+    if(H<0) H+=360;
+    return [H, Sa*100, L*100];
+  }
+  function hsl2hex(hh,s,l){
+    s/=100; l/=100;
+    var a=s*Math.min(l,1-l);
+    function f(n){ var k=(n+hh/30)%12, c=l-a*Math.max(Math.min(k-3,9-k,1),-1);
+      return Math.round(255*c).toString(16).padStart(2,"0"); }
+    return "#"+f(0)+f(8)+f(4);
+  }
+  function deduire(){
+    if(!S.deriv) return;
+    var t=hex2hsl(S.accent);
+    /* Coefficients RELEVÉS sur le couple d'origine, pour que la déduction
+       reproduise le goût maison plutôt qu'une règle inventée :
+         #6161FF (H240 S100 L69) -> #4B4BE0 = S ×0,71 · L −10,4
+                                 -> #EDEDFF = S 100 · L 96,5
+       Vérifié : depuis #6161FF, on retombe sur #4b4bdf et #ededff. */
+    S.accentHover=hsl2hex(t[0], Math.max(0,t[1]*0.71), Math.max(0,t[2]-10.4));
+    S.accentTint =hsl2hex(t[0], 100, 96.5);
+    document.getElementById("accentHover").value=S.accentHover;
+    document.getElementById("accentTint").value=S.accentTint;
   }
 
   /* --- construction des lignes de palette --- */
@@ -415,13 +455,20 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   }
 
   /* --- branchements --- */
-  [["accent","accent"],["accentHover","accentHover"],["accentTint","accentTint"],
+  [["accentHover","accentHover"],["accentTint","accentTint"],
    ["text","text"],["textSoft","textSoft"],["border","border"],["surfaceSoft","surfaceSoft"]
   ].forEach(function(p){
     var el=document.getElementById(p[0]);
     el.value=S[p[1]];
     el.oninput=function(){ S[p[1]]=el.value; rendre(); };
   });
+  /* l'accent est à part : il entraîne le survol et la teinte */
+  var elAccent=document.getElementById("accent");
+  elAccent.value=S.accent;
+  elAccent.oninput=function(){ S.accent=elAccent.value; deduire(); rendre(); };
+  document.getElementById("deriv").onchange=function(){
+    S.deriv=this.checked; if(S.deriv){ deduire(); rendre(); }
+  };
   ["rCard","rPill","rBtn"].forEach(function(k){
     var el=document.getElementById(k); el.value=S[k];
     el.oninput=function(){ S[k]=+el.value; rendre(); };
@@ -463,20 +510,16 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     fontSel.selectedIndex=0; fontTxt.value=S.font;
     document.getElementById("lvl1Link").checked=true;
     document.getElementById("f1Link").checked=true;
+    document.getElementById("deriv").checked=true;
     palette("lvls","lvl","Niveau"); palette("fs","f","Champ"); rendre();
   };
+  /* tire une teinte au hasard et laisse `deduire()` fabriquer le reste, pour
+     que le bouton produise exactement ce que produirait un choix à la main */
   document.getElementById("rand").onclick=function(){
-    var h=Math.floor(Math.random()*360);
-    function hsl(hh,s,l){
-      var a=s*Math.min(l,1-l)/100;
-      function f(n){ var k=(n+hh/30)%12, c=l/100-a*Math.max(Math.min(k-3,9-k,1),-1);
-        return Math.round(255*c).toString(16).padStart(2,"0"); }
-      return "#"+f(0)+f(8)+f(4);
-    }
-    S.accent=hsl(h,75,62); S.accentHover=hsl(h,70,52); S.accentTint=hsl(h,100,95);
+    S.accent=hsl2hex(Math.floor(Math.random()*360),75,62);
     document.getElementById("accent").value=S.accent;
-    document.getElementById("accentHover").value=S.accentHover;
-    document.getElementById("accentTint").value=S.accentTint;
+    var d=S.deriv; S.deriv=true; deduire(); S.deriv=d;
+    document.getElementById("deriv").checked=true; S.deriv=true;
     rendre();
   };
 
