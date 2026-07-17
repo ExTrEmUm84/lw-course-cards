@@ -90,17 +90,27 @@
     "@media (max-width:1040px){" + R + "{padding-left:16px;padding-right:16px;}}",
     R + "*," + R + "*::before," + R + "*::after{box-sizing:inherit;}",
 
-    /* Barre de recherche */
-    R + ".psa-bar{display:flex;gap:12px;flex-wrap:wrap;margin-bottom:12px;}",
+    /* Barre de recherche — vocabulaire des filtres du site (cf. filters.js,
+       page Cas). 🔴 Accent BLEU #3887B4, PAS le violet : le design system
+       PrepaStrat distingue deux accents — bleu/navy pour les FILTRES, violet
+       (--ps-accent) pour les CARTES. Décision archivée dans filter-styles.md.
+       Les cartes plus bas restent donc en violet, seuls les contrôles de
+       filtre sont en bleu. Le bleu est écrit en dur comme dans filters.js
+       (ce n'est pas un token). */
+    R + ".psa-bar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:12px;}",
     R + ".psa-input," + R + ".psa-select{" +
-      "font:inherit;color:inherit;padding:11px 14px;" +
-      "border:1px solid var(--ps-border,#E6E9EF);" +
-      "border-radius:var(--ps-r-btn,10px);background:#fff;outline:none;}",
-    R + ".psa-input{flex:1 1 280px;min-width:0;}",
-    R + ".psa-select{flex:0 0 auto;cursor:pointer;}",
-    R + ".psa-input:focus," + R + ".psa-select:focus{" +
-      "border-color:var(--ps-accent,#6161FF);" +
-      "box-shadow:0 0 0 3px rgba(var(--ps-accent-rgb,97,97,255),.18);}",
+      "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);" +
+      "color:#323338;border:1.5px solid var(--ps-border,#E6E9EF);background:#fff;" +
+      "outline:none;box-shadow:0 1px 2px rgba(0,0,0,.04);" +
+      "transition:border-color .15s ease,box-shadow .15s ease,color .15s ease,background .15s ease;}",
+    /* Champ de recherche : boîte 46px, coins 12px, comme `.-search-box`. */
+    R + ".psa-input{flex:1 1 280px;min-width:0;height:46px;padding:0 16px;border-radius:12px;font-size:15px;}",
+    R + ".psa-input:focus{border-color:#3887B4;box-shadow:0 0 0 3px rgba(56,135,180,.15);}",
+    /* Menus : pilules 44px comme les filtres `.ps-ff` — survol bleu clair. */
+    R + ".psa-select{flex:0 0 auto;height:44px;padding:0 16px;cursor:pointer;" +
+      "border-radius:var(--ps-r-pill,999px);font-size:14px;font-weight:600;color:#4B5563;}",
+    R + ".psa-select:hover{border-color:#3887B4;color:#3887B4;background:#F3F9FC;}",
+    R + ".psa-select:focus{border-color:#3887B4;box-shadow:0 0 0 3px rgba(56,135,180,.15);}",
     R + ".psa-count{margin:0 0 20px;color:var(--ps-text-soft,#676879);font-size:14px;}",
 
     /* Grille */
