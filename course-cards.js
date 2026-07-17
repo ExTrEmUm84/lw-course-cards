@@ -634,9 +634,18 @@
     next.className="ps-car-btn ps-car-next"; next.type="button";
     next.setAttribute("aria-label","Cartes suivantes"); next.innerHTML=CHEV_R;
 
-    /* position de défilement de chaque carte (= ses points d'aimantation) */
+    /* Position de défilement de chaque carte (= ses points d'aimantation).
+       🔴 On part du bord du CONTENU (padding déduit), pas du bord de bordure.
+       Depuis que le rail porte `padding:90px 24px 26px` (la place de la lueur
+       violette), `getBoundingClientRect().left` est 24px À GAUCHE de la 1re
+       carte : sans cette déduction les offsets valaient 24, 381, 739… au lieu de
+       0, 357, 715… et `go(1)` visait 24, c'est-à-dire LA CARTE COURANTE. Comme
+       `scroll-padding:0 24px` place son point d'aimantation à 0, le navigateur
+       ramenait aussitôt le rail à 0 : **les flèches ne faisaient plus rien**.
+       Doit rester cohérent avec le `scroll-padding` du rail. */
     function offsets(){
-      var tl=track.getBoundingClientRect().left, sl=track.scrollLeft, o=[];
+      var padL=parseFloat(getComputedStyle(track).paddingLeft)||0;
+      var tl=track.getBoundingClientRect().left+padL, sl=track.scrollLeft, o=[];
       track.querySelectorAll(".lw-course-card").forEach(function(c){
         o.push(Math.round(sl + c.getBoundingClientRect().left - tl));
       });
