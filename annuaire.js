@@ -143,6 +143,31 @@
 
     "@media (max-width:520px){" + R + ".psa-select{flex:1 1 100%;}}",
     "@media (prefers-reduced-motion:reduce){" + R + ".psa-card," + R + ".psa-skeleton{transition:none;animation:none;}}",
+
+    /* ─── Titre de page ─────────────────────────────────────────────────
+       Mêmes valeurs que case-cards.js / course-cards.js / sector-cards.js :
+       le titre de l'annuaire doit être indiscernable de ceux des autres pages.
+       Scope `#pageContent` (et non `#psa-root`) : le H1 est un élément
+       LearnWorlds, il vit à côté de l'annuaire, pas dedans. Sans danger, ce
+       fichier n'est chargé que sur cette page. */
+    "#pageContent h1.learnworlds-heading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:56px !important;font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:var(--ps-text,#1c1f26) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    /* ⚠️ LearnWorlds SERT le H1 dans le HTML, "#" compris. hero() ne peut le
+       transformer qu'une fois le DOM prêt : sans ça les "#" s'affichent en clair
+       pendant une demi-seconde. -> masqué tant qu'il n'est pas traité.
+       `visibility` (et non `display`) : la place reste réservée, aucun décalage.
+       Filet de sécurité à 2,5s dans hero(), sinon un titre sans "#" resterait
+       invisible pour toujours. */
+    "#pageContent h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
+    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-text,#1c1f26) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    /* `.learnworlds-main-text` existe aussi dans le pied de page : on ne stylise
+       que la description marquée en JS (cf. hero), jamais la classe nue. */
+    "#pageContent .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
+    /* Machine à écrire : le slot réserve la largeur de la phrase la plus longue
+       pour que le titre ne tremble pas à chaque lettre. */
+    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#6161FF) !important;white-space:nowrap !important;}",
+    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#6161FF) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
+    "@keyframes ps-blink{50%{opacity:0}}",
+    "@media(max-width:820px){#pageContent h1.learnworlds-heading{font-size:36px !important;}#pageContent h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}#pageContent .ps-desc{padding-right:0 !important;}}",
   ].join("\n");
 
   function styles() {
@@ -320,6 +345,99 @@
       });
   }
 
+  // --- Titre de page ----------------------------------------------------
+  /* Machine à écrire sur le H1, reprise telle quelle de case-cards.js pour que
+     le titre soit indiscernable de ceux des autres pages. LearnWorlds sert le
+     titre brut, "#" compris : c'est ce JS qui le transforme.
+     Syntaxe : "Vos partenaires pour #le conseil #la stratégie" -> "Vos
+     partenaires pour " reste fixe, les segments après chaque "#" défilent. */
+  function hero() {
+    var h1 = document.querySelector("#pageContent h1.learnworlds-heading");
+    if (!h1 || h1.dataset.psTw) return;
+    /* data-ps-tw posé AVANT toute autre condition : c'est lui qui lève le
+       masquage CSS. Si on le posait seulement en cas de succès, un titre sans
+       "#" resterait invisible pour toujours. */
+    h1.dataset.psTw = "1";
+
+    var raw = (h1.textContent || "").replace(/\s+/g, " ").trim();
+    var i = raw.indexOf("#");
+    if (i < 0) return; /* pas de # -> titre natif, rien à animer */
+    var prefix = raw.slice(0, i).trim();
+    var parts = raw.slice(i).split("#").map(function (s) { return s.trim(); }).filter(Boolean);
+    if (!parts.length) return;
+
+    /* Le texte animé est masqué aux lecteurs d'écran : on leur rend la phrase
+       complète, sinon ils n'entendraient qu'un mot sur trois. */
+    h1.setAttribute("aria-label", prefix + " " + parts.join(", "));
+
+    var pre = document.createElement("span");
+    pre.textContent = prefix + " "; /* textContent : pas d'injection HTML */
+    var slot = document.createElement("span");
+    slot.className = "ps-tw";
+    slot.setAttribute("aria-hidden", "true");
+    var txt = document.createElement("span"); txt.className = "ps-tw-txt";
+    var cur = document.createElement("span"); cur.className = "ps-tw-cur";
+    slot.appendChild(txt); slot.appendChild(cur);
+    h1.textContent = ""; h1.appendChild(pre); h1.appendChild(slot);
+
+    /* Largeur réservée = phrase la plus longue, mesurée police chargée. Sans
+       ça le titre tremble à chaque lettre. */
+    function reserve() {
+      var w = 0, keep = txt.textContent;
+      slot.style.minWidth = "0px";
+      parts.forEach(function (p) {
+        txt.textContent = p;
+        w = Math.max(w, txt.getBoundingClientRect().width);
+      });
+      txt.textContent = keep;
+      slot.style.minWidth = Math.ceil(w) + "px";
+    }
+    if (document.fonts && document.fonts.ready) document.fonts.ready.then(reserve); else reserve();
+    var rt;
+    window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(reserve, 150); });
+
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      txt.textContent = parts[0];
+      return; /* pas d'animation si l'utilisateur la refuse */
+    }
+
+    /* La 1re phrase est affichée EN ENTIER dès le départ, le cycle ne démarre
+       qu'après la pause. Sinon le slot part vide et se remplit lettre par
+       lettre : ça se lit comme un retard d'affichage, pas comme une animation. */
+    var p = 0, c = parts[0].length, del = true;
+    txt.textContent = parts[0];
+    function tick() {
+      var full = parts[p];
+      c += del ? -1 : 1;
+      txt.textContent = full.slice(0, c);
+      var d = del ? 34 : 58; /* frappe / effacement */
+      if (!del && c >= full.length) { del = true; d = 1700; } /* pause phrase complète */
+      else if (del && c <= 0) { del = false; p = (p + 1) % parts.length; d = 320; }
+      setTimeout(tick, d);
+    }
+    setTimeout(tick, 1700); /* phrase lisible avant le 1er effacement */
+  }
+
+  /* Filet de sécurité du masquage CSS : si hero() n'avait jamais tourné, le
+     titre resterait invisible. Au pire on le révèle brut au bout de 2,5s — un
+     titre avec des "#" vaut mieux qu'un titre absent. */
+  setTimeout(function () {
+    var h = document.querySelector("#pageContent h1.learnworlds-heading");
+    if (h && !h.dataset.psTw) h.dataset.psTw = "1";
+  }, 2500);
+
+  /* La description du hero. Repère : le seul `.learnworlds-main-text` situé
+     AVANT l'annuaire — les autres sont dans le pied de page (contact,
+     copyright). Sur les autres pages du repo c'est `.cards-grandpa` qui sert
+     de frontière ; ici c'est `#psa-root`. */
+  function desc(root) {
+    document.querySelectorAll("#pageContent .learnworlds-main-text").forEach(function (e) {
+      if (root.contains(e)) return;
+      if (!(root.compareDocumentPosition(e) & Node.DOCUMENT_POSITION_PRECEDING)) return;
+      e.classList.add("ps-desc");
+    });
+  }
+
   // --- Montage ----------------------------------------------------------
   function construire(root) {
     root.replaceChildren();
@@ -418,19 +536,18 @@
   /* Le Site Builder construit la page progressivement : le point de montage
      peut n'exister qu'après nous. On attend, puis on renonce en le disant —
      un annuaire absent sans explication est le pire des cas. */
-  function demarrer() {
+  function monter() {
     var root = document.getElementById(MOUNT);
     if (root) {
       if (root.dataset.psaMonte === "1") return;
       root.dataset.psaMonte = "1";
-      figtree();
-      styles();
+      desc(root);
       construire(root);
       return;
     }
 
     var obs = new MutationObserver(function () {
-      if (document.getElementById(MOUNT)) { obs.disconnect(); demarrer(); }
+      if (document.getElementById(MOUNT)) { obs.disconnect(); monter(); }
     });
     obs.observe(document.documentElement, { childList: true, subtree: true });
 
@@ -441,6 +558,17 @@
                      "ajoute-le dans un élément HTML là où l'annuaire doit apparaître.");
       }
     }, 10000);
+  }
+
+  /* Le titre est indépendant de l'annuaire : il doit s'animer même si le point
+     de montage manque. D'où hero() ici et non dans monter() — sinon un oubli de
+     <div id="psa-root"> laisserait le H1 masqué par le CSS, donc la page sans
+     titre du tout. */
+  function demarrer() {
+    figtree();
+    styles();
+    hero();
+    monter();
   }
 
   if (document.readyState === "loading") {
