@@ -134,7 +134,10 @@
          ⚠️ NE PAS ajouter ici une 2e règle `padding-top` sur le rail : elle
          serait écrasée par celle plus bas, qui a le MÊME sélecteur et vient
          après (piège déjà rencontré deux fois dans ce fichier). */
-    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{background:#fff !important;overflow:visible !important;}",
+    /* `isolation:isolate` : fait de la carte un contexte d'empilement, pour que
+       le liseré en `z-index:-1` (cf. sa règle) reste AU-DESSUS du fond blanc de
+       la carte au lieu de filer derrière un ancêtre. Sans ça, il disparaît. */
+    "#pageContent .cards-grandpa > .lw-cols > .col.lw-course-card{background:#fff !important;overflow:visible !important;isolation:isolate !important;}",
     /* `top:-90px` : le lien natif est en `inset:0`, il s'arrêtait donc au bord
        de la carte et **la moitié du rond qui dépasse n'était PAS cliquable**
        (vérifié : `elementFromPoint` y renvoyait le div de l'image, pas le lien)
@@ -162,7 +165,17 @@
        le motif fait 2x1.02 ; à offset 1, le tiret déborde de 0.02 sur le début
        du tracé → ~28px de trait bleu visible SANS survol (constaté à l'écran).
        Le tour se ferme donc à offset 0.02, soit 98% de la durée — invisible. */
-    ".ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;pointer-events:none !important;z-index:4 !important;}",
+    /* 🔴 `z-index:-1` = le liseré passe DERRIÈRE le rond, qui l'occulte.
+       Depuis que le rond déborde au-dessus de la carte, le bord haut du liseré
+       le traverse en plein milieu : en `z-index:4` la ligne bleue était peinte
+       PAR-DESSUS l'illustration et la barrait. En négatif, la ligne se glisse
+       sous l'anneau blanc — le médaillon se lit comme posé sur le bord.
+       Pourquoi pas un z-index sur l'image plutôt : il exigerait
+       `position:relative` sur elle, ce qui CASSE la carte cliquable (cf. plus
+       haut). Le lien étiré (z-index:3) reste au-dessus : rien n'est bloqué.
+       Dépend de `isolation:isolate` sur la carte, sinon ce négatif l'envoie
+       derrière le fond blanc et il devient invisible. */
+    ".ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;pointer-events:none !important;z-index:-1 !important;}",
     ".ps-mline rect{fill:none !important;stroke:#6161FF !important;stroke-width:4 !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset .55s ease !important;}",
     "#pageContent .cards-grandpa .lw-course-card:hover .ps-mline rect{stroke-dashoffset:0 !important;}",
     "@media(prefers-reduced-motion:reduce){.ps-mline rect{transition:none !important;}}",
