@@ -63,13 +63,13 @@
     return "def";
   }
 
-  var C=["#6161FF","#00C875","#E2445C","#FDAB3D","#A25DDC","#0073EA"];
+  var C=["var(--ps-accent,#6161FF)","#00C875","#E2445C","#FDAB3D","#A25DDC","#0073EA"];
   var NAV=" nav.lw-topbar-menu ";           // scope desktop
   var CSS=[
     /* ---------- pictos + libellés (desktop ET tiroir mobile) ---------- */
     ".ps-mm-ic{border-radius:11px !important;flex:none !important;display:flex !important;align-items:center !important;justify-content:center !important;color:#fff !important;}",
     ".ps-mm-ic svg{stroke:#fff !important;fill:none !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
-    ".ps-mm-t{font-family:Figtree,sans-serif !important;font-weight:600 !important;color:#1c1f26 !important;line-height:1.3 !important;}",
+    ".ps-mm-t{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-weight:600 !important;color:var(--ps-text,#1c1f26) !important;line-height:1.3 !important;}",
     /* tiroir mobile : on garde la ligne picto + libellé */
     ".ps-mm-ic{width:34px !important;height:34px !important;}",
     ".ps-mm-ic svg{width:19px !important;height:19px !important;}",
@@ -99,8 +99,8 @@
     "@media(max-width:1100px){.lw-cols.js-same-content-wrapper .flex-item:has(> .lw-topbar-menu-wrapper){position:static !important;transform:none !important;}}",
 
     /* ---------- barre de nav : typo moderne ---------- */
-    NAV+".lw-topbar-option-link-lbl{font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;letter-spacing:-.01em !important;color:#1c1f26 !important;transition:color .15s ease !important;}",
-    NAV+".lw-topbar-option:hover > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:#6161FF !important;}",
+    NAV+".lw-topbar-option-link-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;letter-spacing:-.01em !important;color:var(--ps-text,#1c1f26) !important;transition:color .15s ease !important;}",
+    NAV+".lw-topbar-option:hover > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:var(--ps-accent,#6161FF) !important;}",
     NAV+".lw-topbar-option > .lw-topbar-option-link svg{transition:transform .2s ease !important;}",
     /* le chevron ne pivote plus au survol : il indique l'état OUVERT, et
        l'ouverture se fait maintenant au clic (cf. .ps-mm-on plus bas) */
@@ -124,7 +124,7 @@
        donc à 49, soit 26px À L'INTÉRIEUR du header (la section va de 0 à 75) :
        le bord venait mordre sous les libellés. On ne peut pas ancrer le panneau
        sur la section (cf. ci-dessus), d'où la marge mesurée en JS. */
-    NAV+".lw-topbar-submenu.js-submenu-list{position:absolute !important;top:100% !important;bottom:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:100vw !important;min-width:0 !important;max-width:100vw !important;height:auto !important;max-height:none !important;overflow:visible !important;margin-top:var(--ps-mm-gap,26px) !important;padding:12px 24px !important;border-radius:0 !important;border:0 !important;border-top:1px solid #E6E9EF !important;border-bottom:1px solid #E6E9EF !important;background:#F5F6F8 !important;box-shadow:none !important;gap:48px !important;font-family:Figtree,sans-serif !important;grid-template-columns:none !important;justify-content:center !important;align-items:center !important;}",
+    NAV+".lw-topbar-submenu.js-submenu-list{position:absolute !important;top:100% !important;bottom:auto !important;left:50% !important;right:auto !important;transform:translateX(-50%) !important;width:100vw !important;min-width:0 !important;max-width:100vw !important;height:auto !important;max-height:none !important;overflow:visible !important;margin-top:var(--ps-mm-gap,26px) !important;padding:12px 24px !important;border-radius:0 !important;border:0 !important;border-top:1px solid var(--ps-border,#E6E9EF) !important;border-bottom:1px solid var(--ps-border,#E6E9EF) !important;background:#F5F6F8 !important;box-shadow:none !important;gap:48px !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;grid-template-columns:none !important;justify-content:center !important;align-items:center !important;}",
     /* Ouverture pilotée en JS (classe), PAS en :hover — cf. openMenus() :
        le panneau fait toute la largeur du menu alors que son déclencheur est
        étroit ; en diagonale la souris sort du li AVANT d'atteindre le panneau,
@@ -135,13 +135,13 @@
        plus d'espace à combler — et le clic rend la question du survol caduque. */
     /* items sur UNE ligne : picto + libellé côte à côte, comme chez Boks */
     NAV+".lw-topbar-submenu-item:not(.ps-mm-hide){list-style:none !important;margin:0 !important;padding:0 !important;flex:0 0 auto !important;min-width:0 !important;display:flex !important;}",
-    NAV+".lw-topbar-submenu-item > .lw-topbar-option-link{display:flex !important;flex-direction:row !important;align-items:center !important;justify-content:flex-start !important;text-align:left !important;gap:12px !important;padding:8px 4px !important;border-radius:10px !important;width:auto !important;white-space:nowrap !important;text-decoration:none !important;transition:opacity .15s ease !important;}",
+    NAV+".lw-topbar-submenu-item > .lw-topbar-option-link{display:flex !important;flex-direction:row !important;align-items:center !important;justify-content:flex-start !important;text-align:left !important;gap:12px !important;padding:8px 4px !important;border-radius:var(--ps-r-btn,10px) !important;width:auto !important;white-space:nowrap !important;text-decoration:none !important;transition:opacity .15s ease !important;}",
     NAV+".lw-topbar-submenu-item > .lw-topbar-option-link:hover{background:transparent !important;opacity:.7 !important;}",
     NAV+".ps-mm-ic{width:38px !important;height:38px !important;}",
     NAV+".ps-mm-ic svg{width:21px !important;height:21px !important;}",
     NAV+".ps-mm-t{font-size:14px !important;white-space:nowrap !important;}",
     /* item de la barre dont le panneau est ouvert : on le marque, comme Boks */
-    NAV+"li.lw-topbar-option.ps-mm-on > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:#6161FF !important;}",
+    NAV+"li.lw-topbar-option.ps-mm-on > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:var(--ps-accent,#6161FF) !important;}",
     NAV+"li.lw-topbar-option.ps-mm-on > .lw-topbar-option-link svg{transform:rotate(180deg) !important;}",
     /* sous 900px la bande deviendrait illisible sur une ligne : on la scrolle */
     "@media(max-width:900px){"+NAV+".lw-topbar-submenu.js-submenu-list{justify-content:flex-start !important;overflow-x:auto !important;gap:28px !important;}}"

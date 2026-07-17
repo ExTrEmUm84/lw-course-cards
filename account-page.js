@@ -47,7 +47,7 @@
      gère. `.account-app` contient le titre, le menu latéral et les 4 sections,
      et rien d'autre. */
   var A=B+".account-app ";
-  var FT="font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;";
+  var FT="font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;";
 
   var CSS=[
     /* fond de page : le gris clair du site, pour que les cartes se détachent */
@@ -72,33 +72,33 @@
     ].join(",")+"{"+FT+"}",
 
     /* titre de page */
-    B+".account-app h2{"+FT+"font-size:38px !important;font-weight:800 !important;letter-spacing:-.025em !important;color:#1c1f26 !important;}",
+    B+".account-app h2{"+FT+"font-size:38px !important;font-weight:800 !important;letter-spacing:-.025em !important;color:var(--ps-text,#1c1f26) !important;}",
 
     /* La grande carte blanche unique s'efface : ce sont les sections qui
        portent désormais la carte (choix de Ziad). */
     B+".lw-body-bg.border-radius.account-cnt{background:transparent !important;border-radius:0 !important;box-shadow:none !important;}",
 
     /* --- une carte par section --- */
-    B+"section.account-section{background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;padding:26px 28px !important;margin:0 0 20px !important;box-shadow:none !important;transition:box-shadow .2s ease !important;}",
+    B+"section.account-section{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;padding:26px 28px !important;margin:0 0 20px !important;box-shadow:none !important;transition:box-shadow .2s ease !important;}",
     B+"section.account-section:hover{box-shadow:0 6px 20px rgba(15,23,42,.05) !important;}",
     B+".account-section-header{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;margin-bottom:18px !important;}",
-    B+".account-section-title{font-family:Figtree,sans-serif !important;font-size:21px !important;font-weight:800 !important;letter-spacing:-.015em !important;color:#243B6B !important;}",
+    B+".account-section-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:21px !important;font-weight:800 !important;letter-spacing:-.015em !important;color:#243B6B !important;}",
 
     /* --- bouton "Modifier" : le CTA violet du site --- */
-    B+".account-section-header button.learnworlds-button{background:transparent !important;border:0 !important;box-shadow:none !important;padding:0 !important;color:#6161FF !important;font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;cursor:pointer !important;transition:color .18s ease !important;}",
-    B+".account-section-header button.learnworlds-button:hover{color:#4B4BE0 !important;}",
+    B+".account-section-header button.learnworlds-button{background:transparent !important;border:0 !important;box-shadow:none !important;padding:0 !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;cursor:pointer !important;transition:color .18s ease !important;}",
+    B+".account-section-header button.learnworlds-button:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
 
     /* --- menu latéral --- */
     B+".account-menu-content{position:sticky !important;top:24px !important;}",
-    B+".account-section-navigation a{display:block !important;font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;color:#4B5563 !important;text-decoration:none !important;padding:9px 12px !important;margin-bottom:2px !important;border-radius:9px !important;transition:color .15s ease, background .15s ease !important;}",
-    B+".account-section-navigation a:hover{color:#6161FF !important;background:#F3F1FF !important;}",
+    B+".account-section-navigation a{display:block !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;color:#4B5563 !important;text-decoration:none !important;padding:9px 12px !important;margin-bottom:2px !important;border-radius:9px !important;transition:color .15s ease, background .15s ease !important;}",
+    B+".account-section-navigation a:hover{color:var(--ps-accent,#6161FF) !important;background:#F3F1FF !important;}",
     /* item actif : AUCUN état natif (vérifié : cliquer n'ajoute aucune classe
        et le hash reste vide) -> classe posée en JS par l'observateur. */
-    B+".account-section-navigation a.ps-acc-on{color:#6161FF !important;background:#EDEDFF !important;}",
+    B+".account-section-navigation a.ps-acc-on{color:var(--ps-accent,#6161FF) !important;background:var(--ps-accent-tint,#EDEDFF) !important;}",
 
     /* --- champs / valeurs --- */
-    B+".personal-details-values{font-family:Figtree,sans-serif !important;}",
-    B+".account-user-avatar{border-radius:16px !important;overflow:hidden !important;}"
+    B+".personal-details-values{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    B+".account-user-avatar{border-radius:var(--ps-r-card,16px) !important;overflow:hidden !important;}"
   ].join("\n");
 
   function styles(){

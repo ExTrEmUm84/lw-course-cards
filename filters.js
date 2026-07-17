@@ -66,16 +66,16 @@
     s.textContent=[
       ".ps-cat-hidden{display:none !important;}",
       /* --- barre de recherche moderne --- */
-      "#pageContent .-search-box{display:inline-flex !important;align-items:center !important;border:1.5px solid #E6E9EF !important;border-radius:12px !important;background:#fff !important;padding:0 6px 0 0 !important;box-shadow:0 1px 2px rgba(0,0,0,.04) !important;overflow:hidden !important;height:46px !important;transition:border-color .15s ease, box-shadow .15s ease !important;}",
+      "#pageContent .-search-box{display:inline-flex !important;align-items:center !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;border-radius:12px !important;background:#fff !important;padding:0 6px 0 0 !important;box-shadow:0 1px 2px rgba(0,0,0,.04) !important;overflow:hidden !important;height:46px !important;transition:border-color .15s ease, box-shadow .15s ease !important;}",
       "#pageContent .-search-box:focus-within{border-color:#3887B4 !important;box-shadow:0 0 0 3px rgba(56,135,180,.15) !important;}",
-      "#pageContent .-search-box .learnworlds-input, #pageContent .-search-box input{border:0 !important;box-shadow:none !important;height:44px !important;font-family:Figtree,sans-serif !important;font-size:15px !important;background:transparent !important;color:#323338 !important;}",
+      "#pageContent .-search-box .learnworlds-input, #pageContent .-search-box input{border:0 !important;box-shadow:none !important;height:44px !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;background:transparent !important;color:#323338 !important;}",
       /* Le bouton loupe garde sinon SA bordure native (1px rgba(32,56,102,.2),
          radius 0 7px 7px 0) : elle dessinait un 2e rectangle arrondi À
          L'INTÉRIEUR de notre champ -> effet "double ligne". On neutralise la
          bordure du bouton, le champ porte le seul contour. */
       "#pageContent .-search-box button, #pageContent .-search-box .learnworlds-button{border:0 !important;box-shadow:none !important;background:transparent !important;border-radius:0 11px 11px 0 !important;height:44px !important;}",
       /* --- bouton "tout" en pill --- */
-      "#pageContent .learnworlds-button.filter.text-only{display:inline-flex !important;align-items:center !important;justify-content:center !important;height:44px !important;padding:0 18px !important;border-radius:999px !important;border:1.5px solid #E6E9EF !important;background:#fff !important;color:#4B5563 !important;font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:600 !important;margin-right:10px !important;cursor:pointer !important;transition:all .15s ease !important;}",
+      "#pageContent .learnworlds-button.filter.text-only{display:inline-flex !important;align-items:center !important;justify-content:center !important;height:44px !important;padding:0 18px !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;color:#4B5563 !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:600 !important;margin-right:10px !important;cursor:pointer !important;transition:all .15s ease !important;}",
       "#pageContent .learnworlds-button.filter.text-only:hover{border-color:#3887B4 !important;color:#3887B4 !important;background:#F3F9FC !important;}",
       /* Pastille de filtre SANS libellé : LearnWorlds en génère (mesuré : 36x2px,
          donc invisible en natif). Notre style de pastille ci-dessus (hauteur 44 +
@@ -93,13 +93,13 @@
             retrouvait 1,5px plus haut que les autres (mesuré : top 438,1 contre
             439,6). Hauteur et bordure étaient pourtant identiques — le coupable
             n'était pas la taille mais la marge. */
-      "#pageContent .lw-filter-option.with-submenu{display:inline-flex !important;align-items:center !important;height:44px !important;padding:0 18px !important;margin:0 10px 0 0 !important;border-radius:999px !important;border:1.5px solid #E6E9EF !important;background:#fff !important;font-family:Figtree,sans-serif !important;cursor:pointer !important;transition:all .15s ease !important;}",
+      "#pageContent .lw-filter-option.with-submenu{display:inline-flex !important;align-items:center !important;height:44px !important;padding:0 18px !important;margin:0 10px 0 0 !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;cursor:pointer !important;transition:all .15s ease !important;}",
       "#pageContent .lw-filter-option.with-submenu:hover{border-color:#3887B4 !important;background:#F3F9FC !important;}",
-      "#pageContent .lw-filter-option-lbl{font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:600 !important;color:#4B5563 !important;}",
+      "#pageContent .lw-filter-option-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:600 !important;color:#4B5563 !important;}",
       "#pageContent .lw-filter-option.with-submenu:hover .lw-filter-option-lbl{color:#3887B4 !important;}",
       /* --- panneau déroulant --- */
-      "#pageContent .lw-filter-option.with-submenu .lw-topbar-submenu{border-radius:14px !important;box-shadow:0 16px 40px rgba(15,23,42,.14) !important;border:1px solid #E6E9EF !important;padding:8px !important;margin-top:10px !important;min-width:220px !important;background:#fff !important;}",
-      "#pageContent .lw-topbar-submenu-item.filter{list-style:none !important;padding:9px 14px !important;border-radius:9px !important;font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:500 !important;color:#323338 !important;cursor:pointer !important;transition:background .12s ease, color .12s ease !important;}",
+      "#pageContent .lw-filter-option.with-submenu .lw-topbar-submenu{border-radius:14px !important;box-shadow:0 16px 40px rgba(15,23,42,.14) !important;border:1px solid var(--ps-border,#E6E9EF) !important;padding:8px !important;margin-top:10px !important;min-width:220px !important;background:#fff !important;}",
+      "#pageContent .lw-topbar-submenu-item.filter{list-style:none !important;padding:9px 14px !important;border-radius:9px !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:500 !important;color:#323338 !important;cursor:pointer !important;transition:background .12s ease, color .12s ease !important;}",
       "#pageContent .lw-topbar-submenu-item.filter:hover{background:#F3F9FC !important;color:#3887B4 !important;}",
 
       /* ============ SÉLECTEURS MAISON (Cabinet / Année / Type / Difficulté) ====
@@ -108,7 +108,7 @@
          fichier cible `".lw-filter-option li, .lw-topbar-submenu-item.filter"` :
          en réutilisant ces classes, nos propres options seraient prises pour des
          catégories et envoyées une par une à /api/learner/products. */
-      ".ps-ff{position:relative !important;display:inline-flex !important;align-items:center !important;gap:7px !important;height:44px !important;padding:0 16px !important;margin-right:10px !important;border-radius:999px !important;border:1.5px solid #E6E9EF !important;background:#fff !important;font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:600 !important;color:#4B5563 !important;cursor:pointer !important;user-select:none !important;transition:all .15s ease !important;}",
+      ".ps-ff{position:relative !important;display:inline-flex !important;align-items:center !important;gap:7px !important;height:44px !important;padding:0 16px !important;margin-right:10px !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:600 !important;color:#4B5563 !important;cursor:pointer !important;user-select:none !important;transition:all .15s ease !important;}",
       ".ps-ff:hover{border-color:#3887B4 !important;color:#3887B4 !important;background:#F3F9FC !important;}",
       /* sélecteur actif : même bleu que le reste de la barre */
       ".ps-ff.ps-ff-on{border-color:#3887B4 !important;background:#F3F9FC !important;color:#3887B4 !important;}",
@@ -159,7 +159,7 @@
          à la grille (même précédent que mega-menu.js). Aucun `display` posé
          sur un `.lw-cols` nu : cf. la règle du piège n°1. */
       "#pageContent .lw-cols.no-gutter:has(.lw-filters){z-index:20 !important;}",
-      ".ps-ff-menu{display:none !important;position:absolute !important;top:calc(100% + 10px) !important;left:0 !important;z-index:50 !important;min-width:200px !important;max-height:280px !important;overflow-y:auto !important;margin:0 !important;padding:8px !important;list-style:none !important;text-align:left !important;border-radius:14px !important;border:1px solid #E6E9EF !important;background:#fff !important;box-shadow:0 16px 40px rgba(15,23,42,.14) !important;}",
+      ".ps-ff-menu{display:none !important;position:absolute !important;top:calc(100% + 10px) !important;left:0 !important;z-index:50 !important;min-width:200px !important;max-height:280px !important;overflow-y:auto !important;margin:0 !important;padding:8px !important;list-style:none !important;text-align:left !important;border-radius:14px !important;border:1px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;box-shadow:0 16px 40px rgba(15,23,42,.14) !important;}",
       ".ps-ff.ps-ff-open .ps-ff-menu{display:block !important;}",
       /* text-align:left explicite : la barre de filtres est alignée à DROITE sur
          la page, et les options en héritaient (constaté à l'écran : "Tous" et

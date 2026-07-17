@@ -33,10 +33,10 @@
        recherche écrasé à 157px. Et un `display:…!important` sur ce sélecteur nu
        écrase le `display:none` INLINE que LearnWorlds pose quand on désactive
        les filtres -> ils resteraient visibles. Jamais de `display` en nu. */
-    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:grid !important;grid-template-columns:1fr 1fr !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;overflow:visible !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
+    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:grid !important;grid-template-columns:1fr 1fr !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;overflow:visible !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
     /* la barre de filtres : alignement seul, aucun `display` */
-    "#pageContent .lw-cols.with-filters{max-width:1000px !important;margin:0 auto !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
+    "#pageContent .lw-cols.with-filters{max-width:1000px !important;margin:0 auto !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
     "#pageContent .lw-course-card > *:not(.ps-cc){display:none !important;}",
     ".ps-cc{display:flex !important;flex-direction:column !important;padding:26px !important;min-height:180px !important;}",
@@ -46,7 +46,7 @@
        de le garder en regard de la 1re ligne. Le `margin-top:2px` du picto le
        recale optiquement sur la hauteur de capitale. */
     ".ps-cc-head{display:flex !important;align-items:flex-start !important;gap:12px !important;margin:0 0 14px !important;}",
-    ".ps-cc-ic{flex:0 0 auto !important;width:36px !important;height:36px !important;margin-top:2px !important;border-radius:10px !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;background:#EEF1F6 !important;color:#4B5563 !important;}",
+    ".ps-cc-ic{flex:0 0 auto !important;width:36px !important;height:36px !important;margin-top:2px !important;border-radius:var(--ps-r-btn,10px) !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;background:#EEF1F6 !important;color:#4B5563 !important;}",
     ".ps-cc-ic svg{width:20px !important;height:20px !important;fill:none !important;stroke:currentColor !important;stroke-width:1.7 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     /* `class="f"` = aplat léger, le reste en trait : c'est ce contraste qui
        donne la densité à petite taille (même convention que sector-cards.js). */
@@ -55,15 +55,15 @@
     ".ps-cc-ic.ps-ic-pill{background:#E1F7EC !important;color:#009257 !important;}",
     ".ps-cc-ic.ps-ic-chart{background:#E8F1FE !important;color:#0A6ED8 !important;}",
     ".ps-cc-ic.ps-ic-car{background:#FFF3E0 !important;color:#C77700 !important;}",
-    ".ps-cc-ic.ps-ic-build{background:#EDEDFF !important;color:#4B4BE0 !important;}",
+    ".ps-cc-ic.ps-ic-build{background:var(--ps-accent-tint,#EDEDFF) !important;color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-cc-ic.ps-ic-plane{background:#EAF5FC !important;color:#2F7DA8 !important;}",
     ".ps-cc-ic.ps-ic-cart{background:#FDEFF3 !important;color:#C2286A !important;}",
     ".ps-cc-ic.ps-ic-bank{background:#F3EAFB !important;color:#8A45C9 !important;}",
-    ".ps-cc-title{font-family:Figtree,sans-serif !important;font-size:25px !important;font-weight:800 !important;color:#243B6B !important;line-height:1.2 !important;letter-spacing:-.02em !important;margin:0 !important;}",
+    ".ps-cc-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:25px !important;font-weight:800 !important;color:#243B6B !important;line-height:1.2 !important;letter-spacing:-.02em !important;margin:0 !important;}",
     ".ps-cc-pills{display:flex !important;flex-wrap:wrap !important;gap:7px !important;margin-bottom:auto !important;}",
-    ".ps-pill{display:inline-flex !important;align-items:center !important;gap:5px !important;padding:4px 11px !important;border-radius:999px !important;font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:600 !important;line-height:1.1 !important;background:#EEF1F6 !important;color:#4B5563 !important;}",
+    ".ps-pill{display:inline-flex !important;align-items:center !important;gap:5px !important;padding:4px 11px !important;border-radius:var(--ps-r-pill,999px) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:600 !important;line-height:1.1 !important;background:#EEF1F6 !important;color:#4B5563 !important;}",
     ".ps-pill b{font-weight:700 !important;opacity:.62 !important;text-transform:uppercase !important;font-size:10px !important;letter-spacing:.03em !important;}",
-    ".ps-f-cabinet{background:#EDEDFF !important;color:#4B4BE0 !important;}",
+    ".ps-f-cabinet{background:var(--ps-accent-tint,#EDEDFF) !important;color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-f-annee{background:#E8F1FE !important;color:#0A6ED8 !important;}",
     ".ps-f-secteur{background:#E1F7EC !important;color:#009257 !important;}",
     ".ps-f-type{background:#FFF3E0 !important;color:#C77700 !important;}",
@@ -74,9 +74,9 @@
     ".ps-diff-deb{background:#E6F9F0 !important;color:#12A85F !important;}",
     ".ps-diff-int{background:#FFF3E0 !important;color:#D98500 !important;}",
     ".ps-diff-adv{background:#FDECEF !important;color:#D22B45 !important;}",
-    ".ps-cc-link{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:#6161FF !important;font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
+    ".ps-cc-link{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-cc-link::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
-    ".ps-cc-link:hover{color:#4B4BE0 !important;}",
+    ".ps-cc-link:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-cc-link:hover::after{transform:translateX(5px) !important;}",
     /* ================= TITRES (hero premium) — porté de course-cards.js =====
        Même géométrie que la page Cours, vérifié à la mesure : le conteneur des
@@ -85,7 +85,7 @@
        60px à gauche des cartes -> on reprend la même largeur 1000px centrée.
        (`.cards-grandpa` fait 1650px ici contre 1120 sur la page Cours, mais il
        ne sert pas à l'alignement : c'est la grille qui compte.) */
-    "#pageContent h1.learnworlds-heading{font-family:Figtree,sans-serif !important;font-size:56px !important;font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:#1c1f26 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    "#pageContent h1.learnworlds-heading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:56px !important;font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:var(--ps-text,#1c1f26) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     /* ⚠️ LearnWorlds SERT le H1 dans le HTML, "#" compris. heroText() ne peut le
        transformer qu'une fois le DOM prêt : sans ça les "#" s'affichent en clair
        pendant une demi-seconde. -> masqué tant qu'il n'est pas traité.
@@ -93,15 +93,15 @@
        Filet de sécurité à 2,5s plus bas, sinon un titre sans "#" resterait
        invisible pour toujours. */
     "#pageContent h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    "#pageContent h2.learnworlds-subheading{font-family:Figtree,sans-serif !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:#1c1f26 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-text,#1c1f26) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     /* .learnworlds-main-text existe AUSSI dans chaque carte ET dans le bouton des
        catégories du filtre : on ne stylise que la description marquée en JS
        (cf. heroText), jamais la classe nue. */
-    "#pageContent .ps-desc{font-family:Figtree,sans-serif !important;font-size:17px !important;line-height:1.65 !important;color:#676879 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
+    "#pageContent .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
     /* machine à écrire : le slot réserve la largeur de la phrase la plus longue
        pour que le titre ne tremble pas à chaque lettre */
-    ".ps-tw{display:inline-block !important;text-align:left !important;color:#6161FF !important;white-space:nowrap !important;}",
-    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:#6161FF !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
+    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#6161FF) !important;white-space:nowrap !important;}",
+    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#6161FF) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
     "@keyframes ps-blink{50%{opacity:0}}",
     "@media(max-width:820px){#pageContent .cards-grandpa > .lw-cols.multiple-rows{grid-template-columns:1fr !important;}#pageContent h1.learnworlds-heading{font-size:36px !important;}#pageContent h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}#pageContent .ps-desc{padding-right:0 !important;}}"
   ].join("\n");

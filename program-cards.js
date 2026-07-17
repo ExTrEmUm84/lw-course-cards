@@ -55,38 +55,38 @@
        fait 1120px). Le recopier décalerait le titre. Ne pas le réintroduire.
        Pas de `padding-right:38%` sur la description non plus : sur la page
        Cours il réserve la place de la tuile de progression, qui n'existe pas ici. */
-    S+" h1.learnworlds-heading{font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;font-size:56px !important;font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:#1c1f26 !important;text-align:left !important;}",
+    S+" h1.learnworlds-heading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:56px !important;font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:var(--ps-text,#1c1f26) !important;text-align:left !important;}",
     /* LW sert le H1 avec ses "#" en clair : on le masque tant que heroText() ne
        l'a pas transformé, sinon les "#" clignotent une demi-seconde.
        `visibility` et non `display` : la place reste réservée, pas de saut.
        Filet de sécurité à 2,5s plus bas — sinon un titre sans "#" resterait
        invisible pour toujours. */
     S+" h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    S+" h2.learnworlds-subheading{font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:#1c1f26 !important;text-align:left !important;}",
-    S+" .ps-desc{font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;font-size:17px !important;line-height:1.65 !important;color:#676879 !important;text-align:left !important;}",
-    ".ps-tw{display:inline-block !important;text-align:left !important;color:#6161FF !important;white-space:nowrap !important;}",
-    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:#6161FF !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
+    S+" h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-text,#1c1f26) !important;text-align:left !important;}",
+    S+" .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;}",
+    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#6161FF) !important;white-space:nowrap !important;}",
+    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#6161FF) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
     "@keyframes ps-blink{50%{opacity:0}}",
     "@media(max-width:820px){"+S+" h1.learnworlds-heading{font-size:36px !important;}"+S+" h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}}",
 
     /* ---- panneau du programme ---------------------------------------- */
-    PROG+"{background:#F7F8FB !important;border:1px solid #E6E9EF !important;border-radius:16px !important;padding:28px 24px !important;}",
+    PROG+"{background:var(--ps-surface-soft,#F7F8FB) !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;padding:28px 24px !important;}",
 
     /* ---- en-tête ------------------------------------------------------ */
-    PROG+" h3{font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;font-size:26px !important;font-weight:800 !important;color:#1c1f26 !important;line-height:1.2 !important;}",
-    PROG+" .lw-learning-program-card-descr{font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;font-size:15px !important;line-height:1.6 !important;color:#676879 !important;}",
+    PROG+" h3{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:26px !important;font-weight:800 !important;color:var(--ps-text,#1c1f26) !important;line-height:1.2 !important;}",
+    PROG+" .lw-learning-program-card-descr{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;}",
 
     /* Pastille « N Leçons » : bleu natif #3887B4 -> violet teinté. */
-    PROG+" .lw-tag{background:#EDEDFF !important;color:#6161FF !important;border-radius:999px !important;padding:5px 11px !important;font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:700 !important;}",
+    PROG+" .lw-tag{background:var(--ps-accent-tint,#EDEDFF) !important;color:var(--ps-accent,#6161FF) !important;border-radius:var(--ps-r-pill,999px) !important;padding:5px 11px !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:700 !important;}",
 
     /* Bouton « Continuer » : vert LearnWorlds #009E78 -> violet de la charte. */
-    PROG+" button.learnworlds-button{background:#6161FF !important;color:#fff !important;border-radius:10px !important;border:0 !important;font-family:Figtree,sans-serif !important;font-weight:700 !important;transition:background .18s ease !important;}",
-    PROG+" button.learnworlds-button:hover{background:#4B4BE0 !important;}",
+    PROG+" button.learnworlds-button{background:var(--ps-accent,#6161FF) !important;color:#fff !important;border-radius:var(--ps-r-btn,10px) !important;border:0 !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-weight:700 !important;transition:background .18s ease !important;}",
+    PROG+" button.learnworlds-button:hover{background:var(--ps-accent-hover,#4B4BE0) !important;}",
 
     /* Progression : remplissage bleu marine #203866 -> violet. */
-    PROG+" .lw-course-card-progress{background:#EDEDF2 !important;border-radius:999px !important;overflow:hidden !important;}",
-    PROG+" .lw-course-card-progress-bar{background:#6161FF !important;border-radius:999px !important;}",
-    PROG+" .learnworlds-overline-text{font-family:Figtree,sans-serif !important;color:#676879 !important;font-weight:600 !important;}",
+    PROG+" .lw-course-card-progress{background:#EDEDF2 !important;border-radius:var(--ps-r-pill,999px) !important;overflow:hidden !important;}",
+    PROG+" .lw-course-card-progress-bar{background:var(--ps-accent,#6161FF) !important;border-radius:var(--ps-r-pill,999px) !important;}",
+    PROG+" .learnworlds-overline-text{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;color:var(--ps-text-soft,#676879) !important;font-weight:600 !important;}",
 
     /* ---- cartes enfants : la coquille commune ------------------------- */
     /* Photo RETIRÉE (choix de Ziad le 17/07) : la carte ne porte plus que son
@@ -99,9 +99,9 @@
     S+" .lw-course-card-item .product-image-container{display:none !important;}",
     /* `overflow:hidden` est conservé bien que la photo ait disparu : il garde
        tout futur contenu à l'intérieur du radius. */
-    S+" .lw-course-card-item{background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;overflow:hidden !important;box-shadow:none !important;transition:transform .18s ease, box-shadow .18s ease !important;}",
+    S+" .lw-course-card-item{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;overflow:hidden !important;box-shadow:none !important;transition:transform .18s ease, box-shadow .18s ease !important;}",
     S+" .lw-course-card-item:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
-    S+" .lw-course-card-item h4{font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;font-size:17px !important;font-weight:700 !important;color:#1c1f26 !important;line-height:1.3 !important;}",
+    S+" .lw-course-card-item h4{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;font-weight:700 !important;color:var(--ps-text,#1c1f26) !important;line-height:1.3 !important;}",
 
     /* Le swiper est en `overflow:hidden` : sans cette réserve verticale, le
        `translateY(-3px)` du survol et l'ombre seraient rognés. Réserve VERTICALE

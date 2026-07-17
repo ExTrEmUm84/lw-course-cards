@@ -49,8 +49,8 @@
   // --- 2) Styles ---
   var CSS=[
     /* grille de 3, alignée comme la page Cours (1000px centrés) */
-    GRID+"{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
-    S+" .cards-grandpa > .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
+    GRID+"{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    S+" .cards-grandpa > .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
     S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
     /* on ne masque le natif QUE sur les cartes effectivement reconstruites */
     S+" .lw-course-card[data-ps-s] > *:not(.ps-scard){display:none !important;}",
@@ -72,38 +72,38 @@
     ".ps-sicon svg{width:52px !important;height:52px !important;fill:none !important;stroke:currentColor !important;stroke-width:1.5 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-sicon svg .f{fill:currentColor !important;fill-opacity:.18 !important;}",
     ".ps-sbody{display:flex !important;flex-direction:column !important;flex:1 1 auto !important;padding:22px 24px 24px !important;}",
-    ".ps-stitle{font-family:Figtree,sans-serif !important;font-size:21px !important;line-height:1.25 !important;font-weight:800 !important;color:#1c1f26 !important;margin:0 0 8px !important;}",
+    ".ps-stitle{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:21px !important;line-height:1.25 !important;font-weight:800 !important;color:var(--ps-text,#1c1f26) !important;margin:0 0 8px !important;}",
     /* description bornée à 3 lignes : les cartes gardent la même hauteur */
-    ".ps-sdesc{font-family:Figtree,sans-serif !important;font-size:14px !important;line-height:1.6 !important;color:#676879 !important;margin:0 0 auto !important;display:-webkit-box !important;-webkit-line-clamp:3 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
+    ".ps-sdesc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;margin:0 0 auto !important;display:-webkit-box !important;-webkit-line-clamp:3 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
     /* même CTA que partout ailleurs */
-    ".ps-slink{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:#6161FF !important;font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
+    ".ps-slink{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-slink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
-    ".ps-slink:hover{color:#4B4BE0 !important;}",
+    ".ps-slink:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-slink:hover::after{transform:translateX(5px) !important;}",
     /* Cycle de couleurs : une seule teinte par carte, déclinée en 2 valeurs —
        `color` porte le picto (trait plein + aplat via currentColor), et le
        bandeau reprend la MÊME teinte en clair. Le cercle, lui, reste blanc. */
-    CYCLE(1, "#6161FF", "#EDEDFF"),
-    CYCLE(2, "#00C875", "#E3F8EE"),
-    CYCLE(3, "#E2445C", "#FDECEF"),
-    CYCLE(4, "#FDAB3D", "#FFF3E0"),
-    CYCLE(5, "#A25DDC", "#F3EAFB"),
-    CYCLE(6, "#0073EA", "#E6F1FD"),
+    CYCLE(1, "var(--ps-f1,#6161FF)", "var(--ps-f1-tint,#EDEDFF)"),
+    CYCLE(2, "var(--ps-f2,#00C875)", "var(--ps-f2-tint,#E3F8EE)"),
+    CYCLE(3, "var(--ps-f3,#E2445C)", "var(--ps-f3-tint,#FDECEF)"),
+    CYCLE(4, "var(--ps-f4,#FDAB3D)", "var(--ps-f4-tint,#FFF3E0)"),
+    CYCLE(5, "var(--ps-f5,#A25DDC)", "var(--ps-f5-tint,#F3EAFB)"),
+    CYCLE(6, "var(--ps-f6,#0073EA)", "var(--ps-f6-tint,#E6F1FD)"),
     /* ================= TITRES (hero) — porté de case-cards.js ==============
        Alignés sur les CARTES : le conteneur natif du titre fait 1120px
        (mesuré : 290->1410) alors que la grille fait 1000px (350->1350). Sans
        `max-width:1000px`, le titre et la description débordent de 60px à
        gauche des cartes — c'est le décalage que Ziad a signalé. */
-    S+" h1.learnworlds-heading{font-family:Figtree,sans-serif !important;font-size:56px !important;font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:#1c1f26 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    S+" h1.learnworlds-heading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:56px !important;font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:var(--ps-text,#1c1f26) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     /* LW sert le H1 avec ses "#" : masqué tant que heroText() ne l'a pas
        transformé, sinon les "#" s'affichent en clair une demi-seconde.
        `visibility` et non `display` : la place reste réservée. Filet de
        sécurité à 2,5s, sinon un titre sans "#" resterait invisible. */
     S+" h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    S+" h2.learnworlds-subheading{font-family:Figtree,sans-serif !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:#1c1f26 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
-    S+" .ps-desc{font-family:Figtree,sans-serif !important;font-size:17px !important;line-height:1.65 !important;color:#676879 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
-    ".ps-tw{display:inline-block !important;text-align:left !important;color:#6161FF !important;white-space:nowrap !important;}",
-    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:#6161FF !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
+    S+" h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-text,#1c1f26) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    S+" .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
+    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#6161FF) !important;white-space:nowrap !important;}",
+    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#6161FF) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
     "@keyframes ps-blink{50%{opacity:0}}",
 
     "@media(max-width:1040px){"+GRID+"{grid-template-columns:1fr 1fr !important;}}",

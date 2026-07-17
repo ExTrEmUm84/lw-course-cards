@@ -38,8 +38,8 @@
        un `display:none` INLINE quand on désactive les filtres dans l'éditeur.
        Un `display:… !important` en feuille de style écrase cet inline -> les
        filtres restent visibles malgré la désactivation. Ici : alignement seul. */
-    "#pageContent .lw-cols.with-filters{max-width:1000px !important;margin:0 auto !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;box-shadow:0 0 20px rgba(97,97,255,.18) !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
+    "#pageContent .lw-cols.with-filters{max-width:1000px !important;margin:0 auto !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 0 20px rgba(var(--ps-accent-rgb,97,97,255),.18) !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
     /* 🔴 LA LUEUR VIOLETTE (choix de Ziad le 17/07) EST INDISSOCIABLE DU PADDING
        HORIZONTAL DU RAIL (`padding:90px 24px 26px`, sa règle plus bas). Le rail
        porte `overflow-x:auto` : avec le padding horizontal à 0 qu'il avait, la
@@ -52,7 +52,7 @@
        bord à 350) et toujours alignées sur le hero, lui aussi calé sur 1000px.
        ⚠️ Ne pas toucher à l'un des trois (padding / max-width / rayon de la
        lueur) sans les autres. */
-    "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(97,97,255,.30) !important;transform:translateY(-3px) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(var(--ps-accent-rgb,97,97,255),.30) !important;transform:translateY(-3px) !important;}",
     /* On masque le natif SAUF l'illustration : LearnWorlds la pose en
        `background-image` sur un `div.learnworlds-image`, PREMIER enfant de la
        carte (pas une balise <img>) — inutile donc d'aller relire son URL, il
@@ -62,21 +62,21 @@
     /* En-tête sur 2 lignes : le niveau seul dessus (c'est LE repère de la carte),
        les compteurs en dessous, plus discrets. */
     ".ps-mhead{display:flex !important;flex-direction:column !important;align-items:flex-start !important;gap:10px !important;margin-bottom:24px !important;}",
-    ".ps-mtag{display:inline-flex !important;align-items:center !important;padding:7px 16px !important;border-radius:999px !important;font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:800 !important;line-height:1 !important;letter-spacing:-.01em !important;white-space:nowrap !important;}",
+    ".ps-mtag{display:inline-flex !important;align-items:center !important;padding:7px 16px !important;border-radius:var(--ps-r-pill,999px) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:800 !important;line-height:1 !important;letter-spacing:-.01em !important;white-space:nowrap !important;}",
     /* la rangée des compteurs, sous le niveau */
     ".ps-mmetas{display:flex !important;align-items:center !important;gap:8px !important;flex-wrap:wrap !important;}",
     /* compteurs (« 8 leçons », « 3 quiz ») : pastille neutre, pour que la
        couleur reste réservée au niveau — qui est le vrai repère de la carte */
-    ".ps-mmeta{display:inline-flex !important;align-items:center !important;padding:4px 10px !important;border-radius:999px !important;background:#F1F2F6 !important;color:#676879 !important;font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:600 !important;line-height:1 !important;white-space:nowrap !important;}",
+    ".ps-mmeta{display:inline-flex !important;align-items:center !important;padding:4px 10px !important;border-radius:var(--ps-r-pill,999px) !important;background:#F1F2F6 !important;color:var(--ps-text-soft,#676879) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:600 !important;line-height:1 !important;white-space:nowrap !important;}",
     /* Progression : reprise de la donnée native de LearnWorlds (elle est dans la
        carte, on la masquait simplement). La barre prend la couleur du niveau. */
-    ".ps-mprog{height:6px !important;border-radius:999px !important;background:#EDEFF4 !important;overflow:hidden !important;margin-top:18px !important;}",
-    ".ps-mprog-bar{height:100% !important;border-radius:999px !important;transition:width .4s ease !important;}",
-    ".ps-mprog-txt{font-family:Figtree,sans-serif !important;font-size:12px !important;font-weight:600 !important;color:#676879 !important;margin-top:7px !important;}",
-    ".ps-mtitle{font-family:Figtree,sans-serif !important;font-size:25px !important;line-height:1.25 !important;font-weight:700 !important;color:#323338 !important;margin:0 0 auto !important;}",
-    ".ps-mlink{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:26px !important;color:#6161FF !important;font-family:Figtree,sans-serif !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
+    ".ps-mprog{height:6px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EDEFF4 !important;overflow:hidden !important;margin-top:18px !important;}",
+    ".ps-mprog-bar{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;transition:width .4s ease !important;}",
+    ".ps-mprog-txt{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:600 !important;color:var(--ps-text-soft,#676879) !important;margin-top:7px !important;}",
+    ".ps-mtitle{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:25px !important;line-height:1.25 !important;font-weight:700 !important;color:#323338 !important;margin:0 0 auto !important;}",
+    ".ps-mlink{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:26px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-mlink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
-    ".ps-mlink:hover{color:#4B4BE0 !important;}",
+    ".ps-mlink:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-mlink:hover::after{transform:translateX(5px) !important;}",
     /* Cours terminé : "Terminé" est un ÉTAT, pas une action — la flèche qui
        pousse en avant n'a plus de sens, on met une coche. Le lien reste
@@ -90,18 +90,18 @@
     /* Couleur par NIVEAU, et non par position : les chevrons intercalés entre
        les cartes décalent nth-child et le cycle sautait (vérifié : Niveau 4
        récupérait la couleur du Niveau 1). data-ps-lvl est posé dans build(). */
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='1'] .ps-mtag{background:#EDEDFF !important;color:#4B4BE0 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='1'] .ps-mprog-bar{background:#4B4BE0 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='2'] .ps-mtag{background:#E6F9F0 !important;color:#12A85F !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='2'] .ps-mprog-bar{background:#12A85F !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='3'] .ps-mtag{background:#E1F7EC !important;color:#009257 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='3'] .ps-mprog-bar{background:#009257 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='4'] .ps-mtag{background:#FDECEF !important;color:#D22B45 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='4'] .ps-mprog-bar{background:#D22B45 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='5'] .ps-mtag{background:#FFF3E0 !important;color:#D98500 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='5'] .ps-mprog-bar{background:#D98500 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='6'] .ps-mtag{background:#F3EAFB !important;color:#8A45C9 !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='6'] .ps-mprog-bar{background:#8A45C9 !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='1'] .ps-mtag{background:var(--ps-lvl1-tint,#EDEDFF) !important;color:var(--ps-lvl1,#4B4BE0) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='1'] .ps-mprog-bar{background:var(--ps-lvl1,#4B4BE0) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='2'] .ps-mtag{background:var(--ps-lvl2-tint,#E6F9F0) !important;color:var(--ps-lvl2,#12A85F) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='2'] .ps-mprog-bar{background:var(--ps-lvl2,#12A85F) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='3'] .ps-mtag{background:var(--ps-lvl3-tint,#E1F7EC) !important;color:var(--ps-lvl3,#009257) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='3'] .ps-mprog-bar{background:var(--ps-lvl3,#009257) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='4'] .ps-mtag{background:var(--ps-lvl4-tint,#FDECEF) !important;color:var(--ps-lvl4,#D22B45) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='4'] .ps-mprog-bar{background:var(--ps-lvl4,#D22B45) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='5'] .ps-mtag{background:var(--ps-lvl5-tint,#FFF3E0) !important;color:var(--ps-lvl5,#D98500) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='5'] .ps-mprog-bar{background:var(--ps-lvl5,#D98500) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='6'] .ps-mtag{background:var(--ps-lvl6-tint,#F3EAFB) !important;color:var(--ps-lvl6,#8A45C9) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='6'] .ps-mprog-bar{background:var(--ps-lvl6,#8A45C9) !important;}",
     /* Timeline : double chevron entre les cartes, le 1er clair et le 2e foncé,
        pour donner le sens de la progression. */
     ".ps-chev{flex:none !important;width:40px !important;display:flex !important;align-items:center !important;justify-content:center !important;align-self:stretch !important;}",
@@ -204,7 +204,7 @@
        concentrique.
        x/y/width/height/rx en CSS = propriétés de géométrie SVG2 (les attributs,
        eux, n'acceptent pas `calc()`). Support vérifié à l'écran sur Chrome. */
-    ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;rx:14px !important;fill:none !important;stroke:#6161FF !important;stroke-width:4 !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset .55s ease !important;}",
+    ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:4 !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset .55s ease !important;}",
     "#pageContent .cards-grandpa .lw-course-card:hover .ps-mline rect{stroke-dashoffset:0 !important;}",
     "@media(prefers-reduced-motion:reduce){.ps-mline rect{transition:none !important;}}",
 
@@ -213,7 +213,7 @@
     "#pageContent .cards-grandpa{position:relative !important;}",
     /* le rail porte lui-même sa largeur/fond/police : le `display:flex` n'est posé
        QUE sur ce sélecteur scopé, jamais sur `.lw-cols.multiple-rows` nu (cf. plus haut) */
-    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;scroll-snap-type:x mandatory !important;scrollbar-width:none !important;-ms-overflow-style:none !important;gap:16px !important;padding:90px 24px 26px !important;max-width:1048px !important;scroll-padding:0 24px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
+    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;scroll-snap-type:x mandatory !important;scrollbar-width:none !important;-ms-overflow-style:none !important;gap:16px !important;padding:90px 24px 26px !important;max-width:1048px !important;scroll-padding:0 24px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
     "#pageContent .cards-grandpa > .lw-cols.multiple-rows::-webkit-scrollbar{display:none !important;}",
     /* 3 cartes : largeur = (100% - 2 gouttières) / 3.
        flex-direction:column : la carte est déjà en flex côté LW, il faut la
@@ -244,9 +244,9 @@
        ils deviendront inatteignables : il faudra retirer cette règle. */
     "#pageContent .lw-load-more{display:none !important;}",
     /* les flèches */
-    ".ps-car-btn{position:absolute !important;top:50% !important;transform:translateY(-50%) !important;width:44px !important;height:44px !important;border-radius:50% !important;background:#fff !important;border:1px solid #E6E9EF !important;box-shadow:0 4px 14px rgba(15,23,42,.12) !important;display:flex !important;align-items:center !important;justify-content:center !important;cursor:pointer !important;padding:0 !important;z-index:5 !important;transition:background .15s ease, box-shadow .15s ease, opacity .2s ease !important;}",
+    ".ps-car-btn{position:absolute !important;top:50% !important;transform:translateY(-50%) !important;width:44px !important;height:44px !important;border-radius:50% !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;box-shadow:0 4px 14px rgba(15,23,42,.12) !important;display:flex !important;align-items:center !important;justify-content:center !important;cursor:pointer !important;padding:0 !important;z-index:5 !important;transition:background .15s ease, box-shadow .15s ease, opacity .2s ease !important;}",
     ".ps-car-btn:hover{background:#F5F7FB !important;box-shadow:0 6px 18px rgba(15,23,42,.16) !important;}",
-    ".ps-car-btn svg{width:20px !important;height:20px !important;stroke:#1c1f26 !important;fill:none !important;stroke-width:2.2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    ".ps-car-btn svg{width:20px !important;height:20px !important;stroke:var(--ps-text,#1c1f26) !important;fill:none !important;stroke-width:2.2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-car-btn[disabled]{opacity:0 !important;pointer-events:none !important;}",
     ".ps-car-prev{left:4px !important;}",
     ".ps-car-next{right:4px !important;}",
@@ -259,7 +259,7 @@
     /* Alignés à gauche SUR LES CARTES : le conteneur natif fait 1120px alors que
        le rail des cartes fait 1000px centré. Un simple text-align:left décalerait
        les titres de 60px à gauche des cartes -> on reprend la même largeur 1000px. */
-    "#pageContent h1.learnworlds-heading{font-family:Figtree,sans-serif !important;font-size:56px !important;font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:#1c1f26 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    "#pageContent h1.learnworlds-heading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:56px !important;font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:var(--ps-text,#1c1f26) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     /* ⚠️ LearnWorlds SERT le H1 dans le HTML, "#" compris. Le loader étant en
        <head>, notre CSS est en place avant que le titre soit peint, mais
        heroText() ne peut le transformer qu'une fois le DOM prêt (~500ms) : sans
@@ -269,12 +269,12 @@
        heroText() pose data-ps-tw dès qu'il voit le titre, même s'il n'y a pas de
        "#" à animer — et un filet de sécurité le révèle après 2,5s au pire. */
     "#pageContent h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    "#pageContent h2.learnworlds-subheading{font-family:Figtree,sans-serif !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:#1c1f26 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-text,#1c1f26) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     /* .learnworlds-main-text existe AUSSI dans chaque carte : on ne stylise que
        la description marquée en JS (cf. heroText), jamais la classe nue.
        padding-right : garde une longueur de ligne lisible (~620px) tout en
        laissant le bord GAUCHE calé sur les cartes. */
-    "#pageContent .ps-desc{font-family:Figtree,sans-serif !important;font-size:17px !important;line-height:1.65 !important;color:#676879 !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
+    "#pageContent .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
     /* ---- TUILE DE PROGRESSION GLOBALE, à droite de la description ----
        Ancrée DANS `.ps-desc` : ce bloc fait déjà exactement 1000px (350->1350),
        est déjà `position:relative` en natif, et son `padding-right:38%` laisse
@@ -294,24 +294,24 @@
        Cas). ⚠️ Plus la description est courte, plus la tuile déborde : c'est
        pour ça que le défaut n'apparaissait que « parfois ». */
     "#pageContent .learnworlds-section-content:has(.ps-kpi){z-index:5 !important;}",
-    ".ps-kpi{position:absolute !important;top:0 !important;right:0 !important;width:352px !important;display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;padding:20px 22px !important;background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;box-shadow:0 4px 14px rgba(15,23,42,.05) !important;font-family:Figtree,sans-serif !important;}",
-    ".ps-kpi-num{font-family:Figtree,sans-serif !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
-    ".ps-kpi-lbl{font-family:Figtree,sans-serif !important;font-size:14px !important;font-weight:500 !important;color:#676879 !important;margin-top:2px !important;}",
+    ".ps-kpi{position:absolute !important;top:0 !important;right:0 !important;width:352px !important;display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;padding:20px 22px !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 14px rgba(15,23,42,.05) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    ".ps-kpi-num{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
+    ".ps-kpi-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:500 !important;color:var(--ps-text-soft,#676879) !important;margin-top:2px !important;}",
     ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:#F1F1FF !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
     /* ⚠️ SVG et non police d'icône : un glyphe de police se ferait écraser par
        tout `font-family` posé plus haut. (Cf. les pictos des tuiles du profil,
        cassés par un `*{font-family}`.) */
-    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:#6161FF !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
-    ".ps-kpi-bar{height:7px !important;border-radius:999px !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
-    ".ps-kpi-bar-in{height:100% !important;border-radius:999px !important;background:#6161FF !important;transition:width .6s ease !important;}",
+    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    ".ps-kpi-bar{height:7px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
+    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#6161FF) !important;transition:width .6s ease !important;}",
     ".ps-kpi-txt{flex:1 1 auto !important;min-width:0 !important;}",
     /* sous 1100px la place à droite disparaît : la tuile repasse dans le flux */
     "@media(max-width:1100px){.ps-kpi{position:static !important;width:auto !important;max-width:352px !important;margin-top:20px !important;}#pageContent .ps-desc{padding-right:0 !important;}}",
 
     /* machine à écrire : le slot réserve la largeur de la phrase la plus longue
        pour que le titre centré ne tremble pas à chaque lettre */
-    ".ps-tw{display:inline-block !important;text-align:left !important;color:#6161FF !important;white-space:nowrap !important;}",
-    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:#6161FF !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
+    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#6161FF) !important;white-space:nowrap !important;}",
+    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#6161FF) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
     "@keyframes ps-blink{50%{opacity:0}}",
     "@media(max-width:820px){#pageContent h1.learnworlds-heading{font-size:36px !important;}#pageContent h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}#pageContent .ps-desc{padding-right:0 !important;}}"
   ].join("\n");
