@@ -1,8 +1,13 @@
 /* ============================================================
    Cartes "études de cas" LearnWorlds — style monday + pastilles
    ------------------------------------------------------------
-   À charger dans le Code personnalisé de la PAGE Cas :
-     <script src="https://cdn.jsdelivr.net/gh/ExTrEmUm84/lw-course-cards@main/case-cards.js"></script>
+   À charger dans le Code personnalisé de la PAGE Cas (Réglages de la PAGE —
+   jamais dans un élément « HTML », les <script> y sont inertes) :
+     <script src="https://extremum84.github.io/lw-course-cards/case-cards.js"></script>
+
+   ⚠️ GitHub Pages, PAS jsDelivr : jsDelivr est abandonné depuis le 16/07, il
+   servait `@main` figé 12h en arrière (deux régressions en prod le même jour) et
+   rien ne force sa résolution branche -> commit. Déploiement = `git push`, point.
 
    Cible l'élément natif "Courses" (.lw-course-card). Lit la DESCRIPTION
    du cours au format "Label : valeur" (séparateur # optionnel) et rend

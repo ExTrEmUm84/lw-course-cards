@@ -1,8 +1,13 @@
 /* ============================================================
    Cartes "Fiches secteur" — même design que les cartes de cours
    ------------------------------------------------------------
-   À charger dans le Code personnalisé de la PAGE /fiches-secteur :
-     <script src="https://cdn.jsdelivr.net/gh/ExTrEmUm84/lw-course-cards@main/sector-cards.js"></script>
+   À charger dans le Code personnalisé de la PAGE /fiches-secteur (Réglages de la
+   PAGE — jamais dans un élément « HTML », les <script> y sont inertes) :
+     <script src="https://extremum84.github.io/lw-course-cards/sector-cards.js"></script>
+
+   ⚠️ GitHub Pages, PAS jsDelivr : jsDelivr est abandonné depuis le 16/07, il
+   servait `@main` figé 12h en arrière (deux régressions en prod le même jour) et
+   rien ne force sa résolution branche -> commit. Déploiement = `git push`, point.
 
    Même coquille que `course-cards.js` (blanc, bord #E6E9EF, radius 16,
    survol qui soulève) mais SANS la marque "PrepaStrat" ni la pastille :

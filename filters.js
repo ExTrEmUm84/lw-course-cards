@@ -1,8 +1,13 @@
 /* ============================================================
    Filtre catégories LearnWorlds — masque les catégories vides
    ------------------------------------------------------------
-   À charger dans le Code personnalisé de la PAGE (haut de page) :
-     <script src="https://cdn.jsdelivr.net/gh/ExTrEmUm84/lw-course-cards@main/filters.js"></script>
+   À charger dans le Code personnalisé de la PAGE, haut de page (Réglages de la
+   PAGE — jamais dans un élément « HTML », les <script> y sont inertes) :
+     <script src="https://extremum84.github.io/lw-course-cards/filters.js"></script>
+
+   ⚠️ GitHub Pages, PAS jsDelivr : jsDelivr est abandonné depuis le 16/07, il
+   servait `@main` figé 12h en arrière (deux régressions en prod le même jour) et
+   rien ne force sa résolution branche -> commit. Déploiement = `git push`, point.
 
    Le menu déroulant "categories" liste TOUTES les catégories de
    l'école, y compris celles sans cours sur cette page (→ "0 résultat").

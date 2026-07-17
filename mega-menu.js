@@ -1,9 +1,14 @@
 /* ============================================================
    Mega menu de navigation LearnWorlds — style monday (pictos)
    ------------------------------------------------------------
-   À charger SITE-WIDE (Réglages du SITE → Code personnalisé) car
-   le menu est présent sur toutes les pages :
-     <script src="https://cdn.jsdelivr.net/gh/ExTrEmUm84/lw-course-cards@main/mega-menu.js"></script>
+   À charger SITE-WIDE (Réglages du SITE → Code personnalisé) car le menu est
+   présent sur toutes les pages — jamais dans un élément « HTML », les <script>
+   y sont inertes :
+     <script src="https://extremum84.github.io/lw-course-cards/mega-menu.js"></script>
+
+   ⚠️ GitHub Pages, PAS jsDelivr : jsDelivr est abandonné depuis le 16/07, il
+   servait `@main` figé 12h en arrière (deux régressions en prod le même jour) et
+   rien ne force sa résolution branche -> commit. Déploiement = `git push`, point.
 
    1) Typo moderne (Figtree) sur toute la barre de nav.
    2) Dropdowns natifs (.lw-topbar-submenu) -> panneau type monday :
