@@ -1,8 +1,14 @@
 /* ============================================================
    Cartes "Programme" (lw-learning-program-card) — page /page-introduction
    ------------------------------------------------------------
-   À charger dans le Code personnalisé de la PAGE /page-introduction :
-     <script src="https://cdn.jsdelivr.net/gh/ExTrEmUm84/lw-course-cards@main/program-cards.js"></script>
+   À charger dans le Code personnalisé de la PAGE /page-introduction
+   (Réglages de la PAGE — jamais dans un élément « HTML », les <script> y sont
+   inertes) :
+     <script src="https://extremum84.github.io/lw-course-cards/program-cards.js"></script>
+
+   ⚠️ GitHub Pages, PAS jsDelivr : jsDelivr est abandonné depuis le 16/07, il
+   servait `@main` figé 12h en arrière (deux régressions en prod le même jour) et
+   rien ne force sa résolution branche -> commit. Déploiement = `git push`, point.
 
    Choix de Ziad le 17/07 : « faire cette page comme les autres » = la coquille
    commune sur les cartes enfants + l'en-tête de programme à la charte.
