@@ -215,6 +215,30 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       <button class="primary copy" id="copy">Copier</button>
     </div>
     <div class="note" id="howto"></div>
+
+    <h2>Publier sur le site</h2>
+    <div class="note" style="border-left-color:#E2445C;background:#FDECEF;color:#8A2233">
+      ⚠️ <strong>À lire une fois.</strong> Ce dépôt n'héberge pas que des couleurs : il contient
+      <strong>le JavaScript que ton site charge sur toutes les pages</strong>. Un jeton qui fuite
+      permettrait donc d'injecter du code chez tes visiteurs. Crée-le
+      <strong>« fine-grained », limité au seul dépôt <code>lw-course-cards</code></strong>,
+      permission <strong>Contents : Read and write</strong>, avec une expiration.
+      Il reste dans <em>ton</em> navigateur (rien n'est envoyé ailleurs) et se révoque en un clic
+      sur GitHub.
+    </div>
+    <div class="row" style="margin-top:9px">
+      <input type="password" id="tok" placeholder="Jeton GitHub (github_pat_…)" autocomplete="off">
+    </div>
+    <div class="btns" style="margin-top:8px">
+      <button class="primary" id="pub" style="flex:1">Publier sur le site</button>
+      <button id="forget" title="Efface le jeton de ce navigateur">Oublier</button>
+    </div>
+    <div class="note" id="pubStatus" style="display:none"></div>
+    <div class="note">
+      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Créer un jeton fine-grained →</a><br>
+      Repository access : <em>Only select repositories</em> → <code>lw-course-cards</code>.<br>
+      Permissions : <em>Repository permissions</em> → <strong>Contents</strong> → <em>Read and write</em>.
+    </div>
   </div>
 
   <!-- ================= APERÇU ================= -->
@@ -521,6 +545,107 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     var d=S.deriv; S.deriv=true; deduire(); S.deriv=d;
     document.getElementById("deriv").checked=true; S.deriv=true;
     rendre();
+  };
+
+  /* ================= PUBLIER ==========================================
+     Commite `tokens.js` via l'API GitHub, en ne remplaçant QUE le bloc entre
+     les marqueurs — tout le reste du fichier (les commentaires, qui sont la
+     mémoire du projet) est préservé à l'octet près.
+     🔴 Le jeton ne sort JAMAIS d'ici : il va de ce navigateur à api.github.com,
+     rien d'autre. Stocké en localStorage sur extremum84.github.io. */
+  var OWNER="ExTrEmUm84", REPO="lw-course-cards", PATH="tokens.js";
+  var API="https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/"+PATH;
+  var CLE="ps-gh-token";
+  /* Les marqueurs. Doivent correspondre EXACTEMENT à ceux de tokens.js —
+     les renommer d'un côté sans l'autre casse la publication. */
+  var RE=/(\/\* >>> DEBUT TOKENS[^\n]*\n)([\s\S]*?)(\n\/\* <<< FIN TOKENS \*\/)/;
+
+  /* btoa() ne gère que le latin-1 : tokens.js contient des accents et des
+     emojis, il faut passer par les octets UTF-8 sinon le fichier est corrompu. */
+  function b64(str){
+    var o=new TextEncoder().encode(str), s="";
+    o.forEach(function(b){ s+=String.fromCharCode(b); });
+    return btoa(s);
+  }
+  function deb64(x){
+    var bin=atob(String(x).replace(/\s/g,""));
+    var o=Uint8Array.from(bin, function(c){ return c.charCodeAt(0); });
+    return new TextDecoder().decode(o);
+  }
+
+  var elTok=document.getElementById("tok"), elPub=document.getElementById("pub"),
+      elSt=document.getElementById("pubStatus");
+  try{ elTok.value=localStorage.getItem(CLE)||""; }catch(e){}
+  function dire(msg, type){
+    elSt.style.display="block";
+    elSt.style.borderLeftColor = type==="ko" ? "#E2445C" : type==="ok" ? "#00C875" : "#DCE0E8";
+    elSt.style.background      = type==="ko" ? "#FDECEF" : type==="ok" ? "#E9FBF2" : "#F7F8FB";
+    elSt.style.color           = type==="ko" ? "#8A2233" : type==="ok" ? "#0B6B43" : "#8A90A2";
+    elSt.innerHTML=msg;
+  }
+  document.getElementById("forget").onclick=function(){
+    try{ localStorage.removeItem(CLE); }catch(e){}
+    elTok.value=""; dire("Jeton effacé de ce navigateur. Pense à le révoquer sur GitHub s'il ne sert plus.","");
+  };
+
+  elPub.onclick=async function(){
+    var t=elTok.value.trim();
+    if(!t){ dire("Colle d'abord ton jeton GitHub.","ko"); return; }
+    elPub.disabled=true; var libelle=elPub.textContent; elPub.textContent="Publication…";
+    try{
+      var H={Authorization:"Bearer "+t, Accept:"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28"};
+
+      dire("Lecture de <code>tokens.js</code>…","");
+      var g=await fetch(API+"?ref=main&t="+Date.now(),{headers:H, cache:"no-store"});
+      if(g.status===401) throw new Error("Jeton refusé (401). Il est peut-être expiré ou mal copié.");
+      if(g.status===403) throw new Error("Accès refusé (403). Le jeton n'a pas la permission <strong>Contents: Read and write</strong> sur ce dépôt.");
+      if(g.status===404) throw new Error("Introuvable (404). Le jeton ne donne probablement pas accès au dépôt <code>"+REPO+"</code>.");
+      if(!g.ok) throw new Error("Lecture impossible ("+g.status+").");
+      var meta=await g.json();
+      var actuel=deb64(meta.content);
+
+      if(!RE.test(actuel)) throw new Error("Les marqueurs <code>DEBUT/FIN TOKENS</code> sont introuvables dans tokens.js. Quelqu'un les a renommés — je ne touche à rien.");
+
+      var bloc=lignes().map(function(p){ return '    "'+p[0]+':'+p[1]+'"'; }).join(",\n");
+      var neuf=actuel.replace(RE, function(_,a,__,c){ return a+bloc+c; });
+
+      if(neuf===actuel){ dire("Rien à publier : le site a déjà exactement ces valeurs.","ok"); return; }
+
+      dire("Envoi du commit…","");
+      var p=await fetch(API,{method:"PUT",headers:H,body:JSON.stringify({
+        message:"Design system : tokens mis a jour depuis le configurateur",
+        content:b64(neuf), sha:meta.sha, branch:"main"
+      })});
+      if(p.status===409) throw new Error("Conflit (409) : le fichier a changé entre-temps. Recharge la page et republie.");
+      if(!p.ok){ var e=await p.text(); throw new Error("Commit refusé ("+p.status+"). "+e.slice(0,120)); }
+
+      dire("Commit passé ✓ — GitHub Pages redéploie, j'attends la mise en ligne…","");
+
+      /* On ne dit "en ligne" qu'après l'avoir VÉRIFIÉ : Pages met 1 à 2 min, et
+         annoncer trop tôt ferait croire à un bug quand le site n'a pas bougé. */
+      var cible=lignes().find(function(p){ return p[0]==="--ps-accent"; })[1];
+      var vu=false;
+      for(var i=0;i<24 && !vu;i++){
+        await new Promise(function(r){ setTimeout(r,5000); });
+        try{
+          var v=await fetch("https://extremum84.github.io/lw-course-cards/tokens.js?cb="+Date.now(),{cache:"reload"});
+          var txt=await v.text();
+          if(txt.indexOf('"--ps-accent:'+cible+'"')>-1) vu=true;
+        }catch(e){}
+        if(!vu) dire("Commit passé ✓ — Pages redéploie… ("+((i+1)*5)+"s)","");
+      }
+      if(vu) dire("<strong>En ligne ✓</strong> Recharge une page de ton site pour la voir.<br>"
+        +"⚠️ Ton navigateur garde les fichiers en cache ~10 min : fais un rechargement forcé "
+        +"(<kbd>Cmd+Maj+R</kbd>) si tu ne vois rien.","ok");
+      else dire("Commit passé ✓, mais Pages n'a pas encore servi la nouvelle version après 2 min. "
+        +"Ça finit presque toujours par arriver — réessaie de recharger dans quelques minutes.","");
+
+      try{ localStorage.setItem(CLE,t); }catch(e){}
+    }catch(err){
+      dire("<strong>Échec.</strong> "+(err&&err.message?err.message:err),"ko");
+    }finally{
+      elPub.disabled=false; elPub.textContent=libelle;
+    }
   };
 
   palette("lvls","lvl","Niveau");
