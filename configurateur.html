@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Configurateur — design system PrepaStrat</title>
+<!--
+  ============================================================
+  CONFIGURATEUR DU DESIGN SYSTEM — https://extremum84.github.io/lw-course-cards/configurateur.html
+  ------------------------------------------------------------
+  Règle les tokens de `tokens.js` à la souris, avec un aperçu en direct, et
+  génère le code à coller.
+
+  🔴 L'APERÇU EST UNE MAQUETTE, PAS LE VRAI SITE. Impossible de prévisualiser
+  les vraies pages ici : elles sont sur prepastrat.learnworlds.com, donc une
+  autre origine — un iframe ne laisserait rien injecter (cross-origin). Les
+  composants ci-dessous sont donc redessinés à l'identique À LA MAIN, avec les
+  MÊMES tokens et les MÊMES relations que la prod. Ils peuvent dériver si les
+  scripts évoluent sans qu'on touche à cette page.
+
+  Ce que la maquette reproduit fidèlement (relations vérifiées le 17/07) :
+  - `--ps-accent-rgb` est DÉRIVÉ de `--ps-accent` (la lueur des cartes en dépend) ;
+  - le liseré est tracé à `calc(var(--ps-r-card) - 2px)` pour rester concentrique ;
+  - `--ps-lvl1` et `--ps-f1` suivent la marque par défaut, comme dans tokens.js.
+  ============================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;600;700;800&family=Poppins:wght@400;600;700;800&family=Inter:wght@400;600;700;800&family=Manrope:wght@400;600;700;800&family=DM+Sans:wght@400;700&family=Space+Grotesk:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* ---- Les tokens : c'est CE bloc que le configurateur pilote ---------- */
+:root{
+  --ps-accent:#6161FF;
+  --ps-accent-rgb:97,97,255;
+  --ps-accent-hover:#4B4BE0;
+  --ps-accent-tint:#EDEDFF;
+  --ps-text:#1c1f26;
+  --ps-text-soft:#676879;
+  --ps-surface-soft:#F7F8FB;
+  --ps-border:#E6E9EF;
+  --ps-font:Figtree,-apple-system,Segoe UI,Roboto,sans-serif;
+  --ps-r-card:16px;
+  --ps-r-pill:999px;
+  --ps-r-btn:10px;
+  --ps-lvl1:var(--ps-accent-hover); --ps-lvl1-tint:var(--ps-accent-tint);
+  --ps-lvl2:#12A85F; --ps-lvl2-tint:#E6F9F0;
+  --ps-lvl3:#009257; --ps-lvl3-tint:#E1F7EC;
+  --ps-lvl4:#D22B45; --ps-lvl4-tint:#FDECEF;
+  --ps-lvl5:#D98500; --ps-lvl5-tint:#FFF3E0;
+  --ps-lvl6:#8A45C9; --ps-lvl6-tint:#F3EAFB;
+  --ps-f1:var(--ps-accent); --ps-f1-tint:var(--ps-accent-tint);
+  --ps-f2:#00C875; --ps-f2-tint:#E3F8EE;
+  --ps-f3:#E2445C; --ps-f3-tint:#FDECEF;
+  --ps-f4:#FDAB3D; --ps-f4-tint:#FFF3E0;
+  --ps-f5:#A25DDC; --ps-f5-tint:#F3EAFB;
+  --ps-f6:#0073EA; --ps-f6-tint:#E6F1FD;
+}
+/* ---- Le châssis du configurateur (volontairement neutre, il ne doit pas
+       se confondre avec l'aperçu) ------------------------------------- */
+*{box-sizing:border-box}
+body{margin:0;background:#F2F4F8;color:#1c1f26;font:15px/1.5 Figtree,-apple-system,Segoe UI,Roboto,sans-serif}
+.wrap{display:grid;grid-template-columns:340px 1fr;gap:0;min-height:100vh}
+.panel{background:#fff;border-right:1px solid #E1E5EC;padding:20px;overflow-y:auto;max-height:100vh;position:sticky;top:0}
+.stage{padding:26px 30px;overflow-y:auto}
+h1{font-size:19px;font-weight:800;margin:0 0 4px;letter-spacing:-.02em}
+.sub{font-size:12.5px;color:#676879;margin:0 0 18px;line-height:1.45}
+h2{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:#8A90A2;margin:22px 0 9px;padding-bottom:6px;border-bottom:1px solid #EEF0F4}
+.row{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.row label{flex:1;font-size:13px;color:#3A3F4D}
+.row code{font-size:10.5px;color:#9AA0B0;font-family:ui-monospace,Menlo,monospace}
+input[type=color]{width:34px;height:26px;padding:0;border:1px solid #DCE0E8;border-radius:6px;background:#fff;cursor:pointer;flex:none}
+input[type=range]{flex:1;accent-color:#6161FF}
+input[type=text],select{width:100%;padding:7px 9px;border:1px solid #DCE0E8;border-radius:7px;font:13px Figtree,sans-serif;background:#fff}
+.val{font-size:11.5px;color:#676879;min-width:40px;text-align:right;font-family:ui-monospace,Menlo,monospace}
+.lien{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#8A90A2;margin:-2px 0 9px 0}
+.lien input{accent-color:#6161FF}
+.btns{display:flex;gap:8px;margin-top:18px}
+button{font:600 13px Figtree,sans-serif;padding:9px 13px;border-radius:8px;border:1px solid #DCE0E8;background:#fff;cursor:pointer;transition:.15s}
+button:hover{background:#F5F7FB}
+button.primary{background:#6161FF;color:#fff;border-color:#6161FF}
+button.primary:hover{background:#4B4BE0}
+.note{font-size:11.5px;color:#8A90A2;line-height:1.5;margin-top:10px;padding:9px 10px;background:#F7F8FB;border-radius:7px;border-left:2px solid #DCE0E8}
+/* ---- Sortie ------------------------------------------------------- */
+.out{margin-top:22px;background:#151823;border-radius:12px;overflow:hidden}
+.tabs{display:flex;background:#1E2231}
+.tab{flex:1;padding:9px;font:600 12px Figtree,sans-serif;color:#9AA3BD;background:none;border:0;border-radius:0;cursor:pointer}
+.tab.on{background:#151823;color:#fff}
+.tab:hover{background:#252A3B}
+pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;max-height:230px;overflow:auto}
+.copy{margin:0 14px 14px;width:calc(100% - 28px)}
+/* ================= L'APERÇU — maquette des vrais composants ========= */
+.stage h3{font:800 12px/1 Figtree,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#9AA0B0;margin:0 0 12px}
+.bloc{background:#fff;border-radius:14px;padding:26px;margin-bottom:20px;border:1px solid #E7EAF0}
+/* hero */
+.pv-h1{font-family:var(--ps-font);font-size:40px;font-weight:800;letter-spacing:-.025em;line-height:1.14;color:var(--ps-text);margin:0}
+.pv-tw{color:var(--ps-accent)}
+.pv-cur{display:inline-block;width:3px;height:.86em;background:var(--ps-accent);margin-left:5px;vertical-align:-.06em;border-radius:2px;animation:bl 1.05s steps(1) infinite}
+@keyframes bl{50%{opacity:0}}
+.pv-desc{font-family:var(--ps-font);font-size:15px;line-height:1.65;color:var(--ps-text-soft);margin:12px 0 0;max-width:520px}
+/* rail + cartes cours */
+.pv-rail{display:flex;gap:16px;padding:74px 24px 26px;align-items:stretch}
+.pv-card{position:relative;isolation:isolate;flex:1;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
+  box-shadow:0 0 20px rgba(var(--ps-accent-rgb),.18);font-family:var(--ps-font);padding:0 22px 22px;
+  transition:box-shadow .2s ease,transform .2s ease}
+.pv-card:hover{box-shadow:0 12px 30px rgba(var(--ps-accent-rgb),.30);transform:translateY(-3px)}
+.pv-card:hover .pv-line rect{stroke-dashoffset:0}
+.pv-line{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:-1}
+.pv-line rect{x:2px;y:2px;width:calc(100% - 4px);height:calc(100% - 4px);rx:calc(var(--ps-r-card) - 2px);
+  fill:none;stroke:var(--ps-accent);stroke-width:4;stroke-dasharray:1.02;stroke-dashoffset:1.02;
+  transition:stroke-dashoffset .55s ease}
+.pv-rond{width:120px;height:120px;border-radius:50%;margin:-60px auto 0;border:5px solid #fff;
+  box-shadow:0 6px 18px rgba(15,23,42,.10);background:var(--ps-accent-tint);display:grid;place-items:center;
+  font:800 30px var(--ps-font);color:var(--ps-accent)}
+.pv-tag{display:inline-block;font:800 13px var(--ps-font);padding:5px 12px;border-radius:var(--ps-r-pill);margin:18px 0 12px}
+.pv-c1 .pv-tag{background:var(--ps-lvl1-tint);color:var(--ps-lvl1)}
+.pv-c2 .pv-tag{background:var(--ps-lvl2-tint);color:var(--ps-lvl2)}
+.pv-c3 .pv-tag{background:var(--ps-lvl3-tint);color:var(--ps-lvl3)}
+.pv-mini{display:flex;gap:7px;margin-bottom:12px}
+.pv-mini span{font:600 11.5px var(--ps-font);background:#F1F2F6;color:var(--ps-text-soft);padding:4px 9px;border-radius:var(--ps-r-pill)}
+.pv-titre{font:800 18px/1.28 var(--ps-font);color:var(--ps-text);margin:0 0 14px}
+.pv-bar{height:5px;background:#EDEDF2;border-radius:var(--ps-r-pill);overflow:hidden;margin-bottom:6px}
+.pv-bar i{display:block;height:100%;width:72%;border-radius:var(--ps-r-pill)}
+.pv-c1 .pv-bar i{background:var(--ps-lvl1)} .pv-c2 .pv-bar i{background:var(--ps-lvl2)} .pv-c3 .pv-bar i{background:var(--ps-lvl3)}
+.pv-pct{font:600 11.5px var(--ps-font);color:var(--ps-text-soft)}
+.pv-cta{display:inline-flex;align-items:center;gap:7px;margin-top:14px;font:700 14px var(--ps-font);color:var(--ps-accent);text-decoration:none}
+.pv-chev{align-self:center;color:#C3C9D6;font-size:26px;font-weight:800;flex:none}
+/* tuile KPI */
+.pv-kpi{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--ps-border);
+  border-radius:var(--ps-r-card);padding:16px 20px;font-family:var(--ps-font);max-width:360px}
+.pv-kpi b{font-size:26px;font-weight:800;color:var(--ps-text);display:block}
+.pv-kpi small{font-size:12.5px;color:var(--ps-text-soft)}
+.pv-kpi .pv-bar{margin-top:9px}
+.pv-kpi .pv-bar i{width:14%;background:var(--ps-accent)}
+.pv-kpi-ic{width:44px;height:44px;border-radius:50%;background:var(--ps-accent-tint);display:grid;place-items:center;color:var(--ps-accent);flex:none;font-weight:800}
+/* bouton + panneau programme */
+.pv-btn{background:var(--ps-accent);color:#fff;border:0;border-radius:var(--ps-r-btn);font:700 14px var(--ps-font);padding:11px 20px;cursor:pointer}
+.pv-btn:hover{background:var(--ps-accent-hover)}
+.pv-panel{background:var(--ps-surface-soft);border:1px solid var(--ps-border);border-radius:var(--ps-r-card);padding:22px;font-family:var(--ps-font)}
+.pv-panel h4{font:800 20px var(--ps-font);color:var(--ps-text);margin:0 0 6px}
+.pv-panel p{font-size:14px;color:var(--ps-text-soft);margin:0 0 12px;line-height:1.55}
+.pv-lecons{display:inline-block;background:var(--ps-accent-tint);color:var(--ps-accent);font:700 12px var(--ps-font);padding:5px 11px;border-radius:var(--ps-r-pill)}
+.pv-enfants{display:flex;gap:12px;margin-top:16px}
+.pv-enfant{flex:1;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);padding:14px;
+  font:700 14px/1.3 var(--ps-font);color:var(--ps-text);transition:transform .18s,box-shadow .18s}
+.pv-enfant:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(0,0,0,.08)}
+/* pastilles de champs */
+.pv-champs{display:flex;flex-wrap:wrap;gap:8px}
+.pv-champ{font:700 12.5px var(--ps-font);padding:6px 12px;border-radius:var(--ps-r-pill)}
+@media(max-width:900px){.wrap{grid-template-columns:1fr}.panel{position:static;max-height:none;border-right:0;border-bottom:1px solid #E1E5EC}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- ================= CONTRÔLES ================= -->
+  <div class="panel">
+    <h1>Design system PrepaStrat</h1>
+    <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
+    <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
+
+    <h2>Marque</h2>
+    <div class="row"><label>Violet principal</label><code>--ps-accent</code><input type="color" id="accent"></div>
+    <div class="row"><label>Violet au survol</label><code>-hover</code><input type="color" id="accentHover"></div>
+    <div class="row"><label>Violet teinté (fonds)</label><code>-tint</code><input type="color" id="accentTint"></div>
+
+    <h2>Texte, bords, surfaces</h2>
+    <div class="row"><label>Texte fort (titres)</label><code>--ps-text</code><input type="color" id="text"></div>
+    <div class="row"><label>Texte doux</label><code>-soft</code><input type="color" id="textSoft"></div>
+    <div class="row"><label>Bord des cartes</label><code>--ps-border</code><input type="color" id="border"></div>
+    <div class="row"><label>Fond doux (panneaux)</label><code>-surface-soft</code><input type="color" id="surfaceSoft"></div>
+
+    <h2>Typographie</h2>
+    <select id="fontSel">
+      <option value="Figtree,-apple-system,Segoe UI,Roboto,sans-serif">Figtree (actuelle)</option>
+      <option value="Inter,-apple-system,Segoe UI,Roboto,sans-serif">Inter</option>
+      <option value="Poppins,-apple-system,Segoe UI,Roboto,sans-serif">Poppins</option>
+      <option value="Manrope,-apple-system,Segoe UI,Roboto,sans-serif">Manrope</option>
+      <option value="DM Sans,-apple-system,Segoe UI,Roboto,sans-serif">DM Sans</option>
+      <option value="Space Grotesk,-apple-system,Segoe UI,Roboto,sans-serif">Space Grotesk</option>
+      <option value="Georgia,serif">Georgia (à empattements)</option>
+      <option value="__custom">Autre… (saisir à la main)</option>
+    </select>
+    <div class="row" style="margin-top:7px"><input type="text" id="fontTxt" placeholder="ex. Inter,sans-serif"></div>
+    <div class="note">⚠️ La police doit être <strong>disponible sur le site LearnWorlds</strong>. L'aperçu ici
+    charge les polices depuis Google Fonts ; si la tienne n'est pas installée côté LearnWorlds,
+    le site retombera sur la suivante de la liste.</div>
+
+    <h2>Arrondis</h2>
+    <div class="row"><label>Cartes</label><input type="range" id="rCard" min="0" max="32" step="1"><span class="val" id="rCardV"></span></div>
+    <div class="lien">↳ le liseré suit tout seul (<code>rayon − 2px</code>)</div>
+    <div class="row"><label>Pastilles</label><input type="range" id="rPill" min="0" max="999" step="1"><span class="val" id="rPillV"></span></div>
+    <div class="row"><label>Boutons</label><input type="range" id="rBtn" min="0" max="28" step="1"><span class="val" id="rBtnV"></span></div>
+
+    <h2>Palette — niveaux (page Cours)</h2>
+    <div class="lien"><input type="checkbox" id="lvl1Link" checked><label for="lvl1Link" style="flex:none">Niveau 1 suit la marque</label></div>
+    <div id="lvls"></div>
+
+    <h2>Palette — pastilles de champs</h2>
+    <div class="lien"><input type="checkbox" id="f1Link" checked><label for="f1Link" style="flex:none">Champ 1 suit la marque</label></div>
+    <div id="fs"></div>
+
+    <div class="btns">
+      <button id="reset">Tout réinitialiser</button>
+      <button id="rand">Surprends-moi</button>
+    </div>
+
+    <!-- ---- Sortie ---- -->
+    <div class="out">
+      <div class="tabs">
+        <button class="tab on" data-t="tok">Pour <code style="color:inherit">tokens.js</code></button>
+        <button class="tab" data-t="css">Test rapide</button>
+      </div>
+      <pre id="code"></pre>
+      <button class="primary copy" id="copy">Copier</button>
+    </div>
+    <div class="note" id="howto"></div>
+  </div>
+
+  <!-- ================= APERÇU ================= -->
+  <div class="stage">
+    <div class="note" style="margin:0 0 18px;border-left-color:#6161FF">
+      🔴 <strong>Ceci est une maquette, pas le vrai site.</strong> Les vraies pages sont sur un autre
+      domaine : impossible de les prévisualiser ici. Les composants sont redessinés avec les mêmes
+      tokens et les mêmes relations qu'en production — mais seul le site fait foi.
+    </div>
+
+    <h3>Hero</h3>
+    <div class="bloc">
+      <h1 class="pv-h1">Nos formations pour <span class="pv-tw">le conseil</span><span class="pv-cur"></span></h1>
+      <p class="pv-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed in metus vulputate, imperdiet tortor imperdiet, pulvinar metus.</p>
+    </div>
+
+    <h3>Tuile de progression</h3>
+    <div class="bloc">
+      <div class="pv-kpi">
+        <div style="flex:1"><b>14 %</b><small>Progression sur 6 cours</small><div class="pv-bar"><i></i></div></div>
+        <div class="pv-kpi-ic">↗</div>
+      </div>
+    </div>
+
+    <h3>Cartes de cours <span style="text-transform:none;font-weight:600;color:#B4BAC8">— survole pour voir le liseré et la lueur</span></h3>
+    <div class="bloc" style="padding:0 4px">
+      <div class="pv-rail">
+        <div class="pv-card pv-c1">
+          <svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect/></svg>
+          <div class="pv-rond">1</div>
+          <span class="pv-tag">Niveau 1</span>
+          <div class="pv-mini"><span>8 leçons</span><span>3 quiz</span></div>
+          <p class="pv-titre">Introduction au conseil en stratégie</p>
+          <div class="pv-bar"><i></i></div><span class="pv-pct">72 % complété</span>
+          <a class="pv-cta" href="#">Continuer →</a>
+        </div>
+        <div class="pv-chev">»</div>
+        <div class="pv-card pv-c2">
+          <svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect/></svg>
+          <div class="pv-rond">2</div>
+          <span class="pv-tag">Niveau 2</span>
+          <div class="pv-mini"><span>6 leçons</span></div>
+          <p class="pv-titre">Passage du screening et fondamentaux</p>
+          <a class="pv-cta" href="#">Commencer →</a>
+        </div>
+        <div class="pv-chev">»</div>
+        <div class="pv-card pv-c3">
+          <svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect/></svg>
+          <div class="pv-rond">3</div>
+          <span class="pv-tag">Niveau 3</span>
+          <div class="pv-mini"><span>9 leçons</span></div>
+          <p class="pv-titre">Montée en puissance sur les études de cas</p>
+          <a class="pv-cta" href="#">Commencer →</a>
+        </div>
+      </div>
+    </div>
+
+    <h3>Panneau de programme (page Introduction)</h3>
+    <div class="bloc">
+      <div class="pv-panel">
+        <div style="display:flex;align-items:flex-start;gap:20px">
+          <div style="flex:1">
+            <h4>Business Sense</h4>
+            <p>Le business sense est une compétence essentielle en entretien de conseil.</p>
+            <span class="pv-lecons">4 Leçons</span>
+          </div>
+          <button class="pv-btn">Continuer</button>
+        </div>
+        <div class="pv-enfants">
+          <div class="pv-enfant">1.3 – Maîtriser les types d'études de cas</div>
+          <div class="pv-enfant">1.4 – Astuces pour l'étude de cas</div>
+          <div class="pv-enfant">1.5 – Les réflexes fondamentaux</div>
+        </div>
+      </div>
+    </div>
+
+    <h3>Pastilles de champs (fiches secteur / études de cas)</h3>
+    <div class="bloc"><div class="pv-champs" id="champs"></div></div>
+  </div>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  /* Les valeurs d'origine = celles de tokens.js. Elles servent AUSSI de
+     référence pour n'émettre que ce qui a VRAIMENT changé. */
+  var DEF={
+    accent:"#6161FF", accentHover:"#4B4BE0", accentTint:"#EDEDFF",
+    text:"#1c1f26", textSoft:"#676879", border:"#E6E9EF", surfaceSoft:"#F7F8FB",
+    font:"Figtree,-apple-system,Segoe UI,Roboto,sans-serif",
+    rCard:16, rPill:999, rBtn:10,
+    lvl:[["#4B4BE0","#EDEDFF"],["#12A85F","#E6F9F0"],["#009257","#E1F7EC"],["#D22B45","#FDECEF"],["#D98500","#FFF3E0"],["#8A45C9","#F3EAFB"]],
+    f:[["#6161FF","#EDEDFF"],["#00C875","#E3F8EE"],["#E2445C","#FDECEF"],["#FDAB3D","#FFF3E0"],["#A25DDC","#F3EAFB"],["#0073EA","#E6F1FD"]],
+    lvl1Link:true, f1Link:true
+  };
+  var S=JSON.parse(JSON.stringify(DEF));
+
+  /* 🔴 --ps-accent-rgb DOIT suivre --ps-accent : c'est lui qui porte la lueur
+     des cartes (`rgba(var(--ps-accent-rgb),.18)`), une variable ne pouvant pas
+     être glissée dans `rgba(#hex,...)`. On le DÉRIVE, jamais à la main. */
+  function rgb(hex){
+    var h=hex.replace("#","");
+    if(h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
+    var n=parseInt(h,16);
+    return [(n>>16)&255,(n>>8)&255,n&255].join(",");
+  }
+
+  /* --- construction des lignes de palette --- */
+  function palette(hote, cle, nom){
+    var box=document.getElementById(hote);
+    box.innerHTML="";
+    S[cle].forEach(function(p,i){
+      var d=document.createElement("div"); d.className="row";
+      d.innerHTML='<label>'+nom+' '+(i+1)+'</label>';
+      var a=document.createElement("input"); a.type="color"; a.value=p[0]; a.title="couleur pleine";
+      var b=document.createElement("input"); b.type="color"; b.value=p[1]; b.title="teinte de fond";
+      a.oninput=function(){ S[cle][i][0]=a.value; rendre(); };
+      b.oninput=function(){ S[cle][i][1]=b.value; rendre(); };
+      d.appendChild(a); d.appendChild(b); box.appendChild(d);
+    });
+  }
+
+  var champsBox=document.getElementById("champs");
+  function champs(){
+    champsBox.innerHTML="";
+    ["Cabinet","Année","Secteur","Type","Difficulté","Format"].forEach(function(t,i){
+      var s=document.createElement("span"); s.className="pv-champ";
+      s.style.background="var(--ps-f"+(i+1)+"-tint)"; s.style.color="var(--ps-f"+(i+1)+")";
+      s.textContent=t; champsBox.appendChild(s);
+    });
+  }
+
+  var R=document.documentElement.style;
+  function rendre(){
+    R.setProperty("--ps-accent",S.accent);
+    R.setProperty("--ps-accent-rgb",rgb(S.accent));
+    R.setProperty("--ps-accent-hover",S.accentHover);
+    R.setProperty("--ps-accent-tint",S.accentTint);
+    R.setProperty("--ps-text",S.text);
+    R.setProperty("--ps-text-soft",S.textSoft);
+    R.setProperty("--ps-border",S.border);
+    R.setProperty("--ps-surface-soft",S.surfaceSoft);
+    R.setProperty("--ps-font",S.font);
+    R.setProperty("--ps-r-card",S.rCard+"px");
+    R.setProperty("--ps-r-pill",S.rPill+"px");
+    R.setProperty("--ps-r-btn",S.rBtn+"px");
+    for(var i=0;i<6;i++){
+      var lien1 = (i===0 && S.lvl1Link);
+      R.setProperty("--ps-lvl"+(i+1), lien1?"var(--ps-accent-hover)":S.lvl[i][0]);
+      R.setProperty("--ps-lvl"+(i+1)+"-tint", lien1?"var(--ps-accent-tint)":S.lvl[i][1]);
+      var lienf = (i===0 && S.f1Link);
+      R.setProperty("--ps-f"+(i+1), lienf?"var(--ps-accent)":S.f[i][0]);
+      R.setProperty("--ps-f"+(i+1)+"-tint", lienf?"var(--ps-accent-tint)":S.f[i][1]);
+    }
+    document.getElementById("rCardV").textContent=S.rCard+"px";
+    document.getElementById("rPillV").textContent=S.rPill+"px";
+    document.getElementById("rBtnV").textContent=S.rBtn+"px";
+    sortie();
+  }
+
+  /* --- le code généré --- */
+  function lignes(){
+    var L=[];
+    L.push(["--ps-accent",S.accent]);
+    L.push(["--ps-accent-rgb",rgb(S.accent)]);
+    L.push(["--ps-accent-hover",S.accentHover]);
+    L.push(["--ps-accent-tint",S.accentTint]);
+    L.push(["--ps-text",S.text]);
+    L.push(["--ps-text-soft",S.textSoft]);
+    L.push(["--ps-surface-soft",S.surfaceSoft]);
+    L.push(["--ps-border",S.border]);
+    L.push(["--ps-font",S.font]);
+    L.push(["--ps-r-card",S.rCard+"px"]);
+    L.push(["--ps-r-pill",S.rPill+"px"]);
+    L.push(["--ps-r-btn",S.rBtn+"px"]);
+    for(var i=0;i<6;i++){
+      var l1=(i===0&&S.lvl1Link);
+      L.push(["--ps-lvl"+(i+1), l1?"var(--ps-accent-hover)":S.lvl[i][0]]);
+      L.push(["--ps-lvl"+(i+1)+"-tint", l1?"var(--ps-accent-tint)":S.lvl[i][1]]);
+    }
+    for(i=0;i<6;i++){
+      var f1=(i===0&&S.f1Link);
+      L.push(["--ps-f"+(i+1), f1?"var(--ps-accent)":S.f[i][0]]);
+      L.push(["--ps-f"+(i+1)+"-tint", f1?"var(--ps-accent-tint)":S.f[i][1]]);
+    }
+    return L;
+  }
+  var onglet="tok";
+  function sortie(){
+    var L=lignes(), t;
+    if(onglet==="tok"){
+      t=L.map(function(p){ return '    "'+p[0]+':'+p[1]+'"'; }).join(",\n");
+      document.getElementById("howto").innerHTML="<strong>Le propre :</strong> remplace le contenu du tableau <code>TOKENS</code> dans <code>tokens.js</code> par ce bloc, puis <code>git push</code>. En ligne 1–2 min après. C'est la source de vérité — à privilégier.";
+    }else{
+      t="<style>\n:root{\n"+L.map(function(p){ return "  "+p[0]+":"+p[1]+";"; }).join("\n")+"\n}\n</style>";
+      document.getElementById("howto").innerHTML="<strong>Le rapide :</strong> colle ça dans le Code du SITE <em>après</em> la balise <code>tokens.js</code>, pour voir le rendu sur le vrai site sans déployer. ⚠️ À ne pas laisser en place : <code>tokens.js</code> ne serait plus la source de vérité et les deux finiraient par diverger.";
+    }
+    document.getElementById("code").textContent=t;
+  }
+
+  /* --- branchements --- */
+  [["accent","accent"],["accentHover","accentHover"],["accentTint","accentTint"],
+   ["text","text"],["textSoft","textSoft"],["border","border"],["surfaceSoft","surfaceSoft"]
+  ].forEach(function(p){
+    var el=document.getElementById(p[0]);
+    el.value=S[p[1]];
+    el.oninput=function(){ S[p[1]]=el.value; rendre(); };
+  });
+  ["rCard","rPill","rBtn"].forEach(function(k){
+    var el=document.getElementById(k); el.value=S[k];
+    el.oninput=function(){ S[k]=+el.value; rendre(); };
+  });
+  var fontSel=document.getElementById("fontSel"), fontTxt=document.getElementById("fontTxt");
+  fontTxt.value=S.font;
+  fontSel.onchange=function(){
+    if(fontSel.value==="__custom"){ fontTxt.focus(); return; }
+    S.font=fontSel.value; fontTxt.value=S.font; rendre();
+  };
+  fontTxt.oninput=function(){ S.font=fontTxt.value||DEF.font; rendre(); };
+  document.getElementById("lvl1Link").onchange=function(){ S.lvl1Link=this.checked; rendre(); };
+  document.getElementById("f1Link").onchange=function(){ S.f1Link=this.checked; rendre(); };
+
+  document.querySelectorAll(".tab").forEach(function(b){
+    b.onclick=function(){
+      document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on");});
+      b.classList.add("on"); onglet=b.dataset.t; sortie();
+    };
+  });
+  document.getElementById("copy").onclick=function(){
+    var b=this;
+    navigator.clipboard.writeText(document.getElementById("code").textContent).then(function(){
+      b.textContent="Copié ✓"; setTimeout(function(){ b.textContent="Copier"; },1400);
+    },function(){ b.textContent="Copie refusée — sélectionne le texte"; });
+  };
+  document.getElementById("reset").onclick=function(){
+    S=JSON.parse(JSON.stringify(DEF));
+    document.getElementById("accent").value=S.accent;
+    document.getElementById("accentHover").value=S.accentHover;
+    document.getElementById("accentTint").value=S.accentTint;
+    document.getElementById("text").value=S.text;
+    document.getElementById("textSoft").value=S.textSoft;
+    document.getElementById("border").value=S.border;
+    document.getElementById("surfaceSoft").value=S.surfaceSoft;
+    document.getElementById("rCard").value=S.rCard;
+    document.getElementById("rPill").value=S.rPill;
+    document.getElementById("rBtn").value=S.rBtn;
+    fontSel.selectedIndex=0; fontTxt.value=S.font;
+    document.getElementById("lvl1Link").checked=true;
+    document.getElementById("f1Link").checked=true;
+    palette("lvls","lvl","Niveau"); palette("fs","f","Champ"); rendre();
+  };
+  document.getElementById("rand").onclick=function(){
+    var h=Math.floor(Math.random()*360);
+    function hsl(hh,s,l){
+      var a=s*Math.min(l,1-l)/100;
+      function f(n){ var k=(n+hh/30)%12, c=l/100-a*Math.max(Math.min(k-3,9-k,1),-1);
+        return Math.round(255*c).toString(16).padStart(2,"0"); }
+      return "#"+f(0)+f(8)+f(4);
+    }
+    S.accent=hsl(h,75,62); S.accentHover=hsl(h,70,52); S.accentTint=hsl(h,100,95);
+    document.getElementById("accent").value=S.accent;
+    document.getElementById("accentHover").value=S.accentHover;
+    document.getElementById("accentTint").value=S.accentTint;
+    rendre();
+  };
+
+  palette("lvls","lvl","Niveau");
+  palette("fs","f","Champ");
+  champs();
+  rendre();
+})();
+</script>
+</body>
+</html>
