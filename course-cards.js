@@ -1,8 +1,13 @@
 /* ============================================================
    Cartes de cours LearnWorlds — style "monday produit" (dynamique)
    ------------------------------------------------------------
-   Hébergé sur GitHub, chargé via jsDelivr dans le Code personnalisé :
-     <script src="https://cdn.jsdelivr.net/gh/ExTrEmUm84/lw-course-cards@main/course-cards.js"></script>
+   À charger dans le Code personnalisé de la PAGE (Réglages de la PAGE — jamais
+   dans un élément « HTML », les <script> y sont inertes) :
+     <script src="https://extremum84.github.io/lw-course-cards/course-cards.js"></script>
+
+   ⚠️ GitHub Pages, PAS jsDelivr : jsDelivr est abandonné depuis le 16/07, il
+   servait `@main` figé 12h en arrière (deux régressions en prod le même jour) et
+   rien ne force sa résolution branche -> commit. Déploiement = `git push`, point.
 
    Cible l'élément natif "Courses" (.lw-course-card).
    Titre requis : "Niveau #N - Nom du cours".
@@ -34,8 +39,20 @@
        Un `display:… !important` en feuille de style écrase cet inline -> les
        filtres restent visibles malgré la désactivation. Ici : alignement seul. */
     "#pageContent .lw-cols.with-filters{max-width:1000px !important;margin:0 auto !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;box-shadow:0 0 20px rgba(97,97,255,.18) !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
+    /* 🔴 LA LUEUR VIOLETTE (choix de Ziad le 17/07) EST INDISSOCIABLE DU PADDING
+       HORIZONTAL DU RAIL (`padding:90px 24px 26px`, sa règle plus bas). Le rail
+       porte `overflow-x:auto` : avec le padding horizontal à 0 qu'il avait, la
+       lueur de la 1re carte était TRANCHÉE NET sur son bord gauche (vérifié en
+       posant un bandeau opaque de 22px : il n'en restait qu'un éclat).
+       Le `max-width` du rail est passé de 1000 à 1048px POUR COMPENSER ces
+       2×24px : la largeur des cartes est un `calc((100% - 80px - 64px)/3)` sur
+       le contenu du rail, donc sans compensation elles maigrissaient de 16px
+       chacune. Contenu du rail = 1000px, comme avant -> cartes inchangées (285px,
+       bord à 350) et toujours alignées sur le hero, lui aussi calé sur 1000px.
+       ⚠️ Ne pas toucher à l'un des trois (padding / max-width / rayon de la
+       lueur) sans les autres. */
+    "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(97,97,255,.30) !important;transform:translateY(-3px) !important;}",
     /* On masque le natif SAUF l'illustration : LearnWorlds la pose en
        `background-image` sur un `div.learnworlds-image`, PREMIER enfant de la
        carte (pas une balise <img>) — inutile donc d'aller relire son URL, il
@@ -127,7 +144,7 @@
          bandeau, qui n'existe plus ; les chevrons, eux, sont déjà insérés en JS
          précisément à cause de ce `overflow:hidden`.
        - la réserve de 90px en haut du RAIL est posée dans SA règle, plus bas
-         (`padding:90px 0 26px`) : il porte `overflow-x:auto`, donc son
+         (`padding:90px 24px 26px`) : il porte `overflow-x:auto`, donc son
          débordement vertical n'est PAS `visible` (spec CSS : un axe en `auto`
          force l'autre hors de `visible`) -> sans cette réserve, la moitié qui
          dépasse est rognée par le conteneur de défilement.
@@ -196,7 +213,7 @@
     "#pageContent .cards-grandpa{position:relative !important;}",
     /* le rail porte lui-même sa largeur/fond/police : le `display:flex` n'est posé
        QUE sur ce sélecteur scopé, jamais sur `.lw-cols.multiple-rows` nu (cf. plus haut) */
-    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;scroll-snap-type:x mandatory !important;scrollbar-width:none !important;-ms-overflow-style:none !important;gap:16px !important;padding:90px 0 26px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
+    "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:flex !important;flex-wrap:nowrap !important;overflow-x:auto !important;scroll-snap-type:x mandatory !important;scrollbar-width:none !important;-ms-overflow-style:none !important;gap:16px !important;padding:90px 24px 26px !important;max-width:1048px !important;scroll-padding:0 24px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;}",
     "#pageContent .cards-grandpa > .lw-cols.multiple-rows::-webkit-scrollbar{display:none !important;}",
     /* 3 cartes : largeur = (100% - 2 gouttières) / 3.
        flex-direction:column : la carte est déjà en flex côté LW, il faut la
