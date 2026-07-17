@@ -167,7 +167,19 @@
     R + ".psa-chip-btn:hover{background:var(--ps-accent,#6161FF);color:#fff;}",
     R + ".psa-chip-btn:focus-visible{outline:2px solid var(--ps-accent,#6161FF);outline-offset:2px;}",
 
-    R + ".psa-links{margin-top:auto;padding-top:16px;display:flex;gap:14px;}",
+    /* Pied de carte : collé en bas, action principale (bouton) au-dessus des
+       liens secondaires. Le margin-top:auto vit ici, plus sur .psa-links. */
+    R + ".psa-foot{margin-top:auto;padding-top:16px;display:flex;flex-direction:column;gap:12px;align-items:flex-start;}",
+    /* Bouton "Contacter" : CTA plein au violet du site (--ps-accent), coins
+       --ps-r-btn. Affordance bouton pour une action, là où .ps-mlink est un
+       simple lien "voir plus". */
+    R + ".psa-contact{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;" +
+      "border-radius:var(--ps-r-btn,10px);background:var(--ps-accent,#6161FF);color:#fff;" +
+      "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);" +
+      "font-size:13.5px;font-weight:600;text-decoration:none;transition:background .15s ease;}",
+    R + ".psa-contact:hover{background:var(--ps-accent-hover,#4B4BE0);}",
+    R + ".psa-contact:focus-visible{outline:2px solid var(--ps-accent,#6161FF);outline-offset:2px;}",
+    R + ".psa-links{display:flex;gap:14px;}",
     R + ".psa-link{font-size:13px;font-weight:600;color:var(--ps-accent,#6161FF);text-decoration:none;}",
     R + ".psa-link:hover{text-decoration:underline;}",
 
@@ -285,6 +297,25 @@
       c.appendChild(wrap);
     }
 
+    // Pied de carte : le bouton "Contacter" (action principale) puis les liens
+    // secondaires (LinkedIn / Site). Le tout collé en bas par margin-top:auto.
+    var foot = el("div", "psa-foot");
+
+    // Bouton contact : le canal (email, LinkedIn, tél…) est choisi par le
+    // membre ; le Worker a déjà déterminé libellé et lien.
+    if (m.contact && m.contact.href) {
+      var cta = el("a", "psa-contact", m.contact.label);
+      cta.href = m.contact.href;
+      // On n'ouvre un nouvel onglet que pour le web ; mailto:/tel: restent
+      // dans le même contexte (sinon un onglet blanc s'ouvre puis se ferme).
+      if (/^https?:/i.test(m.contact.href)) {
+        cta.target = "_blank";
+        cta.rel = "noopener noreferrer nofollow";
+      }
+      cta.setAttribute("aria-label", m.contact.label + " — " + m.name);
+      foot.appendChild(cta);
+    }
+
     var links = el("div", "psa-links");
     [[m.linkedin, "LinkedIn"], [m.website, "Site web"]].forEach(function (p) {
       if (!p[0]) return;
@@ -295,7 +326,9 @@
       a.setAttribute("aria-label", p[1] + " de " + m.name);
       links.appendChild(a);
     });
-    if (links.childNodes.length) c.appendChild(links);
+    if (links.childNodes.length) foot.appendChild(links);
+
+    if (foot.childNodes.length) c.appendChild(foot);
 
     return c;
   }
