@@ -62,8 +62,20 @@
   var R = "#psa-root ";
 
   var CSS = [
+    /* 🔴 `font-size` et `text-align` NE SONT PAS DÉCORATIFS ICI — ils coupent
+       deux héritages de LearnWorlds :
+       - LW pose `font-size:0` sur ses sections (vieille astuce anti-espaces
+         entre colonnes inline-block). Sans la ligne ci-dessous, tout ce qui
+         fait `font:inherit` — l'input et les selects — tombe à 0 : les menus
+         déroulants deviennent deux boîtes vides de 50px. Les cartes, elles,
+         ont des tailles explicites et ne le montrent pas. Vérifié sur la page
+         réelle le 17/07.
+       - LW pose aussi `text-align:center` sur ses sections.
+       Déclarer les deux ici arrête l'héritage : aucune bagarre de spécificité,
+       aucun !important. Ne pas les retirer. */
     R + "{" +
       "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);" +
+      "font-size:15px;text-align:left;" +
       "color:var(--ps-text,#1c1f26);" +
       "max-width:1120px;margin:0 auto;padding:8px 16px 48px;" +
       "line-height:1.5;box-sizing:border-box;}",
@@ -312,10 +324,25 @@
   function construire(root) {
     root.replaceChildren();
 
-    var bar = el("div", "psa-bar");
+    /* 🔴 UN `<form>`, PAS UN `<div>` — et ce n'est pas cosmétique.
+       Les modales de connexion/inscription de LearnWorlds laissent 3 champs
+       mot de passe ORPHELINS (hors de tout `<form>`) dans le DOM de chaque
+       page. Chrome regroupe les champs orphelins entre eux : il voyait « un
+       champ texte + des mots de passe » et concluait « formulaire de
+       connexion », donc il remplissait l'email de l'utilisateur dans ma
+       recherche. `autocomplete="off"` n'y change rien, Chrome l'ignore pour le
+       remplissage d'identité. Donner un formulaire à mon champ le sort du
+       groupe des orphelins : c'est ça qui règle le problème.
+       Vérifié sur la page réelle le 17/07 : `#psa-root` n'est dans aucun
+       formulaire, celui-ci n'est donc pas imbriqué (ce qui l'invaliderait). */
+    var bar = el("form", "psa-bar");
+    bar.setAttribute("autocomplete", "off");
+    bar.addEventListener("submit", function (e) { e.preventDefault(); });
+
     qEl = el("input", "psa-input");
     qEl.type = "search";
     qEl.id = "psa-q";
+    qEl.name = "psa-recherche";
     qEl.placeholder = "Rechercher un nom, une filière, une matière…";
     qEl.autocomplete = "off";
     qEl.setAttribute("aria-label", "Rechercher dans l'annuaire");
