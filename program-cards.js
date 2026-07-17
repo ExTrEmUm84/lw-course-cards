@@ -68,8 +68,16 @@
     PROG+" .learnworlds-overline-text{font-family:Figtree,sans-serif !important;color:#676879 !important;font-weight:600 !important;}",
 
     /* ---- cartes enfants : la coquille commune ------------------------- */
-    /* `overflow:hidden` sert ici aux coins de la photo, qui est en bandeau
-       (contrairement à la page Cours où l'illustration est un rond). */
+    /* Photo RETIRÉE (choix de Ziad le 17/07) : la carte ne porte plus que son
+       titre, comme `cabinet-cards.js`. Vérifié avant de masquer : le lien de la
+       photo et celui du titre pointent sur le même cours — on ne perd aucun
+       accès. La photo reste dans le DOM en `background-image` si on veut la
+       réintroduire un jour ; ne pas la supprimer côté LearnWorlds.
+       On masque le CONTENEUR et pas `.learnworlds-image` : ça emporte aussi le
+       lien qui l'enveloppe, sinon on garderait une zone cliquable vide. */
+    S+" .lw-course-card-item .product-image-container{display:none !important;}",
+    /* `overflow:hidden` est conservé bien que la photo ait disparu : il garde
+       tout futur contenu à l'intérieur du radius. */
     S+" .lw-course-card-item{background:#fff !important;border:1px solid #E6E9EF !important;border-radius:16px !important;overflow:hidden !important;box-shadow:none !important;transition:transform .18s ease, box-shadow .18s ease !important;}",
     S+" .lw-course-card-item:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
     S+" .lw-course-card-item h4{font-family:Figtree,-apple-system,Segoe UI,Roboto,sans-serif !important;font-size:17px !important;font-weight:700 !important;color:#1c1f26 !important;line-height:1.3 !important;}",
