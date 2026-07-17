@@ -73,12 +73,21 @@
        - LW pose aussi `text-align:center` sur ses sections.
        Déclarer les deux ici arrête l'héritage : aucune bagarre de spécificité,
        aucun !important. Ne pas les retirer. */
+    /* `max-width:1000px` sans marge horizontale = exactement la boîte du hero
+       (h1 et .ps-desc, plus bas). Mesuré sur la page réelle : avec 1120px et
+       16px de padding, l'annuaire commençait 44px à gauche du titre — visible
+       à l'œil. Le conteneur LearnWorlds a `padding:0`, il ne rattrape rien.
+       Ne pas retoucher ces valeurs sans les remesurer contre le hero. */
     R + "{" +
       "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);" +
       "font-size:15px;text-align:left;" +
       "color:var(--ps-text,#1c1f26);" +
-      "max-width:1120px;margin:0 auto;padding:8px 16px 48px;" +
+      "max-width:1000px;margin:0 auto;padding:8px 0 48px;" +
       "line-height:1.5;box-sizing:border-box;}",
+    /* En dessous de la largeur du hero, plus rien ne protège des bords : on
+       remet une marge. L'alignement avec le titre y perd 16px, invisible sur
+       un écran où tout est en une colonne — des cartes coupées, non. */
+    "@media (max-width:1040px){" + R + "{padding-left:16px;padding-right:16px;}}",
     R + "*," + R + "*::before," + R + "*::after{box-sizing:inherit;}",
 
     /* Barre de recherche */
