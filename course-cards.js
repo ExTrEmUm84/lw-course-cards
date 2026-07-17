@@ -176,7 +176,18 @@
        Dépend de `isolation:isolate` sur la carte, sinon ce négatif l'envoie
        derrière le fond blanc et il devient invisible. */
     ".ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;pointer-events:none !important;z-index:-1 !important;}",
-    ".ps-mline rect{fill:none !important;stroke:#6161FF !important;stroke-width:4 !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset .55s ease !important;}",
+    /* 🔴 Le rect est RENTRÉ de 2px (= la moitié du trait) dans le SVG, sinon les
+       COINS paraissent 2x plus épais (signalé par Ziad le 17/07) :
+       tracé pile sur le bord, le trait de 4px déborde de 2px hors du SVG, que
+       son `overflow:hidden` natif rogne -> 2px visibles sur les côtés droits.
+       Mais dans les angles l'arc rentre vers l'intérieur, le trait ne sort plus
+       du SVG, rien n'est rogné -> 4px pleins. D'où des coins deux fois plus gras.
+       Rentré de 2px, le trait tient entièrement dans le viewport : plus aucun
+       rognage, épaisseur uniforme. `rx:14` = 16 (radius carte) - 2, pour rester
+       concentrique.
+       x/y/width/height/rx en CSS = propriétés de géométrie SVG2 (les attributs,
+       eux, n'acceptent pas `calc()`). Support vérifié à l'écran sur Chrome. */
+    ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;rx:14px !important;fill:none !important;stroke:#6161FF !important;stroke-width:4 !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset .55s ease !important;}",
     "#pageContent .cards-grandpa .lw-course-card:hover .ps-mline rect{stroke-dashoffset:0 !important;}",
     "@media(prefers-reduced-motion:reduce){.ps-mline rect{transition:none !important;}}",
 
@@ -484,7 +495,11 @@
     var r=document.createElementNS(NS,"rect");
     r.setAttribute("x","0"); r.setAttribute("y","0");
     r.setAttribute("width","100%"); r.setAttribute("height","100%");
-    r.setAttribute("rx","16");                     // = le radius de la carte
+    /* ⚠️ x/y/width/height/rx posés ici sont ÉCRASÉS par la règle `.ps-mline rect`
+       (qui rentre le rect de 2px pour que les coins ne soient pas plus épais).
+       Ils ne servent que de repli si le CSS saute — d'où le `rx:16` brut ici,
+       contre `rx:14` en CSS. La géométrie de référence est dans le CSS. */
+    r.setAttribute("rx","16");
     r.setAttribute("pathLength","1");
     s.appendChild(r);
     return s;
