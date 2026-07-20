@@ -172,16 +172,21 @@
     R + ".psa-foot{margin-top:auto;padding-top:16px;display:flex;flex-direction:column;gap:12px;align-items:flex-start;}",
     /* Bouton "Contacter" : CTA plein au violet du site (--ps-accent), coins
        --ps-r-btn. Affordance bouton pour une action, là où .ps-mlink est un
-       simple lien "voir plus". */
+       simple lien "voir plus".
+       🔴 !important sur color/background/text-decoration : ce sont des <a>, et
+       LearnWorlds impose à TOUS ses liens sa couleur (#1c1f26) + un soulignement.
+       Sans !important, le texte du bouton virait gris foncé souligné sur fond
+       violet — illisible. Vérifié sur la page réelle le 2026-07-17. */
     R + ".psa-contact{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;" +
-      "border-radius:var(--ps-r-btn,10px);background:var(--ps-accent,#6161FF);color:#fff;" +
+      "border-radius:var(--ps-r-btn,10px);background:var(--ps-accent,#6161FF) !important;color:#fff !important;" +
       "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);" +
-      "font-size:13.5px;font-weight:600;text-decoration:none;transition:background .15s ease;}",
-    R + ".psa-contact:hover{background:var(--ps-accent-hover,#4B4BE0);}",
+      "font-size:13.5px;font-weight:600;text-decoration:none !important;transition:background .15s ease;}",
+    R + ".psa-contact:hover{background:var(--ps-accent-hover,#4B4BE0) !important;color:#fff !important;}",
     R + ".psa-contact:focus-visible{outline:2px solid var(--ps-accent,#6161FF);outline-offset:2px;}",
     R + ".psa-links{display:flex;gap:14px;}",
-    R + ".psa-link{font-size:13px;font-weight:600;color:var(--ps-accent,#6161FF);text-decoration:none;}",
-    R + ".psa-link:hover{text-decoration:underline;}",
+    /* Mêmes <a>, même écrasement LW : on force la couleur violette. */
+    R + ".psa-link{font-size:13px;font-weight:600;color:var(--ps-accent,#6161FF) !important;text-decoration:none !important;}",
+    R + ".psa-link:hover{text-decoration:underline !important;}",
 
     /* États */
     R + ".psa-empty," + R + ".psa-error{color:var(--ps-text-soft,#676879);font-size:15px;padding:32px 0;text-align:center;}",
