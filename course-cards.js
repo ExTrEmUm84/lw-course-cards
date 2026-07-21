@@ -274,7 +274,25 @@
        la description marquée en JS (cf. heroText), jamais la classe nue.
        padding-right : garde une longueur de ligne lisible (~620px) tout en
        laissant le bord GAUCHE calé sur les cartes. */
-    "#pageContent .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
+    /* padding-right:0 : la description s'étend sur TOUTE la largeur (1000px, comme
+       les cartes). Avant, un padding-right de 38% réservait la place au KPI qui
+       vivait dans la description ; le KPI est désormais dans la rangée haute (à
+       côté du titre), la description n'a plus rien à éviter. */
+    "#pageContent .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:0 !important;}",
+    /* ─── Séparateur entre le titre animé (H1) et le sous-titre (H2) ───
+       Petit trait à la couleur d'accent de la page (bleu, jaune, rouge…), via
+       ::before pour ne rien ajouter au DOM. Aligné à gauche sur le titre. */
+    "#pageContent h2.learnworlds-subheading::before{content:\"\" !important;display:block !important;width:60px !important;height:4px !important;border-radius:2px !important;background:var(--ps-accent,#6161FF) !important;margin:0 0 24px 0 !important;}",
+    /* ─── Rangée haute : titre (gauche) + tuile progression (droite) ───
+       Le KPI n'est plus en absolu dans la description : mountKpi() enveloppe le
+       H1 et le KPI dans `.ps-herotop`. `align-items:flex-start` -> le KPI se
+       cale en haut, au niveau du titre. 1000px centré comme le reste. */
+    "#pageContent .ps-herotop{display:flex !important;align-items:flex-start !important;justify-content:space-between !important;gap:32px !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    "#pageContent .ps-herotop > h1.learnworlds-heading{margin:0 !important;max-width:none !important;flex:1 1 auto !important;}",
+    /* on annule le positionnement absolu du KPI : dans la rangée il est un
+       simple item flex de 352px. */
+    "#pageContent .ps-herotop > .ps-kpi{position:static !important;top:auto !important;right:auto !important;flex:0 0 352px !important;margin:6px 0 0 0 !important;}",
+    "@media(max-width:900px){#pageContent .ps-herotop{flex-direction:column !important;gap:20px !important;}#pageContent .ps-herotop > .ps-kpi{flex:0 0 auto !important;width:100% !important;max-width:352px !important;}}",
     /* ---- TUILE DE PROGRESSION GLOBALE, à droite de la description ----
        Ancrée DANS `.ps-desc` : ce bloc fait déjà exactement 1000px (350->1350),
        est déjà `position:relative` en natif, et son `padding-right:38%` laisse
@@ -483,14 +501,28 @@
 
     var cles=Object.keys(vus);
     var avecBarre=cles.filter(function(k){ return vus[k]!==null; });
-    var kpi=desc.querySelector(".ps-kpi");
+    /* recherche GLOBALE : le KPI vit dans la rangée haute, plus dans la desc */
+    var kpi=document.querySelector(S+" .ps-kpi");
+    var h1=document.querySelector(S+" h1.learnworlds-heading");
+    var top=document.querySelector(S+" .ps-herotop");
     if(!cles.length || !avecBarre.length){         // anonyme -> pas de donnée
       if(kpi) kpi.remove();
+      /* on démonte la rangée : le H1 reprend sa place, seul et pleine largeur */
+      if(top){ if(h1) top.parentNode.insertBefore(h1, top); top.remove(); }
       return;
     }
     var total=0;
     cles.forEach(function(k){ total += (vus[k]||0); });
     var pct=Math.round(total/cles.length);
+
+    /* Rangée haute (titre + KPI), créée UNE fois. Le H1 est seulement DÉPLACÉ
+       dans le wrapper : la machine à écrire, posée sur ce même élément, survit
+       (déplacer un noeud préserve ses enfants et ses écouteurs). */
+    if(h1 && !top){
+      top=document.createElement("div"); top.className="ps-herotop";
+      h1.parentNode.insertBefore(top, h1);
+      top.appendChild(h1);
+    }
 
     /* on reconstruit aussi si le contenu a disparu : sans ce contrôle, les
        `querySelector(...).textContent` plus bas jetteraient sur un null et
@@ -505,8 +537,10 @@
                   +   '<div class="ps-kpi-bar"><div class="ps-kpi-bar-in"></div></div>'
                   + '</div>'
                   + '<span class="ps-kpi-ic" aria-hidden="true">'+ICON_KPI+'</span>';
-      desc.appendChild(kpi);
     }
+    /* dans la rangée (à côté du titre) si elle existe, sinon repli dans la desc */
+    var hote=top||desc;
+    if(kpi.parentNode!==hote) hote.appendChild(kpi);
     /* textContent : jamais de concaténation HTML */
     kpi.querySelector(".ps-kpi-num").textContent=pct+" %";
     kpi.querySelector(".ps-kpi-lbl").textContent="Progression sur "+cles.length+" cours";
