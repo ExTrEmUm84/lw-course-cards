@@ -360,7 +360,12 @@
       var badge=h.querySelector(".course-level-badge"), ct=h.querySelector(".course-title");
       if(badge && ct){ level=((badge.textContent.match(/(\d+)/)||[])[1]); name=ct.textContent.trim(); }
       else { var m=h.textContent.trim().match(/^Niveau\s*#?\s*(\d+)\s*-\s*(.+)$/i); if(m){ level=m[1]; name=m[2]; } }
-      if(!level || !name) return;
+      /* Carte "domaine" : titre libre, sans "Niveau N -" (ex. "Le Conseil en
+         Management"). On lui donne le MÊME design que les cartes Niveau, mais
+         sans pastille de niveau (level reste vide -> la pastille est omise plus
+         bas, cf. `if(level)`). Seul cas où l'on abandonne : aucun titre du tout. */
+      if(!name) name=h.textContent.trim();
+      if(!name) return;
       var link=card.querySelector("a.card-link[href], a[href]");
       var href=link ? link.getAttribute("href") : "#";
       /* compteurs éventuels ("Leçons : 8 # Quiz : 3") ; absents -> pas de pastille */
@@ -371,9 +376,13 @@
       d.className="ps-mcard";
       var head=document.createElement("div");
       head.className="ps-mhead";
-      var tag=document.createElement("span");
-      tag.className="ps-mtag"; tag.textContent="Niveau "+level;
-      head.appendChild(tag);
+      /* Pastille de niveau seulement pour les cartes "Niveau N". Les cartes
+         "domaine" (level vide) n'en ont pas : ce serait un faux niveau. */
+      if(level){
+        var tag=document.createElement("span");
+        tag.className="ps-mtag"; tag.textContent="Niveau "+level;
+        head.appendChild(tag);
+      }
       /* compteurs regroupés sur leur propre ligne, sous le niveau ; pas de
          rangée vide si le cours n'a pas encore les champs dans sa description */
       if(metas.length){
@@ -388,7 +397,10 @@
       }
       var t=document.createElement("h3");
       t.className="ps-mtitle"; t.textContent=name;
-      d.appendChild(head); d.appendChild(t);
+      /* head peut être vide sur une carte domaine (ni pastille ni compteurs) :
+         on ne l'insère alors pas, sinon un bloc d'espace vide au-dessus du titre. */
+      if(head.childNodes.length) d.appendChild(head);
+      d.appendChild(t);
 
       /* Progression : LearnWorlds la met DÉJÀ dans la carte (on la masquait).
          On lit la largeur INLINE de sa barre plutôt que le texte "72% Complété" :
@@ -428,7 +440,9 @@
       card.appendChild(liseret());
       /* la couleur suit le NIVEAU (cf. CSS [data-ps-lvl]) : les chevrons
          intercalés décalent nth-child, qui compte tous les frères */
-      card.dataset.psLvl=(((parseInt(level,10)-1)%6)+1);
+      /* Couleur suivant le niveau ; carte domaine (sans niveau) -> 1 = violet de
+         marque, pour qu'une barre de progression éventuelle reste cohérente. */
+      card.dataset.psLvl=level ? (((parseInt(level,10)-1)%6)+1) : 1;
       card.dataset.psM="1";
     });
     mountChevrons();
