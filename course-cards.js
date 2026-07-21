@@ -295,21 +295,13 @@
        simple item flex de 352px. */
     "#pageContent .ps-herotop > .ps-kpi{position:static !important;top:auto !important;right:auto !important;flex:0 0 352px !important;margin:6px 0 0 0 !important;}",
     "@media(max-width:900px){#pageContent .ps-herotop{flex-direction:column !important;gap:20px !important;}#pageContent .ps-herotop > .ps-kpi{flex:0 0 auto !important;width:100% !important;max-width:352px !important;}}",
-    /* ─── Boutons du hero (ex. « Cours » / « Compétences ») ───
-       Les boutons natifs `learnworlds-button-outline-accent1` du hero, en
-       pilules au design system : bordure fine, Figtree, survol à la couleur de
-       la page. Le `*` reprend la police/couleur de l'éventuel <span> interne. */
-    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;padding:11px 26px !important;height:auto !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;color:var(--ps-text,#1c1f26) !important;box-shadow:0 1px 2px rgba(0,0,0,.04) !important;transition:all .15s ease !important;cursor:pointer !important;}",
-    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1 *{font-family:inherit !important;color:inherit !important;font-weight:inherit !important;}",
-    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1:hover{border-color:var(--ps-accent,#6161FF) !important;color:var(--ps-accent,#6161FF) !important;background:var(--ps-accent-tint,#EDEDFF) !important;}",
-    /* Alignement : le conteneur des boutons du hero débordait de 60px à gauche
-       (295 au lieu de 355). On le cale sur la MÊME boîte 1000px centrée que le
-       titre / le sous-titre / les cartes. `:has()` ne vise que ce conteneur. */
+    /* Style des boutons du hero + état actif : déplacés dans tokens.js (site-wide),
+       car ces boutons apparaissent aussi sur des pages qui ne chargent pas ce
+       script (ex. Compétences). Ici on ne garde que l'ALIGNEMENT, spécifique à la
+       page Cours dont le titre est calé sur 1000px : le conteneur des boutons
+       débordait de 60px à gauche (295 au lieu de 355), on le recale sur la même
+       boîte 1000px centrée. `:has()` ne vise que ce conteneur. */
     "#pageContent .learnworlds-button-wrapper:has(> .learnworlds-button.learnworlds-button-outline-accent1),#pageContent .learnworlds-button-wrapper:has(.learnworlds-button.learnworlds-button-outline-accent1){max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
-    /* Bouton ACTIF (la page courante) : plein, à la couleur d'accent de la page. */
-    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active{background:var(--ps-accent,#6161FF) !important;border-color:var(--ps-accent,#6161FF) !important;color:#fff !important;}",
-    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active *{color:#fff !important;}",
-    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active:hover{background:var(--ps-accent-hover,#4B4BE0) !important;border-color:var(--ps-accent-hover,#4B4BE0) !important;color:#fff !important;}",
     /* ---- TUILE DE PROGRESSION GLOBALE, à droite de la description ----
        Ancrée DANS `.ps-desc` : ce bloc fait déjà exactement 1000px (350->1350),
        est déjà `position:relative` en natif, et son `padding-right:38%` laisse
@@ -487,19 +479,7 @@
     mountCarousel();
     heroText();
     mountKpi();
-    heroActiveBtn();
-  }
-
-  /* Bouton actif du hero : la page « Cours » met le 1er bouton en plein, la page
-     « Compétences » le 2e. Map slug LearnWorlds -> index du bouton à remplir.
-     (Le bouton natif ne porte pas son URL cible de façon fiable, d'où le repérage
-     par position, comme demandé par Ziad.) Pour ajouter une page : une ligne. */
-  var HERO_ACTIVE={ "empty":0, "page-introduction":1 };
-  function heroActiveBtn(){
-    var m=document.body && document.body.className.match(/slug-([a-z0-9-]+)/i);
-    var idx=m ? HERO_ACTIVE[m[1]] : undefined;
-    var btns=document.querySelectorAll(S+" .learnworlds-button.learnworlds-button-outline-accent1");
-    btns.forEach(function(b,i){ b.classList.toggle("ps-hb-active", idx!==undefined && i===idx); });
+    /* Style + état actif des boutons du hero : gérés par tokens.js (site-wide). */
   }
 
   /* --- Tuile de progression globale ---------------------------------------

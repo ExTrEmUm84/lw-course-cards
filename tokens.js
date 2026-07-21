@@ -163,6 +163,46 @@
     if(st.textContent!==css) st.textContent=css;
   }
 
-  poser(); accentPage();
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ poser(); accentPage(); });
+  /* ====================================================================
+     BOUTONS DE HERO « Cours » / « Compétences » — SITE-WIDE
+     --------------------------------------------------------------------
+     Ces boutons natifs (`learnworlds-button-outline-accent1`) apparaissent sur
+     plusieurs pages (Cours, Compétences…) qui ne chargent PAS le même script de
+     cartes. Leur style + l'état actif vivent donc ici (tokens.js est chargé
+     partout), et non dans course-cards.js.
+
+     Style pilule au design system ; le bouton qui correspond à la page courante
+     passe en PLEIN à la couleur d'accent de la page. Repérage par POSITION (le
+     bouton LW ne porte pas son URL cible de façon fiable) : map slug -> index.
+     Ajouter une page = une ligne dans HERO_ACTIVE.
+
+     ⚠️ L'ALIGNEMENT des boutons (boîte 1000px) reste dans course-cards.js : il
+     n'est valable que là où le titre est calé sur 1000px (page Cours). Ailleurs
+     (ex. Compétences) le titre est à sa place naturelle et les boutons suivent.
+     ==================================================================== */
+  var HERO_ACTIVE={ "empty":0, "page-introduction":1 };
+  var HERO_BTN_CSS=
+      "#pageContent .learnworlds-button.learnworlds-button-outline-accent1{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;padding:11px 26px !important;height:auto !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;color:var(--ps-text,#1c1f26) !important;box-shadow:0 1px 2px rgba(0,0,0,.04) !important;transition:all .15s ease !important;cursor:pointer !important;}"
+    + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1 *{font-family:inherit !important;color:inherit !important;font-weight:inherit !important;}"
+    + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1:hover{border-color:var(--ps-accent,#6161FF) !important;color:var(--ps-accent,#6161FF) !important;background:var(--ps-accent-tint,#EDEDFF) !important;}"
+    + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active{background:var(--ps-accent,#6161FF) !important;border-color:var(--ps-accent,#6161FF) !important;color:#fff !important;}"
+    + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active *{color:#fff !important;}"
+    + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active:hover{background:var(--ps-accent-hover,#4B4BE0) !important;border-color:var(--ps-accent-hover,#4B4BE0) !important;color:#fff !important;}";
+
+  function heroBtns(){
+    var st=document.getElementById("ps-hero-btn");
+    if(!st){ st=document.createElement("style"); st.id="ps-hero-btn"; (document.head||document.documentElement).appendChild(st); }
+    if(st.textContent!==HERO_BTN_CSS) st.textContent=HERO_BTN_CSS;
+    if(!document.body) return;
+    var m=document.body.className.match(/slug-([a-z0-9-]+)/i);
+    var idx=m ? HERO_ACTIVE[m[1]] : undefined;
+    var btns=document.querySelectorAll("#pageContent .learnworlds-button.learnworlds-button-outline-accent1");
+    btns.forEach(function(b,i){ b.classList.toggle("ps-hb-active", idx!==undefined && i===idx); });
+  }
+
+  poser(); accentPage(); heroBtns();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ poser(); accentPage(); heroBtns(); });
+  /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
+     quelques relances pour attraper la classe active. */
+  [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); });
 })();
