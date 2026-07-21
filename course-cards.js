@@ -306,6 +306,10 @@
        (295 au lieu de 355). On le cale sur la MÊME boîte 1000px centrée que le
        titre / le sous-titre / les cartes. `:has()` ne vise que ce conteneur. */
     "#pageContent .learnworlds-button-wrapper:has(> .learnworlds-button.learnworlds-button-outline-accent1),#pageContent .learnworlds-button-wrapper:has(.learnworlds-button.learnworlds-button-outline-accent1){max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    /* Bouton ACTIF (la page courante) : plein, à la couleur d'accent de la page. */
+    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active{background:var(--ps-accent,#6161FF) !important;border-color:var(--ps-accent,#6161FF) !important;color:#fff !important;}",
+    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active *{color:#fff !important;}",
+    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active:hover{background:var(--ps-accent-hover,#4B4BE0) !important;border-color:var(--ps-accent-hover,#4B4BE0) !important;color:#fff !important;}",
     /* ---- TUILE DE PROGRESSION GLOBALE, à droite de la description ----
        Ancrée DANS `.ps-desc` : ce bloc fait déjà exactement 1000px (350->1350),
        est déjà `position:relative` en natif, et son `padding-right:38%` laisse
@@ -483,6 +487,19 @@
     mountCarousel();
     heroText();
     mountKpi();
+    heroActiveBtn();
+  }
+
+  /* Bouton actif du hero : la page « Cours » met le 1er bouton en plein, la page
+     « Compétences » le 2e. Map slug LearnWorlds -> index du bouton à remplir.
+     (Le bouton natif ne porte pas son URL cible de façon fiable, d'où le repérage
+     par position, comme demandé par Ziad.) Pour ajouter une page : une ligne. */
+  var HERO_ACTIVE={ "empty":0, "page-introduction":1 };
+  function heroActiveBtn(){
+    var m=document.body && document.body.className.match(/slug-([a-z0-9-]+)/i);
+    var idx=m ? HERO_ACTIVE[m[1]] : undefined;
+    var btns=document.querySelectorAll(S+" .learnworlds-button.learnworlds-button-outline-accent1");
+    btns.forEach(function(b,i){ b.classList.toggle("ps-hb-active", idx!==undefined && i===idx); });
   }
 
   /* --- Tuile de progression globale ---------------------------------------
