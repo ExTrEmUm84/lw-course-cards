@@ -295,6 +295,17 @@
        simple item flex de 352px. */
     "#pageContent .ps-herotop > .ps-kpi{position:static !important;top:auto !important;right:auto !important;flex:0 0 352px !important;margin:6px 0 0 0 !important;}",
     "@media(max-width:900px){#pageContent .ps-herotop{flex-direction:column !important;gap:20px !important;}#pageContent .ps-herotop > .ps-kpi{flex:0 0 auto !important;width:100% !important;max-width:352px !important;}}",
+    /* ─── Boutons du hero (ex. « Cours » / « Compétences ») ───
+       Les boutons natifs `learnworlds-button-outline-accent1` du hero, en
+       pilules au design system : bordure fine, Figtree, survol à la couleur de
+       la page. Le `*` reprend la police/couleur de l'éventuel <span> interne. */
+    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;padding:11px 26px !important;height:auto !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;color:var(--ps-text,#1c1f26) !important;box-shadow:0 1px 2px rgba(0,0,0,.04) !important;transition:all .15s ease !important;cursor:pointer !important;}",
+    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1 *{font-family:inherit !important;color:inherit !important;font-weight:inherit !important;}",
+    "#pageContent .learnworlds-button.learnworlds-button-outline-accent1:hover{border-color:var(--ps-accent,#6161FF) !important;color:var(--ps-accent,#6161FF) !important;background:var(--ps-accent-tint,#EDEDFF) !important;}",
+    /* Alignement : le conteneur des boutons du hero débordait de 60px à gauche
+       (295 au lieu de 355). On le cale sur la MÊME boîte 1000px centrée que le
+       titre / le sous-titre / les cartes. `:has()` ne vise que ce conteneur. */
+    "#pageContent .learnworlds-button-wrapper:has(> .learnworlds-button.learnworlds-button-outline-accent1),#pageContent .learnworlds-button-wrapper:has(.learnworlds-button.learnworlds-button-outline-accent1){max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     /* ---- TUILE DE PROGRESSION GLOBALE, à droite de la description ----
        Ancrée DANS `.ps-desc` : ce bloc fait déjà exactement 1000px (350->1350),
        est déjà `position:relative` en natif, et son `padding-right:38%` laisse
