@@ -108,6 +108,61 @@
     if(st.textContent!==TOKENS) st.textContent=TOKENS;
   }
 
-  poser();
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",poser);
+  /* ====================================================================
+     ACCENT PAR PAGE — une couleur dominante par page
+     --------------------------------------------------------------------
+     Une seule couleur par page ; survol / teinte / canaux RGB sont DÉRIVÉS
+     (mêmes coefficients que le configurateur). Pages non listées -> accent
+     global défini plus haut (le bleu). Clé = slug LearnWorlds : la classe
+     `slug-…` que LW pose sur le <body>, égale à "slug-" + le slug d'URL.
+
+     🔴 Couleur CLAIRE (ex. jaune) : illisible en TEXTE sur blanc. On assombrit
+     alors l'accent-texte jusqu'à un contraste lisible (>=4:1), MAIS la lueur
+     des cartes (`--ps-accent-rgb`) garde la couleur VIVE. L'impression « page
+     jaune » vient de la lueur + des pastilles claires, pas du texte. Les
+     couleurs déjà foncées (vert, rouge) restent fidèles au hex donné.
+
+     Pour changer/ajouter une page : une ligne dans PAGE_ACCENTS, c'est tout. */
+  var PAGE_ACCENTS={
+    "fiches-secteur":"#fad54a",        /* Secteurs — jaune */
+    "emptykk-clone-clone":"#009e78",   /* Cas — vert */
+    "fiches-secteur-clone":"#c51d4a"   /* Cabinets — rouge */
+  };
+
+  function _chan(hex){var h=hex.replace("#","");if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
+  function _hex2hsl(hex){var c=_chan(hex),r=c[0]/255,g=c[1]/255,b=c[2]/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,H=0,L=(mx+mn)/2,S=d===0?0:d/(1-Math.abs(2*L-1));if(d!==0){if(mx===r)H=60*(((g-b)/d)%6);else if(mx===g)H=60*((b-r)/d+2);else H=60*((r-g)/d+4);}if(H<0)H+=360;return [H,S*100,L*100];}
+  function _hsl2hex(hh,s,l){s/=100;l/=100;var a=s*Math.min(l,1-l);function f(n){var k=(n+hh/30)%12,c=l-a*Math.max(Math.min(k-3,9-k,1),-1);return Math.round(255*c).toString(16).padStart(2,"0");}return "#"+f(0)+f(8)+f(4);}
+  function _lum(hex){var c=_chan(hex).map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2];}
+  function _contraste(hex){return 1.05/(_lum(hex)+0.05);}
+
+  /* hex de page -> {accent (texte, lisible), rgb (lueur, vive), hover, tint}.
+     hover/tint : mêmes coefficients que deduire() du configurateur. */
+  function _deriver(hex){
+    var t=_hex2hsl(hex), accent=hex;
+    if(t[2]>55){ var L=t[2]; while(L>10 && _contraste(_hsl2hex(t[0],t[1],L))<4) L-=1; accent=_hsl2hex(t[0],t[1],L); }
+    var ta=_hex2hsl(accent);
+    return {
+      accent:accent,
+      rgb:_chan(hex).join(","),                                    /* lueur = couleur VIVE d'origine */
+      hover:_hsl2hex(ta[0], Math.max(0,ta[1]*0.71), Math.max(0,ta[2]-10.4)),
+      tint:_hsl2hex(t[0], 100, 96.5)
+    };
+  }
+
+  function accentPage(){
+    if(!document.body) return;                                    /* body pas encore là (script en <head>) */
+    var m=document.body.className.match(/slug-([a-z0-9-]+)/i);
+    var hex=m ? PAGE_ACCENTS[m[1]] : null;
+    var st=document.getElementById("ps-tokens-page");
+    if(!hex){ if(st) st.textContent=""; return; }                 /* page non listée -> accent global */
+    var d=_deriver(hex);
+    var css=":root{--ps-accent:"+d.accent+";--ps-accent-rgb:"+d.rgb+";--ps-accent-hover:"+d.hover+";--ps-accent-tint:"+d.tint+";}";
+    /* APRÈS ps-tokens dans le <head> : même spécificité (:root), l'ordre du DOM
+       tranche -> l'override de page gagne sur les valeurs globales. */
+    if(!st){ st=document.createElement("style"); st.id="ps-tokens-page"; document.head.appendChild(st); }
+    if(st.textContent!==css) st.textContent=css;
+  }
+
+  poser(); accentPage();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ poser(); accentPage(); });
 })();
