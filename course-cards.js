@@ -247,7 +247,9 @@
     ".ps-car-btn{position:absolute !important;top:50% !important;transform:translateY(-50%) !important;width:44px !important;height:44px !important;border-radius:50% !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;box-shadow:0 4px 14px rgba(15,23,42,.12) !important;display:flex !important;align-items:center !important;justify-content:center !important;cursor:pointer !important;padding:0 !important;z-index:5 !important;transition:background .15s ease, box-shadow .15s ease, opacity .2s ease !important;}",
     ".ps-car-btn:hover{background:#F5F7FB !important;box-shadow:0 6px 18px rgba(15,23,42,.16) !important;}",
     ".ps-car-btn svg{width:20px !important;height:20px !important;stroke:var(--ps-text,#1c1f26) !important;fill:none !important;stroke-width:2.2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
-    ".ps-car-btn[disabled]{opacity:0 !important;pointer-events:none !important;}",
+    /* flèche inactive (début / fin du carrousel) : GRISÉE mais toujours
+       visible, pour garder les deux flèches gauche+droite en permanence. */
+    ".ps-car-btn[disabled]{opacity:.35 !important;pointer-events:none !important;}",
     ".ps-car-prev{left:4px !important;}",
     ".ps-car-next{right:4px !important;}",
     /* responsive : 2 puis 1 carte, flèches collées aux bords */
@@ -463,7 +465,10 @@
       card.dataset.psLvl=level ? (((parseInt(level,10)-1)%6)+1) : 1;
       card.dataset.psM="1";
     });
-    mountChevrons();
+    /* Plus de chevrons décoratifs entre les cartes (choix de Ziad) : la
+       navigation se fait par les deux flèches gauche/droite du carrousel. On
+       retire aussi ceux qu'une version précédente aurait posés. */
+    document.querySelectorAll(S+" .ps-chev").forEach(function(c){ c.remove(); });
     mountCarousel();
     heroText();
     mountKpi();
