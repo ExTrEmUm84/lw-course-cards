@@ -204,7 +204,7 @@
        concentrique.
        x/y/width/height/rx en CSS = propriétés de géométrie SVG2 (les attributs,
        eux, n'acceptent pas `calc()`). Support vérifié à l'écran sur Chrome. */
-    ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:4 !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset .55s ease !important;}",
+    ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:4 !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset 1.1s ease !important;}",
     "#pageContent .cards-grandpa .lw-course-card:hover .ps-mline rect{stroke-dashoffset:0 !important;}",
     "@media(prefers-reduced-motion:reduce){.ps-mline rect{transition:none !important;}}",
 
