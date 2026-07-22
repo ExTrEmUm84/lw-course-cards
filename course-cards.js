@@ -472,7 +472,17 @@
          "S'inscrire gratuitement" à la place). Donc :
            pas de barre -> NaN -> "En savoir plus"  (il n'est pas inscrit)
            barre à 0%          -> "Commencer"       (inscrit, jamais ouvert) */
-      a.className="ps-mlink"; a.href=href;
+      /* Lien : par défaut la page de PRÉSENTATION (`/course/<slug>`). Pour un
+         apprenant INSCRIT — signalé par la présence d'une barre de progression
+         `nat` (LearnWorlds n'en met PAS aux visiteurs anonymes / non inscrits) —
+         on court-circuite cette page et on ouvre DIRECTEMENT le lecteur :
+         `/path-player?courseid=<slug>` (LW y résout la reprise, ou la 1re leçon
+         si jamais commencé). Les non-inscrits gardent la page de présentation
+         pour pouvoir s'inscrire (sinon LW les renvoie à l'accueil). Le lecteur
+         accepte le SLUG comme `courseid` — validé le 22/07 en session connectée. */
+      var slug=(href.match(/\/course\/([^\/?#]+)/)||[])[1];
+      var target=(nat && slug) ? "/path-player?courseid="+slug : href;
+      a.className="ps-mlink"; a.href=target;
       var label="En savoir plus";
       if(!isNaN(pct)){
         if(pct>=100){ label="Terminé"; a.classList.add("ps-done"); }
