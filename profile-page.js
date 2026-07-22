@@ -80,6 +80,22 @@
      S+" .ps-pf-tiles .learnworlds-heading3", S+" .ps-pf-tiles .learnworlds-heading4",
      S+" .ps-pf-tiles p", S+" .ps-pf-tiles .talign-l"].join(",")+"{"+FT+"}",
 
+    /* ============ 2b) BOARD "progression par domaine" (remplace les 4 tuiles) ============ */
+    /* Une tuile par programme thématique, avec son %. Données 100 % natives
+       (progression des Learning Programs déjà rendue plus bas) -> instantané.
+       Le board est injecté DANS le grandpa des tuiles ; les tuiles natives sont
+       masquées via `ps-has-board`. */
+    S+" .ps-pf-tiles.ps-has-board > *:not(.ps-pf-board){display:none !important;}",
+    S+" .ps-pf-board{display:grid !important;grid-template-columns:repeat(auto-fit,minmax(150px,1fr)) !important;gap:14px !important;}",
+    S+" .ps-pf-bt{background:#fff !important;border-radius:var(--ps-r-card,16px) !important;padding:18px 20px !important;box-shadow:0 4px 14px rgba(15,23,42,.06) !important;display:flex !important;flex-direction:column !important;gap:11px !important;transition:transform .2s ease, box-shadow .2s ease !important;}",
+    S+" .ps-pf-bt:hover{transform:translateY(-2px) !important;box-shadow:0 10px 26px rgba(15,23,42,.10) !important;}",
+    S+" .ps-pf-bt-top{display:flex !important;align-items:flex-start !important;justify-content:space-between !important;}",
+    S+" .ps-pf-bt-pct{"+FT+"font-size:26px !important;font-weight:800 !important;line-height:1 !important;letter-spacing:-.02em !important;color:#243B6B !important;}",
+    S+" .ps-pf-bt-ic{width:34px !important;height:34px !important;border-radius:50% !important;background:var(--ps-accent-tint,#EDEDFF) !important;display:flex !important;align-items:center !important;justify-content:center !important;color:var(--ps-accent,#6161FF) !important;flex:none !important;}",
+    S+" .ps-pf-bt-name{"+FT+"font-size:13px !important;font-weight:600 !important;color:#4B5563 !important;line-height:1.3 !important;}",
+    S+" .ps-pf-bt-track{height:7px !important;border-radius:999px !important;background:#EEF1F6 !important;overflow:hidden !important;}",
+    S+" .ps-pf-bt-fill{height:100% !important;border-radius:999px !important;background:var(--ps-accent,#6161FF) !important;transition:width .6s ease !important;}",
+
     /* ============ 3) titres de section ============ */
     /* On garde LEURS couleurs (rouge / vert / bleu) : c'est un choix éditorial
        de Ziad, pas un défaut. On n'unifie que la typo et la graisse. */
@@ -206,10 +222,70 @@
     if(sec) sec.querySelectorAll("button.learnworlds-button").forEach(function(b){ b.classList.add("ps-pf-edit"); });
   }
 
+  /* ---- Board "progression par domaine" (remplace les 4 tuiles du RÉSUMÉ) ---- */
+  var BOARD_ICON='<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 17l6-6 4 4 7-7"/><path d="M14 8h6v6"/></svg>';
+
+  /* Libellés raccourcis (validés par Ziad) : on retire les préfixes verbeux. */
+  function domainLabel(t){
+    t=(t||"").replace(/\s+/g," ").trim();
+    t=t.replace(/^Module de Formation\s*[-–—:]\s*/i,"");
+    t=t.replace(/^Tout Savoir sur\s+(les?\s+|l['’]\s*)?/i,"");
+    return t;
+  }
+
+  /* % d'un programme thématique : d'abord la largeur inline d'un remplissage
+     dans son bloc de progression, sinon le texte "N %". */
+  function programPct(card){
+    var box=card.querySelector("[class*='progress']")||card;
+    var els=box.querySelectorAll("*");
+    for(var i=0;i<els.length;i++){
+      var w=els[i].style && els[i].style.width;
+      if(w && /^\d+(\.\d+)?%$/.test(w)){ var n=parseFloat(w); if(n>0) return Math.min(100,Math.round(n)); }
+    }
+    var m=(box.textContent||"").match(/(\d+)\s*%/);
+    return m ? Math.min(100,parseInt(m[1],10)) : 0;
+  }
+
+  /* Construit/actualise le board dans le grandpa des tuiles. Idempotent grâce à
+     une signature : ne se reconstruit que si les domaines ou les % changent
+     (l'observer rappelle build() à chaque mutation). */
+  function mountBoard(){
+    var grandpa=document.querySelector(S+" .ps-pf-tiles");
+    if(!grandpa) return;
+    var seen={}, progs=[];
+    document.querySelectorAll(S+" [class*='learning-program-card']").forEach(function(card){
+      var h=card.querySelector(".learnworlds-heading3")||card.querySelector("[class*='heading']");
+      var raw=h?(h.textContent||"").replace(/\s+/g," ").trim():"";
+      if(!raw || seen[raw]) return; seen[raw]=1;
+      progs.push({name:domainLabel(raw), pct:programPct(card)});
+    });
+    if(!progs.length) return;                       // programmes pas encore rendus : réessai
+    var sig=progs.map(function(p){return p.name+"="+p.pct;}).join("|");
+    var board=grandpa.querySelector(".ps-pf-board");
+    if(board && board.dataset.sig===sig){ grandpa.classList.add("ps-has-board"); return; }
+    if(!board){ board=document.createElement("div"); board.className="ps-pf-board"; grandpa.insertBefore(board,grandpa.firstChild); }
+    board.dataset.sig=sig;
+    board.textContent="";
+    progs.forEach(function(p){
+      var tile=document.createElement("div"); tile.className="ps-pf-bt";
+      var top=document.createElement("div"); top.className="ps-pf-bt-top";
+      var pc=document.createElement("span"); pc.className="ps-pf-bt-pct"; pc.textContent=p.pct+" %";
+      var ic=document.createElement("span"); ic.className="ps-pf-bt-ic"; ic.innerHTML=BOARD_ICON;
+      top.appendChild(pc); top.appendChild(ic);
+      var nm=document.createElement("div"); nm.className="ps-pf-bt-name"; nm.textContent=p.name;
+      var tr=document.createElement("div"); tr.className="ps-pf-bt-track";
+      var fl=document.createElement("div"); fl.className="ps-pf-bt-fill"; fl.style.width=(p.pct>0&&p.pct<2?2:p.pct)+"%";
+      tr.appendChild(fl);
+      tile.appendChild(top); tile.appendChild(nm); tile.appendChild(tr);
+      board.appendChild(tile);
+    });
+    grandpa.classList.add("ps-has-board");
+  }
+
   function build(){
     /* garde évalué ICI, pas au chargement : cf. l'avertissement en tête */
     if(!surLaPage()) return;
-    figtree(); styles(); marquer();
+    figtree(); styles(); marquer(); mountBoard();
     document.querySelectorAll(S+" .ps-pf-courses .lw-course-card").forEach(function(card){
       if(card.dataset.psPf) return;
       var h=card.querySelector(".learnworlds-heading3"); if(!h) return;
