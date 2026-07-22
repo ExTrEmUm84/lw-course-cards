@@ -176,7 +176,7 @@
      🔴 Les lignes de cours pointent vers /path-player?courseid=<slug> — le slug
      est dans la QUERY STRING, PAS dans un /course/<slug>. Les programmes
      (/program-player?program=) n'ont pas de progression par cours : ignorés. */
-  var progStarted=false, lastBySlug=null, tsEl=null;
+  var progStarted=false, lastBySlug=null, tsEl=null, progPolling=false, progTries=0, progObs=null;
 
   function courseRows(){
     var cp=document.getElementById("courses-programs");
@@ -279,11 +279,38 @@
     (document.head||document.documentElement).appendChild(s);
   }
 
+  /* Rejoue paint quand l'app compte re-render la table « Cours et programmes »
+     (pagination, tri…) : les barres injectées seraient sinon perdues. Posé une
+     seule fois. On se déconnecte le temps de peindre pour ne pas se
+     ré-observer soi-même (paint modifie le DOM de la section). */
+  function watchCourses(){
+    if(progObs) return;
+    var cp=document.getElementById("courses-programs");
+    if(!cp) return;
+    progObs=new MutationObserver(function(){
+      if(!lastBySlug) return;
+      progObs.disconnect();
+      paint(lastBySlug);
+      progObs.observe(cp,{childList:true,subtree:true});
+    });
+    progObs.observe(cp,{childList:true,subtree:true});
+  }
+
   function progression(){
-    if(progStarted){ if(lastBySlug) paint(lastBySlug); return; }
-    if(!courseRows().length) return;   // section pas encore rendue : on réessaiera
-    progStarted=true;
-    turnstile();
+    if(progStarted){ if(lastBySlug) paint(lastBySlug); watchCourses(); return; }
+    if(courseRows().length){ progStarted=true; watchCourses(); turnstile(); return; }
+    /* 🔴 La table est rendue TARD par l'app compte (souvent après 2,5 s). Les
+       relances de run() s'arrêtent à 2500 ms → si on se contentait de sortir,
+       la progression ne démarrerait JAMAIS quand la table apparaît plus tard
+       (bug constaté en live). On poursuit donc le poll au-delà, borné (~20 s),
+       en une seule chaîne. */
+    if(progPolling) return;
+    progPolling=true;
+    (function poll(){
+      if(progStarted) return;
+      if(courseRows().length){ progStarted=true; watchCourses(); turnstile(); return; }
+      if(progTries++ < 40) setTimeout(poll,500); else progPolling=false;
+    })();
   }
 
   function run(){
