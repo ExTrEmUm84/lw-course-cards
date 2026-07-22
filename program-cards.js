@@ -69,6 +69,26 @@
     "@keyframes ps-blink{50%{opacity:0}}",
     "@media(max-width:820px){"+S+" h1.learnworlds-heading{font-size:36px !important;}"+S+" h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}}",
 
+    /* ─── Tuile de progression globale (portée de course-cards.js, 22/07) ───
+       Ici le KPI vit dans `.ps-herotop` (rangée flex titre+tuile), PAS en absolu
+       dans la description comme sur Cours -> inutile de reprendre ses bricoles de
+       z-index. 🔴 PAS de `max-width:1000px` sur `.ps-herotop` : le hero de cette
+       page est calé sur les panneaux (~1120px), pas 1000 (cf. avertissement du
+       hero plus haut) — le recopier décalerait titre + tuile. */
+    S+" .ps-herotop{display:flex !important;align-items:flex-start !important;justify-content:space-between !important;gap:32px !important;}",
+    S+" .ps-herotop > h1.learnworlds-heading{margin:0 !important;flex:1 1 auto !important;}",
+    S+" .ps-herotop > .ps-kpi{flex:0 0 352px !important;margin:6px 0 0 0 !important;}",
+    ".ps-kpi{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;padding:20px 22px !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 14px rgba(15,23,42,.05) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    ".ps-kpi-txt{flex:1 1 auto !important;min-width:0 !important;}",
+    ".ps-kpi-num{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
+    ".ps-kpi-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:500 !important;color:var(--ps-text-soft,#676879) !important;margin-top:2px !important;}",
+    ".ps-kpi-bar{height:7px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
+    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#6161FF) !important;transition:width .6s ease !important;}",
+    ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:#F1F1FF !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+    /* SVG et non police d'icône : un glyphe se ferait écraser par un font-family. */
+    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    "@media(max-width:900px){"+S+" .ps-herotop{flex-direction:column !important;gap:20px !important;}"+S+" .ps-herotop > .ps-kpi{flex:0 0 auto !important;width:100% !important;max-width:352px !important;}}",
+
     /* ---- panneau du programme ---------------------------------------- */
     PROG+"{background:var(--ps-surface-soft,#F7F8FB) !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;padding:28px 24px !important;}",
 
@@ -212,7 +232,72 @@
     if(h && !h.dataset.psTw) h.dataset.psTw="1";
   },2500);
 
-  function build(){ styles(); heroText(); recalerSwipers(); }
+  /* Tuile de progression globale — même esprit que sur Cours : la MOYENNE des
+     avancements. 🔴 Différence CLÉ de cette page : les `.lw-course-card-progress-bar`
+     sont PAR PROGRAMME (1 par `lw-learning-program-card`), pas par cours — les
+     cartes-cours enfants `.lw-course-card-item` n'ont pas de barre propre. On
+     moyenne donc les PROGRAMMES (dédup par titre de programme), et on libelle
+     « Progression sur N formations » (la page = « Nos formations »).
+     Programme sans barre alors que d'autres en ont -> 0 au numérateur, reste au
+     dénominateur. Aucune barre nulle part (anonyme) -> pas de tuile. */
+  var ICON_KPI='<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/><path d="M15 7h4v4"/></svg>';
+  function mountKpi(){
+    var desc=document.querySelector(S+" .ps-desc");
+    if(!desc) return;
+
+    var vus=Object.create(null);
+    document.querySelectorAll(S+" .lw-learning-program-card").forEach(function(pc){
+      var titleEl=pc.querySelector("h3");
+      var cle=titleEl ? (titleEl.textContent||"").replace(/\s+/g," ").trim() : null;
+      if(!cle || cle in vus) return;                 // doublon éventuel
+      /* la barre PROPRE du programme : pas celle d'une carte-cours enfant */
+      var bars=[].slice.call(pc.querySelectorAll(".lw-course-card-progress-bar"));
+      var own=bars.filter(function(b){ return !b.closest(".lw-course-card-item"); })[0] || bars[0];
+      var p=own ? parseInt((own.style.width||"").replace("%",""),10) : NaN;
+      vus[cle]=isNaN(p) ? null : Math.max(0, Math.min(100, p));
+    });
+
+    var cles=Object.keys(vus);
+    var avecBarre=cles.filter(function(k){ return vus[k]!==null; });
+    var kpi=document.querySelector(S+" .ps-kpi");
+    var h1=document.querySelector(S+" h1.learnworlds-heading");
+    var top=document.querySelector(S+" .ps-herotop");
+    if(!cles.length || !avecBarre.length){          // anonyme -> pas de donnée
+      if(kpi) kpi.remove();
+      if(top){ if(h1) top.parentNode.insertBefore(h1, top); top.remove(); }
+      return;
+    }
+    var total=0;
+    cles.forEach(function(k){ total += (vus[k]||0); });
+    var pct=Math.round(total/cles.length);
+
+    /* Rangée haute (titre + KPI), créée UNE fois. Le H1 est seulement DÉPLACÉ
+       dans le wrapper -> la machine à écrire (posée sur ce même noeud) survit. */
+    if(h1 && !top){
+      top=document.createElement("div"); top.className="ps-herotop";
+      h1.parentNode.insertBefore(top, h1);
+      top.appendChild(h1);
+    }
+    if(!kpi || !kpi.querySelector(".ps-kpi-num")){
+      if(kpi) kpi.remove();
+      kpi=document.createElement("div");
+      kpi.className="ps-kpi";
+      kpi.innerHTML='<div class="ps-kpi-txt">'
+                  +   '<div class="ps-kpi-num"></div>'
+                  +   '<div class="ps-kpi-lbl"></div>'
+                  +   '<div class="ps-kpi-bar"><div class="ps-kpi-bar-in"></div></div>'
+                  + '</div>'
+                  + '<span class="ps-kpi-ic" aria-hidden="true">'+ICON_KPI+'</span>';
+    }
+    var hote=top||desc;
+    if(kpi.parentNode!==hote) hote.appendChild(kpi);
+    kpi.querySelector(".ps-kpi-num").textContent=pct+" %";
+    kpi.querySelector(".ps-kpi-lbl").textContent="Progression sur "+cles.length+" formations";
+    kpi.querySelector(".ps-kpi-bar-in").style.width=pct+"%";
+    kpi.setAttribute("aria-label","Progression globale : "+pct+" % sur "+cles.length+" formations");
+  }
+
+  function build(){ styles(); heroText(); mountKpi(); recalerSwipers(); }
 
   var t;
   function schedule(){ clearTimeout(t); t=setTimeout(build,120); }
