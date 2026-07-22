@@ -41,6 +41,24 @@
   var S="#pageContent";
   var GRID=S+" .cards-grandpa > .lw-cols.multiple-rows";
 
+  /* Logos de repli hébergés sur GitHub Pages (dossier /logos du repo), pour les
+     cabinets qui n'ont PAS de logo uploadé dans LearnWorlds (au 22/07 : les 7
+     autres qu'Advancy/Bain/Sia). SVG récupérés sur Wikimedia Commons, affichés
+     monochromes comme les logos LW. Clé = nom normalisé (minuscule, sans accent
+     ni séparateur). Kéa Partners : pas trouvé de source propre -> pas de repli.
+     Ajouter un cabinet = déposer son SVG dans /logos + une ligne ici. */
+  var LOGO_BASE="https://extremum84.github.io/lw-course-cards/logos/";
+  var LOGOS={
+    accenture:"accenture.svg",
+    bcg:"bcg.svg", bostonconsultinggroup:"bcg.svg",
+    eyconsulting:"ey.svg",
+    eyparthenon:"ey-parthenon.svg",
+    mckinsey:"mckinsey.svg", mckinseycompany:"mckinsey.svg",
+    wavestone:"wavestone.svg"
+  };
+  function normName(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,""); }
+  function logoFor(title){ var f=LOGOS[normName(title)]; return f ? 'url("'+LOGO_BASE+f+'")' : ""; }
+
   // --- 2) Styles ---
   var CSS=[
     /* grille de 3, alignée comme les autres pages (1000px centrés).
@@ -207,17 +225,18 @@
       /* Logo du cabinet : on recopie l'URL du background-image natif
          (`.learnworlds-image`) sur une div dédiée, harmonisée + monochrome (cf.
          CSS .ps-cab-logo). Pas de logo -> pas de div (la carte reste propre). */
+      /* Logo : priorité au vrai logo uploadé dans LearnWorlds (background-image du
+         `.learnworlds-image`). Sans logo LW, LW sert `course-default-img.png`
+         (placeholder rayé) qu'on EXCLUT → on retombe alors sur le logo de repli
+         hébergé (table LOGOS). Ni l'un ni l'autre (ex. Kéa) → pas de logo. */
       var imgEl=card.querySelector(".learnworlds-image");
       var bg=imgEl ? getComputedStyle(imgEl).backgroundImage : "";
-      /* 🔴 On n'affiche un logo que si le cabinet en a un VRAI. Sans logo uploadé,
-         LearnWorlds sert `course-default-img.png` (le placeholder rayé) : on
-         l'exclut, sinon la carte afficherait une image rayée. Au 22/07, seuls
-         Advancy, Bain et Sia ont un logo ; les 7 autres tombent ici en `false`
-         et gardent une carte propre sans logo (à uploader côté LW). */
-      if(bg && bg.indexOf("url(")>=0 && bg.indexOf("course-default-img")<0){
+      var lwLogo = (bg && bg.indexOf("url(")>=0 && bg.indexOf("course-default-img")<0) ? bg : "";
+      var logo = lwLogo || logoFor(title);
+      if(logo){
         var lg=document.createElement("div");
         lg.className="ps-cab-logo";
-        lg.style.backgroundImage=bg;
+        lg.style.backgroundImage=logo;
         lg.setAttribute("role","img");
         lg.setAttribute("aria-label","Logo "+title);
         d.appendChild(lg);
