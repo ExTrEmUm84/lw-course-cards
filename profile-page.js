@@ -244,14 +244,16 @@
       d.appendChild(head); d.appendChild(t);
 
       /* Progression : on lit la largeur INLINE de la barre native, pas le texte
-         "72% Complété" (dépendant de la langue). Affichée seulement si > 0. */
+         "72% Complété" (dépendant de la langue). Affichée dès que la donnée
+         existe (barre native présente), y compris à 0 % — comme ça CHAQUE carte
+         de cours suivi porte sa progression, pas seulement les cours entamés. */
       var nat=card.querySelector(".lw-course-card-progress-bar");
       var pct=nat ? parseInt((nat.style.width||"").replace("%",""),10) : NaN;
-      if(!isNaN(pct) && pct>0){
-        var cp=Math.min(pct,100);
+      if(!isNaN(pct) && pct>=0){
+        var cp=Math.max(0,Math.min(pct,100));
         var ph=document.createElement("div"); ph.className="ps-pfc-prog-head";
         var pn=document.createElement("span"); pn.className="ps-pfc-prog-pct"; pn.textContent=cp+" %";
-        var pl=document.createElement("span"); pl.className="ps-pfc-prog-lbl"; pl.textContent="complété";
+        var pl=document.createElement("span"); pl.className="ps-pfc-prog-lbl"; pl.textContent=cp>0?"complété":"pas commencé";
         ph.appendChild(pn); ph.appendChild(pl);
         var pw=document.createElement("div"); pw.className="ps-pfc-prog";
         var pb=document.createElement("div"); pb.className="ps-pfc-prog-bar";
