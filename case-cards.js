@@ -60,6 +60,12 @@
     ".ps-cc-ic.ps-ic-cart{background:#FDEFF3 !important;color:#C2286A !important;}",
     ".ps-cc-ic.ps-ic-bank{background:#F3EAFB !important;color:#8A45C9 !important;}",
     ".ps-cc-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:25px !important;font-weight:800 !important;color:#243B6B !important;line-height:1.2 !important;letter-spacing:-.02em !important;margin:0 !important;}",
+    /* Titre « Cabinet ✕ Client » (nom de fiche « Deloitte - Monito - FR ») :
+       le cabinet en bleu marine, le client dans l'accent de la page, un ✕ discret
+       au milieu (le « - FR » de langue est retiré côté JS, cf. caseTitle()). */
+    ".ps-cc-cab{color:#243B6B !important;}",
+    ".ps-cc-cli{color:var(--ps-accent,#6161FF) !important;}",
+    ".ps-cc-x{display:inline-block !important;margin:0 .32em !important;font-size:.62em !important;font-weight:700 !important;color:#B4BCCB !important;vertical-align:.12em !important;}",
     ".ps-cc-pills{display:flex !important;flex-wrap:wrap !important;gap:7px !important;margin-bottom:auto !important;}",
     ".ps-pill{display:inline-flex !important;align-items:center !important;gap:5px !important;padding:4px 11px !important;border-radius:var(--ps-r-pill,999px) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:600 !important;line-height:1.1 !important;background:#EEF1F6 !important;color:#4B5563 !important;}",
     ".ps-pill b{font-weight:700 !important;opacity:.62 !important;text-transform:uppercase !important;font-size:10px !important;letter-spacing:.03em !important;}",
@@ -259,6 +265,26 @@
     if(h && !h.dataset.psTw) h.dataset.psTw="1";
   },2500);
 
+  /* Titre de fiche « Cabinet - Client - LANG » -> « Cabinet ✕ Client », deux
+     couleurs, sans le code langue. Séparateurs acceptés : - – — (tiret, demi et
+     cadratin). Le code langue (2-3 lettres) n'est retiré QUE s'il est un 3e+
+     segment : « Deloitte - IBM » (2 segments) garde IBM comme client. Pas au
+     format attendu (0 ou 1 segment) -> titre brut, comme avant.
+     Tout en createElement/textContent : le titre vient du Customizer (un « & »
+     ou « < » ne doit jamais être interprété comme du HTML). */
+  function caseTitle(el, raw){
+    el.textContent="";
+    var parts=raw.split(/\s*[-–—]\s*/).map(function(s){return s.trim();}).filter(Boolean);
+    if(parts.length>=3 && /^[a-zA-Z]{2,3}$/.test(parts[parts.length-1])) parts.pop();
+    if(parts.length<2){ el.textContent=raw; return; }
+    var cabinet=parts[0], client=parts.slice(1).join(" - ");
+    var cab=document.createElement("span"); cab.className="ps-cc-cab"; cab.textContent=cabinet;
+    var x=document.createElement("span"); x.className="ps-cc-x"; x.textContent="✕"; x.setAttribute("aria-hidden","true");
+    var cli=document.createElement("span"); cli.className="ps-cc-cli"; cli.textContent=client;
+    el.appendChild(cab); el.appendChild(x); el.appendChild(cli);
+    el.setAttribute("aria-label", cabinet+" et "+client);
+  }
+
   function build(){
     heroText();
     document.querySelectorAll("#pageContent .lw-course-card").forEach(function(card){
@@ -287,7 +313,7 @@
                 + '<a class="ps-cc-link" href="'+href+'">En savoir plus</a>';
       /* titre posé en textContent (et non concaténé dans le innerHTML) : il
          vient du Customizer, un "&" ou un "<" y serait interprété comme du HTML. */
-      d.querySelector(".ps-cc-title").textContent=title;
+      caseTitle(d.querySelector(".ps-cc-title"), title);
       card.appendChild(d);
     });
   }
