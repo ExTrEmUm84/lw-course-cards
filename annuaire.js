@@ -457,6 +457,824 @@
     empty.textContent = msg;
   }
 
+  /* ═══════════════════════════════════════════════════════════════════
+     PROFILS DE DÉMO — FICTIFS, POUR L'AFFICHAGE UNIQUEMENT (choix de Ziad).
+     Ces 42 profils n'existent PAS comme comptes LearnWorlds : ils sont
+     concaténés aux vrais membres renvoyés par le Worker, juste pour montrer
+     la page peuplée. Aucune donnée réelle. Leurs liens de contact pointent
+     vers des adresses bidon (exemple.fr, wa.me/336…) — ils ne mènent nulle
+     part d'utile, c'est normal.
+     🔴 POUR REVENIR AUX SEULS VRAIS MEMBRES : passer DEMO_FILL à false
+     (ou supprimer ce bloc + la ligne « if (DEMO_FILL) … » plus bas).
+     ═══════════════════════════════════════════════════════════════════ */
+  var DEMO_FILL = true;
+  var DEMO_MEMBERS =   [
+    {
+      "id": "m01",
+      "name": "Amine Marchetti",
+      "initials": "AM",
+      "photo": null,
+      "filiere": "ECT 2e année",
+      "matieres": [
+        "Anglais",
+        "Espagnol"
+      ],
+      "location": "Paris",
+      "promo": "2026",
+      "bio": "Dispo le soir en semaine pour réviser la culture générale ensemble.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Contacter sur WhatsApp",
+        "href": "https://wa.me/33612345678"
+      }
+    },
+    {
+      "id": "m02",
+      "name": "Claire Nguyen",
+      "initials": "CN",
+      "photo": null,
+      "filiere": "Prépa MP",
+      "matieres": [
+        "Maths",
+        "Physique"
+      ],
+      "location": "Lille",
+      "promo": "2026",
+      "bio": "Je bosse les maths appliquées à fond cette année. Dispo pour des colles blanches en visio le week-end.",
+      "linkedin": "https://linkedin.com/in/claire-nguyen",
+      "website": null,
+      "contact": {
+        "label": "Prendre rendez-vous",
+        "href": "https://calendly.com/claire-nguyen/30min"
+      }
+    },
+    {
+      "id": "m03",
+      "name": "Yanis Ferreira",
+      "initials": "YF",
+      "photo": null,
+      "filiere": "ECG 1re année",
+      "matieres": [
+        "Maths",
+        "Espagnol"
+      ],
+      "location": "Clermont-Ferrand",
+      "promo": "2027",
+      "bio": "Passé par la fac avant la prépa, je parle réorientation sans tabou.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Contacter sur WhatsApp",
+        "href": "https://wa.me/33612345678"
+      }
+    },
+    {
+      "id": "m04",
+      "name": "Léa Aubert",
+      "initials": "LA",
+      "photo": null,
+      "filiere": "Prépa D2",
+      "matieres": [
+        "Économie",
+        "Sociologie"
+      ],
+      "location": "Strasbourg",
+      "promo": "2026",
+      "bio": "J'ai beaucoup galéré au premier semestre, je m'en sors mieux maintenant. Je peux rassurer ceux qui doutent.",
+      "linkedin": "https://linkedin.com/in/lea-aubert",
+      "website": null,
+      "contact": {
+        "label": "Contacter sur LinkedIn",
+        "href": "https://linkedin.com/in/lea-aubert"
+      }
+    },
+    {
+      "id": "m05",
+      "name": "Thomas Traoré",
+      "initials": "TT",
+      "photo": null,
+      "filiere": "ECG 1re année",
+      "matieres": [
+        "Anglais",
+        "Allemand"
+      ],
+      "location": "Nancy",
+      "promo": "2027",
+      "bio": null,
+      "linkedin": "https://linkedin.com/in/thomas-traore",
+      "website": null,
+      "contact": null
+    },
+    {
+      "id": "m06",
+      "name": "Sarah Rousseau",
+      "initials": "SR",
+      "photo": null,
+      "filiere": "ECG 1re année",
+      "matieres": [
+        "Maths",
+        "Contraction"
+      ],
+      "location": "Lyon",
+      "promo": "2028",
+      "bio": "Je bosse les maths appliquées à fond cette année. Dispo pour des colles blanches en visio le week-end.",
+      "linkedin": null,
+      "website": null,
+      "contact": null
+    },
+    {
+      "id": "m07",
+      "name": "Hugo Moreau",
+      "initials": "HM",
+      "photo": null,
+      "filiere": "Licence 3 Économie",
+      "matieres": [
+        "Marketing",
+        "Management"
+      ],
+      "location": "Versailles",
+      "promo": "2027",
+      "bio": "Dispo le soir en semaine pour réviser la culture générale ensemble.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Prendre rendez-vous",
+        "href": "https://calendly.com/hugo-moreau/30min"
+      }
+    },
+    {
+      "id": "m08",
+      "name": "Inès Lemoine",
+      "initials": "IL",
+      "photo": null,
+      "filiere": "Prépa B/L",
+      "matieres": [
+        "Sciences sociales",
+        "Philosophie"
+      ],
+      "location": "Nancy",
+      "promo": "2027",
+      "bio": "Bilingue, je peux faire passer des oraux blancs de langue à qui veut.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Prendre rendez-vous",
+        "href": "https://calendly.com/ines-lemoine/30min"
+      }
+    },
+    {
+      "id": "m09",
+      "name": "Marc Fontaine",
+      "initials": "MF",
+      "photo": null,
+      "filiere": "ECG 1re année",
+      "matieres": [
+        "Maths",
+        "ESH"
+      ],
+      "location": "Marseille",
+      "promo": "2028",
+      "bio": "Filière peu représentée, je réponds volontiers aux questions dessus.",
+      "linkedin": null,
+      "website": null,
+      "contact": null
+    },
+    {
+      "id": "m10",
+      "name": "Nour Diallo",
+      "initials": "ND",
+      "photo": null,
+      "filiere": "Licence 2 Éco-Gestion",
+      "matieres": [
+        "Statistiques",
+        "Microéconomie"
+      ],
+      "location": "Metz",
+      "promo": "2028",
+      "bio": "J'ai beaucoup galéré au premier semestre, je m'en sors mieux maintenant. Je peux rassurer ceux qui doutent.",
+      "linkedin": "https://linkedin.com/in/nour-diallo",
+      "website": null,
+      "contact": {
+        "label": "Contacter sur WhatsApp",
+        "href": "https://wa.me/33612345678"
+      }
+    },
+    {
+      "id": "m11",
+      "name": "Camille Barbier",
+      "initials": "CB",
+      "photo": null,
+      "filiere": "ECG 1re année",
+      "matieres": [
+        "Maths",
+        "Géopolitique"
+      ],
+      "location": "Lille",
+      "promo": "2027",
+      "bio": "Grosse expérience des concours blancs, je partage ma méthode de gestion du temps.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Envoyer un email",
+        "href": "mailto:camille-barbier@exemple.fr"
+      }
+    },
+    {
+      "id": "m12",
+      "name": "Mehdi Renard",
+      "initials": "MR",
+      "photo": null,
+      "filiere": "Prépa D1",
+      "matieres": [
+        "Droit",
+        "Culture générale"
+      ],
+      "location": "Nice",
+      "promo": "2027",
+      "bio": "Dispo le soir en semaine pour réviser la culture générale ensemble.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Prendre rendez-vous",
+        "href": "https://calendly.com/mehdi-renard/30min"
+      }
+    },
+    {
+      "id": "m13",
+      "name": "Juliette Faure",
+      "initials": "JF",
+      "photo": null,
+      "filiere": "Prépa PC",
+      "matieres": [
+        "Maths",
+        "Chimie"
+      ],
+      "location": "Lille",
+      "promo": "2027",
+      "bio": "Je tiens un planning de révisions que je partage avec plaisir.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Contacter sur Instagram",
+        "href": "https://instagram.com/juliettefaure"
+      }
+    },
+    {
+      "id": "m14",
+      "name": "Antoine Meyer",
+      "initials": "AM",
+      "photo": null,
+      "filiere": "Prépa MP",
+      "matieres": [
+        "Maths",
+        "Informatique"
+      ],
+      "location": "Toulouse",
+      "promo": "2026",
+      "bio": "Filière peu représentée, je réponds volontiers aux questions dessus.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Envoyer un email",
+        "href": "mailto:antoine-meyer@exemple.fr"
+      }
+    },
+    {
+      "id": "m15",
+      "name": "Fatou Roy",
+      "initials": "FR",
+      "photo": null,
+      "filiere": "Licence 2 Éco-Gestion",
+      "matieres": [
+        "Comptabilité",
+        "Droit"
+      ],
+      "location": "Tours",
+      "promo": "2028",
+      "bio": "Je cherche des partenaires pour des mini-cas de stratégie en groupe.",
+      "linkedin": null,
+      "website": null,
+      "contact": null
+    },
+    {
+      "id": "m16",
+      "name": "Louis Leclerc",
+      "initials": "LL",
+      "photo": null,
+      "filiere": "ECT 2e année",
+      "matieres": [
+        "Anglais",
+        "Espagnol"
+      ],
+      "location": "Strasbourg",
+      "promo": "2026",
+      "bio": "J'ai beaucoup galéré au premier semestre, je m'en sors mieux maintenant. Je peux rassurer ceux qui doutent.",
+      "linkedin": "https://linkedin.com/in/louis-leclerc",
+      "website": null,
+      "contact": {
+        "label": "Prendre rendez-vous",
+        "href": "https://calendly.com/louis-leclerc/30min"
+      }
+    },
+    {
+      "id": "m17",
+      "name": "Chloé Marchand",
+      "initials": "CM",
+      "photo": null,
+      "filiere": "ECG 1re année",
+      "matieres": [
+        "ESH",
+        "Culture générale"
+      ],
+      "location": "Tours",
+      "promo": "2027",
+      "bio": "Bilingue, je peux faire passer des oraux blancs de langue à qui veut.",
+      "linkedin": null,
+      "website": null,
+      "contact": null
+    },
+    {
+      "id": "m18",
+      "name": "Rayan Dupuis",
+      "initials": "RD",
+      "photo": null,
+      "filiere": "Licence 3 Économie",
+      "matieres": [
+        "Marketing",
+        "Management"
+      ],
+      "location": "Versailles",
+      "promo": "2027",
+      "bio": "Je cherche des partenaires pour des mini-cas de stratégie en groupe.",
+      "linkedin": "https://linkedin.com/in/rayan-dupuis",
+      "website": null,
+      "contact": {
+        "label": "Appeler",
+        "href": "tel:0612345678"
+      }
+    },
+    {
+      "id": "m19",
+      "name": "Manon Hamon",
+      "initials": "MH",
+      "photo": null,
+      "filiere": "ECG 2e année",
+      "matieres": [
+        "Maths",
+        "Espagnol"
+      ],
+      "location": "Metz",
+      "promo": "2026",
+      "bio": "Je bosse les maths appliquées à fond cette année. Dispo pour des colles blanches en visio le week-end.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Prendre rendez-vous",
+        "href": "https://calendly.com/manon-hamon/30min"
+      }
+    },
+    {
+      "id": "m20",
+      "name": "Karim Pires",
+      "initials": "KP",
+      "photo": null,
+      "filiere": "ECG 1re année",
+      "matieres": [
+        "Anglais",
+        "Allemand"
+      ],
+      "location": "Reims",
+      "promo": "2027",
+      "bio": "Je bosse les maths appliquées à fond cette année. Dispo pour des colles blanches en visio le week-end.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Envoyer un email",
+        "href": "mailto:karim-pires@exemple.fr"
+      }
+    },
+    {
+      "id": "m21",
+      "name": "Emma Blin",
+      "initials": "EB",
+      "photo": null,
+      "filiere": "Prépa D2",
+      "matieres": [
+        "Économie",
+        "Sociologie"
+      ],
+      "location": "Rouen",
+      "promo": "2026",
+      "bio": null,
+      "linkedin": null,
+      "website": null,
+      "contact": null
+    },
+    {
+      "id": "m22",
+      "name": "Baptiste Ollivier",
+      "initials": "BO",
+      "photo": null,
+      "filiere": "Prépa B/L",
+      "matieres": [
+        "Sciences sociales",
+        "Philosophie"
+      ],
+      "location": "Lyon",
+      "promo": "2027",
+      "bio": "Filière peu représentée, je réponds volontiers aux questions dessus.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Prendre rendez-vous",
+        "href": "https://calendly.com/baptiste-ollivier/30min"
+      }
+    },
+    {
+      "id": "m23",
+      "name": "Aya Vasseur",
+      "initials": "AV",
+      "photo": null,
+      "filiere": "Prépa BCPST",
+      "matieres": [
+        "Maths",
+        "SVT"
+      ],
+      "location": "Clermont-Ferrand",
+      "promo": "2026",
+      "bio": "Passé par la fac avant la prépa, je parle réorientation sans tabou.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Appeler",
+        "href": "tel:0612345678"
+      }
+    },
+    {
+      "id": "m24",
+      "name": "Gabriel Bouzid",
+      "initials": "GB",
+      "photo": null,
+      "filiere": "Licence 2 Éco-Gestion",
+      "matieres": [
+        "Marketing",
+        "Management"
+      ],
+      "location": "Poitiers",
+      "promo": "2028",
+      "bio": null,
+      "linkedin": null,
+      "website": null,
+      "contact": null
+    },
+    {
+      "id": "m25",
+      "name": "Salomé Benkirane",
+      "initials": "SB",
+      "photo": null,
+      "filiere": "ECG 2e année",
+      "matieres": [
+        "Maths",
+        "Géopolitique"
+      ],
+      "location": "Rennes",
+      "promo": "2027",
+      "bio": "Je bosse les maths appliquées à fond cette année. Dispo pour des colles blanches en visio le week-end.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Appeler",
+        "href": "tel:0612345678"
+      }
+    },
+    {
+      "id": "m26",
+      "name": "Idris Perrin",
+      "initials": "IP",
+      "photo": null,
+      "filiere": "Prépa D2",
+      "matieres": [
+        "Économie",
+        "Sociologie"
+      ],
+      "location": "Paris",
+      "promo": "2026",
+      "bio": null,
+      "linkedin": "https://linkedin.com/in/idris-perrin",
+      "website": null,
+      "contact": {
+        "label": "Contacter sur WhatsApp",
+        "href": "https://wa.me/33612345678"
+      }
+    },
+    {
+      "id": "m27",
+      "name": "Jeanne Haddad",
+      "initials": "JH",
+      "photo": null,
+      "filiere": "Bachelor Business",
+      "matieres": [
+        "Market sizing",
+        "Anglais"
+      ],
+      "location": "Amiens",
+      "promo": "2027",
+      "bio": "Je bosse les maths appliquées à fond cette année. Dispo pour des colles blanches en visio le week-end.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Prendre rendez-vous",
+        "href": "https://calendly.com/jeanne-haddad/30min"
+      }
+    },
+    {
+      "id": "m28",
+      "name": "Nathan Lefèvre",
+      "initials": "NL",
+      "photo": null,
+      "filiere": "Bachelor Business",
+      "matieres": [
+        "Market sizing",
+        "Anglais"
+      ],
+      "location": "Nancy",
+      "promo": "2027",
+      "bio": "Je tiens un planning de révisions que je partage avec plaisir.",
+      "linkedin": "https://linkedin.com/in/nathan-lefevre",
+      "website": null,
+      "contact": {
+        "label": "Envoyer un email",
+        "href": "mailto:nathan-lefevre@exemple.fr"
+      }
+    },
+    {
+      "id": "m29",
+      "name": "Lina Da Silva",
+      "initials": "LD",
+      "photo": null,
+      "filiere": "Licence 2 Éco-Gestion",
+      "matieres": [
+        "Comptabilité",
+        "Droit"
+      ],
+      "location": "Poitiers",
+      "promo": "2028",
+      "bio": "Je cherche des partenaires pour des mini-cas de stratégie en groupe.",
+      "linkedin": "https://linkedin.com/in/lina-da-silva",
+      "website": null,
+      "contact": null
+    },
+    {
+      "id": "m30",
+      "name": "Paul Chevalier",
+      "initials": "PC",
+      "photo": null,
+      "filiere": "Licence 1 Éco-Gestion",
+      "matieres": [
+        "Économétrie",
+        "Statistiques"
+      ],
+      "location": "Amiens",
+      "promo": "2029",
+      "bio": "Je cherche des partenaires pour des mini-cas de stratégie en groupe.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Appeler",
+        "href": "tel:0612345678"
+      }
+    },
+    {
+      "id": "m31",
+      "name": "Yasmine El Amrani",
+      "initials": "YE",
+      "photo": null,
+      "filiere": "Prépa PC",
+      "matieres": [
+        "Maths",
+        "Chimie"
+      ],
+      "location": "Nancy",
+      "promo": "2027",
+      "bio": "Passé par la fac avant la prépa, je parle réorientation sans tabou.",
+      "linkedin": null,
+      "website": null,
+      "contact": null
+    },
+    {
+      "id": "m32",
+      "name": "Adrien Girard",
+      "initials": "AG",
+      "photo": null,
+      "filiere": "Prépa D1",
+      "matieres": [
+        "Droit",
+        "Économie"
+      ],
+      "location": "Grenoble",
+      "promo": "2027",
+      "bio": "J'ai beaucoup galéré au premier semestre, je m'en sors mieux maintenant. Je peux rassurer ceux qui doutent.",
+      "linkedin": "https://linkedin.com/in/adrien-girard",
+      "website": null,
+      "contact": {
+        "label": "Contacter sur Instagram",
+        "href": "https://instagram.com/adriengirard"
+      }
+    },
+    {
+      "id": "m33",
+      "name": "Margaux Bertrand",
+      "initials": "MB",
+      "photo": null,
+      "filiere": "Prépa PC",
+      "matieres": [
+        "Physique",
+        "Chimie"
+      ],
+      "location": "Pau",
+      "promo": "2027",
+      "bio": "Grosse expérience des concours blancs, je partage ma méthode de gestion du temps.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Envoyer un email",
+        "href": "mailto:margaux-bertrand@exemple.fr"
+      }
+    },
+    {
+      "id": "m34",
+      "name": "Sofiane Guerin",
+      "initials": "SG",
+      "photo": null,
+      "filiere": "Prépa PC",
+      "matieres": [
+        "Maths",
+        "Chimie"
+      ],
+      "location": "Orléans",
+      "promo": "2027",
+      "bio": null,
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Contacter sur Instagram",
+        "href": "https://instagram.com/sofianeguerin"
+      }
+    },
+    {
+      "id": "m35",
+      "name": "Alice Ben Salah",
+      "initials": "AB",
+      "photo": null,
+      "filiere": "Prépa D1",
+      "matieres": [
+        "Droit",
+        "Économie"
+      ],
+      "location": "Le Havre",
+      "promo": "2027",
+      "bio": "Filière peu représentée, je réponds volontiers aux questions dessus.",
+      "linkedin": "https://linkedin.com/in/alice-ben-salah",
+      "website": null,
+      "contact": null
+    },
+    {
+      "id": "m36",
+      "name": "Victor Colin",
+      "initials": "VC",
+      "photo": null,
+      "filiere": "Licence 2 Éco-Gestion",
+      "matieres": [
+        "Économétrie",
+        "Statistiques"
+      ],
+      "location": "Dijon",
+      "promo": "2028",
+      "bio": "Je peux échanger des fiches et des annales, envoyez-moi un message.",
+      "linkedin": null,
+      "website": null,
+      "contact": null
+    },
+    {
+      "id": "m37",
+      "name": "Maëlys Boucher",
+      "initials": "MB",
+      "photo": null,
+      "filiere": "ECG 1re année",
+      "matieres": [
+        "Maths",
+        "Espagnol"
+      ],
+      "location": "Angers",
+      "promo": "2028",
+      "bio": "Passé par la fac avant la prépa, je parle réorientation sans tabou.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Contacter sur LinkedIn",
+        "href": "https://linkedin.com/in/maelys-boucher"
+      }
+    },
+    {
+      "id": "m38",
+      "name": "Elias Cohen",
+      "initials": "EC",
+      "photo": null,
+      "filiere": "ECT 1re année",
+      "matieres": [
+        "Management",
+        "Économie"
+      ],
+      "location": "Nice",
+      "promo": "2027",
+      "bio": "Je peux échanger des fiches et des annales, envoyez-moi un message.",
+      "linkedin": "https://linkedin.com/in/elias-cohen",
+      "website": null,
+      "contact": {
+        "label": "Envoyer un email",
+        "href": "mailto:elias-cohen@exemple.fr"
+      }
+    },
+    {
+      "id": "m39",
+      "name": "Romane Payet",
+      "initials": "RP",
+      "photo": null,
+      "filiere": "ECT 1re année",
+      "matieres": [
+        "Économie",
+        "Droit"
+      ],
+      "location": "Paris",
+      "promo": "2027",
+      "bio": "Je peux échanger des fiches et des annales, envoyez-moi un message.",
+      "linkedin": "https://linkedin.com/in/romane-payet",
+      "website": null,
+      "contact": {
+        "label": "Prendre rendez-vous",
+        "href": "https://calendly.com/romane-payet/30min"
+      }
+    },
+    {
+      "id": "m40",
+      "name": "Théo Schmitt",
+      "initials": "TS",
+      "photo": null,
+      "filiere": "Professeur d'ESH",
+      "matieres": [
+        "Maths",
+        "Géopolitique"
+      ],
+      "location": "Clermont-Ferrand",
+      "promo": null,
+      "bio": "J'enseigne en ECG. Dispo pour les questions de méthode et la structuration des dissertations.",
+      "linkedin": null,
+      "website": "https://theo-schmitt.fr",
+      "contact": null
+    },
+    {
+      "id": "m41",
+      "name": "Anaïs Sow",
+      "initials": "AS",
+      "photo": null,
+      "filiere": "Professeur de Maths",
+      "matieres": [
+        "Maths",
+        "Informatique"
+      ],
+      "location": "Toulouse",
+      "promo": null,
+      "bio": "Prof de maths approfondies. Je peux relire des copies et pointer les erreurs de rédaction.",
+      "linkedin": null,
+      "website": "https://anais-sow.fr",
+      "contact": {
+        "label": "Prendre rendez-vous",
+        "href": "https://calendly.com/anais-sow/30min"
+      }
+    },
+    {
+      "id": "m42",
+      "name": "Wassim Carpentier",
+      "initials": "WC",
+      "photo": null,
+      "filiere": "Colleur de Géopolitique",
+      "matieres": [
+        "Maths",
+        "ESH"
+      ],
+      "location": "Clermont-Ferrand",
+      "promo": null,
+      "bio": "Colleur HGG depuis 6 ans. Je fais passer des oraux blancs sur les sujets d'actualité.",
+      "linkedin": null,
+      "website": null,
+      "contact": {
+        "label": "Contacter sur LinkedIn",
+        "href": "https://linkedin.com/in/wassim-carpentier"
+      }
+    }
+  ];
+
   // --- Chargement -------------------------------------------------------
   function charger(jeton) {
     fetch(ENDPOINT, { headers: { Accept: "application/json", "X-Turnstile-Token": jeton } })
@@ -466,6 +1284,7 @@
       })
       .then(function (data) {
         membres = Array.isArray(data.members) ? data.members : [];
+        if (DEMO_FILL) membres = membres.concat(DEMO_MEMBERS);
         if (!membres.length) {
           grid.replaceChildren();
           count.textContent = "";
