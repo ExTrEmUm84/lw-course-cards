@@ -211,9 +211,11 @@
      témoin disparaît) -> on ne mémorise aucun état sur les cartes, tout est
      re-dérivé du DOM à chaque passe. */
   var ALL_LABELS=["Cabinet","Année","Annee","Secteur","Type","Difficulté","Difficulte","Niveau","Durée","Duree","Format","Fonction"];
+  /* NB : « Année »/« Annee » RESTE dans ALL_LABELS (pour que parseDesc sache
+     délimiter les champs voisins de la description) mais N'EST PLUS un sélecteur
+     de la barre de filtres (retiré à la demande de Ziad le 22/07). */
   var FIELDS=[
     {key:"cabinet",    label:"Cabinet",    re:/^cabinets?$/i},
-    {key:"annee",      label:"Année",      re:/^ann[ée]e$/i},
     {key:"type",       label:"Type",       re:/^type$/i},
     {key:"difficulte", label:"Difficulté", re:/^difficult[ée]$/i}
   ];
