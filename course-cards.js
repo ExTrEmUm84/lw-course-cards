@@ -285,6 +285,13 @@
        Petit trait à la couleur d'accent de la page (bleu, jaune, rouge…), via
        ::before pour ne rien ajouter au DOM. Aligné à gauche sur le titre. */
     "#pageContent h2.learnworlds-subheading::before{content:\"\" !important;display:block !important;width:60px !important;height:4px !important;border-radius:2px !important;background:var(--ps-accent,#6161FF) !important;margin:0 0 24px 0 !important;}",
+    /* H2 SANS TITRE : LearnWorlds pose quand même un sous-titre vide -> le trait
+       séparateur flottait tout seul (signalé par Ziad le 22/07). On masque le
+       trait et on écrase toute hauteur/marge du H2 vide. `emptyHeadings()` pose
+       le [data-ps-empty] en JS (`:empty` ne suffit pas : LW laisse des espaces
+       insécables / <br> dans le H2). */
+    "#pageContent h2.learnworlds-subheading[data-ps-empty]::before{display:none !important;}",
+    "#pageContent h2.learnworlds-subheading[data-ps-empty]{margin:0 !important;padding:0 !important;min-height:0 !important;line-height:0 !important;}",
     /* ─── Rangée haute : titre (gauche) + tuile progression (droite) ───
        Le KPI n'est plus en absolu dans la description : mountKpi() enveloppe le
        H1 et le KPI dans `.ps-herotop`. `align-items:flex-start` -> le KPI se
@@ -377,6 +384,17 @@
     var l=label.toLowerCase();
     if(/^le[çc]ons?$/.test(l)) l = (value==="1" ? "leçon" : "leçons");
     return value+" "+l;
+  }
+
+  /* Un sous-titre H2 sans texte ne doit pas afficher le trait séparateur (sinon
+     un trait bleu flotte seul, sans titre). On marque [data-ps-empty] plutôt que
+     de se fier à `:empty` : LearnWorlds laisse souvent des espaces/<br> dans le
+     H2. On enlève le marqueur si un titre réapparaît (édition dans le builder). */
+  function emptyHeadings(){
+    document.querySelectorAll(S+" h2.learnworlds-subheading").forEach(function(h){
+      if(!(h.textContent||"").replace(/[\s\u00a0]+/g,"")) h.setAttribute("data-ps-empty","1");
+      else h.removeAttribute("data-ps-empty");
+    });
   }
 
   function build(){
@@ -476,6 +494,7 @@
        navigation se fait par les deux flèches gauche/droite du carrousel. On
        retire aussi ceux qu'une version précédente aurait posés. */
     document.querySelectorAll(S+" .ps-chev").forEach(function(c){ c.remove(); });
+    emptyHeadings();
     mountCarousel();
     heroText();
     mountKpi();
