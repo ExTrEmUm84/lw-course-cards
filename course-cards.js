@@ -493,6 +493,21 @@
       d.appendChild(a);
       card.appendChild(d);
       card.appendChild(liseret());
+      /* 🔴 TOUTE la carte cliquable vers le LECTEUR pour un inscrit. LearnWorlds
+         rend la carte cliquable (curseur pointer + handler de clic délégué) vers
+         la page de PRÉSENTATION : réécrire le seul lien « Continuer » ne suffit
+         pas, un clic sur l'image ou le titre repasse par la présentation. On
+         intercepte en CAPTURE (avant le handler LW) et on part au lecteur ; les
+         vrais liens (`<a>`, dont « Continuer ») gardent leur comportement. Ajouté
+         une seule fois (build() saute les cartes déjà montées via data-ps-m). */
+      if(nat && slug){
+        card.style.cursor="pointer";
+        card.addEventListener("click", function(e){
+          if(e.target.closest("a")) return;                 // laisser les liens agir
+          e.stopPropagation(); e.preventDefault();
+          window.location.href=target;
+        }, true);
+      }
       /* la couleur suit le NIVEAU (cf. CSS [data-ps-lvl]) : les chevrons
          intercalés décalent nth-child, qui compte tous les frères */
       /* Couleur suivant le niveau ; carte domaine (sans niveau) -> 1 = violet de
