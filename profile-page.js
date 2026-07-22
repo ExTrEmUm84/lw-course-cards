@@ -95,10 +95,10 @@
        rester intacte. La liste des :not() doit inclure TOUT ce qu'on ajoute en
        enfant direct — l'illustration native comprise (elle a déjà été « mangée »
        deux fois sur course-cards.js). */
-    S+" .lw-course-card[data-ps-pf] > *:not(.ps-pfc):not(.learnworlds-image){display:none !important;}",
-    /* l'illustration native est un background-image sur le 1er enfant */
-    S+" .ps-pf-courses .lw-course-card > .learnworlds-image{position:static !important;}",
-    S+" .ps-pf-courses .lw-course-card a.lw-course-card--stretched-link{z-index:3 !important;}",
+    /* Illustration native MASQUÉE (design « Option A » choisi par Ziad le 22/07 :
+       cartes sobres SANS image stock). On retire `.learnworlds-image` de la liste
+       des `:not()` -> tout le natif est masqué sauf notre `.ps-pfc`. */
+    S+" .lw-course-card[data-ps-pf] > *:not(.ps-pfc){display:none !important;}",
 
     /* 🔴 `flex:1 1 auto` : la carte native est en `flex-direction:column` et
        répartit son espace libre. Sans ça, `.ps-pfc` s'arrête à son contenu et
@@ -109,7 +109,7 @@
        `margin-bottom:auto` du titre qui plaque le CTA en bas.
        (Même leçon que le `height:100%` de sector-cards.js.) */
     ".ps-pfc{display:flex !important;flex-direction:column !important;flex:1 1 auto !important;padding:24px !important;}",
-    ".ps-pfc-head{display:flex !important;flex-direction:column !important;align-items:flex-start !important;gap:10px !important;margin-bottom:16px !important;}",
+    ".ps-pfc-head{display:flex !important;flex-direction:row !important;flex-wrap:wrap !important;align-items:center !important;gap:8px !important;margin-bottom:16px !important;}",
     ".ps-pfc-tag{display:inline-flex !important;align-items:center !important;padding:5px 13px !important;border-radius:var(--ps-r-pill,999px) !important;"+FT+"font-size:14px !important;font-weight:800 !important;line-height:1.2 !important;background:var(--ps-accent-tint,#EDEDFF) !important;color:var(--ps-accent-hover,#4B4BE0) !important;}",
     /* 🔴 couleur par NIVEAU (data-ps-lvl), JAMAIS par nth-child : sur la page
        Cours, les chevrons intercalés décalaient les positions et le cycle
@@ -123,9 +123,11 @@
     ".ps-pfc-metas{display:flex !important;flex-wrap:wrap !important;gap:7px !important;}",
     ".ps-pfc-meta{display:inline-flex !important;align-items:center !important;padding:4px 11px !important;border-radius:var(--ps-r-pill,999px) !important;"+FT+"font-size:12px !important;font-weight:600 !important;background:#EEF1F6 !important;color:#4B5563 !important;}",
     ".ps-pfc-title{"+FT+"font-size:20px !important;font-weight:800 !important;line-height:1.25 !important;letter-spacing:-.015em !important;color:#243B6B !important;margin:0 0 auto !important;}",
-    ".ps-pfc-prog{height:7px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:18px !important;}",
+    ".ps-pfc-prog-head{display:flex !important;align-items:baseline !important;justify-content:space-between !important;margin-top:18px !important;margin-bottom:7px !important;}",
+    ".ps-pfc-prog-pct{"+FT+"font-size:13px !important;font-weight:700 !important;color:#243B6B !important;}",
+    ".ps-pfc-prog-lbl{"+FT+"font-size:12px !important;font-weight:500 !important;color:#8A93A5 !important;}",
+    ".ps-pfc-prog{height:8px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;}",
     ".ps-pfc-prog-bar{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#6161FF) !important;}",
-    ".ps-pfc-prog-txt{"+FT+"font-size:13px !important;font-weight:600 !important;color:var(--ps-text-soft,#676879) !important;margin-top:7px !important;}",
     ".ps-pfc-link{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:14px !important;color:var(--ps-accent,#6161FF) !important;"+FT+"font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-pfc-link::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-pfc-link:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
@@ -246,13 +248,16 @@
       var nat=card.querySelector(".lw-course-card-progress-bar");
       var pct=nat ? parseInt((nat.style.width||"").replace("%",""),10) : NaN;
       if(!isNaN(pct) && pct>0){
+        var cp=Math.min(pct,100);
+        var ph=document.createElement("div"); ph.className="ps-pfc-prog-head";
+        var pn=document.createElement("span"); pn.className="ps-pfc-prog-pct"; pn.textContent=cp+" %";
+        var pl=document.createElement("span"); pl.className="ps-pfc-prog-lbl"; pl.textContent="complété";
+        ph.appendChild(pn); ph.appendChild(pl);
         var pw=document.createElement("div"); pw.className="ps-pfc-prog";
         var pb=document.createElement("div"); pb.className="ps-pfc-prog-bar";
-        pb.style.width=Math.min(pct,100)+"%";
+        pb.style.width=cp+"%";
         pw.appendChild(pb);
-        var pt=document.createElement("div");
-        pt.className="ps-pfc-prog-txt"; pt.textContent=pct+" % complété";
-        d.appendChild(pw); d.appendChild(pt);
+        d.appendChild(ph); d.appendChild(pw);
       }
 
       var a=document.createElement("a");
