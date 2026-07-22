@@ -27,6 +27,13 @@
 
   var B="body.slug-account ";                 // scope : cette page uniquement
 
+  /* Progression par cours : le Worker Cloudflare (API admin LearnWorlds),
+     derrière Turnstile, exactement comme l'annuaire. Clé publique déjà
+     autorisée sur le domaine → Turnstile s'auto-injecte, aucun loader à
+     ajouter côté page. */
+  var ENDPOINT="https://annuaire-prepastrat.ziedbencheikh.workers.dev/";
+  var SITEKEY="0x4AAAAAAD35WbGwkjYZmALf";
+
   /* Sort tout de suite ailleurs : le fichier est chargé site-wide.
      Le CSS est de toute façon scopé, mais inutile de poser une feuille de
      style et un observer sur chaque page du site. */
@@ -98,7 +105,23 @@
 
     /* --- champs / valeurs --- */
     B+".personal-details-values{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
-    B+".account-user-avatar{border-radius:var(--ps-r-card,16px) !important;overflow:hidden !important;}"
+    B+".account-user-avatar{border-radius:var(--ps-r-card,16px) !important;overflow:hidden !important;}",
+
+    /* --- barre de progression par cours (injectée en JS dans #courses-programs) ---
+       🔴 La cellule de ligne est en display:flex (direction row) : sans
+       flex-wrap, la barre devient un flex-item comprimé à côté du titre et son
+       remplissage s'effondre à 0. On fait passer la cellule en wrap et on donne
+       à la barre flex-basis 100% pour qu'elle prenne sa PROPRE ligne sous le
+       titre. Vérifié en direct : remplissages exacts, barres sous le titre. */
+    B+"#courses-programs .account-table-row .account-table-cell{flex-wrap:wrap !important;}",
+    B+"#courses-programs .ps-acc-prog{flex:0 0 100% !important;width:100% !important;max-width:520px !important;margin:9px 0 2px !important;}",
+    B+"#courses-programs .ps-acc-prog-head{display:flex !important;align-items:baseline !important;gap:5px !important;margin-bottom:5px !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    B+"#courses-programs .ps-acc-prog-pct{font-size:12.5px !important;font-weight:800 !important;color:var(--ps-accent,#6161FF) !important;letter-spacing:-.01em !important;}",
+    B+"#courses-programs .ps-acc-prog-lbl{font-size:12px !important;font-weight:600 !important;color:#8A93A5 !important;}",
+    B+"#courses-programs .ps-acc-prog-track{width:auto !important;height:6px !important;border-radius:999px !important;background:var(--ps-accent-tint,#EDEDFF) !important;overflow:hidden !important;}",
+    B+"#courses-programs .ps-acc-prog-fill{height:100% !important;border-radius:999px !important;background:var(--ps-accent,#6161FF) !important;width:0;transition:width .6s ease !important;}",
+    B+"#courses-programs .ps-acc-prog[data-done='1'] .ps-acc-prog-pct{color:#15A46A !important;}",
+    B+"#courses-programs .ps-acc-prog[data-done='1'] .ps-acc-prog-fill{background:#15A46A !important;}"
   ].join("\n");
 
   function styles(){
@@ -146,9 +169,126 @@
     cibles.forEach(function(c){ io.observe(c.el); });
   }
 
+  /* --- 4) Progression par cours ---
+     La liste native « Cours et programmes » (#courses-programs) n'a AUCUNE
+     donnée d'avancement (vérifié : 0 barre, aucun %). On la récupère via le
+     Worker (API admin LearnWorlds).
+     🔴 Les lignes de cours pointent vers /path-player?courseid=<slug> — le slug
+     est dans la QUERY STRING, PAS dans un /course/<slug>. Les programmes
+     (/program-player?program=) n'ont pas de progression par cours : ignorés. */
+  var progStarted=false, lastBySlug=null, tsEl=null;
+
+  function courseRows(){
+    var cp=document.getElementById("courses-programs");
+    if(!cp) return [];
+    var map=[];
+    [].forEach.call(cp.querySelectorAll(".account-table-row a[href*='courseid=']"),function(a){
+      var slug=null;
+      try{ slug=new URL(a.href,location.href).searchParams.get("courseid"); }catch(e){}
+      if(!slug) return;
+      var row=a.closest(".account-table-row");
+      var cell=a.closest(".account-table-cell")||row;
+      if(row&&cell) map.push({slug:slug, title:(a.textContent||"").replace(/\s+/g," ").trim(), cell:cell});
+    });
+    return map;
+  }
+
+  /* e-mail du membre connecté, lu dans « Informations personnelles ». Il part
+     UNIQUEMENT vers le Worker, en en-tête (jamais en URL : une donnée perso
+     n'a rien à faire dans une query string qui finit dans les logs). */
+  function findEmail(){
+    var re=/[^\s@]+@[^\s@]+\.[^\s@]+/;
+    var inp=document.querySelector(".account-app input[type='email']");
+    if(inp && re.test(inp.value||"")) return inp.value.trim().match(re)[0];
+    var ml=document.querySelector(".account-app a[href^='mailto:']");
+    if(ml){ var m=ml.getAttribute("href").slice(7).match(re); if(m) return m[0]; }
+    var pool=document.querySelectorAll("#personal-details .account-value-display-value, #personal-details .account-value-display, .personal-details-values *");
+    for(var i=0;i<pool.length;i++){ var mm=(pool[i].textContent||"").match(re); if(mm) return mm[0]; }
+    return null;
+  }
+
+  /* Pose/actualise la barre sur chaque ligne dont on connaît le %. Idempotent :
+     rejouée à chaque run() (les lignes peuvent arriver tard) sans doublonner. */
+  function paint(bySlug){
+    if(!bySlug) return;
+    lastBySlug=bySlug;
+    courseRows().forEach(function(c){
+      var p=bySlug[c.slug];
+      if(p==null) return;                         // pas de donnée : pas de barre
+      var box=c.cell.querySelector(":scope > .ps-acc-prog");
+      if(!box){
+        box=document.createElement("div"); box.className="ps-acc-prog";
+        var head=document.createElement("div"); head.className="ps-acc-prog-head";
+        var pct=document.createElement("span"); pct.className="ps-acc-prog-pct";
+        var lbl=document.createElement("span"); lbl.className="ps-acc-prog-lbl";
+        head.appendChild(pct); head.appendChild(lbl);
+        var track=document.createElement("div"); track.className="ps-acc-prog-track";
+        track.appendChild(document.createElement("div")).className="ps-acc-prog-fill";
+        box.appendChild(head); box.appendChild(track);
+        c.cell.appendChild(box);
+      }
+      var done=p>=100;
+      box.dataset.done=done?"1":"0";
+      box.querySelector(".ps-acc-prog-pct").textContent=done?"Terminé":(p+" %");
+      box.querySelector(".ps-acc-prog-lbl").textContent=done?"✓":(p>0?"complété":"pas commencé");
+      /* Largeur posée SYNCHRONEMENT (reflow forcé entre 0 et la cible) plutôt
+         que via requestAnimationFrame : rAF est gelé quand l'onglet n'est pas
+         au premier plan, ce qui laissait la barre vide. Le reflow garantit la
+         largeur tout en jouant la transition. */
+      var fillEl=box.querySelector(".ps-acc-prog-fill");
+      var target=(p>0&&p<2?2:p)+"%";
+      fillEl.style.width="0%";
+      void fillEl.offsetWidth;              // force le reflow
+      fillEl.style.width=target;
+    });
+  }
+
+  function charger(jeton){
+    var email=findEmail();
+    if(!email) return;   // sans e-mail, pas de résolution du membre : on renonce en silence
+    fetch(ENDPOINT+"progress",{ headers:{ Accept:"application/json", "X-Turnstile-Token":jeton, "X-LW-Email":email } })
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(data){ paint(data && data.bySlug); })
+      .catch(function(err){ console.error("[account-progress]",err); });
+  }
+
+  /* Turnstile auto-injecté (comme annuaire.js) : widget invisible dans un
+     conteneur hors écran mais RENDU (un display:none empêcherait l'exécution). */
+  function turnstile(){
+    if(!tsEl){
+      tsEl=document.createElement("div");
+      tsEl.style.cssText="position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;";
+      (document.body||document.documentElement).appendChild(tsEl);
+    }
+    window.psAccTsReady=function(){
+      try{
+        window.turnstile.render(tsEl,{
+          sitekey:SITEKEY,
+          callback:charger,
+          "error-callback":function(){ return true; },
+          "expired-callback":function(){ try{ window.turnstile.reset(tsEl); }catch(e){} },
+        });
+      }catch(e){ console.error("[account-progress] turnstile",e); }
+    };
+    if(window.turnstile){ window.psAccTsReady(); return; }
+    if(document.getElementById("ps-acc-ts-api")) return;
+    var s=document.createElement("script");
+    s.id="ps-acc-ts-api";
+    s.src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=psAccTsReady&render=explicit";
+    s.async=true; s.defer=true;
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  function progression(){
+    if(progStarted){ if(lastBySlug) paint(lastBySlug); return; }
+    if(!courseRows().length) return;   // section pas encore rendue : on réessaiera
+    progStarted=true;
+    turnstile();
+  }
+
   function run(){
     if(!surLaPage()) return;
-    figtree(); styles(); spy();
+    figtree(); styles(); spy(); progression();
   }
 
   if(document.readyState!=="loading") run(); else document.addEventListener("DOMContentLoaded",run);
