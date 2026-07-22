@@ -36,27 +36,17 @@
     "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:grid !important;grid-template-columns:1fr 1fr !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;overflow:visible !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
     /* la barre de filtres : alignement seul, aucun `display` */
     "#pageContent .lw-cols.with-filters{max-width:1000px !important;margin:0 auto !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
-    /* 🔴 overflow VISIBLE (et non hidden) : la plaque de titre `.ps-cc-plate`
-       déborde du coin haut-gauche de la carte, il ne faut pas la rogner. Le
-       natif est déjà masqué par `.lw-course-card > *:not(.ps-cc)` plus bas, donc
-       rien d'autre ne dépasse. position+z-index : au survol la carte (et sa
-       plaque) passent au-dessus des cartes voisines qu'elle chevauche. */
-    "#pageContent .lw-cols > .col.lw-course-card{position:relative !important;z-index:1 !important;width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:none !important;overflow:visible !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card:hover{z-index:10 !important;box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
     "#pageContent .lw-course-card > *:not(.ps-cc){display:none !important;}",
-    /* min-height:0 → la carte épouse son contenu (fini le grand vide). Dans une
-       rangée, la grille égalise quand même les hauteurs. */
-    ".ps-cc{position:relative !important;display:flex !important;flex-direction:column !important;padding:0 24px 24px 24px !important;min-height:0 !important;}",
-    /* ─── Bandeau de titre en relief qui DÉBORDE la carte (design « fiche »,
-       Option 2 validée par Ziad le 22/07) ───
-       Bandeau blanc PLEINE LARGEUR débordant en haut (-18) et sur les deux côtés
-       (-10/-10) ; gros titre « Cabinet ✕ Client », fin liseré d'accent en bas.
-       🔴 DANS LE FLUX (pas en absolu) : sa hauteur pousse les pastilles dessous,
-       même si le titre passe sur 2 lignes. Étant un flex-item, il s'étire en
-       pleine largeur (align stretch par défaut). La carte est en
-       `overflow:visible` (cf. plus haut) sinon le bandeau serait rogné. */
-    ".ps-cc-plate{margin:-18px -10px 20px -10px !important;background:#fff !important;border-radius:14px !important;border-bottom:3px solid var(--ps-accent,#6161FF) !important;box-shadow:0 10px 26px rgba(15,23,42,.13) !important;padding:18px 22px !important;}",
-    ".ps-cc-plate .ps-cc-title{font-size:29px !important;line-height:1.05 !important;}",
+    /* Design SOBRE (choix de Ziad le 22/07, remplace le bandeau « fiche ») :
+       carte flat à filet fin, titre bicolore en haut, court filet d'accent
+       dessous. min-height:0 → la carte épouse son contenu (pas de grand vide) ;
+       la grille égalise les hauteurs d'une même rangée. */
+    ".ps-cc{display:flex !important;flex-direction:column !important;padding:26px !important;min-height:0 !important;}",
+    /* Court filet d'accent sous le titre — même esprit que le séparateur des
+       sous-titres du site (suit `--ps-accent` = couleur de la page). */
+    ".ps-cc-rule{flex:0 0 auto !important;width:38px !important;height:3px !important;border-radius:2px !important;background:var(--ps-accent,#6161FF) !important;margin:14px 0 18px 0 !important;}",
     /* En-tête : picto + titre sur une ligne.
        `align-items:flex-start` et non `center` : sur un titre qui passe sur 2
        lignes, un centrage ferait descendre le picto au milieu du bloc au lieu
@@ -323,10 +313,10 @@
       }).join("");
       var d=document.createElement("div");
       d.className="ps-cc";
-      /* Titre dans une plaque en relief qui déborde (design « fiche »). Le picto
-         est retiré (maquette A) ; pickIcon/ICON restent définis, réutilisables si
-         Ziad veut le remettre dans la plaque. */
-      d.innerHTML='<div class="ps-cc-plate"><h3 class="ps-cc-title"></h3></div>'
+      /* Design sobre : titre bicolore + court filet d'accent dessous, puis les
+         pastilles. Picto retiré (pickIcon/ICON restent définis, réutilisables). */
+      d.innerHTML='<h3 class="ps-cc-title"></h3>'
+                + '<div class="ps-cc-rule" aria-hidden="true"></div>'
                 + '<div class="ps-cc-pills">'+pills+'</div>'
                 + '<a class="ps-cc-link" href="'+href+'">En savoir plus</a>';
       /* titre posé en textContent (et non concaténé dans le innerHTML) : il
