@@ -245,7 +245,15 @@
 
   function charger(jeton){
     var email=findEmail();
-    if(!email) return;   // sans e-mail, pas de résolution du membre : on renonce en silence
+    if(!email){
+      /* 🔴 « Informations personnelles » (où se lit l'e-mail) peut être rendu
+         APRÈS l'arrivée du jeton Turnstile : sans réessai, charger() sortait en
+         silence et aucune barre n'apparaissait (course de rendu constatée en
+         live). On repousse, borné (~20 s) ; le jeton Turnstile reste valide
+         plusieurs minutes, donc on peut le réutiliser. */
+      if((charger.tries=(charger.tries||0)+1) <= 40){ setTimeout(function(){ charger(jeton); }, 500); }
+      return;
+    }
     fetch(ENDPOINT+"progress",{ headers:{ Accept:"application/json", "X-Turnstile-Token":jeton, "X-LW-Email":email } })
       .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
       .then(function(data){ paint(data && data.bySlug); })
