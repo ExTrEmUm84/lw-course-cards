@@ -56,6 +56,16 @@
        de remplir la hauteur étirée par la grille -> le `margin-bottom:auto` de
        la description n'a rien à absorber et les CTA se désalignent entre cartes. */
     ".ps-ccab{display:flex !important;flex-direction:column !important;height:100% !important;padding:26px !important;}",
+    /* Logo du cabinet, HARMONISÉ sur toutes les cartes (demande de Ziad le 22/07) :
+       hauteur fixe + `background-size:contain` -> aucun rognage, tous à la même
+       échelle visuelle quel que soit le ratio du logo ; MONOCHROME via
+       `grayscale(1)` + opacité normalisée pour que des logos de teintes très
+       variées (bleu Advancy, violet Accenture, rouge…) se ressemblent. Couleur
+       restaurée au survol de la carte, repère de reconnaissance. Le logo natif
+       est un `background-image` sur `.learnworlds-image` (masqué) : build() en
+       recopie l'URL sur cette div. */
+    ".ps-cab-logo{height:46px !important;margin:0 0 20px !important;background-repeat:no-repeat !important;background-position:left center !important;background-size:contain !important;filter:grayscale(1) !important;opacity:.72 !important;transition:filter .25s ease, opacity .25s ease !important;}",
+    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover .ps-cab-logo{filter:grayscale(0) !important;opacity:1 !important;}",
     ".ps-cab-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:25px !important;line-height:1.2 !important;font-weight:800 !important;letter-spacing:-.02em !important;color:#243B6B !important;margin:0 0 10px !important;}",
     /* description bornée à 4 lignes : les cartes gardent la même hauteur */
     ".ps-cab-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;margin:0 !important;display:-webkit-box !important;-webkit-line-clamp:4 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
@@ -194,6 +204,24 @@
 
       var d=document.createElement("div");
       d.className="ps-ccab";
+      /* Logo du cabinet : on recopie l'URL du background-image natif
+         (`.learnworlds-image`) sur une div dédiée, harmonisée + monochrome (cf.
+         CSS .ps-cab-logo). Pas de logo -> pas de div (la carte reste propre). */
+      var imgEl=card.querySelector(".learnworlds-image");
+      var bg=imgEl ? getComputedStyle(imgEl).backgroundImage : "";
+      /* 🔴 On n'affiche un logo que si le cabinet en a un VRAI. Sans logo uploadé,
+         LearnWorlds sert `course-default-img.png` (le placeholder rayé) : on
+         l'exclut, sinon la carte afficherait une image rayée. Au 22/07, seuls
+         Advancy, Bain et Sia ont un logo ; les 7 autres tombent ici en `false`
+         et gardent une carte propre sans logo (à uploader côté LW). */
+      if(bg && bg.indexOf("url(")>=0 && bg.indexOf("course-default-img")<0){
+        var lg=document.createElement("div");
+        lg.className="ps-cab-logo";
+        lg.style.backgroundImage=bg;
+        lg.setAttribute("role","img");
+        lg.setAttribute("aria-label","Logo "+title);
+        d.appendChild(lg);
+      }
       var t=document.createElement("h3");
       t.className="ps-cab-title"; t.textContent=title;        // textContent : pas d'injection
       d.appendChild(t);
