@@ -302,10 +302,23 @@
     kpi.setAttribute("aria-label","Progression globale : "+pct+" % sur "+cles.length+" fiches");
   }
 
+  /* Le placeholder de la barre de recherche NATIVE LW est « Rechercher des cours »
+     (chaîne système LW, pas un réglage par élément). Sur la page Secteurs on le
+     force à « Rechercher un secteur… ». Idempotent : ne réécrit QUE les placeholders
+     contenant « cours » -> une fois corrigé il n'y touche plus, et re-corrige si LW
+     re-render le remet. N'ajoute/retire aucun nœud -> pas de boucle avec l'observer. */
+  function searchPlaceholder(){
+    var ins=document.querySelectorAll("#pageContent input[placeholder]");
+    for(var i=0;i<ins.length;i++){
+      if(/cours/i.test(ins[i].getAttribute("placeholder")||"")) ins[i].setAttribute("placeholder","Rechercher un secteur…");
+    }
+  }
+
   // --- 5) Construction ---
   function build(){
     heroText();
     mountKpi();
+    searchPlaceholder();
     document.querySelectorAll(S+" .cards-grandpa .lw-course-card").forEach(function(card){
       if(card.dataset.psS) return;
       var h=card.querySelector(".learnworlds-heading3");
