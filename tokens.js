@@ -242,4 +242,19 @@
      quelques relances pour attraper la classe active. */
   [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); });
   setTimeout(reveal, 3500);   // filet de sécurité anti-flash
+
+  /* ====================================================================
+     CHARGEMENT DU FOOTER REFAIT (footer.js)
+     --------------------------------------------------------------------
+     tokens.js est chargé sur TOUT le site ; le footer étant identique
+     partout, on charge footer.js d'ici plutôt que d'ajouter un 2e include
+     site-wide dans LearnWorlds (zéro admin : un git push suffit). Fichier
+     séparé pour la lisibilité. Garde-fou par id -> jamais injecté 2 fois. */
+  if(!document.getElementById("ps-footer-js")){
+    var _fs=document.createElement("script");
+    _fs.id="ps-footer-js";
+    _fs.src="https://extremum84.github.io/lw-course-cards/footer.js";
+    _fs.async=true;
+    (document.head||document.documentElement).appendChild(_fs);
+  }
 })();
