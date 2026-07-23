@@ -78,7 +78,7 @@
        - row-gap:106px : place pour les cercles des rangées suivantes, sinon ils
          débordent sur les cartes de la rangée du dessus (grille multi-rangées,
          contrairement au rail d'une seule rangée de la page Cours). column-gap:24px. */
-    GRID+"{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:106px 24px !important;max-width:1000px !important;margin:0 auto !important;padding:96px 0 0 !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    GRID+"{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:84px 24px !important;max-width:1000px !important;margin:0 auto !important;padding:78px 0 0 !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
     /* overflow:visible pour laisser sortir le badge ; flex column pour empiler
        badge (flottant) puis contenu — comme les cartes cours. */
     S+" .cards-grandpa > .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;overflow:visible !important;display:flex !important;flex-direction:column !important;isolation:isolate !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
@@ -103,11 +103,11 @@
        5px + ombre, comme l'illustration ronde des cours). Fond bleu #203866, logo
        en BLANC par-dessus. 🔴 Blanchiment (`brightness(0) invert(1)`) sur un
        élément INTERNE `.ps-cab-logo-img` (sinon le fond bleu blanchit aussi). */
-    ".ps-cab-logo{width:180px !important;height:180px !important;border-radius:50% !important;background-color:#203866 !important;display:flex !important;align-items:center !important;justify-content:center !important;margin:-90px auto 18px !important;border:5px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.12) !important;overflow:hidden !important;flex:none !important;transition:box-shadow .25s ease !important;}",
+    ".ps-cab-logo{width:140px !important;height:140px !important;border-radius:50% !important;background-color:#203866 !important;display:flex !important;align-items:center !important;justify-content:center !important;margin:-70px auto 16px !important;border:4px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.12) !important;overflow:hidden !important;flex:none !important;transition:box-shadow .25s ease !important;}",
     ".ps-cab-logo-img{width:66% !important;height:66% !important;background-repeat:no-repeat !important;background-position:center !important;background-size:contain !important;filter:brightness(0) invert(1) !important;}",
     /* Repli : cabinet sans logo hébergé transparent (Advancy, Sia, Kéa) ->
        initiales BLANCHES sur le même cercle bleu, look homogène. */
-    ".ps-cab-logo--ini{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:52px !important;font-weight:800 !important;color:#fff !important;letter-spacing:.5px !important;}",
+    ".ps-cab-logo--ini{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:42px !important;font-weight:800 !important;color:#fff !important;letter-spacing:.5px !important;}",
     S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover .ps-cab-logo{box-shadow:0 10px 26px rgba(15,23,42,.18) !important;}",
     ".ps-cab-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:25px !important;line-height:1.2 !important;font-weight:800 !important;letter-spacing:-.02em !important;color:#243B6B !important;margin:0 0 10px !important;}",
     /* description bornée à 4 lignes : les cartes gardent la même hauteur */
