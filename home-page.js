@@ -539,7 +539,7 @@
 
   /* HERO plein écran avec la vidéo en FOND (Vimeo background=1 : autoplay muet en
      boucle, sans contrôles), voile sombre + contenu blanc dessus. Idempotent. */
-  var HERO_BG_VIDEO="https://player.vimeo.com/video/910833393?background=1&autoplay=1&loop=1&muted=1&badge=0&autopause=0";
+  var HERO_BG_VIDEO="https://player.vimeo.com/video/910833393?h=94064c722b&background=1&autopause=0&muted=1";
   function heroVideoBg(){
     var hero=document.querySelector(H+" .ps-home-hero");
     if(!hero || hero.classList.contains("ps-hero-bg")) return;
