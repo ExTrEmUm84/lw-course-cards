@@ -304,10 +304,24 @@
     kpi.setAttribute("aria-label","Progression globale : "+pct+" % sur "+cles.length+" fiches");
   }
 
+  /* Le placeholder de la barre de recherche NATIVE LW est « Rechercher des cours »
+     (chaîne système LW, pas un réglage par élément). Sur la page Cabinets on le
+     force à « Rechercher un cabinet… ». Idempotent : ne réécrit QUE les placeholders
+     contenant « cours » -> une fois corrigé il n'y touche plus, et re-corrige si LW
+     re-render le remet à « cours ». N'ajoute/retire aucun nœud -> pas de boucle avec
+     l'observer (childList seulement). */
+  function searchPlaceholder(){
+    var ins=document.querySelectorAll("#pageContent input[placeholder]");
+    for(var i=0;i<ins.length;i++){
+      if(/cours/i.test(ins[i].getAttribute("placeholder")||"")) ins[i].setAttribute("placeholder","Rechercher un cabinet…");
+    }
+  }
+
   // --- 4) Construction des cartes ---
   function build(){
     heroText();
     mountKpi();
+    searchPlaceholder();
     document.querySelectorAll(S+" .cards-grandpa .lw-course-card").forEach(function(card){
       if(card.dataset.psC) return;
       var h=card.querySelector(".learnworlds-heading3");
