@@ -74,8 +74,11 @@
          L'INTÉRIEUR de notre champ -> effet "double ligne". On neutralise la
          bordure du bouton, le champ porte le seul contour. */
       "#pageContent .-search-box button, #pageContent .-search-box .learnworlds-button{border:0 !important;box-shadow:none !important;background:transparent !important;border-radius:0 11px 11px 0 !important;height:44px !important;}",
-      /* --- bouton "tout" en pill --- */
-      "#pageContent .learnworlds-button.filter.text-only{display:inline-flex !important;align-items:center !important;justify-content:center !important;height:44px !important;padding:0 18px !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;color:#4B5563 !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:600 !important;margin-right:10px !important;cursor:pointer !important;transition:all .15s ease !important;}",
+      /* --- bouton "tout" (renommé « Réinitialiser les filtres ») en pill ---
+         `white-space:nowrap` + `width:auto` : le libellé est plus long que le
+         "tout" natif ; sans ça il passait à la ligne (et `w-50perc-sp` le bridait
+         à 50 % sur mobile -> texte coupé). La pastille épouse maintenant son texte. */
+      "#pageContent .learnworlds-button.filter.text-only{display:inline-flex !important;align-items:center !important;justify-content:center !important;white-space:nowrap !important;width:auto !important;max-width:none !important;height:44px !important;padding:0 18px !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;color:#4B5563 !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:600 !important;margin-right:10px !important;cursor:pointer !important;transition:all .15s ease !important;}",
       "#pageContent .learnworlds-button.filter.text-only:hover{border-color:#3887B4 !important;color:#3887B4 !important;background:#F3F9FC !important;}",
       /* Pastille de filtre SANS libellé : LearnWorlds en génère (mesuré : 36x2px,
          donc invisible en natif). Notre style de pastille ci-dessus (hauteur 44 +
@@ -194,6 +197,28 @@
     if(!CAT_LABEL) return;
     document.querySelectorAll("#pageContent .lw-filter-option-lbl").forEach(function(el){
       if((el.textContent||"").trim()!==CAT_LABEL) el.textContent=CAT_LABEL;
+    });
+  }
+
+  /* ================= RENOMMAGE DU BOUTON "tout" ==========================
+     Le bouton natif "tout" (bilingue "tout"/"all") REMET tous les filtres à
+     zéro (natif + nos sélecteurs, cf. l'écouteur plus bas). Son libellé "tout"
+     était trompeur -> renommé « Réinitialiser les filtres », vrai partout où le
+     script tourne (Cas, Secteurs, Cabinets). Personnalisable par page comme
+     PS_CAT_LABEL, mais avec un DÉFAUT non nul (la fonction est la même partout,
+     contrairement au sens des catégories) :
+         <script>window.PS_TOUT_LABEL="Toutes les études de cas";</script>
+     Cosmétique, réappliqué à chaque run() car LearnWorlds réécrit le libellé.
+     On ne touche QUE la 1re pastille .text-only (le "tout") : la 2e est vide
+     (cf. .ps-f-blank, déjà masquée) — le garde-fou `if(!t)` l'exclut. */
+  var TOUT_LABEL=(typeof window.PS_TOUT_LABEL==="string" && window.PS_TOUT_LABEL.trim()) ? window.PS_TOUT_LABEL.trim() : "Réinitialiser les filtres";
+  function renameToutButton(){
+    document.querySelectorAll("#pageContent .learnworlds-button-wrapper.lw-filters").forEach(function(wrap){
+      var btn=wrap.querySelector(".learnworlds-button.filter.text-only");
+      if(!btn) return;
+      var t=(btn.textContent||"").trim();
+      if(!t || t===TOUT_LABEL) return;   // pastille vide, ou déjà renommée
+      btn.textContent=TOUT_LABEL;
     });
   }
 
@@ -431,6 +456,7 @@
     });
     hideBlankPills();
     renameCategories();
+    renameToutButton();
     mountFieldFilters();
     applyCardFilter();
   }
