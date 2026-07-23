@@ -73,9 +73,12 @@
     /* grille de 3, alignée comme les autres pages (1000px centrés).
        Le natif fait 1120px ici (mesuré : 290->1410) : on reprend 1000 pour
        que les cartes tombent sur le même bord gauche que le hero. */
-    /* 🔴 padding-top:96px : laisse la place aux badges qui DÉBORDENT au-dessus des
-       cartes (style « carte cours » : cercle centré flottant, cf. course-cards.js). */
-    GRID+"{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;padding:96px 0 0 !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    /* 🔴 Style « carte cours » : cercle centré qui FLOTTE au-dessus (cf. course-cards.js).
+       - padding-top:96px : place pour les cercles de la 1re rangée.
+       - row-gap:106px : place pour les cercles des rangées suivantes, sinon ils
+         débordent sur les cartes de la rangée du dessus (grille multi-rangées,
+         contrairement au rail d'une seule rangée de la page Cours). column-gap:24px. */
+    GRID+"{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:106px 24px !important;max-width:1000px !important;margin:0 auto !important;padding:96px 0 0 !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
     /* overflow:visible pour laisser sortir le badge ; flex column pour empiler
        badge (flottant) puis contenu — comme les cartes cours. */
     S+" .cards-grandpa > .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;overflow:visible !important;display:flex !important;flex-direction:column !important;isolation:isolate !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
