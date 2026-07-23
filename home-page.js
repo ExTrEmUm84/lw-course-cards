@@ -234,6 +234,18 @@
     [H+" .ps-home-atouts .ps-hcard .box-icon-wrapper",H+" .ps-home-atouts .ps-hcard .learnworlds-icon-wrapper"].join(",")+"{margin:0 auto 4px !important;width:64px !important;height:64px !important;}",
     H+" .ps-home-atouts .ps-hcard .flexible-part{width:100% !important;}",
     H+" .ps-home-atouts .ps-hcard .box-icon-wrapper .learnworlds-icon,"+H+" .ps-home-atouts .ps-hcard .learnworlds-icon-wrapper .learnworlds-icon{font-size:24px !important;}",
+    /* pictos SVG premium (buildAtouts) : les FontAwesome natifs (5x play-circle,
+       receipt, question…) ne collent pas au sens -> remplacés par un SVG ligne
+       assorti à chaque atout, dans le badge cercle tint. */
+    [H+" .ps-home-atouts .box-icon-wrapper",H+" .ps-home-atouts .learnworlds-icon-wrapper"].join(",")+"{display:flex !important;align-items:center !important;justify-content:center !important;}",
+    H+" .ps-home-atouts .ps-atout-ic{display:inline-flex !important;align-items:center !important;justify-content:center !important;}",
+    H+" .ps-home-atouts .ps-atout-ic svg{width:28px !important;height:28px !important;stroke:var(--ps-accent,#507EC5) !important;fill:none !important;stroke-width:1.9 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    /* révélation au scroll en cascade (transform reveal .3s -> le hover -3px reste vif) */
+    H+" .ps-home-atouts .ps-hcard{opacity:0 !important;transform:translateY(18px) !important;transition:opacity .5s ease,transform .3s ease,box-shadow .2s ease !important;}",
+    H+" .ps-home-atouts.ps-in .ps-hcard{opacity:1 !important;transform:translateY(0) !important;}",
+    H+" .ps-home-atouts.ps-in .ps-hgrid > .ps-hcard:nth-child(4n+2){transition-delay:.06s !important;}",
+    H+" .ps-home-atouts.ps-in .ps-hgrid > .ps-hcard:nth-child(4n+3){transition-delay:.12s !important;}",
+    H+" .ps-home-atouts.ps-in .ps-hgrid > .ps-hcard:nth-child(4n){transition-delay:.18s !important;}",
 
     /* --- 5) BANDE « Avez-vous besoin d'une formation » (constat) — REFONTE :
        titre centré, mais le CORPS passe en COLONNE DE LECTURE alignée à gauche
@@ -603,6 +615,58 @@
     }
   }
 
+  /* ================= ATOUTS : pictos SVG assortis + révélation =================
+     Les 8 cartes « Pourquoi choisir PrepaStrat ? » portent des FontAwesome
+     génériques (5x play-circle, receipt, question…). On choisit un SVG ligne
+     par mot-clé du TITRE et on remplace l'icône native dans son badge. La
+     section reçoit .ps-in au scroll pour la cascade. Idempotent / auto-réparant. */
+  var ATOUT_ICON={
+    trophy:'<svg viewBox="0 0 24 24"><path d="M7.4 4h9.2v5.4a4.6 4.6 0 0 1-9.2 0V4Z"/><path d="M7.4 6H5.3a2 2 0 0 0 0 4h2.2M16.6 6h2.1a2 2 0 0 1 0 4h-2.2"/><path d="M9.4 21h5.2M12 16.8V21"/></svg>',
+    compass:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.5 8.5-2.2 5.3-5.3 2.2 2.2-5.3 5.3-2.2Z"/></svg>',
+    medal:'<svg viewBox="0 0 24 24"><circle cx="12" cy="8.6" r="5.3"/><path d="m9.4 12.9-1.7 7.7L12 18.1l4.3 2.5-1.7-7.7"/></svg>',
+    users:'<svg viewBox="0 0 24 24"><path d="M16 21v-1.8a4 4 0 0 0-4-4H6.6a4 4 0 0 0-4 4V21"/><circle cx="9.3" cy="7.4" r="3.6"/><path d="M21.4 21v-1.8a4 4 0 0 0-3-3.87M16.6 3.9a3.6 3.6 0 0 1 0 7"/></svg>',
+    target:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1.5"/></svg>',
+    network:'<svg viewBox="0 0 24 24"><circle cx="6" cy="6" r="2.4"/><circle cx="18" cy="6" r="2.4"/><circle cx="12" cy="18.2" r="2.4"/><path d="M8 6h8M7.6 7.8 10.6 16M16.4 7.8 13.4 16"/></svg>',
+    star:'<svg viewBox="0 0 24 24"><path d="m12 3 2.6 5.2 5.8.85-4.2 4.1 1 5.75L12 21.3l-5.2-2.75 1-5.75-4.2-4.1 5.8-.85L12 3Z"/></svg>',
+    globe:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 3.9 5.8 3.9 9s-1.4 6.4-3.9 9c-2.5-2.6-3.9-5.8-3.9-9S9.5 5.6 12 3Z"/></svg>',
+    check:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m8.4 12 2.5 2.5 4.7-5.1"/></svg>'
+  };
+  function atoutKey(title){
+    var t=(title||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"");
+    if(/admission|taux|reussit|%/.test(t)) return "trophy";
+    if(/pedagogie|sur-mesure|personnalis|mesure/.test(t)) return "compass";
+    if(/expertise|ans|ancien|annee|experience/.test(t)) return "medal";
+    if(/tous profils|profils/.test(t)) return "users";
+    if(/specialis|conseil|coeur|coeur|c.ur/.test(t)) return "target";
+    if(/reseau/.test(t)) return "network";
+    if(/coach|mbb/.test(t)) return "star";
+    if(/francophone|langue|bureau|internation/.test(t)) return "globe";
+    return "check";
+  }
+  function buildAtouts(){
+    var sec=document.querySelector(H+" .ps-home-atouts"); if(!sec) return;
+    sec.querySelectorAll(".ps-hcard").forEach(function(card){
+      var wrap=card.querySelector(".box-icon-wrapper, .learnworlds-icon-wrapper");
+      var fa=wrap ? wrap.querySelector(".learnworlds-icon") : null;
+      if(wrap && fa && !wrap.querySelector(".ps-atout-ic")){
+        var h=card.querySelector(".learnworlds-heading3, .learnworlds-heading4");
+        var sp=document.createElement("span");
+        sp.className="ps-atout-ic";
+        sp.innerHTML=ATOUT_ICON[atoutKey(h?h.textContent:"")]||ATOUT_ICON.check;
+        wrap.appendChild(sp);
+        fa.classList.add("ps-home-hide");
+      }
+    });
+    if(!sec.classList.contains("ps-in") && !sec.__psAtoutObs){
+      sec.__psAtoutObs=1;
+      if(window.IntersectionObserver){
+        var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ sec.classList.add("ps-in"); io.disconnect(); } }); },{threshold:0.1});
+        io.observe(sec);
+        setTimeout(function(){ var r=sec.getBoundingClientRect(); if(r.top<(window.innerHeight||800)) sec.classList.add("ps-in"); },450);
+      } else { sec.classList.add("ps-in"); }
+    }
+  }
+
   /* Reconstruit « Notre histoire » en timeline HORIZONTALE (4 jalons), révélée au
      scroll. Idempotent. Masque les rangées natives verticales. */
   function buildTimeline(){
@@ -852,7 +916,7 @@
 
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer(); cartes(); buildStats(); buildCta(); buildPreuve(); buildCabinets(); buildTimeline(); buildProfils(); heroVideoBg(); setHeroVideo(); buildFaq();
+    styles(); marquer(); cartes(); buildStats(); buildCta(); buildPreuve(); buildAtouts(); buildCabinets(); buildTimeline(); buildProfils(); heroVideoBg(); setHeroVideo(); buildFaq();
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
