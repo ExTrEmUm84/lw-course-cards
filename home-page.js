@@ -153,11 +153,43 @@
     H+" .ps-home-preuve .learnworlds-heading4{color:var(--ps-accent,#507EC5) !important;font-size:22px !important;font-weight:800 !important;letter-spacing:-.02em !important;}",
     H+" .ps-home-preuve .learnworlds-heading3{color:var(--ps-marine,#243B6B) !important;font-weight:800 !important;}",
 
-    /* --- 8) PROFILS : fond blanc (le fond bleu clair du template écrasait le titre),
-         cartes à liseré d'accent en haut --- */
-    H+" .ps-home-profils{background:#fff !important;}",
-    H+" .ps-home-profils .box-shadow-round-light,"+H+" .ps-home-profils .radius-15{border-top:3px solid var(--ps-accent,#507EC5) !important;padding:26px !important;}",
-    H+" .ps-home-profils .learnworlds-heading4{color:var(--ps-marine,#243B6B) !important;}",
+    /* --- 8) PROFILS v2 (buildProfils) : REFONTE — donut animé (répartition) + 2 cartes
+         profils à pastilles + cabinets en TIERS à chips. Le natif (pie moche + accordéons
+         + liste) est masqué. Fond doux, contenu en cartes blanches. --- */
+    [H+" .ps-home-profils",H+" .ps-home-profils .learnworlds-section-content"].join(",")+"{background:var(--ps-surface-soft,#F6F8FB) !important;}",
+    H+" .ps-pf2{display:grid !important;grid-template-columns:1fr 1.15fr !important;gap:18px !important;max-width:1000px !important;margin:24px auto 0 !important;align-items:start !important;}",
+    H+" .ps-pf2-left{display:flex !important;flex-direction:column !important;gap:14px !important;}",
+    /* carte donut */
+    H+" .ps-donutcard{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:16px !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;padding:22px !important;display:flex !important;align-items:center !important;gap:18px !important;}",
+    H+" .ps-donut{width:132px !important;height:132px !important;flex:none !important;}",
+    H+" .ps-donut-seg{transition:stroke-dashoffset 1s cubic-bezier(.35,0,.2,1) !important;}",
+    H+" .ps-pf2.ps-in .ps-donut-seg{stroke-dashoffset:0 !important;}",
+    H+" .ps-donut-c{"+FT+"font-weight:800 !important;fill:var(--ps-marine,#243B6B) !important;}",
+    H+" .ps-donut-cs{"+FT+"font-weight:600 !important;fill:var(--ps-text-soft,#676879) !important;}",
+    H+" .ps-donut-leg{display:flex !important;flex-direction:column !important;gap:7px !important;flex:1 !important;min-width:0 !important;}",
+    H+" .ps-donut-leg-i{display:flex !important;align-items:center !important;gap:8px !important;"+FT+"font-size:12.5px !important;color:var(--ps-text,#1c1f26) !important;}",
+    H+" .ps-donut-dot{width:10px !important;height:10px !important;border-radius:3px !important;flex:none !important;}",
+    H+" .ps-donut-val{margin-left:auto !important;font-weight:700 !important;color:var(--ps-marine,#243B6B) !important;}",
+    /* cartes profils */
+    H+" .ps-pfcard{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:16px !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;padding:20px !important;}",
+    H+" .ps-pfcard-h{display:flex !important;align-items:center !important;gap:11px !important;margin-bottom:11px !important;}",
+    H+" .ps-pfcard-ic{width:42px !important;height:42px !important;border-radius:12px !important;background:var(--ps-accent-tint,#EDF4FF) !important;color:var(--ps-accent,#507EC5) !important;display:flex !important;align-items:center !important;justify-content:center !important;flex:none !important;}",
+    H+" .ps-pfcard-ic svg{width:22px !important;height:22px !important;stroke:currentColor !important;fill:none !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    H+" .ps-pfcard-t{"+FT+"font-size:17px !important;font-weight:800 !important;color:var(--ps-marine,#243B6B) !important;}",
+    H+" .ps-pfchips{display:flex !important;flex-wrap:wrap !important;gap:7px !important;margin-bottom:11px !important;}",
+    H+" .ps-chip{display:inline-flex !important;align-items:center !important;"+FT+"font-size:12.5px !important;font-weight:600 !important;background:var(--ps-accent-tint,#EDF4FF) !important;color:var(--ps-marine,#243B6B) !important;padding:6px 12px !important;border-radius:999px !important;}",
+    H+" .ps-pfcard-d{"+FT+"font-size:13.5px !important;color:var(--ps-text-soft,#676879) !important;line-height:1.6 !important;margin:0 !important;}",
+    /* colonne droite : tiers cabinets */
+    H+" .ps-pf2-right{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:16px !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;padding:24px !important;}",
+    H+" .ps-pf2-right-t{"+FT+"font-size:17px !important;font-weight:800 !important;color:var(--ps-marine,#243B6B) !important;margin:0 0 16px !important;}",
+    H+" .ps-tier{display:flex !important;gap:11px !important;align-items:flex-start !important;margin-bottom:12px !important;}",
+    H+" .ps-tierbadge{display:inline-flex !important;align-items:center !important;justify-content:center !important;min-width:66px !important;height:26px !important;padding:0 10px !important;background:var(--ps-marine,#243B6B) !important;color:#fff !important;"+FT+"font-size:12px !important;font-weight:700 !important;border-radius:7px !important;flex:none !important;}",
+    H+" .ps-tier-firms{display:flex !important;flex-wrap:wrap !important;gap:6px !important;}",
+    H+" .ps-pf-callout{margin-top:16px !important;background:var(--ps-accent-tint,#EDF4FF) !important;border-radius:12px !important;padding:14px 16px !important;"+FT+"font-size:13.5px !important;color:var(--ps-marine,#243B6B) !important;font-weight:600 !important;line-height:1.5 !important;}",
+    /* révélation au scroll */
+    H+" .ps-pf-rise{opacity:0 !important;transform:translateY(16px) !important;transition:opacity .6s ease,transform .6s ease !important;}",
+    H+" .ps-pf2.ps-in .ps-pf-rise{opacity:1 !important;transform:none !important;}",
+    "@media(max-width:820px){"+H+" .ps-pf2{grid-template-columns:1fr !important;}"+H+" .ps-donutcard{flex-direction:column !important;text-align:center !important;}}",
 
     /* --- 10) HISTOIRE : timeline HORIZONTALE moderne, reconstruite en JS (`buildTimeline`)
          et révélée au scroll. Le natif vertical est masqué. --- */
@@ -358,9 +390,116 @@
     } else { tl.classList.add("ps-in"); }
   }
 
+  /* ===== Refonte section « Quel candidat êtes-vous ? » (buildProfils) =====
+     🔴 VALEURS DU DONUT ESTIMÉES (le graphique natif ne s'extrait pas) — Ziad donne
+     les vrais % et on remplace `value` ici. Le reste (chips, tiers) = contenu réel. */
+  var PF_SEGMENTS=[
+    {label:"Fin d'études",           value:40, color:"#507EC5"},
+    {label:"M1 & césure",            value:15, color:"#243B6B"},
+    {label:"Changement de cabinet",  value:13, color:"#14B8A6"},
+    {label:"Expérimenté",            value:12, color:"#7EA6DC"},
+    {label:"MBA",                    value:11, color:"#F0A93C"},
+    {label:"Docteur (PhD)",          value:9,  color:"#8B7BD8"}
+  ];
+  var PF_JUNIORS={ title:"Profils juniors",
+    icon:'<svg viewBox="0 0 24 24"><path d="M22 10 12 5 2 10l10 5 10-5Z"/><path d="M6 12v5c0 1 3 3 6 3s6-2 6-3v-5"/></svg>',
+    chips:["M1 & césure","Fin d'études"],
+    desc:"Que vous sortiez d'une école cible ou d'un parcours atypique, on vous fait briller en entretien — comme les centaines de candidats avant vous." };
+  var PF_EXPERT={ title:"Profils expérimentés",
+    icon:'<svg viewBox="0 0 24 24"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>',
+    chips:["Docteur (PhD)","MBA","En poste","Changement de cabinet"],
+    desc:"Attentes spécifiques et peu de temps ? On optimise votre candidature de senior hire — tous ceux qu'on a coachés ont atteint leur objectif." };
+  var PF_TIERS=[
+    {tier:"MBB",       firms:["McKinsey","BCG","Bain"]},
+    {tier:"Top-6",     firms:["Oliver Wyman","Roland Berger","Kearney"]},
+    {tier:"Big-4",     firms:["Deloitte","EY-Parthenon","KPMG","PwC Strategy&"]},
+    {tier:"Boutiques", firms:["Mars & Co","Cepton","Vertone","Simon-Kucher"]},
+    {tier:"Data",      firms:["BCG Gamma","Black Quantum","Eleven Strategy"]},
+    {tier:"IT",        firms:["Accenture","IBM","Capgemini","BearingPoint"]}
+  ];
+  var PF_CALLOUT="Votre cabinet idéal vous correspond-il vraiment ? On répond à toutes vos questions pendant la formation.";
+
+  var SVGNS="http://www.w3.org/2000/svg";
+  function makeDonut(segs){
+    var C=2*Math.PI*45, total=0; segs.forEach(function(s){ total+=s.value; }); if(!total) total=1;
+    var svg=document.createElementNS(SVGNS,"svg"); svg.setAttribute("class","ps-donut"); svg.setAttribute("viewBox","0 0 120 120"); svg.setAttribute("aria-hidden","true");
+    function circ(stroke,w){ var c=document.createElementNS(SVGNS,"circle"); c.setAttribute("cx","60"); c.setAttribute("cy","60"); c.setAttribute("r","45"); c.setAttribute("fill","none"); c.setAttribute("stroke",stroke); c.setAttribute("stroke-width",w); return c; }
+    svg.appendChild(circ("#EEF1F6","18"));
+    var cum=0;
+    segs.forEach(function(s,i){
+      var frac=s.value/total, arc=frac*C;
+      var c=circ(s.color,"18"); c.setAttribute("class","ps-donut-seg");
+      c.setAttribute("stroke-dasharray",arc.toFixed(2)+" "+C.toFixed(2));
+      c.setAttribute("transform","rotate("+(-90+cum*360).toFixed(2)+" 60 60)");
+      c.style.strokeDashoffset=arc.toFixed(2);        // caché au départ, révélé au scroll
+      c.style.transitionDelay=(i*0.1)+"s";
+      svg.appendChild(c); cum+=frac;
+    });
+    function txt(cls,y,size,t){ var e=document.createElementNS(SVGNS,"text"); e.setAttribute("class",cls); e.setAttribute("x","60"); e.setAttribute("y",y); e.setAttribute("text-anchor","middle"); e.setAttribute("font-size",size); e.textContent=t; return e; }
+    svg.appendChild(txt("ps-donut-c","58","22",String(segs.length)));
+    svg.appendChild(txt("ps-donut-cs","74","10","profils"));
+    return svg;
+  }
+
+  function buildProfils(){
+    var sec=document.querySelector(H+" .ps-home-profils");
+    if(!sec || sec.querySelector(".ps-pf2")) return;
+    var pf2=document.createElement("div"); pf2.className="ps-pf2";
+    /* ---- gauche : donut + 2 cartes profils ---- */
+    var left=document.createElement("div"); left.className="ps-pf2-left";
+    var dc=document.createElement("div"); dc.className="ps-donutcard ps-pf-rise";
+    dc.appendChild(makeDonut(PF_SEGMENTS));
+    var leg=document.createElement("div"); leg.className="ps-donut-leg";
+    PF_SEGMENTS.forEach(function(s){
+      var it=document.createElement("div"); it.className="ps-donut-leg-i";
+      var dot=document.createElement("span"); dot.className="ps-donut-dot"; dot.style.background=s.color;
+      var lb=document.createElement("span"); lb.textContent=s.label;
+      var v=document.createElement("span"); v.className="ps-donut-val"; v.textContent=s.value+" %";
+      it.appendChild(dot); it.appendChild(lb); it.appendChild(v); leg.appendChild(it);
+    });
+    dc.appendChild(leg); left.appendChild(dc);
+    [PF_JUNIORS,PF_EXPERT].forEach(function(p,i){
+      var card=document.createElement("div"); card.className="ps-pfcard ps-pf-rise"; card.style.transitionDelay=((i+1)*0.1)+"s";
+      var h=document.createElement("div"); h.className="ps-pfcard-h";
+      var ic=document.createElement("span"); ic.className="ps-pfcard-ic"; ic.innerHTML=p.icon;   // SVG statique
+      var t=document.createElement("div"); t.className="ps-pfcard-t"; t.textContent=p.title;
+      h.appendChild(ic); h.appendChild(t); card.appendChild(h);
+      var chips=document.createElement("div"); chips.className="ps-pfchips";
+      p.chips.forEach(function(c){ var ch=document.createElement("span"); ch.className="ps-chip"; ch.textContent=c; chips.appendChild(ch); });
+      card.appendChild(chips);
+      var d=document.createElement("p"); d.className="ps-pfcard-d"; d.textContent=p.desc; card.appendChild(d);
+      left.appendChild(card);
+    });
+    pf2.appendChild(left);
+    /* ---- droite : tiers cabinets ---- */
+    var right=document.createElement("div"); right.className="ps-pf2-right ps-pf-rise"; right.style.transitionDelay="0.15s";
+    var rt=document.createElement("div"); rt.className="ps-pf2-right-t"; rt.textContent="À quels cabinets nous préparons-vous ?"; right.appendChild(rt);
+    PF_TIERS.forEach(function(tr){
+      var row=document.createElement("div"); row.className="ps-tier";
+      var b=document.createElement("span"); b.className="ps-tierbadge"; b.textContent=tr.tier;
+      var fw=document.createElement("div"); fw.className="ps-tier-firms";
+      tr.firms.forEach(function(f){ var ch=document.createElement("span"); ch.className="ps-chip"; ch.textContent=f; fw.appendChild(ch); });
+      row.appendChild(b); row.appendChild(fw); right.appendChild(row);
+    });
+    var co=document.createElement("div"); co.className="ps-pf-callout"; co.textContent=PF_CALLOUT; right.appendChild(co);
+    pf2.appendChild(right);
+    /* ---- insertion + masquage du natif (pie + accordéons + liste) ---- */
+    var nativeCards=sec.querySelectorAll(".box-shadow-round-light, .radius-15");
+    var anchor=nativeCards[0] ? (nativeCards[0].closest(".lw-cols")||nativeCards[0]) : sec.querySelector(".lw-cols");
+    if(anchor){ anchor.parentNode.insertBefore(pf2, anchor); }
+    else { sec.appendChild(pf2); }
+    Array.prototype.forEach.call(nativeCards,function(c){ c.classList.add("ps-home-hide"); });
+    /* ---- révélation au scroll ---- */
+    if(window.IntersectionObserver){
+      var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ pf2.classList.add("ps-in"); io.disconnect(); } }); },{threshold:0.1});
+      io.observe(pf2);
+      setTimeout(function(){ var r=pf2.getBoundingClientRect(); if(r.top<(window.innerHeight||800)) pf2.classList.add("ps-in"); },450);
+    } else { pf2.classList.add("ps-in"); }
+  }
+
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer(); cartes(); buildCabinets(); buildTimeline();
+    styles(); marquer(); cartes(); buildCabinets(); buildTimeline(); buildProfils();
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
