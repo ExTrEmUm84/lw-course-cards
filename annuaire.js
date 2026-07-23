@@ -247,7 +247,7 @@
   var facettes = {}; /* key -> { box, label, resetTxt, valeurs } */
   /* Ordres imposés pour Niveau/Recherche/Langue (sinon tri alphabétique). */
   var ORDRE = {
-    niveau: ["débutant", "avancé", "expert"],
+    niveau: ["Débutant", "Avancé", "Expert"],
     recherche: ["Stage", "CDI Junior", "CDI expérimenté"],
     langue: ["Français", "Anglais"]
   };
@@ -527,8 +527,8 @@
   /* Démo : remplit École/Niveau/Recherche/Langue sur les faux profils (déterministe
      via un hash du nom) pour que les 4 filtres soient peuplés et démontrables. Les
      VRAIS membres gardent leurs champs du Worker (cf_ecole/cf_niveau/cf_recherche/cf_langue). */
-  var DEMO_ECOLES = ["HEC Paris", "ESSEC", "ESCP", "EM Lyon", "EDHEC", "Polytechnique", "CentraleSupélec", "Dauphine", "Sciences Po", "ENSAE"];
-  var DEMO_NIVEAUX = ["débutant", "avancé", "expert"];
+  var DEMO_ECOLES = ["HEC Paris", "ESSEC", "ESCP", "EM Lyon", "EDHEC", "SKEMA", "Audencia", "NEOMA", "Grenoble EM", "Polytechnique (X)", "CentraleSupélec", "Mines Paris", "Ponts ParisTech", "Télécom Paris", "ENSAE", "Arts et Métiers", "Dauphine", "Sciences Po Paris", "ENS"];
+  var DEMO_NIVEAUX = ["Débutant", "Avancé", "Expert"];
   var DEMO_RECH = ["Stage", "CDI Junior", "CDI expérimenté"];
   var DEMO_LANGUES = [["Français"], ["Français", "Anglais"], ["Anglais"], ["Français", "Anglais"]];
   function demoEnrich(m) {
