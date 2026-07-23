@@ -109,11 +109,12 @@
          contenu blanc par-dessus. Section pleine largeur (100vw) + ~90vh de haut. ---- */
     H+" .ps-home-hero.ps-hero-bg{position:relative !important;min-height:90vh !important;display:flex !important;align-items:center !important;overflow:hidden !important;width:100vw !important;margin-left:calc(50% - 50vw) !important;padding:0 !important;background:#0f1b33 !important;}",
     H+" .ps-hero-vwrap{position:absolute !important;inset:0 !important;overflow:hidden !important;z-index:0 !important;}",
-    H+" .ps-hero-vwrap iframe{position:absolute !important;top:50% !important;left:50% !important;transform:translate(-50%,-50%) !important;width:100vw !important;height:56.25vw !important;min-width:177.78vh !important;min-height:100vh !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;pointer-events:none !important;}",
-    /* 🔴 dégradé RENFORCÉ à gauche : panneau quasi-plein sur ~40% (derrière le texte)
-       qui fond vers transparent → la vidéo n'apparaît qu'à droite, l'œil ne voit pas
-       qu'elle est décalée. */
-    H+" .ps-hero-scrim{position:absolute !important;inset:0 !important;z-index:1 !important;background:linear-gradient(90deg,rgba(12,22,44,.97) 0%,rgba(12,22,44,.95) 34%,rgba(12,22,44,.6) 60%,rgba(12,22,44,.12) 82%,rgba(12,22,44,0) 100%) !important;}",
+    /* 🔴 iframe DÉCALÉE À DROITE (left:68% au lieu de 50%) : le sujet de la vidéo se
+       déplace dans la moitié droite, dégagée du panneau de texte. */
+    H+" .ps-hero-vwrap iframe{position:absolute !important;top:50% !important;left:68% !important;transform:translate(-50%,-50%) !important;width:100vw !important;height:56.25vw !important;min-width:177.78vh !important;min-height:100vh !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;pointer-events:none !important;}",
+    /* 🔴 dégradé : panneau sombre sur la gauche (texte) qui s'ouvre vers ~60% pour
+       laisser voir la vidéo sur toute la droite. */
+    H+" .ps-hero-scrim{position:absolute !important;inset:0 !important;z-index:1 !important;background:linear-gradient(90deg,rgba(12,22,44,.97) 0%,rgba(12,22,44,.92) 30%,rgba(12,22,44,.5) 48%,rgba(12,22,44,0) 64%) !important;}",
     /* contenu aligné sur la grille du reste de la page (~1180px centrés = même bord
        gauche que les titres de section), pas 1000px. */
     H+" .ps-home-hero.ps-hero-bg .lw-cols{position:relative !important;z-index:2 !important;max-width:1180px !important;margin:0 auto !important;width:100% !important;padding:0 24px !important;align-items:center !important;}",
