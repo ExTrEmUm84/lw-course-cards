@@ -41,15 +41,17 @@
   var S="#pageContent";
   var GRID=S+" .cards-grandpa > .lw-cols.multiple-rows";
 
-  /* Logos de repli hébergés sur GitHub Pages (dossier /logos du repo), pour les
-     cabinets qui n'ont PAS de logo uploadé dans LearnWorlds (au 22/07 : les 7
-     autres qu'Advancy/Bain/Sia). SVG récupérés sur Wikimedia Commons, affichés
-     monochromes comme les logos LW. Clé = nom normalisé (minuscule, sans accent
-     ni séparateur). Kéa Partners : pas trouvé de source propre -> pas de repli.
-     Ajouter un cabinet = déposer son SVG dans /logos + une ligne ici. */
+  /* Logos hébergés sur GitHub Pages (dossier /logos), SVG TRANSPARENTS (Wikimedia
+     Commons). 🔴 Depuis le 23/07 on n'utilise QUE ceux-ci (plus les images
+     uploadées dans LW) : le design « logo blanc sur cercle bleu » exige un fond
+     transparent, or les images LW (Advancy/Bain/Sia) ont un fond opaque.
+     Clé = nom normalisé (minuscule, sans accent ni séparateur). Cabinets sans
+     SVG propre (Advancy, Sia, Kéa) -> badge d'initiales. Ajouter = SVG dans
+     /logos + une ligne ici. */
   var LOGO_BASE="https://extremum84.github.io/lw-course-cards/logos/";
   var LOGOS={
     accenture:"accenture.svg",
+    bain:"bain.svg", baincompany:"bain.svg",
     bcg:"bcg.svg", bostonconsultinggroup:"bcg.svg",
     eyconsulting:"ey.svg",
     eyparthenon:"ey-parthenon.svg",
@@ -89,15 +91,17 @@
        restaurée au survol de la carte, repère de reconnaissance. Le logo natif
        est un `background-image` sur `.learnworlds-image` (masqué) : build() en
        recopie l'URL sur cette div. */
-    /* Logo dans un CERCLE (demande de Ziad le 23/07) : badge rond 96px, fond
-       blanc + fine bordure + ombre douce, logo CONTENU au centre (66% pour
-       laisser une marge). Monochrome au repos, couleur au survol de la carte.
-       Les logos étant des wordmarks larges, `contain`/66% évite le rognage. */
-    ".ps-cab-logo{width:96px !important;height:96px !important;border-radius:50% !important;background-color:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;box-shadow:0 4px 14px rgba(15,23,42,.06) !important;margin:0 0 22px !important;background-repeat:no-repeat !important;background-position:center !important;background-size:66% auto !important;filter:grayscale(1) !important;opacity:.8 !important;transition:filter .25s ease, opacity .25s ease, box-shadow .25s ease !important;}",
-    /* Repli : cabinet sans logo (ex. Kéa) -> badge d'initiales, pour que TOUTES
-       les cartes portent un cercle. */
-    ".ps-cab-logo--ini{background-color:var(--ps-accent-tint,#EDEDFF) !important;background-image:none !important;filter:none !important;opacity:1 !important;display:flex !important;align-items:center !important;justify-content:center !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:30px !important;font-weight:800 !important;color:var(--ps-accent-hover,#4B4BE0) !important;letter-spacing:.5px !important;}",
-    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover .ps-cab-logo{filter:grayscale(0) !important;opacity:1 !important;box-shadow:0 8px 22px rgba(15,23,42,.12) !important;}",
+    /* Logo dans un CERCLE bleu #203866, logo en BLANC par-dessus (demande de Ziad
+       le 23/07). 🔴 Le blanchiment (`brightness(0) invert(1)`) est posé sur un
+       élément INTERNE `.ps-cab-logo-img` : appliqué au cercle entier il
+       blanchirait aussi le fond bleu. `contain`/66% évite le rognage des
+       wordmarks larges. */
+    ".ps-cab-logo{width:96px !important;height:96px !important;border-radius:50% !important;background-color:#203866 !important;display:flex !important;align-items:center !important;justify-content:center !important;box-shadow:0 4px 14px rgba(15,23,42,.10) !important;margin:0 0 22px !important;overflow:hidden !important;transition:box-shadow .25s ease, transform .25s ease !important;}",
+    ".ps-cab-logo-img{width:66% !important;height:66% !important;background-repeat:no-repeat !important;background-position:center !important;background-size:contain !important;filter:brightness(0) invert(1) !important;}",
+    /* Repli : cabinet sans logo hébergé transparent (Advancy, Sia, Kéa) ->
+       initiales BLANCHES sur le même cercle bleu, look homogène. */
+    ".ps-cab-logo--ini{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:30px !important;font-weight:800 !important;color:#fff !important;letter-spacing:.5px !important;}",
+    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover .ps-cab-logo{box-shadow:0 8px 22px rgba(15,23,42,.18) !important;transform:scale(1.04) !important;}",
     ".ps-cab-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:25px !important;line-height:1.2 !important;font-weight:800 !important;letter-spacing:-.02em !important;color:#243B6B !important;margin:0 0 10px !important;}",
     /* description bornée à 4 lignes : les cartes gardent la même hauteur */
     ".ps-cab-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;margin:0 !important;display:-webkit-box !important;-webkit-line-clamp:4 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
@@ -243,19 +247,23 @@
          `.learnworlds-image`). Sans logo LW, LW sert `course-default-img.png`
          (placeholder rayé) qu'on EXCLUT → on retombe alors sur le logo de repli
          hébergé (table LOGOS). Ni l'un ni l'autre (ex. Kéa) → pas de logo. */
-      var imgEl=card.querySelector(".learnworlds-image");
-      var bg=imgEl ? getComputedStyle(imgEl).backgroundImage : "";
-      var lwLogo = (bg && bg.indexOf("url(")>=0 && bg.indexOf("course-default-img")<0) ? bg : "";
-      var logo = lwLogo || logoFor(title);
+      /* 🔴 QUE les logos hébergés (transparents) : une image uploadée dans LW a un
+         fond opaque -> deviendrait un bloc blanc sous le filtre de blanchiment.
+         Le logo va dans un élément INTERNE pour que le filtre n'atteigne pas le
+         fond bleu du cercle. Pas de logo hébergé -> badge d'initiales. */
+      var logo = logoFor(title);
       if(logo){
         var lg=document.createElement("div");
         lg.className="ps-cab-logo";
-        lg.style.backgroundImage=logo;
         lg.setAttribute("role","img");
         lg.setAttribute("aria-label","Logo "+title);
+        var im=document.createElement("div");
+        im.className="ps-cab-logo-img";
+        im.style.backgroundImage=logo;
+        lg.appendChild(im);
         d.appendChild(lg);
       } else {
-        /* pas de logo (ex. Kéa) : badge d'initiales, pour que toutes les cartes aient un cercle */
+        /* Advancy / Sia / Kéa : initiales blanches sur le cercle bleu */
         var ini=document.createElement("div");
         ini.className="ps-cab-logo ps-cab-logo--ini";
         ini.textContent=initialsOf(title);
