@@ -102,10 +102,12 @@
        recopie l'URL sur cette div. */
     /* CERCLE 180px CENTRÉ qui FLOTTE au-dessus de la carte (style « carte cours » :
        `margin:-90px auto 18px` = remonte de la moitié + centré ; bordure blanche
-       5px + ombre, comme l'illustration ronde des cours). Fond bleu #203866, logo
-       en BLANC par-dessus. 🔴 Blanchiment (`brightness(0) invert(1)`) sur un
-       élément INTERNE `.ps-cab-logo-img` (sinon le fond bleu blanchit aussi). */
-    ".ps-cab-logo{width:140px !important;height:140px !important;border-radius:50% !important;background-color:#203866 !important;display:flex !important;align-items:center !important;justify-content:center !important;margin:-70px auto 16px !important;border:4px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.12) !important;overflow:hidden !important;flex:none !important;transition:box-shadow .25s ease !important;}",
+       5px + ombre, comme l'illustration ronde des cours). Fond bleu de marque
+       #507EC5 (choix Ziad 24/07, était #203866 marine), logo en BLANC par-dessus.
+       🔴 background-color EN DUR (pas var(--ps-accent) : l'accent de la page
+       Cabinets est ROUGE #c51d4a). 🔴 Blanchiment (`brightness(0) invert(1)`) sur
+       un élément INTERNE `.ps-cab-logo-img` (sinon le fond bleu blanchit aussi). */
+    ".ps-cab-logo{width:140px !important;height:140px !important;border-radius:50% !important;background-color:#507EC5 !important;display:flex !important;align-items:center !important;justify-content:center !important;margin:-70px auto 16px !important;border:4px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.12) !important;overflow:hidden !important;flex:none !important;transition:box-shadow .25s ease !important;}",
     ".ps-cab-logo-img{width:66% !important;height:66% !important;background-repeat:no-repeat !important;background-position:center !important;background-size:contain !important;filter:brightness(0) invert(1) !important;}",
     /* Repli : cabinet sans logo hébergé transparent (Advancy, Sia, Kéa) ->
        initiales BLANCHES sur le même cercle bleu, look homogène. */
