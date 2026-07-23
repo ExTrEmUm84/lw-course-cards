@@ -246,6 +246,14 @@
       var desc=dEl ? (dEl.textContent||"").replace(/\s+/g," ").trim() : "";
       var link=card.querySelector("a.card-link[href], a[href]");
       var href=link ? link.getAttribute("href") : "#";
+      /* 🔴 Clic DIRECT sur le LECTEUR (`/path-player?courseid=<slug>`, slug===courseid)
+         au lieu de la page de présentation `/course/<slug>` — MAIS uniquement si on
+         est INSCRIT (barre de progression native présente) : un non-inscrit sur
+         /path-player est renvoyé à l'accueil, donc pour lui on garde la présentation
+         (où il accède/s'inscrit). Vérifié en live : le lecteur s'ouvre bien. */
+      var enrolled = !!card.querySelector(".lw-course-card-progress-bar");
+      var slug = (href.match(/\/course\/([^\/?#]+)/) || [])[1] || "";
+      var target = (enrolled && slug) ? ("/path-player?courseid=" + encodeURIComponent(slug)) : href;
 
       /* 🔴 Le BADGE est un enfant DIRECT de la carte (comme l'illustration ronde
          des cartes cours), pas dans .ps-ccab : c'est lui qui FLOTTE au-dessus via
@@ -279,7 +287,7 @@
       d.appendChild(t);
       if(desc){ var p=document.createElement("p"); p.className="ps-cab-desc"; p.textContent=desc; d.appendChild(p); }
       var a=document.createElement("a");
-      a.className="ps-cab-link"; a.href=href; a.textContent="En savoir plus";
+      a.className="ps-cab-link"; a.href=target; a.textContent="En savoir plus";
       d.appendChild(a);
 
       card.appendChild(badge);                 // badge flottant, au-dessus
@@ -288,7 +296,7 @@
          (même href que le CTA). Le CTA « En savoir plus » reste au-dessus (z-index)
          pour garder son animation de survol ; les deux mènent au même endroit. */
       var cover=document.createElement("a");
-      cover.className="ps-cab-cover"; cover.href=href;
+      cover.className="ps-cab-cover"; cover.href=target;
       cover.setAttribute("aria-label", title);
       card.appendChild(cover);
       card.dataset.psC="1";                    // déclenche le masquage du natif
