@@ -200,9 +200,46 @@
     btns.forEach(function(b,i){ b.classList.toggle("ps-hb-active", idx!==undefined && i===idx); });
   }
 
-  poser(); accentPage(); heroBtns();
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ poser(); accentPage(); heroBtns(); });
+  /* ====================================================================
+     ANTI-FLASH (FOUC) — masquer les cartes tant que nos scripts ne les ont pas
+     refaites, puis révéler en FONDU. Sinon on voit les cartes NATIVES de
+     LearnWorlds une fraction de seconde (« l'ancien css ») avant le restyling.
+     Scopé aux pages à cartes gérées (par slug) pour ne RIEN cacher ailleurs.
+     Révélé dès qu'une carte reconstruite apparaît (.ps-mcard/.ps-cc/…), ou au
+     bout de 3,5 s (filet de sécurité : ne JAMAIS laisser une page cachée, même
+     si un script échoue).
+     ⚠️ Efficace parce que ce fichier (petit, en cache) s'exécute avant que la
+     grosse SPA de LearnWorlds ne peigne les cartes. ==================== */
+  var CLOAK_SLUGS=["empty","emptykk-clone-clone","fiches-secteur","fiches-secteur-clone","sentrainer"];
+  var READY_SEL="#pageContent .ps-mcard,#pageContent .ps-cc,#pageContent .ps-ccab,#pageContent .ps-scard,#pageContent .ps-pfc";
+  function cloak(){
+    if(document.getElementById("ps-cloak")) return;
+    /* 🔴 Trop tard ? Si les cartes sont DÉJÀ dans le DOM (LW les a déjà peintes),
+       les cacher maintenant créerait un « blink » (visible -> caché -> révélé),
+       pire que le flash. Dans ce cas on ne cache pas : jamais pire que l'actuel. */
+    if(document.querySelector("#pageContent .cards-grandpa .lw-course-card")) return;
+    /* pas sur une page à cartes gérée -> inutile (le sélecteur ne matcherait rien,
+       mais on évite d'injecter une feuille pour rien). */
+    var base=CLOAK_SLUGS.map(function(s){ return "body.slug-"+s; });
+    var trans=base.map(function(b){ return b+" #pageContent .cards-grandpa .lw-course-card"; }).join(",")+"{transition:opacity .35s ease !important;}";
+    var hide=base.map(function(b){ return b+":not(.ps-cards-ready) #pageContent .cards-grandpa .lw-course-card"; }).join(",")+"{opacity:0 !important;}";
+    var st=document.createElement("style"); st.id="ps-cloak"; st.textContent=trans+hide;
+    var head=document.head||document.documentElement; head.insertBefore(st, head.firstChild);
+  }
+  function reveal(){ if(document.body) document.body.classList.add("ps-cards-ready"); }
+  var _revObs=null;
+  function watchReveal(){
+    if(!document.body || document.body.classList.contains("ps-cards-ready")) return;
+    if(document.querySelector(READY_SEL)){ reveal(); return; }
+    if(_revObs) return;
+    _revObs=new MutationObserver(function(){ if(document.querySelector(READY_SEL)){ reveal(); _revObs.disconnect(); } });
+    _revObs.observe(document.documentElement,{childList:true,subtree:true});
+  }
+
+  cloak(); poser(); accentPage(); heroBtns(); watchReveal();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
      quelques relances pour attraper la classe active. */
   [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); });
+  setTimeout(reveal, 3500);   // filet de sécurité anti-flash
 })();
