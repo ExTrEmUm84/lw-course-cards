@@ -156,10 +156,15 @@
     /* --- 10) HISTOIRE (timeline) : les dates en accent --- */
     H+" .ps-home-histoire .learnworlds-heading4{color:var(--ps-accent,#507EC5) !important;font-weight:800 !important;letter-spacing:-.01em !important;}",
 
-    /* --- 11) ÉQUIPE : images arrondies, noms marine, rôles accent --- */
+    /* --- 11) ÉQUIPE : images arrondies. 🔴 Le panneau `.lw-brand-bg` (bleu vif du
+         template #3887B4) passe en MARINE #243B6B avec TEXTE BLANC — sinon les noms
+         (marine) et bios (gris) étaient sombre-sur-bleu = illisibles. Spécificité
+         renforcée (`.lw-brand-bg .learnworlds-*`) pour battre la règle globale. --- */
     H+" .ps-home-equipe .learnworlds-image{border-radius:16px !important;}",
     H+" .ps-home-equipe .learnworlds-heading3{color:var(--ps-marine,#243B6B) !important;font-size:18px !important;}",
     H+" .ps-home-equipe .learnworlds-heading4{color:var(--ps-accent,#507EC5) !important;font-weight:700 !important;}",
+    H+" .ps-home-equipe .lw-brand-bg{background:#243B6B !important;}",
+    [H+" .ps-home-equipe .lw-brand-bg .learnworlds-heading3",H+" .ps-home-equipe .lw-brand-bg .learnworlds-heading4",H+" .ps-home-equipe .lw-brand-bg .learnworlds-heading:not(.learnworlds-icon)",H+" .ps-home-equipe .lw-brand-bg .learnworlds-main-text",H+" .ps-home-equipe .lw-brand-bg p"].join(",")+"{color:#fff !important;}",
 
     /* --- 12) ARTICLES : bouton « Charger plus » en outline centré --- */
     H+" .ps-home-articles .learnworlds-button{background:transparent !important;border:1.5px solid var(--ps-accent,#507EC5) !important;color:var(--ps-accent,#507EC5) !important;}",
@@ -168,9 +173,9 @@
     /* --- 13) RDV : bande foncée #203866 -> titres blancs, bouton blanc.
          🔴 on cible AUSSI les titres en <div> (learnworlds-heading/subheading) sinon la
          règle globale marine gagne et le titre reste sombre sur fond sombre (illisible). */
-    [H+" .ps-home-rdv h1",H+" .ps-home-rdv h2",H+" .ps-home-rdv h3",H+" .ps-home-rdv h4",
-     H+" .ps-home-rdv .learnworlds-heading",H+" .ps-home-rdv .learnworlds-subheading:not(.learnworlds-icon)",
-     H+" .ps-home-rdv .learnworlds-heading3",H+" .ps-home-rdv .learnworlds-heading4",H+" .ps-home-rdv .learnworlds-main-text"].join(",")+"{color:#fff !important;}",
+    [H+" .ps-home-rdv h1.learnworlds-heading",H+" .ps-home-rdv h2",H+" .ps-home-rdv h3",H+" .ps-home-rdv h4",
+     H+" .ps-home-rdv .learnworlds-heading:not(.learnworlds-icon)",H+" .ps-home-rdv .learnworlds-subheading:not(.learnworlds-icon)",
+     H+" .ps-home-rdv .learnworlds-heading3:not(.learnworlds-icon)",H+" .ps-home-rdv .learnworlds-heading4:not(.learnworlds-icon)",H+" .ps-home-rdv .learnworlds-main-text"].join(",")+"{color:#fff !important;}",
     H+" .ps-home-rdv .learnworlds-button{background:#fff !important;border:0 !important;color:var(--ps-accent,#507EC5) !important;}",
     H+" .ps-home-rdv .learnworlds-button:hover{background:var(--ps-accent-tint,#EDF4FF) !important;color:var(--ps-accent-hover,#486798) !important;}",
 
