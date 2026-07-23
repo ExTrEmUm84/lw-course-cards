@@ -125,7 +125,7 @@
      Pour changer/ajouter une page : une ligne dans PAGE_ACCENTS, c'est tout. */
   var PAGE_ACCENTS={
     "fiches-secteur":"#fad54a",        /* Secteurs — jaune */
-    "emptykk-clone-clone":"#009e78",   /* Cas — vert */
+    "emptykk-clone-clone":"#6b7280",   /* Cas — gris */
     "fiches-secteur-clone":"#c51d4a"   /* Cabinets — rouge */
   };
 

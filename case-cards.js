@@ -36,7 +36,9 @@
     "#pageContent .cards-grandpa > .lw-cols.multiple-rows{display:grid !important;grid-template-columns:1fr 1fr !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;overflow:visible !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
     /* la barre de filtres : alignement seul, aucun `display` */
     "#pageContent .lw-cols.with-filters{max-width:1000px !important;margin:0 auto !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
+    /* `position:relative` : sert d'ancre au lien étiré (.ps-cc-link::before) qui
+       rend TOUTE la carte cliquable — cf. plus bas. */
+    "#pageContent .lw-cols > .col.lw-course-card{position:relative !important;width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
     "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
     "#pageContent .lw-course-card > *:not(.ps-cc){display:none !important;}",
     /* Design SOBRE (choix de Ziad le 22/07, remplace le bandeau « fiche ») :
@@ -91,6 +93,12 @@
     ".ps-cc-link::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-cc-link:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-cc-link:hover::after{transform:translateX(5px) !important;}",
+    /* CARTE CLIQUABLE PARTOUT : le lien « En savoir plus » est un vrai <a> ; son
+       ::before, positionné en absolu, s'étire sur toute la carte (ancre =
+       .lw-course-card en position:relative). Tout clic sur la carte suit donc le
+       href, et le survol de n'importe où déclenche l'état :hover du lien (flèche).
+       Un seul lien par carte -> pas de lien imbriqué, accessible au clavier. */
+    ".ps-cc-link::before{content:\"\" !important;position:absolute !important;inset:0 !important;z-index:1 !important;}",
     /* ================= TITRES (hero premium) — porté de course-cards.js =====
        Même géométrie que la page Cours, vérifié à la mesure : le conteneur des
        titres fait 1120px (290 -> 1410) alors que la grille des cartes fait
