@@ -81,10 +81,12 @@
     GRID+"{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:84px 24px !important;max-width:1000px !important;margin:0 auto !important;padding:78px 0 0 !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
     /* overflow:visible pour laisser sortir le badge ; flex column pour empiler
        badge (flottant) puis contenu — comme les cartes cours. */
-    S+" .cards-grandpa > .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;overflow:visible !important;display:flex !important;flex-direction:column !important;isolation:isolate !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
+    S+" .cards-grandpa > .lw-cols > .col.lw-course-card{position:relative !important;cursor:pointer !important;width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;overflow:visible !important;display:flex !important;flex-direction:column !important;isolation:isolate !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
     S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover{box-shadow:0 14px 34px rgba(0,0,0,.10) !important;transform:translateY(-3px) !important;}",
-    /* le badge est un enfant DIRECT de la carte (comme l'illustration cours) -> l'exclure du masquage */
-    S+" .lw-course-card[data-ps-c] > *:not(.ps-ccab):not(.ps-cab-logo){display:none !important;}",
+    /* badge + lien-calque = enfants DIRECTS de la carte -> exclus du masquage */
+    S+" .lw-course-card[data-ps-c] > *:not(.ps-ccab):not(.ps-cab-logo):not(.ps-cab-cover){display:none !important;}",
+    /* lien-calque : couvre toute la carte, transparent, sous le CTA (z-index) */
+    ".ps-cab-cover{position:absolute !important;inset:0 !important;z-index:1 !important;border-radius:var(--ps-r-card,16px) !important;background:transparent !important;text-decoration:none !important;}",
 
     /* height:100% : sans ça la carte reconstruite s'arrête à son contenu au lieu
        de remplir la hauteur étirée par la grille -> le `margin-bottom:auto` de
@@ -120,7 +122,7 @@
        vide (constaté à l'écran). Le lien, lui, existe toujours.
        `padding-top` et non `margin-top` pour l'écart : le `margin-top:auto`
        occupe déjà la propriété. */
-    ".ps-cab-link{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:auto !important;padding-top:18px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
+    ".ps-cab-link{position:relative !important;z-index:2 !important;display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:auto !important;padding-top:18px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-cab-link::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-cab-link:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-cab-link:hover::after{transform:translateX(5px) !important;}",
@@ -282,6 +284,13 @@
 
       card.appendChild(badge);                 // badge flottant, au-dessus
       card.appendChild(d);                     // puis le contenu
+      /* Toute la carte cliquable : lien-calque transparent couvrant la carte
+         (même href que le CTA). Le CTA « En savoir plus » reste au-dessus (z-index)
+         pour garder son animation de survol ; les deux mènent au même endroit. */
+      var cover=document.createElement("a");
+      cover.className="ps-cab-cover"; cover.href=href;
+      cover.setAttribute("aria-label", title);
+      card.appendChild(cover);
       card.dataset.psC="1";                    // déclenche le masquage du natif
     });
   }
