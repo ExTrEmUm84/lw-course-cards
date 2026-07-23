@@ -138,7 +138,13 @@
     /* icône offres : tuile arrondie (au lieu du cercle global) */
     H+" .ps-home-offres .box-icon-wrapper,"+H+" .ps-home-offres .learnworlds-icon-wrapper{border-radius:14px !important;width:54px !important;height:54px !important;}",
     H+" .ps-home-offres .learnworlds-main-text-large{font-size:14px !important;font-weight:600 !important;color:var(--ps-accent,#507EC5) !important;}",
-    H+" .ps-home-atouts .learnworlds-heading3{font-size:16px !important;color:var(--ps-marine,#243B6B) !important;margin-top:10px !important;}",
+    H+" .ps-home-atouts .learnworlds-heading3{font-size:16px !important;color:var(--ps-marine,#243B6B) !important;margin-top:12px !important;}",
+    /* 🔴 carte atout : picto CENTRÉ EN HAUT, contenu centré (demande Ziad) —
+       la carte passe en colonne, l'icône (1er enfant) se centre au-dessus du titre+desc. */
+    H+" .ps-home-atouts .ps-hcard{display:flex !important;flex-direction:column !important;align-items:center !important;text-align:center !important;padding:30px 22px !important;}",
+    [H+" .ps-home-atouts .ps-hcard .box-icon-wrapper",H+" .ps-home-atouts .ps-hcard .learnworlds-icon-wrapper"].join(",")+"{margin:0 auto 4px !important;width:64px !important;height:64px !important;}",
+    H+" .ps-home-atouts .ps-hcard .flexible-part{width:100% !important;}",
+    H+" .ps-home-atouts .ps-hcard .box-icon-wrapper .learnworlds-icon,"+H+" .ps-home-atouts .ps-hcard .learnworlds-icon-wrapper .learnworlds-icon{font-size:24px !important;}",
 
     /* --- 5) BANDE CTA « Avez-vous besoin d'une formation » : centrée --- */
     H+" .ps-home-cta{text-align:center !important;}",
@@ -153,8 +159,21 @@
     H+" .ps-home-profils .box-shadow-round-light,"+H+" .ps-home-profils .radius-15{border-top:3px solid var(--ps-accent,#507EC5) !important;padding:26px !important;}",
     H+" .ps-home-profils .learnworlds-heading4{color:var(--ps-marine,#243B6B) !important;}",
 
-    /* --- 10) HISTOIRE (timeline) : les dates en accent --- */
-    H+" .ps-home-histoire .learnworlds-heading4{color:var(--ps-accent,#507EC5) !important;font-weight:800 !important;letter-spacing:-.01em !important;}",
+    /* --- 10) HISTOIRE : timeline HORIZONTALE moderne, reconstruite en JS (`buildTimeline`)
+         et révélée au scroll. Le natif vertical est masqué. --- */
+    H+" .ps-timeline{display:grid !important;grid-template-columns:repeat(4,1fr) !important;max-width:1000px !important;margin:40px auto 0 !important;}",
+    H+" .ps-tl-node{text-align:center !important;padding:0 10px !important;opacity:0 !important;transform:translateY(20px) !important;transition:opacity .6s ease,transform .6s ease !important;}",
+    H+" .ps-timeline.ps-in .ps-tl-node{opacity:1 !important;transform:none !important;}",
+    H+" .ps-tl-date{"+FT+"font-weight:800 !important;font-size:17px !important;letter-spacing:-.01em !important;color:var(--ps-marine,#243B6B) !important;margin:0 0 16px !important;min-height:1.3em !important;}",
+    H+" .ps-tl-dotwrap{position:relative !important;height:20px !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+    [H+" .ps-tl-dotwrap::before",H+" .ps-tl-dotwrap::after"].join(",")+"{content:'' !important;position:absolute !important;top:50% !important;transform:translateY(-50%) !important;height:2px !important;width:calc(50% - 9px) !important;background:#C7D8F0 !important;}",
+    H+" .ps-tl-dotwrap::before{right:calc(50% + 9px) !important;}",
+    H+" .ps-tl-dotwrap::after{left:calc(50% + 9px) !important;}",
+    H+" .ps-tl-node:first-child .ps-tl-dotwrap::before{display:none !important;}",
+    H+" .ps-tl-node:last-child .ps-tl-dotwrap::after{display:none !important;}",
+    H+" .ps-tl-dot{width:18px !important;height:18px !important;border-radius:50% !important;background:var(--ps-accent,#507EC5) !important;border:4px solid #fff !important;box-shadow:0 0 0 2px var(--ps-accent,#507EC5),0 4px 12px rgba(80,126,197,.45) !important;}",
+    H+" .ps-tl-desc{"+FT+"font-size:14px !important;color:var(--ps-text-soft,#676879) !important;margin-top:16px !important;line-height:1.5 !important;}",
+    "@media(max-width:720px){"+H+" .ps-timeline{grid-template-columns:1fr !important;gap:26px !important;}"+H+" .ps-tl-dotwrap::before,"+H+" .ps-tl-dotwrap::after{display:none !important;}}",
 
     /* --- 11) ÉQUIPE : images arrondies. 🔴 Le panneau `.lw-brand-bg` (bleu vif du
          template #3887B4) passe en MARINE #243B6B avec TEXTE BLANC — sinon les noms
@@ -297,9 +316,51 @@
     });
   }
 
+  /* Reconstruit « Notre histoire » en timeline HORIZONTALE (4 jalons), révélée au
+     scroll. Idempotent. Masque les rangées natives verticales. */
+  function buildTimeline(){
+    var sec=document.querySelector(H+" .ps-home-histoire");
+    if(!sec || sec.querySelector(".ps-timeline")) return;
+    var dates=sec.querySelectorAll(".learnworlds-heading4");
+    if(dates.length<2) return;
+    var items=[];
+    dates.forEach(function(d){
+      var date=(d.textContent||"").replace(/\s+/g," ").trim();
+      var col=d.parentElement;
+      var t=col && col.querySelector(".learnworlds-main-text");
+      var desc=t ? (t.textContent||"").replace(/\s+/g," ").trim() : "";
+      if(date) items.push({date:date, desc:desc});
+    });
+    if(!items.length) return;
+    var tl=document.createElement("div"); tl.className="ps-timeline";
+    items.forEach(function(it,i){
+      var node=document.createElement("div"); node.className="ps-tl-node";
+      node.style.transitionDelay=(i*0.12)+"s";
+      var dt=document.createElement("div"); dt.className="ps-tl-date"; dt.textContent=it.date;
+      var dw=document.createElement("div"); dw.className="ps-tl-dotwrap";
+      var dot=document.createElement("span"); dot.className="ps-tl-dot"; dw.appendChild(dot);
+      var ds=document.createElement("div"); ds.className="ps-tl-desc"; ds.textContent=it.desc;
+      node.appendChild(dt); node.appendChild(dw); node.appendChild(ds);
+      tl.appendChild(node);
+    });
+    /* masque les rangées de jalons natives (celles qui portent une date ou un point) */
+    var rows=Array.prototype.slice.call(sec.querySelectorAll(".lw-cols")).filter(function(r){
+      return r.querySelector(".learnworlds-heading4") || r.querySelector(".lw-dot-icon");
+    });
+    if(rows.length){ rows[0].parentNode.insertBefore(tl, rows[0]); rows.forEach(function(r){ r.classList.add("ps-home-hide"); }); }
+    else { sec.appendChild(tl); }
+    /* révélation au scroll */
+    if(window.IntersectionObserver){
+      var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ tl.classList.add("ps-in"); io.disconnect(); } }); }, {threshold:0.15});
+      io.observe(tl);
+      /* filet : si déjà visible au chargement */
+      setTimeout(function(){ var r=tl.getBoundingClientRect(); if(r.top<(window.innerHeight||800)) tl.classList.add("ps-in"); }, 400);
+    } else { tl.classList.add("ps-in"); }
+  }
+
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer(); cartes(); buildCabinets();
+    styles(); marquer(); cartes(); buildCabinets(); buildTimeline();
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
