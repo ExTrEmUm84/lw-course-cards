@@ -157,7 +157,11 @@
          profils à pastilles + cabinets en TIERS à chips. Le natif (pie moche + accordéons
          + liste) est masqué. Fond doux, contenu en cartes blanches. --- */
     [H+" .ps-home-profils",H+" .ps-home-profils .learnworlds-section-content"].join(",")+"{background:var(--ps-surface-soft,#F6F8FB) !important;}",
-    H+" .ps-pf2{display:grid !important;grid-template-columns:1fr 1.15fr !important;gap:18px !important;max-width:1000px !important;margin:24px auto 0 !important;align-items:start !important;}",
+    /* 🔴 un seul fond : le calque bleu du template (.learnworlds-section-overlay.lw-brand-bg
+       #3887B4) est neutralisé, sinon on voit un cadre bleu autour du fond doux. */
+    H+" .ps-home-profils .learnworlds-section-overlay{background:transparent !important;background-color:transparent !important;opacity:0 !important;}",
+    /* colonnes de MÊME largeur + MÊME hauteur (align stretch) */
+    H+" .ps-pf2{display:grid !important;grid-template-columns:1fr 1fr !important;gap:18px !important;max-width:1000px !important;margin:24px auto 0 !important;align-items:stretch !important;}",
     H+" .ps-pf2-left{display:flex !important;flex-direction:column !important;gap:14px !important;}",
     /* carte donut */
     H+" .ps-donutcard{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:16px !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;padding:22px !important;display:flex !important;align-items:center !important;gap:18px !important;}",
@@ -180,12 +184,12 @@
     H+" .ps-chip{display:inline-flex !important;align-items:center !important;"+FT+"font-size:12.5px !important;font-weight:600 !important;background:var(--ps-accent-tint,#EDF4FF) !important;color:var(--ps-marine,#243B6B) !important;padding:6px 12px !important;border-radius:999px !important;}",
     H+" .ps-pfcard-d{"+FT+"font-size:13.5px !important;color:var(--ps-text-soft,#676879) !important;line-height:1.6 !important;margin:0 !important;}",
     /* colonne droite : tiers cabinets */
-    H+" .ps-pf2-right{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:16px !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;padding:24px !important;}",
+    H+" .ps-pf2-right{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:16px !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;padding:24px !important;display:flex !important;flex-direction:column !important;}",
     H+" .ps-pf2-right-t{"+FT+"font-size:17px !important;font-weight:800 !important;color:var(--ps-marine,#243B6B) !important;margin:0 0 16px !important;}",
     H+" .ps-tier{display:flex !important;gap:11px !important;align-items:flex-start !important;margin-bottom:12px !important;}",
     H+" .ps-tierbadge{display:inline-flex !important;align-items:center !important;justify-content:center !important;min-width:66px !important;height:26px !important;padding:0 10px !important;background:var(--ps-marine,#243B6B) !important;color:#fff !important;"+FT+"font-size:12px !important;font-weight:700 !important;border-radius:7px !important;flex:none !important;}",
     H+" .ps-tier-firms{display:flex !important;flex-wrap:wrap !important;gap:6px !important;}",
-    H+" .ps-pf-callout{margin-top:16px !important;background:var(--ps-accent-tint,#EDF4FF) !important;border-radius:12px !important;padding:14px 16px !important;"+FT+"font-size:13.5px !important;color:var(--ps-marine,#243B6B) !important;font-weight:600 !important;line-height:1.5 !important;}",
+    H+" .ps-pf-callout{margin-top:auto !important;background:var(--ps-accent-tint,#EDF4FF) !important;border-radius:12px !important;padding:14px 16px !important;"+FT+"font-size:13.5px !important;color:var(--ps-marine,#243B6B) !important;font-weight:600 !important;line-height:1.5 !important;}",
     /* révélation au scroll */
     H+" .ps-pf-rise{opacity:0 !important;transform:translateY(16px) !important;transition:opacity .6s ease,transform .6s ease !important;}",
     H+" .ps-pf2.ps-in .ps-pf-rise{opacity:1 !important;transform:none !important;}",
@@ -230,9 +234,16 @@
     H+" .ps-home-rdv .learnworlds-button{background:#fff !important;border:0 !important;color:var(--ps-accent,#507EC5) !important;}",
     H+" .ps-home-rdv .learnworlds-button:hover{background:var(--ps-accent-tint,#EDF4FF) !important;color:var(--ps-accent-hover,#486798) !important;}",
 
-    /* --- 14) FAQ : items d'accordéon en cartes propres, questions marine --- */
-    H+" .ps-home-faq .learnworlds-heading3{color:var(--ps-marine,#243B6B) !important;font-weight:700 !important;font-size:16px !important;}",
-    [H+" .ps-home-faq [class*='accordion']",H+" .ps-home-faq [class*='collaps']"].join(",")+"{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:12px !important;margin-bottom:10px !important;overflow:hidden !important;}"
+    /* --- 14) FAQ : accordéon DA (buildFaq) — cartes arrondies, FERMÉ par défaut,
+         toggle au clic, chevron qui tourne. Le natif chargeait tout ouvert. --- */
+    H+" .ps-home-faq .faq-card{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:16px !important;box-shadow:0 3px 14px rgba(15,23,42,.05) !important;margin-bottom:12px !important;overflow:hidden !important;padding:20px 22px !important;transition:box-shadow .2s ease !important;}",
+    H+" .ps-home-faq .faq-card:hover{box-shadow:0 10px 26px rgba(15,23,42,.09) !important;}",
+    [H+" .ps-home-faq .learnworlds-heading3",H+" .ps-home-faq .learnworlds-heading4"].join(",")+"{color:var(--ps-marine,#243B6B) !important;font-weight:700 !important;font-size:16px !important;}",
+    H+" .ps-home-faq .ps-faq-q{cursor:pointer !important;}",
+    H+" .ps-home-faq .ps-faq-body{max-height:0 !important;overflow:hidden !important;opacity:0 !important;margin-top:0 !important;transition:max-height .4s ease,opacity .3s ease,margin-top .3s ease !important;}",
+    H+" .ps-home-faq .faq-card.ps-faq-open .ps-faq-body{max-height:1600px !important;opacity:1 !important;margin-top:10px !important;}",
+    H+" .ps-home-faq .accordion-icon{transition:transform .3s ease !important;color:var(--ps-accent,#507EC5) !important;cursor:pointer !important;}",
+    H+" .ps-home-faq .faq-card:not(.ps-faq-open) .accordion-icon{transform:rotate(180deg) !important;}"
   ].join("\n");
 
   function styles(){
@@ -512,9 +523,34 @@
     ifr.setAttribute("data-ps-vid","1");
   }
 
+  /* FAQ : transforme les `.faq-card` (chargées ouvertes) en accordéon — corps
+     repliés, clic sur le header pour ouvrir/fermer. Idempotent (data-ps-faq).
+     Le 1er reste ouvert. */
+  function buildFaq(){
+    var faq=document.querySelector(H+" .ps-home-faq");
+    if(!faq) return;
+    faq.querySelectorAll(".faq-card").forEach(function(card,idx){
+      if(card.dataset.psFaq) return;
+      var q=card.querySelector(".learnworlds-heading3,.learnworlds-heading4,h3,h4");
+      var bodies=card.querySelectorAll(".learnworlds-main-text, ul, ol");
+      if(!q || !bodies.length) return;
+      card.dataset.psFaq="1";
+      Array.prototype.forEach.call(bodies,function(b){ b.classList.add("ps-faq-body"); });
+      var icon=card.querySelector(".accordion-icon");
+      /* header cliquable = l'ancêtre de la question qui contient aussi le chevron */
+      var head=q, a=q.parentElement;
+      while(a && a!==card){ if(icon && a.contains(icon)){ head=a; break; } a=a.parentElement; }
+      head.classList.add("ps-faq-q");
+      var toggle=function(){ card.classList.toggle("ps-faq-open"); };
+      head.addEventListener("click",toggle);
+      if(icon && !head.contains(icon)) icon.addEventListener("click",toggle);
+      if(idx===0) card.classList.add("ps-faq-open");
+    });
+  }
+
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer(); cartes(); buildCabinets(); buildTimeline(); buildProfils(); setHeroVideo();
+    styles(); marquer(); cartes(); buildCabinets(); buildTimeline(); buildProfils(); setHeroVideo(); buildFaq();
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
