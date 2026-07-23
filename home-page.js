@@ -123,6 +123,20 @@
     [H+" .ps-home-hero.ps-hero-bg .learnworlds-heading4",H+" .ps-home-hero.ps-hero-bg .learnworlds-heading",H+" .ps-home-hero.ps-hero-bg .learnworlds-subheading",H+" .ps-home-hero.ps-hero-bg .learnworlds-main-text"].join(",")+"{color:#fff !important;}",
     H+" .ps-home-hero.ps-hero-bg .learnworlds-heading4{font-size:46px !important;}",
     "@media(max-width:820px){"+H+" .ps-home-hero.ps-hero-bg{min-height:78vh !important;}"+H+" .ps-home-hero.ps-hero-bg .learnworlds-heading4{font-size:32px !important;}}",
+    /* boutons de contrôle du hero vidéo : volume + « Regarder la vidéo » (popup) */
+    H+" .ps-hero-ctrls{position:absolute !important;bottom:32px !important;right:34px !important;z-index:3 !important;display:flex !important;align-items:center !important;gap:12px !important;}",
+    H+" .ps-hero-btn{display:inline-flex !important;align-items:center !important;gap:9px !important;background:rgba(255,255,255,.14) !important;border:1px solid rgba(255,255,255,.4) !important;color:#fff !important;border-radius:999px !important;cursor:pointer !important;"+FT+"font-weight:600 !important;font-size:14px !important;line-height:1 !important;transition:background .18s ease !important;}",
+    H+" .ps-hero-btn:hover{background:rgba(255,255,255,.28) !important;}",
+    H+" .ps-hero-vol{width:44px !important;height:44px !important;justify-content:center !important;padding:0 !important;}",
+    H+" .ps-hero-watch{padding:11px 18px !important;}",
+    H+" .ps-hero-btn svg{width:19px !important;height:19px !important;stroke:currentColor !important;fill:none !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;flex:none !important;}",
+    "@media(max-width:600px){"+H+" .ps-hero-ctrls{bottom:20px !important;right:20px !important;}"+H+" .ps-hero-watch span{display:none !important;}"+H+" .ps-hero-watch{width:44px !important;height:44px !important;padding:0 !important;justify-content:center !important;}}",
+    /* modale lecteur (ajoutée à <body>, hors #pageContent) */
+    "body.slug-home .ps-hero-modal{position:fixed !important;inset:0 !important;z-index:99999 !important;background:rgba(8,14,28,.9) !important;display:flex !important;align-items:center !important;justify-content:center !important;padding:24px !important;}",
+    "body.slug-home .ps-hero-modal-inner{position:relative !important;width:min(1000px,92vw) !important;aspect-ratio:16/9 !important;border-radius:14px !important;overflow:hidden !important;box-shadow:0 30px 80px rgba(0,0,0,.55) !important;background:#000 !important;}",
+    "body.slug-home .ps-hero-modal-inner iframe{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;border:0 !important;}",
+    "body.slug-home .ps-hero-modal-x{position:absolute !important;top:-48px !important;right:0 !important;width:40px !important;height:40px !important;border-radius:50% !important;background:rgba(255,255,255,.16) !important;border:1px solid rgba(255,255,255,.4) !important;color:#fff !important;cursor:pointer !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+    "body.slug-home .ps-hero-modal-x svg{width:20px !important;height:20px !important;stroke:currentColor !important;stroke-width:2 !important;fill:none !important;}",
 
     /* Placeholders du template (« Write your awesome label here. ») masqués. */
     H+" .ps-home-hide{display:none !important;}",
@@ -543,6 +557,28 @@
     ifr.setAttribute("data-ps-vid","1");
   }
 
+  /* --- helpers vidéo : postMessage vers le player Vimeo + modale lecteur --- */
+  function psVimeo(f,method,value){ if(!f||!f.contentWindow) return; var m={method:method}; if(value!==undefined) m.value=value; try{ f.contentWindow.postMessage(JSON.stringify(m),"https://player.vimeo.com"); }catch(e){} }
+  function psHeroModal(bgIfr){
+    if(document.querySelector(".ps-hero-modal")) return;
+    var ov=document.createElement("div"); ov.className="ps-hero-modal";
+    var inner=document.createElement("div"); inner.className="ps-hero-modal-inner";
+    var ifr=document.createElement("iframe");
+    ifr.src="https://player.vimeo.com/video/910833393?h=94064c722b&autoplay=1&title=0&byline=0&portrait=0";
+    ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture");
+    ifr.setAttribute("allowfullscreen","");
+    inner.appendChild(ifr);
+    var x=document.createElement("button"); x.className="ps-hero-modal-x"; x.type="button"; x.setAttribute("aria-label","Fermer");
+    x.innerHTML='<svg viewBox="0 0 24 24"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+    inner.appendChild(x); ov.appendChild(inner); document.body.appendChild(ov);
+    if(bgIfr) psVimeo(bgIfr,"pause");                     // met le fond en pause pendant la lecture
+    function close(){ ov.remove(); if(bgIfr) psVimeo(bgIfr,"play"); document.removeEventListener("keydown",esc); }
+    function esc(e){ if(e.key==="Escape") close(); }
+    x.addEventListener("click",close);
+    ov.addEventListener("click",function(e){ if(e.target===ov) close(); });   // clic hors du player = fermer
+    document.addEventListener("keydown",esc);
+  }
+
   /* HERO plein écran avec la vidéo en FOND (Vimeo background=1 : autoplay muet en
      boucle, sans contrôles), voile sombre + contenu blanc dessus. Idempotent. */
   var HERO_BG_VIDEO="https://player.vimeo.com/video/910833393?h=94064c722b&background=1&autopause=0&muted=1";
@@ -565,6 +601,18 @@
     var sideVid=hero.querySelector(".learnworlds-video-iframe-wrapper, .learnworlds-video-iframe");
     var sideCol=sideVid && (sideVid.closest(".lw-cols > .col") || sideVid.closest(".col"));
     if(sideCol) sideCol.classList.add("ps-hero-vidcol");
+    /* --- boutons : volume (son de la vidéo de fond) + « Regarder la vidéo » (popup) --- */
+    var IVOL='<svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="M15.5 8.5a5 5 0 0 1 0 7M18.5 5.5a9 9 0 0 1 0 13"/></svg>';
+    var IMUTE='<svg viewBox="0 0 24 24"><path d="M11 5 6 9H2v6h4l5 4V5Z"/><path d="m17 9 5 6M22 9l-5 6"/></svg>';
+    var IPLAY='<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><path d="m10 8 6 4-6 4V8Z" fill="currentColor" stroke="none"/></svg>';
+    var ctrls=document.createElement("div"); ctrls.className="ps-hero-ctrls";
+    var vol=document.createElement("button"); vol.className="ps-hero-btn ps-hero-vol"; vol.type="button"; vol.setAttribute("aria-label","Activer le son"); vol.innerHTML=IMUTE;
+    var muted=true;
+    vol.addEventListener("click",function(){ muted=!muted; psVimeo(ifr,"setMuted",muted); psVimeo(ifr,"setVolume",muted?0:1); vol.innerHTML=muted?IMUTE:IVOL; vol.setAttribute("aria-label",muted?"Activer le son":"Couper le son"); });
+    var watch=document.createElement("button"); watch.className="ps-hero-btn ps-hero-watch"; watch.type="button"; watch.innerHTML=IPLAY+'<span>Regarder la vidéo</span>';
+    watch.addEventListener("click",function(){ psHeroModal(ifr); });
+    ctrls.appendChild(vol); ctrls.appendChild(watch);
+    hero.appendChild(ctrls);
   }
 
   /* FAQ : transforme les `.faq-card` (chargées ouvertes) en accordéon — corps
