@@ -114,6 +114,20 @@
     ".ps-cab-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:25px !important;line-height:1.2 !important;font-weight:800 !important;letter-spacing:-.02em !important;color:#243B6B !important;margin:0 0 10px !important;}",
     /* description bornée à 4 lignes : les cartes gardent la même hauteur */
     ".ps-cab-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;margin:0 !important;display:-webkit-box !important;-webkit-line-clamp:4 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
+    /* ===== Barre de progression (fiches INSCRITES uniquement) =====
+       La donnée native (`.lw-course-card-progress-bar`, largeur inline) n'existe
+       que pour les fiches où l'on est inscrit — mêmes lecture et rendu que
+       profile-page.js. 🔴 `margin-top:auto` sur le BLOC (et non sur le lien) :
+       il pousse progression+CTA en bas de la carte ; le sélecteur voisin annule
+       le `margin-top:auto` du lien pour coller le CTA sous la barre. Une carte
+       sans progression garde son ancien comportement (lien seul en `margin-top:auto`). */
+    ".ps-cab-prog{margin-top:auto !important;padding-top:18px !important;}",
+    ".ps-cab-prog + .ps-cab-link{margin-top:0 !important;padding-top:12px !important;}",
+    ".ps-cab-prog-head{display:flex !important;align-items:baseline !important;justify-content:space-between !important;margin-bottom:7px !important;}",
+    ".ps-cab-prog-pct{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:13px !important;font-weight:700 !important;color:#243B6B !important;}",
+    ".ps-cab-prog-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:500 !important;color:#8A93A5 !important;}",
+    ".ps-cab-prog-track{height:8px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;}",
+    ".ps-cab-prog-bar{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#6161FF) !important;transition:width .6s ease !important;}",
     /* Même CTA que partout ailleurs.
        🔴 `margin-top:auto` sur le LIEN, et non `margin-bottom:auto` sur la
        description (comme le fait sector-cards.js) : toutes les fiches n'ont pas
@@ -251,7 +265,8 @@
          est INSCRIT (barre de progression native présente) : un non-inscrit sur
          /path-player est renvoyé à l'accueil, donc pour lui on garde la présentation
          (où il accède/s'inscrit). Vérifié en live : le lecteur s'ouvre bien. */
-      var enrolled = !!card.querySelector(".lw-course-card-progress-bar");
+      var natBar = card.querySelector(".lw-course-card-progress-bar");
+      var enrolled = !!natBar;
       var slug = (href.match(/\/course\/([^\/?#]+)/) || [])[1] || "";
       var target = (enrolled && slug) ? ("/path-player?courseid=" + encodeURIComponent(slug)) : href;
 
@@ -286,6 +301,24 @@
       t.className="ps-cab-title"; t.textContent=title;        // textContent : pas d'injection
       d.appendChild(t);
       if(desc){ var p=document.createElement("p"); p.className="ps-cab-desc"; p.textContent=desc; d.appendChild(p); }
+      /* Progression native : largeur inline de `.lw-course-card-progress-bar`
+         (pas le texte "72 % complété", dépendant de la langue). Affichée dès que
+         la donnée existe — donc seulement pour les fiches inscrites, y compris
+         à 0 %. Repris de profile-page.js. */
+      var pct=natBar ? parseInt((natBar.style.width||"").replace("%",""),10) : NaN;
+      if(!isNaN(pct)){
+        var cp=Math.max(0,Math.min(pct,100));
+        var pr=document.createElement("div"); pr.className="ps-cab-prog";
+        var ph=document.createElement("div"); ph.className="ps-cab-prog-head";
+        var pv=document.createElement("span"); pv.className="ps-cab-prog-pct"; pv.textContent=cp+" %";
+        var pl=document.createElement("span"); pl.className="ps-cab-prog-lbl"; pl.textContent=cp>=100?"terminé":(cp>0?"complété":"pas commencé");
+        ph.appendChild(pv); ph.appendChild(pl);
+        var pt=document.createElement("div"); pt.className="ps-cab-prog-track";
+        var pb=document.createElement("div"); pb.className="ps-cab-prog-bar"; pb.style.width=(cp>0&&cp<2?2:cp)+"%";
+        pt.appendChild(pb);
+        pr.appendChild(ph); pr.appendChild(pt);
+        d.appendChild(pr);
+      }
       var a=document.createElement("a");
       a.className="ps-cab-link"; a.href=target; a.textContent="En savoir plus";
       d.appendChild(a);

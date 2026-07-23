@@ -39,11 +39,13 @@
   var S="#pageContent";
   var GRID=S+" .cards-grandpa > .lw-cols.multiple-rows";
 
-  /* une carte = 1 teinte : picto en plein, et le CERCLE en clair (au lieu du bandeau) */
+  /* une carte = 1 teinte : picto en plein, le CERCLE en clair (au lieu du bandeau),
+     et la barre de progression reprend la MÊME teinte pleine (fiches inscrites). */
   function CYCLE(n, plein, clair){
     var C=S+" .cards-grandpa > .lw-cols > .col.lw-course-card:nth-child(6n+"+n+") ";
     return C+".ps-sicon svg{color:"+plein+" !important;}\n"
-         + C+".ps-sicon{background:"+clair+" !important;}";
+         + C+".ps-sicon{background:"+clair+" !important;}\n"
+         + C+".ps-sca-prog-bar{background:"+plein+" !important;}";
   }
 
   // --- 2) Styles ---
@@ -76,6 +78,17 @@
     ".ps-stitle{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:21px !important;line-height:1.25 !important;font-weight:800 !important;color:var(--ps-text,#1c1f26) !important;margin:0 0 8px !important;}",
     /* description bornée à 3 lignes : les cartes gardent la même hauteur */
     ".ps-sdesc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;margin:0 0 auto !important;display:-webkit-box !important;-webkit-line-clamp:3 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
+    /* ===== Barre de progression (fiches INSCRITES uniquement) =====
+       Donnée native (`.lw-course-card-progress-bar`, largeur inline), comme
+       profile-page.js. Ici pas de `margin-top:auto` sur le bloc : c'est le
+       `margin-bottom:auto` de .ps-sdesc qui pousse déjà progression+CTA en bas.
+       La barre prend la couleur de la carte (posée par CYCLE), la piste reste grise. */
+    ".ps-sca-prog + .ps-slink{margin-top:12px !important;}",
+    ".ps-sca-prog-head{display:flex !important;align-items:baseline !important;justify-content:space-between !important;margin-bottom:7px !important;}",
+    ".ps-sca-prog-pct{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:13px !important;font-weight:700 !important;color:var(--ps-text,#1c1f26) !important;}",
+    ".ps-sca-prog-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:500 !important;color:#8A93A5 !important;}",
+    ".ps-sca-prog-track{height:8px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;}",
+    ".ps-sca-prog-bar{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-f1,#6161FF) !important;transition:width .6s ease !important;}",
     /* même CTA que partout ailleurs */
     ".ps-slink{position:relative !important;z-index:2 !important;display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-slink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
@@ -241,7 +254,8 @@
       /* 🔴 Clic DIRECT sur le LECTEUR (`/path-player?courseid=<slug>`) si INSCRIT
          (barre de progression native), sinon présentation (un non-inscrit sur
          /path-player est renvoyé à l'accueil). Cf. cabinet-cards.js. */
-      var enrolled = !!card.querySelector(".lw-course-card-progress-bar");
+      var natBar = card.querySelector(".lw-course-card-progress-bar");
+      var enrolled = !!natBar;
       var slug = (href.match(/\/course\/([^\/?#]+)/) || [])[1] || "";
       var target = (enrolled && slug) ? ("/path-player?courseid=" + encodeURIComponent(slug)) : href;
 
@@ -256,6 +270,22 @@
       t.className="ps-stitle"; t.textContent=title;          // textContent : pas d'injection
       d.appendChild(t);
       if(desc){ var p=document.createElement("p"); p.className="ps-sdesc"; p.textContent=desc; d.appendChild(p); }
+      /* Progression native (fiches inscrites uniquement) : largeur inline de la
+         barre native, comme profile-page.js. Barre teintée par CYCLE. */
+      var pct=natBar ? parseInt((natBar.style.width||"").replace("%",""),10) : NaN;
+      if(!isNaN(pct)){
+        var cp=Math.max(0,Math.min(pct,100));
+        var pr=document.createElement("div"); pr.className="ps-sca-prog";
+        var ph=document.createElement("div"); ph.className="ps-sca-prog-head";
+        var pv=document.createElement("span"); pv.className="ps-sca-prog-pct"; pv.textContent=cp+" %";
+        var pl=document.createElement("span"); pl.className="ps-sca-prog-lbl"; pl.textContent=cp>=100?"terminé":(cp>0?"complété":"pas commencé");
+        ph.appendChild(pv); ph.appendChild(pl);
+        var pt=document.createElement("div"); pt.className="ps-sca-prog-track";
+        var pb=document.createElement("div"); pb.className="ps-sca-prog-bar"; pb.style.width=(cp>0&&cp<2?2:cp)+"%";
+        pt.appendChild(pb);
+        pr.appendChild(ph); pr.appendChild(pt);
+        d.appendChild(pr);
+      }
       var a=document.createElement("a");
       a.className="ps-slink"; a.href=target; a.textContent="En savoir plus";
       d.appendChild(a);
