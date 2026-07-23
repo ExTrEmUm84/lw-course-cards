@@ -239,9 +239,27 @@
   var membres = [];
   var grid, count, empty, qEl, tsEl;
   /* État des filtres : "" = « toutes ». Remplace les .value des anciens
-     <select> — les facettes .ps-ff n'ont pas de valeur native. */
-  var filtre = { filiere: "", promo: "" };
+     <select> — les facettes .ps-ff n'ont pas de valeur native.
+     🔴 Filtres de CETTE page (annuaire partenaire de cas) : École, Niveau,
+     Recherche, Langue (Promo/Filière retirés — demande Ziad). Les valeurs
+     viennent des champs LW cf_ecole/cf_niveau/cf_recherche/cf_langue (Worker). */
+  var filtre = { ecole: "", niveau: "", recherche: "", langue: "" };
   var facettes = {}; /* key -> { box, label, resetTxt, valeurs } */
+  /* Ordres imposés pour Niveau/Recherche/Langue (sinon tri alphabétique). */
+  var ORDRE = {
+    niveau: ["débutant", "avancé", "expert"],
+    recherche: ["Stage", "CDI Junior", "CDI expérimenté"],
+    langue: ["Français", "Anglais"]
+  };
+  function triFacette(cle) {
+    var ord = ORDRE[cle];
+    if (ord) return function (a, b) {
+      var ia = ord.indexOf(a), ib = ord.indexOf(b);
+      if (ia < 0) ia = 99; if (ib < 0) ib = 99;
+      return ia - ib || String(a).localeCompare(String(b), "fr");
+    };
+    return function (a, b) { return String(a).localeCompare(String(b), "fr", { numeric: true }); };
+  }
 
   function el(tag, cls, txt) {
     var n = document.createElement(tag);
@@ -286,9 +304,12 @@
     }
 
     c.appendChild(el("h3", "psa-name", m.name));
-    if (m.filiere) c.appendChild(el("p", "psa-filiere", m.filiere));
+    var sousTitre = m.ecole || m.filiere;
+    if (sousTitre) c.appendChild(el("p", "psa-filiere", sousTitre));
 
-    var meta = [m.promo ? "Promo " + m.promo : null, m.location].filter(Boolean).join(" · ");
+    var langueTxt = Array.isArray(m.langue) ? m.langue.join(" / ") : m.langue;
+    var meta = [m.niveau ? "Niveau " + m.niveau : null, m.recherche, langueTxt, m.location]
+      .filter(Boolean).join(" · ");
     if (meta) c.appendChild(el("p", "psa-meta", meta));
     if (m.bio) c.appendChild(el("p", "psa-bio", m.bio));
 
@@ -348,19 +369,27 @@
   }
 
   function botteDeFoin(m) {
-    return [m.name, m.filiere, m.location, m.promo]
+    return [m.name, m.ecole, m.filiere, m.niveau, m.recherche, m.location]
+      .concat(Array.isArray(m.langue) ? m.langue : [m.langue])
       .concat(m.matieres || [])
       .filter(Boolean).join(" ").toLowerCase();
   }
 
+  /** Une langue peut être une valeur unique ou une liste : match si présente. */
+  function matchVal(champ, val) {
+    if (!val) return true;
+    if (Array.isArray(champ)) return champ.indexOf(val) !== -1;
+    return String(champ) === val;
+  }
+
   function rendre() {
     var q = qEl.value.trim().toLowerCase();
-    var promo = filtre.promo;
-    var filiere = filtre.filiere;
 
     var vus = membres.filter(function (m) {
-      return (!promo || String(m.promo) === promo) &&
-             (!filiere || m.filiere === filiere) &&
+      return matchVal(m.ecole, filtre.ecole) &&
+             matchVal(m.niveau, filtre.niveau) &&
+             matchVal(m.recherche, filtre.recherche) &&
+             matchVal(m.langue, filtre.langue) &&
              (!q || botteDeFoin(m).indexOf(q) !== -1);
     });
 
@@ -378,7 +407,12 @@
   /** Valeurs distinctes réellement présentes chez les membres, triées. */
   function distinctes(cle, tri) {
     var vues = {};
-    membres.map(function (m) { return m[cle]; }).filter(Boolean).forEach(function (v) { vues[v] = 1; });
+    membres.forEach(function (m) {
+      var v = m[cle];
+      if (!v) return;
+      if (Array.isArray(v)) v.forEach(function (x) { if (x) vues[x] = 1; });   /* ex. langue = ["Français","Anglais"] */
+      else vues[v] = 1;
+    });
     return Object.keys(vues).sort(tri);
   }
 
@@ -441,15 +475,12 @@
   }
 
   function remplirFiltres() {
-    /* Promos décroissantes (sortie la plus proche en premier), filières A→Z. */
-    facettes.promo.valeurs = distinctes("promo", function (a, b) {
-      return String(b).localeCompare(String(a), "fr", { numeric: true });
+    /* École A→Z ; Niveau/Recherche/Langue dans l'ordre imposé (triFacette). */
+    ["ecole", "niveau", "recherche", "langue"].forEach(function (cle) {
+      if (!facettes[cle]) return;
+      facettes[cle].valeurs = distinctes(cle, triFacette(cle));
+      peindreFacette(cle);
     });
-    facettes.filiere.valeurs = distinctes("filiere", function (a, b) {
-      return String(a).localeCompare(String(b), "fr", { numeric: true });
-    });
-    peindreFacette("filiere");
-    peindreFacette("promo");
   }
 
   function squelettes(n) {
@@ -490,6 +521,23 @@
     var first = (m.name || "").split(/\s+/)[0];
     var g = DEMO_FEMALE[first] ? "women" : "men";
     m.photo = "https://randomuser.me/api/portraits/" + g + "/" + (_demoIdx[g]++) + ".jpg";
+    return m;
+  }
+
+  /* Démo : remplit École/Niveau/Recherche/Langue sur les faux profils (déterministe
+     via un hash du nom) pour que les 4 filtres soient peuplés et démontrables. Les
+     VRAIS membres gardent leurs champs du Worker (cf_ecole/cf_niveau/cf_recherche/cf_langue). */
+  var DEMO_ECOLES = ["HEC Paris", "ESSEC", "ESCP", "EM Lyon", "EDHEC", "Polytechnique", "CentraleSupélec", "Dauphine", "Sciences Po", "ENSAE"];
+  var DEMO_NIVEAUX = ["débutant", "avancé", "expert"];
+  var DEMO_RECH = ["Stage", "CDI Junior", "CDI expérimenté"];
+  var DEMO_LANGUES = [["Français"], ["Français", "Anglais"], ["Anglais"], ["Français", "Anglais"]];
+  function demoEnrich(m) {
+    var s = (m.id || m.name || ""), h = 0;
+    for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
+    if (!m.ecole)     m.ecole = DEMO_ECOLES[h % DEMO_ECOLES.length];
+    if (!m.niveau)    m.niveau = DEMO_NIVEAUX[(h >> 3) % DEMO_NIVEAUX.length];
+    if (!m.recherche) m.recherche = DEMO_RECH[(h >> 5) % DEMO_RECH.length];
+    if (!m.langue)    m.langue = DEMO_LANGUES[(h >> 7) % DEMO_LANGUES.length];
     return m;
   }
 
@@ -1309,7 +1357,7 @@
       })
       .then(function (data) {
         membres = Array.isArray(data.members) ? data.members : [];
-        if (DEMO_FILL) membres = membres.concat(DEMO_MEMBERS.map(demoPhoto));
+        if (DEMO_FILL) membres = membres.concat(DEMO_MEMBERS.map(demoPhoto).map(demoEnrich));
         if (!membres.length) {
           grid.replaceChildren();
           count.textContent = "";
@@ -1442,20 +1490,26 @@
     qEl.type = "search";
     qEl.id = "psa-q";
     qEl.name = "psa-recherche";
-    qEl.placeholder = "Rechercher un nom, une filière, une matière…";
+    qEl.placeholder = "Rechercher un nom, une école, une langue…";
     qEl.autocomplete = "off";
     qEl.setAttribute("aria-label", "Rechercher dans l'annuaire");
 
     /* La pilule affiche le nom du champ ("Filière"), le menu porte le reset
        ("Toutes les filières") — comme les filtres "Année"/"Type" de la page Cas. */
-    var filiereBox = creerFacette("filiere", "Filière", "Toutes les filières");
-    filiereBox.setAttribute("aria-label", "Filtrer par filière");
-    var promoBox = creerFacette("promo", "Promo", "Toutes les promos");
-    promoBox.setAttribute("aria-label", "Filtrer par promo");
+    var ecoleBox = creerFacette("ecole", "École", "Toutes les écoles");
+    ecoleBox.setAttribute("aria-label", "Filtrer par école");
+    var niveauBox = creerFacette("niveau", "Niveau", "Tous les niveaux");
+    niveauBox.setAttribute("aria-label", "Filtrer par niveau");
+    var rechercheBox = creerFacette("recherche", "Recherche", "Toutes les recherches");
+    rechercheBox.setAttribute("aria-label", "Filtrer par type de recherche");
+    var langueBox = creerFacette("langue", "Langue", "Toutes les langues");
+    langueBox.setAttribute("aria-label", "Filtrer par langue");
 
     bar.appendChild(qEl);
-    bar.appendChild(filiereBox);
-    bar.appendChild(promoBox);
+    bar.appendChild(ecoleBox);
+    bar.appendChild(niveauBox);
+    bar.appendChild(rechercheBox);
+    bar.appendChild(langueBox);
 
     count = el("p", "psa-count");
     count.setAttribute("aria-live", "polite");
