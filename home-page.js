@@ -122,7 +122,55 @@
     H+" .ps-home-soft{background:var(--ps-surface-soft,#F6F8FB) !important;}",
 
     /* ================= 8) IMAGES ================= */
-    H+" .learnworlds-image{border-radius:var(--ps-r-card,16px) !important;}"
+    H+" .learnworlds-image{border-radius:var(--ps-r-card,16px) !important;}",
+
+    /* ================= 9) SECTIONS SPÉCIFIQUES ================= */
+    /* --- 3) OFFRES : les colonnes portant une icône deviennent des cartes --- */
+    H+" .ps-home-offres .lw-cols > .col:has(.box-icon-wrapper),"+H+" .ps-home-offres .lw-cols > .col:has(.learnworlds-icon-wrapper){background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;padding:26px !important;transition:box-shadow .2s ease,transform .2s ease !important;}",
+    H+" .ps-home-offres .lw-cols > .col:has(.box-icon-wrapper):hover,"+H+" .ps-home-offres .lw-cols > .col:has(.learnworlds-icon-wrapper):hover{box-shadow:0 14px 34px rgba(0,0,0,.10) !important;transform:translateY(-3px) !important;}",
+    /* icône offres : tuile arrondie (au lieu du cercle global) */
+    H+" .ps-home-offres .box-icon-wrapper,"+H+" .ps-home-offres .learnworlds-icon-wrapper{border-radius:14px !important;width:54px !important;height:54px !important;}",
+    H+" .ps-home-offres .learnworlds-main-text-large{font-size:14px !important;font-weight:600 !important;color:var(--ps-accent,#507EC5) !important;}",
+
+    /* --- 5) BANDE CTA « Avez-vous besoin d'une formation » : centrée, titre marine --- */
+    H+" .ps-home-cta{text-align:center !important;}",
+    [H+" .ps-home-cta h1",H+" .ps-home-cta h2",H+" .ps-home-cta h3",H+" .ps-home-cta h4"].join(",")+"{color:var(--ps-marine,#243B6B) !important;}",
+
+    /* --- 6) PREUVE (1% / 90%) : les chiffres en accent, la phrase en marine --- */
+    H+" .ps-home-preuve .learnworlds-heading4{color:var(--ps-accent,#507EC5) !important;font-size:22px !important;font-weight:800 !important;letter-spacing:-.02em !important;}",
+    H+" .ps-home-preuve .learnworlds-heading3{color:var(--ps-marine,#243B6B) !important;font-weight:800 !important;}",
+
+    /* --- 7) ATOUTS : grille de cartes (les 8 colonnes à icône) --- */
+    H+" .ps-home-atouts .lw-cols:has(.box-icon-wrapper),"+H+" .ps-home-atouts .lw-cols:has(.learnworlds-icon-wrapper){display:grid !important;grid-template-columns:repeat(4,1fr) !important;gap:14px !important;}",
+    H+" .ps-home-atouts .lw-cols:has(.box-icon-wrapper) > .col,"+H+" .ps-home-atouts .lw-cols:has(.learnworlds-icon-wrapper) > .col{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 14px rgba(15,23,42,.05) !important;padding:20px !important;margin:0 !important;width:auto !important;transition:box-shadow .2s ease,transform .2s ease !important;}",
+    H+" .ps-home-atouts .lw-cols:has(.box-icon-wrapper) > .col:hover,"+H+" .ps-home-atouts .lw-cols:has(.learnworlds-icon-wrapper) > .col:hover{box-shadow:0 12px 26px rgba(0,0,0,.09) !important;transform:translateY(-2px) !important;}",
+    H+" .ps-home-atouts .learnworlds-heading3{font-size:16px !important;color:var(--ps-marine,#243B6B) !important;margin-top:10px !important;}",
+    "@media(max-width:820px){"+H+" .ps-home-atouts .lw-cols:has(.box-icon-wrapper),"+H+" .ps-home-atouts .lw-cols:has(.learnworlds-icon-wrapper){grid-template-columns:repeat(2,1fr) !important;}}",
+
+    /* --- 8) PROFILS : les 2 cartes reçoivent un liseré d'accent en haut --- */
+    H+" .ps-home-profils .box-shadow-round-light,"+H+" .ps-home-profils .radius-15{border-top:3px solid var(--ps-accent,#507EC5) !important;padding:26px !important;}",
+    H+" .ps-home-profils .learnworlds-heading4{color:var(--ps-marine,#243B6B) !important;}",
+
+    /* --- 10) HISTOIRE (timeline) : les dates en accent --- */
+    H+" .ps-home-histoire .learnworlds-heading4{color:var(--ps-accent,#507EC5) !important;font-weight:800 !important;letter-spacing:-.01em !important;}",
+
+    /* --- 11) ÉQUIPE : images arrondies, noms marine, rôles accent --- */
+    H+" .ps-home-equipe .learnworlds-image{border-radius:16px !important;}",
+    H+" .ps-home-equipe .learnworlds-heading3{color:var(--ps-marine,#243B6B) !important;font-size:18px !important;}",
+    H+" .ps-home-equipe .learnworlds-heading4{color:var(--ps-accent,#507EC5) !important;font-weight:700 !important;}",
+
+    /* --- 12) ARTICLES : bouton « Charger plus » en outline centré --- */
+    H+" .ps-home-articles .learnworlds-button{background:transparent !important;border:1.5px solid var(--ps-accent,#507EC5) !important;color:var(--ps-accent,#507EC5) !important;}",
+    H+" .ps-home-articles .learnworlds-button:hover{background:var(--ps-accent,#507EC5) !important;color:#fff !important;}",
+
+    /* --- 13) RDV : bande foncée #203866 -> titres blancs, bouton blanc --- */
+    [H+" .ps-home-rdv h1",H+" .ps-home-rdv h2",H+" .ps-home-rdv h3",H+" .ps-home-rdv h4",H+" .ps-home-rdv .learnworlds-main-text"].join(",")+"{color:#fff !important;}",
+    H+" .ps-home-rdv .learnworlds-button{background:#fff !important;border:0 !important;color:var(--ps-accent,#507EC5) !important;}",
+    H+" .ps-home-rdv .learnworlds-button:hover{background:var(--ps-accent-tint,#EDF4FF) !important;color:var(--ps-accent-hover,#486798) !important;}",
+
+    /* --- 14) FAQ : items d'accordéon en cartes propres, questions marine --- */
+    H+" .ps-home-faq .learnworlds-heading3{color:var(--ps-marine,#243B6B) !important;font-weight:700 !important;font-size:16px !important;}",
+    [H+" .ps-home-faq [class*='accordion']",H+" .ps-home-faq [class*='collaps']"].join(",")+"{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:12px !important;margin-bottom:10px !important;overflow:hidden !important;}"
   ].join("\n");
 
   function styles(){
@@ -136,6 +184,21 @@
 
   /* Repère par CONTENU (pas par position) la section des stats et les bandes
      neutres, pour leur poser une classe stable ciblée par le CSS ci-dessus. */
+  /* Chaque section repérée par le TEXTE de ses titres (robuste au réordonnancement).
+     `htext` = concat des titres de la section. Une section = une classe stable. */
+  var SECTAGS=[
+    [/cabinets?\s+int[ée]gr/i,"ps-home-cabinets"],
+    [/nos offres de formation/i,"ps-home-offres"],
+    [/avez-vous besoin/i,"ps-home-cta"],
+    [/assurance de rester|s[ée]lectivit[ée]/i,"ps-home-preuve"],
+    [/pourquoi choisir prepastrat/i,"ps-home-atouts"],
+    [/quel candidat/i,"ps-home-profils"],
+    [/notre histoire/i,"ps-home-histoire"],
+    [/qui sommes-nous/i,"ps-home-equipe"],
+    [/derniers articles/i,"ps-home-articles"],
+    [/prenez rendez-vous/i,"ps-home-rdv"],
+    [/\bfaq\b/i,"ps-home-faq"]
+  ];
   function marquer(){
     var secs=document.querySelectorAll(H+" section.learnworlds-section");
     secs.forEach(function(s){
@@ -143,9 +206,9 @@
       if(s.querySelector(".progress-container_counter")) s.classList.add("ps-home-stats");
       /* hero = la section qui porte la vidéo (iframe / learnworlds-video-iframe) */
       if(s.querySelector(".learnworlds-video-iframe, iframe")) s.classList.add("ps-home-hero");
-      /* cabinets = section dont un titre parle de « cabinets intégrés » */
-      var h=s.querySelector("h1,h2,h3,h4");
-      if(h && /cabinets?\s+int[ée]gr/i.test((h.textContent||""))) s.classList.add("ps-home-cabinets");
+      /* tag par titre */
+      var htext=""; s.querySelectorAll("h1,h2,h3,h4").forEach(function(x){ htext+=" "+(x.textContent||""); });
+      SECTAGS.forEach(function(t){ if(t[0].test(htext)) s.classList.add(t[1]); });
       /* bande neutre : fond gris-rosé du template (rgb(245,243,245)) */
       var bg=getComputedStyle(s).backgroundColor;
       if(bg==="rgb(245, 243, 245)") s.classList.add("ps-home-soft");
