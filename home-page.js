@@ -497,9 +497,24 @@
     } else { pf2.classList.add("ps-in"); }
   }
 
+  /* Vidéo du hero : le template a un iframe Vimeo avec un ID mort (« Cette vidéo
+     n'existe pas »). On remplace la source par la vraie vidéo (demande Ziad).
+     Posé UNE fois (garde `data-ps-vid`) pour ne pas recharger la vidéo à chaque build. */
+  var HERO_VIDEO="https://player.vimeo.com/video/910833393?h=94064c722b&badge=0&autopause=0&player_id=0&app_id=58479";
+  function setHeroVideo(){
+    var hero=document.querySelector(H+" .ps-home-hero");
+    if(!hero) return;
+    var ifr=hero.querySelector(".learnworlds-video-iframe iframe, .learnworlds-video-iframe-wrapper iframe, iframe");
+    if(!ifr || ifr.getAttribute("data-ps-vid")) return;
+    ifr.setAttribute("src",HERO_VIDEO);
+    ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture; clipboard-write");
+    ifr.setAttribute("allowfullscreen","");
+    ifr.setAttribute("data-ps-vid","1");
+  }
+
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer(); cartes(); buildCabinets(); buildTimeline(); buildProfils();
+    styles(); marquer(); cartes(); buildCabinets(); buildTimeline(); buildProfils(); setHeroVideo();
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
