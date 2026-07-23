@@ -90,6 +90,15 @@
     CYCLE(4, "var(--ps-f4,#FDAB3D)", "var(--ps-f4-tint,#FFF3E0)"),
     CYCLE(5, "var(--ps-f5,#A25DDC)", "var(--ps-f5-tint,#F3EAFB)"),
     CYCLE(6, "var(--ps-f6,#0073EA)", "var(--ps-f6-tint,#E6F1FD)"),
+    /* ===== Barre de filtres RETIRÉE, recherche CONSERVÉE (demande Ziad 23/07) =====
+       La rangée `.one-row` porte 2 colonnes sœurs : la recherche (`.-search-box`,
+       à gauche) et la barre de filtres NATIVE `.lw-filters` (à droite, col span_8_of_12 ;
+       filters.js ne stylise pas cette page → 0 pilule `.ps-ff`, ce sont les boutons LW
+       natifs). On masque la COLONNE des filtres via `:has(.lw-filters)` — jamais les
+       options une à une (LW pose un `display:none` INLINE sur les filtres désactivés
+       qu'un `!important` ré-afficherait). La recherche reste intacte. */
+    S+" .lw-cols.with-filters .one-row > .col:has(.lw-filters){display:none !important;}",
+
     /* ================= TITRES (hero) — porté de case-cards.js ==============
        Alignés sur les CARTES : le conteneur natif du titre fait 1120px
        (mesuré : 290->1410) alors que la grille fait 1000px (350->1350). Sans
