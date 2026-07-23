@@ -344,6 +344,25 @@
     H+" .ps-home-equipe .lw-brand-bg{background:#243B6B !important;}",
     [H+" .ps-home-equipe .lw-brand-bg .learnworlds-heading3",H+" .ps-home-equipe .lw-brand-bg .learnworlds-heading4",H+" .ps-home-equipe .lw-brand-bg .learnworlds-heading:not(.learnworlds-icon)",H+" .ps-home-equipe .lw-brand-bg .learnworlds-main-text",H+" .ps-home-equipe .lw-brand-bg p"].join(",")+"{color:#fff !important;}",
 
+    /* --- 11b) ÉQUIPE — REFONTE : le widget natif est un système d'ONGLETS
+       (Les Fondateurs / L'équipe / Les coachs) sans photos. buildEquipe() le
+       convertit en grille de CARTES groupées, avatar à INITIALES (ou picto pour
+       les pools de coachs), nom + rôle + bio. Onglets natifs masqués. --- */
+    H+" .ps-home-equipe .ps-team{max-width:1080px !important;margin:26px auto 0 !important;}",
+    H+" .ps-home-equipe .ps-team-group{margin-top:44px !important;}",
+    H+" .ps-home-equipe .ps-team-group:first-child{margin-top:12px !important;}",
+    H+" .ps-home-equipe .ps-team-gt{"+FT+"font-size:13px !important;font-weight:800 !important;text-transform:uppercase !important;letter-spacing:.06em !important;color:var(--ps-accent,#507EC5) !important;text-align:center !important;margin:0 0 22px !important;}",
+    H+" .ps-home-equipe .ps-team-grid{display:grid !important;grid-template-columns:repeat(4,1fr) !important;gap:18px !important;justify-content:center !important;}",
+    "@media(max-width:900px){"+H+" .ps-home-equipe .ps-team-grid{grid-template-columns:repeat(2,1fr) !important;}}",
+    "@media(max-width:520px){"+H+" .ps-home-equipe .ps-team-grid{grid-template-columns:1fr !important;}}",
+    H+" .ps-home-equipe .ps-team-card{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:16px !important;box-shadow:0 4px 16px rgba(15,23,42,.05) !important;padding:24px 20px !important;display:flex !important;flex-direction:column !important;align-items:center !important;text-align:center !important;opacity:0 !important;transform:translateY(16px) !important;transition:opacity .5s ease,transform .3s ease,box-shadow .2s ease !important;}",
+    H+" .ps-home-equipe.ps-in .ps-team-card{opacity:1 !important;transform:translateY(0) !important;}",
+    H+" .ps-home-equipe .ps-team-card:hover{box-shadow:0 12px 30px rgba(15,23,42,.10) !important;transform:translateY(-3px) !important;}",
+    H+" .ps-home-equipe .ps-team-av{width:62px !important;height:62px !important;border-radius:50% !important;background:var(--ps-accent-tint,#EDF4FF) !important;color:var(--ps-accent-hover,#486798) !important;display:flex !important;align-items:center !important;justify-content:center !important;"+FT+"font-weight:800 !important;font-size:21px !important;letter-spacing:.02em !important;margin:0 0 14px !important;flex:none !important;}",
+    H+" .ps-home-equipe .ps-team-av svg{width:27px !important;height:27px !important;stroke:currentColor !important;fill:none !important;stroke-width:1.8 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    H+" .ps-home-equipe .ps-team-name{"+FT+"font-size:16px !important;font-weight:800 !important;color:var(--ps-marine,#243B6B) !important;line-height:1.2 !important;}",
+    H+" .ps-home-equipe .ps-team-role{"+FT+"font-size:12px !important;font-weight:700 !important;text-transform:uppercase !important;letter-spacing:.04em !important;color:var(--ps-accent,#507EC5) !important;margin:4px 0 0 !important;}",
+    H+" .ps-home-equipe .ps-team-bio{"+FT+"font-size:13px !important;color:var(--ps-text-soft,#676879) !important;line-height:1.55 !important;margin:11px 0 0 !important;display:-webkit-box !important;-webkit-line-clamp:4 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
     /* --- 12) ARTICLES : bouton « Charger plus » en outline centré --- */
     H+" .ps-home-articles .learnworlds-button{background:transparent !important;border:1.5px solid var(--ps-accent,#507EC5) !important;color:var(--ps-accent,#507EC5) !important;}",
     H+" .ps-home-articles .learnworlds-button:hover{background:var(--ps-accent,#507EC5) !important;color:#fff !important;}",
@@ -667,6 +686,71 @@
     }
   }
 
+  /* ================= ÉQUIPE : onglets -> cartes groupées + avatars =================
+     Le natif est un widget à 3 onglets (Fondateurs / Équipe / Coachs) sans photos.
+     On lit les 3 .lw-tab-content, on en extrait chaque membre (nom, rôle après un
+     « - », bio), on construit une grille de cartes par groupe (avatar à initiales,
+     ou picto étoile pour les pools « Nos coachs … »), et on masque le widget natif.
+     Bios placeholder (anglais template) ignorées. Construit une seule fois. */
+  var STAR_SVG='<svg viewBox="0 0 24 24"><path d="m12 3 2.6 5.2 5.8.85-4.2 4.1 1 5.75L12 21.3l-5.2-2.75 1-5.75-4.2-4.1 5.8-.85L12 3Z"/></svg>';
+  function teamInitials(name){
+    var w=(name||"").replace(/[^A-Za-zÀ-ÿ' -]/g,"").split(/[\s'-]+/).filter(Boolean);
+    if(!w.length) return "?";
+    if(w.length===1) return w[0].slice(0,2).toUpperCase();
+    return (w[0].charAt(0)+w[w.length-1].charAt(0)).toUpperCase();
+  }
+  function buildEquipe(){
+    var sec=document.querySelector(H+" .ps-home-equipe"); if(!sec) return;
+    if(sec.querySelector(".ps-team")) return;
+    var tabs=sec.querySelector(".lw-tabs"); if(!tabs) return;
+    var btnWrap=tabs.querySelector(".lw-tabs-buttons");
+    var labels=btnWrap ? [].slice.call(btnWrap.querySelectorAll(".lw-tab, .js-lw-tab")).map(function(b){ return (b.textContent||"").replace(/\s+/g," ").trim(); }) : [];
+    var panels=[].slice.call(tabs.querySelectorAll(".lw-tab-content"));
+    if(!panels.length) return;
+    var container=document.createElement("div"); container.className="ps-team";
+    panels.forEach(function(p, gi){
+      var members=[];
+      p.querySelectorAll(".learnworlds-heading3, .learnworlds-heading4").forEach(function(h){
+        var raw=(h.textContent||"").replace(/\s+/g," ").trim();
+        var parts=raw.split(/\s+[-–—]\s+/);
+        var name=parts[0].trim(), role=parts.length>1 ? parts.slice(1).join(" - ").trim() : "";
+        var bio="", n=h.nextElementSibling;
+        while(n){ if(/main-text/.test(n.className||"")){ bio=(n.textContent||"").replace(/\s+/g," ").trim(); break; } n=n.nextElementSibling; }
+        if(/multiple ways of adding|awesome label|lorem ipsum|write your/i.test(bio)) bio="";  /* placeholder EN */
+        if(name) members.push({name:name, role:role, bio:bio});
+      });
+      if(!members.length) return;
+      var grp=document.createElement("div"); grp.className="ps-team-group";
+      var gt=document.createElement("div"); gt.className="ps-team-gt"; gt.textContent=labels[gi]||"";
+      grp.appendChild(gt);
+      var grid=document.createElement("div"); grid.className="ps-team-grid";
+      members.forEach(function(m){
+        var card=document.createElement("div"); card.className="ps-team-card";
+        var av=document.createElement("div"); av.className="ps-team-av";
+        if(/^nos\s/i.test(m.name)) av.innerHTML=STAR_SVG;      /* pool de coachs -> picto */
+        else av.textContent=teamInitials(m.name);
+        card.appendChild(av);
+        var nm=document.createElement("div"); nm.className="ps-team-name"; nm.textContent=m.name; card.appendChild(nm);
+        if(m.role){ var rl=document.createElement("div"); rl.className="ps-team-role"; rl.textContent=m.role; card.appendChild(rl); }
+        if(m.bio){ var bo=document.createElement("div"); bo.className="ps-team-bio"; bo.textContent=m.bio; bo.setAttribute("title", m.bio); card.appendChild(bo); }
+        grid.appendChild(card);
+      });
+      grp.appendChild(grid);
+      container.appendChild(grp);
+    });
+    if(!container.children.length) return;
+    tabs.parentNode.insertBefore(container, tabs);
+    tabs.classList.add("ps-home-hide");   /* masque le widget onglets natif */
+    if(!sec.classList.contains("ps-in") && !sec.__psEquipeObs){
+      sec.__psEquipeObs=1;
+      if(window.IntersectionObserver){
+        var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ sec.classList.add("ps-in"); io.disconnect(); } }); },{threshold:0.08});
+        io.observe(sec);
+        setTimeout(function(){ var r=sec.getBoundingClientRect(); if(r.top<(window.innerHeight||800)) sec.classList.add("ps-in"); },450);
+      } else { sec.classList.add("ps-in"); }
+    }
+  }
+
   /* Reconstruit « Notre histoire » en timeline HORIZONTALE (4 jalons), révélée au
      scroll. Idempotent. Masque les rangées natives verticales. */
   function buildTimeline(){
@@ -916,7 +1000,7 @@
 
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer(); cartes(); buildStats(); buildCta(); buildPreuve(); buildAtouts(); buildCabinets(); buildTimeline(); buildProfils(); heroVideoBg(); setHeroVideo(); buildFaq();
+    styles(); marquer(); cartes(); buildStats(); buildCta(); buildPreuve(); buildAtouts(); buildCabinets(); buildTimeline(); buildProfils(); buildEquipe(); heroVideoBg(); setHeroVideo(); buildFaq();
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
