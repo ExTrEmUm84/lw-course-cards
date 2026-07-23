@@ -73,7 +73,7 @@
     ".ps-sicon{width:140px !important;height:140px !important;border-radius:50% !important;background:#fff !important;display:flex !important;align-items:center !important;justify-content:center !important;margin:-70px auto 16px !important;border:4px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.12) !important;flex:none !important;transition:box-shadow .25s ease !important;}",
     ".ps-sicon svg{width:56px !important;height:56px !important;fill:none !important;stroke:currentColor !important;stroke-width:1.5 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-sicon svg .f{fill:currentColor !important;fill-opacity:.18 !important;}",
-    ".ps-stitle{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:21px !important;line-height:1.25 !important;font-weight:800 !important;color:var(--ps-text,#1c1f26) !important;margin:0 0 8px !important;}",
+    ".ps-stitle{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:21px !important;line-height:1.25 !important;font-weight:800 !important;color:var(--ps-text,#1c1f26) !important;margin:0 0 auto !important;}",
     /* description bornée à 3 lignes : les cartes gardent la même hauteur */
     ".ps-sdesc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;margin:0 0 auto !important;display:-webkit-box !important;-webkit-line-clamp:3 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
     /* même CTA que partout ailleurs */
@@ -257,8 +257,8 @@
      toute la largeur. */
   var ICON_KPI='<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/><path d="M15 7h4v4"/></svg>';
   function mountKpi(){
-    var desc=document.querySelector(S+" .ps-desc");
-    if(!desc) return;                                // hero pas encore prêt : réessai
+    var h1=document.querySelector(S+" h1.learnworlds-heading");
+    if(!h1) return;                                  // hero prêt = H1 présent (avant : ancré sur .ps-desc, qui disparaît si Ziad retire le texte sous le H1)
     var vus=Object.create(null);
     document.querySelectorAll(S+" .cards-grandpa .lw-course-card").forEach(function(card){
       var a=card.querySelector("a.card-link[href], a[href]");
@@ -271,7 +271,6 @@
     var cles=Object.keys(vus);
     var avecBarre=cles.filter(function(k){ return vus[k]!==null; });
     var kpi=document.querySelector(S+" .ps-kpi");
-    var h1=document.querySelector(S+" h1.learnworlds-heading");
     var top=document.querySelector(S+" .ps-herotop");
     if(!cles.length || !avecBarre.length){           // aucune fiche inscrite -> pas de tuile
       if(kpi) kpi.remove();
@@ -294,7 +293,7 @@
       kpi.className="ps-kpi";
       kpi.innerHTML='<div class="ps-kpi-txt"><div class="ps-kpi-num"></div><div class="ps-kpi-lbl"></div><div class="ps-kpi-bar"><div class="ps-kpi-bar-in"></div></div></div><span class="ps-kpi-ic" aria-hidden="true">'+ICON_KPI+'</span>';
     }
-    var hote=top||desc;
+    var hote=top||h1.parentNode;
     if(kpi.parentNode!==hote) hote.appendChild(kpi);
     kpi.querySelector(".ps-kpi-num").textContent=pct+" %";
     kpi.querySelector(".ps-kpi-lbl").textContent="Progression sur "+cles.length+" fiches";
@@ -325,8 +324,6 @@
       if(!h) return;
       var title=(h.textContent||"").replace(/\s+/g," ").trim();
       if(!title) return;                       // pas de titre -> on laisse la carte native
-      var dEl=card.querySelector(".lw-course-card-descr, .learnworlds-main-text");
-      var desc=dEl ? (dEl.textContent||"").replace(/\s+/g," ").trim() : "";
       var link=card.querySelector("a.card-link[href], a[href]");
       var href=link ? link.getAttribute("href") : "#";
 
@@ -342,12 +339,11 @@
       ic.className="ps-sicon"; ic.innerHTML=ICON[pick(title)]||ICON.doc;   // SVG statique, pas de données membre
       ic.setAttribute("aria-hidden","true");
 
-      /* Contenu (sous le cercle) : titre + description + CTA */
+      /* Contenu (sous le cercle) : titre + CTA (description retirée le 24/07, choix Ziad) */
       var d=document.createElement("div"); d.className="ps-scard";
       var t=document.createElement("h3");
       t.className="ps-stitle"; t.textContent=title;          // textContent : pas d'injection
       d.appendChild(t);
-      if(desc){ var p=document.createElement("p"); p.className="ps-sdesc"; p.textContent=desc; d.appendChild(p); }
       var a=document.createElement("a");
       a.className="ps-slink"; a.href=target; a.textContent="En savoir plus";
       d.appendChild(a);
