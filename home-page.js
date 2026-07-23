@@ -103,6 +103,19 @@
     /* Placeholders du template (« Write your awesome label here. ») masqués. */
     H+" .ps-home-hide{display:none !important;}",
 
+    /* ================= 6c) CABINETS : mur de logos monochromes ================= */
+    /* Section `.ps-home-cabinets` : on masque les rangées de 16 pastilles natives
+       (buildCabinets en JS) et on construit une grille de cellules-logos. Logo image
+       hébergé quand dispo (grayscale + couleur au survol), sinon nom stylé (repli). */
+    H+" .ps-cabgrid{display:grid !important;grid-template-columns:repeat(4,1fr) !important;gap:12px !important;max-width:1000px !important;margin:22px auto 0 !important;}",
+    H+" .ps-cabcell{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:14px !important;height:78px !important;display:flex !important;align-items:center !important;justify-content:center !important;padding:14px 18px !important;box-shadow:0 3px 12px rgba(15,23,42,.05) !important;transition:box-shadow .2s ease,transform .2s ease !important;}",
+    H+" .ps-cabcell:hover{box-shadow:0 12px 26px rgba(15,23,42,.10) !important;transform:translateY(-2px) !important;}",
+    H+" .ps-cablogo{max-width:100% !important;max-height:42px !important;object-fit:contain !important;filter:grayscale(1) !important;opacity:.72 !important;transition:filter .2s ease,opacity .2s ease !important;}",
+    H+" .ps-cabcell:hover .ps-cablogo{filter:none !important;opacity:1 !important;}",
+    H+" .ps-cabtext{"+FT+"font-weight:800 !important;font-size:15px !important;color:#8A93A5 !important;letter-spacing:-.01em !important;text-align:center !important;line-height:1.2 !important;transition:color .2s ease !important;}",
+    H+" .ps-cabcell:hover .ps-cabtext{color:var(--ps-accent,#507EC5) !important;}",
+    "@media(max-width:820px){"+H+" .ps-cabgrid{grid-template-columns:repeat(2,1fr) !important;}}",
+
     /* ================= 7) BANDES NEUTRES (#f5f3f5) ================= */
     /* Les sections à fond gris-rosé du template : on garde une bande neutre, mais on
        la pose sur le gris DA (plus froid, cohérent). Classe `.ps-home-soft` en JS. */
@@ -130,6 +143,9 @@
       if(s.querySelector(".progress-container_counter")) s.classList.add("ps-home-stats");
       /* hero = la section qui porte la vidéo (iframe / learnworlds-video-iframe) */
       if(s.querySelector(".learnworlds-video-iframe, iframe")) s.classList.add("ps-home-hero");
+      /* cabinets = section dont un titre parle de « cabinets intégrés » */
+      var h=s.querySelector("h1,h2,h3,h4");
+      if(h && /cabinets?\s+int[ée]gr/i.test((h.textContent||""))) s.classList.add("ps-home-cabinets");
       /* bande neutre : fond gris-rosé du template (rgb(245,243,245)) */
       var bg=getComputedStyle(s).backgroundColor;
       if(bg==="rgb(245, 243, 245)") s.classList.add("ps-home-soft");
@@ -140,9 +156,59 @@
     });
   }
 
+  /* Logos cabinets hébergés (dossier /logos, SVG transparents). Clé = nom
+     normalisé. Repli = nom stylé si pas de logo. Ajouter un logo = déposer le SVG
+     dans /logos + une ligne ici (le mur se recompose tout seul). */
+  var LOGO_BASE="https://extremum84.github.io/lw-course-cards/logos/";
+  var LOGOS={
+    accenture:"accenture.svg",
+    bain:"bain.svg", baincompany:"bain.svg",
+    bcg:"bcg.svg", bcggamma:"bcg.svg", bostonconsultinggroup:"bcg.svg",
+    eyconsulting:"ey.svg",
+    eyparthenon:"ey-parthenon.svg",
+    mckinsey:"mckinsey.svg", mckinseycompany:"mckinsey.svg",
+    wavestone:"wavestone.svg"
+  };
+  function normName(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,""); }
+
+  /* Reconstruit la section cabinets en mur de logos. Idempotent (ne rebuild pas
+     si la grille existe). Masque les rangées de pastilles natives (sans toucher au
+     titre) et insère une grille de cellules-logos à leur place. */
+  function buildCabinets(){
+    var sec=document.querySelector(H+" .ps-home-cabinets");
+    if(!sec || sec.querySelector(".ps-cabgrid")) return;
+    var btnRows=Array.prototype.slice.call(sec.querySelectorAll(".lw-cols")).filter(function(r){
+      return r.querySelector(".learnworlds-button") && !r.querySelector("h1,h2,h3,h4");
+    });
+    if(!btnRows.length) return;
+    var names=[];
+    sec.querySelectorAll(".learnworlds-button").forEach(function(b){
+      var n=(b.textContent||"").replace(/\s+/g," ").trim();
+      if(n) names.push(n);
+    });
+    if(!names.length) return;
+    var grid=document.createElement("div"); grid.className="ps-cabgrid";
+    names.forEach(function(name){
+      var cell=document.createElement("div"); cell.className="ps-cabcell";
+      var file=LOGOS[normName(name)];
+      if(file){
+        var img=document.createElement("img");
+        img.className="ps-cablogo"; img.src=LOGO_BASE+file; img.alt=name; img.loading="lazy";
+        cell.appendChild(img);
+      } else {
+        var sp=document.createElement("span");
+        sp.className="ps-cabtext"; sp.textContent=name;   // textContent : pas d'injection
+        cell.appendChild(sp);
+      }
+      grid.appendChild(cell);
+    });
+    btnRows[0].parentNode.insertBefore(grid, btnRows[0]);
+    btnRows.forEach(function(r){ r.classList.add("ps-home-hide"); });
+  }
+
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer();
+    styles(); marquer(); buildCabinets();
   }
 
   var scheduled=false;
