@@ -78,12 +78,30 @@
     [H+" .box-icon-wrapper .learnworlds-icon",H+" .learnworlds-icon-wrapper .learnworlds-icon",H+" .box-icon-wrapper .standalone",H+" .learnworlds-icon-wrapper .standalone"].join(",")+"{color:var(--ps-accent,#507EC5) !important;}",
 
     /* ================= 6) BANDEAU STATS (compteurs) ================= */
-    /* Le template met un fond bleu #3887B4 sur la section. On uniformise en accent
-       marque via une classe `.ps-home-stats` posée en JS sur la section (repérée par
-       la présence d'un `.progress-container_counter`). Texte + sous-titres blancs. */
-    H+" .ps-home-stats{background:var(--ps-accent,#507EC5) !important;}",
-    H+" .ps-home-stats .progress-container_counter,"+H+" .ps-home-stats .learnworlds-subheading,"+H+" .ps-home-stats .learnworlds-main-text,"+H+" .ps-home-stats h1,"+H+" .ps-home-stats h2,"+H+" .ps-home-stats h3{color:#fff !important;}",
+    /* Le template met un fond bleu vif #3887B4 sur la section. On le passe au
+       MARINE #243B6B (plus premium, validé maquette) via `.ps-home-stats` (posée en
+       JS sur la section qui contient un `.progress-container_counter`). Chiffres +
+       sous-titres blancs, sous-libellés en bleu clair. */
+    H+" .ps-home-stats{background:#243B6B !important;}",
+    H+" .ps-home-stats .progress-container_counter,"+H+" .ps-home-stats .learnworlds-subheading,"+H+" .ps-home-stats h1,"+H+" .ps-home-stats h2,"+H+" .ps-home-stats h3{color:#fff !important;}",
+    H+" .ps-home-stats .learnworlds-main-text{color:#C3D2EA !important;}",
     H+" .ps-home-stats .progress-container_counter{"+FT+"font-weight:800 !important;letter-spacing:-.02em !important;}",
+    /* icônes du bandeau : bleu clair sur le marine (pas de cercle tint) */
+    H+" .ps-home-stats .box-icon-wrapper,"+H+" .ps-home-stats .learnworlds-icon-wrapper{background:transparent !important;color:#9FB3D6 !important;}",
+    H+" .ps-home-stats .learnworlds-icon{color:#9FB3D6 !important;}",
+
+    /* ================= 6b) HERO (section 2 : texte | vidéo) ================= */
+    /* Section repérée en JS par la présence de la vidéo (`.ps-home-hero`). Colonnes
+       centrées verticalement, titre (H4) agrandi en vrai titre hero, vidéo arrondie
+       + ombre portée. */
+    H+" .ps-home-hero .lw-cols{align-items:center !important;}",
+    H+" .ps-home-hero .learnworlds-heading4{"+FT+"font-size:40px !important;font-weight:800 !important;letter-spacing:-.03em !important;line-height:1.1 !important;color:var(--ps-text,#1c1f26) !important;margin:0 0 14px !important;}",
+    H+" .ps-home-hero .learnworlds-main-text{font-size:17px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;}",
+    H+" .ps-home-hero .learnworlds-video-iframe,"+H+" .ps-home-hero iframe{border-radius:16px !important;overflow:hidden !important;box-shadow:0 18px 50px rgba(15,23,42,.16) !important;}",
+    "@media(max-width:820px){"+H+" .ps-home-hero .learnworlds-heading4{font-size:30px !important;}}",
+
+    /* Placeholders du template (« Write your awesome label here. ») masqués. */
+    H+" .ps-home-hide{display:none !important;}",
 
     /* ================= 7) BANDES NEUTRES (#f5f3f5) ================= */
     /* Les sections à fond gris-rosé du template : on garde une bande neutre, mais on
@@ -110,9 +128,15 @@
     secs.forEach(function(s){
       if(s.parentElement && s.parentElement.closest("section.learnworlds-section")) return; // sections de tête seulement
       if(s.querySelector(".progress-container_counter")) s.classList.add("ps-home-stats");
+      /* hero = la section qui porte la vidéo (iframe / learnworlds-video-iframe) */
+      if(s.querySelector(".learnworlds-video-iframe, iframe")) s.classList.add("ps-home-hero");
       /* bande neutre : fond gris-rosé du template (rgb(245,243,245)) */
       var bg=getComputedStyle(s).backgroundColor;
       if(bg==="rgb(245, 243, 245)") s.classList.add("ps-home-soft");
+    });
+    /* Placeholders laissés par le template : on les masque. */
+    document.querySelectorAll(H+" .learnworlds-main-text").forEach(function(t){
+      if((t.textContent||"").replace(/\s+/g," ").trim()==="Write your awesome label here.") t.classList.add("ps-home-hide");
     });
   }
 
