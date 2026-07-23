@@ -104,6 +104,20 @@
     H+" .ps-home-hero .learnworlds-video-iframe,"+H+" .ps-home-hero iframe{border-radius:16px !important;overflow:hidden !important;box-shadow:0 18px 50px rgba(15,23,42,.16) !important;}",
     "@media(max-width:820px){"+H+" .ps-home-hero .learnworlds-heading4{font-size:30px !important;}}",
 
+    /* ---- HERO MODE VIDÉO PLEIN ÉCRAN (classe .ps-hero-bg posée par heroVideoBg) :
+         vidéo Vimeo en fond (background=1 : autoplay muet en boucle), voile sombre,
+         contenu blanc par-dessus. Section pleine largeur (100vw) + ~90vh de haut. ---- */
+    H+" .ps-home-hero.ps-hero-bg{position:relative !important;min-height:90vh !important;display:flex !important;align-items:center !important;overflow:hidden !important;width:100vw !important;margin-left:calc(50% - 50vw) !important;padding:0 !important;background:#0f1b33 !important;}",
+    H+" .ps-hero-vwrap{position:absolute !important;inset:0 !important;overflow:hidden !important;z-index:0 !important;}",
+    H+" .ps-hero-vwrap iframe{position:absolute !important;top:50% !important;left:50% !important;transform:translate(-50%,-50%) !important;width:100vw !important;height:56.25vw !important;min-width:177.78vh !important;min-height:100vh !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;pointer-events:none !important;}",
+    H+" .ps-hero-scrim{position:absolute !important;inset:0 !important;z-index:1 !important;background:linear-gradient(90deg,rgba(15,27,51,.85) 0%,rgba(15,27,51,.55) 48%,rgba(15,27,51,.2) 100%) !important;}",
+    H+" .ps-home-hero.ps-hero-bg .lw-cols{position:relative !important;z-index:2 !important;max-width:1000px !important;margin:0 auto !important;width:100% !important;padding:0 24px !important;align-items:center !important;}",
+    H+" .ps-home-hero.ps-hero-bg .ps-hero-vidcol{display:none !important;}",
+    H+" .ps-home-hero.ps-hero-bg .lw-cols > .col{width:100% !important;max-width:640px !important;flex:1 1 auto !important;}",
+    [H+" .ps-home-hero.ps-hero-bg .learnworlds-heading4",H+" .ps-home-hero.ps-hero-bg .learnworlds-heading",H+" .ps-home-hero.ps-hero-bg .learnworlds-subheading",H+" .ps-home-hero.ps-hero-bg .learnworlds-main-text"].join(",")+"{color:#fff !important;}",
+    H+" .ps-home-hero.ps-hero-bg .learnworlds-heading4{font-size:46px !important;}",
+    "@media(max-width:820px){"+H+" .ps-home-hero.ps-hero-bg{min-height:78vh !important;}"+H+" .ps-home-hero.ps-hero-bg .learnworlds-heading4{font-size:32px !important;}}",
+
     /* Placeholders du template (« Write your awesome label here. ») masqués. */
     H+" .ps-home-hide{display:none !important;}",
 
@@ -514,13 +528,37 @@
   var HERO_VIDEO="https://player.vimeo.com/video/910833393?h=94064c722b&badge=0&autopause=0&player_id=0&app_id=58479";
   function setHeroVideo(){
     var hero=document.querySelector(H+" .ps-home-hero");
-    if(!hero) return;
+    if(!hero || hero.classList.contains("ps-hero-bg")) return;   // mode vidéo-fond : géré par heroVideoBg
     var ifr=hero.querySelector(".learnworlds-video-iframe iframe, .learnworlds-video-iframe-wrapper iframe, iframe");
     if(!ifr || ifr.getAttribute("data-ps-vid")) return;
     ifr.setAttribute("src",HERO_VIDEO);
     ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture; clipboard-write");
     ifr.setAttribute("allowfullscreen","");
     ifr.setAttribute("data-ps-vid","1");
+  }
+
+  /* HERO plein écran avec la vidéo en FOND (Vimeo background=1 : autoplay muet en
+     boucle, sans contrôles), voile sombre + contenu blanc dessus. Idempotent. */
+  var HERO_BG_VIDEO="https://player.vimeo.com/video/910833393?background=1&autoplay=1&loop=1&muted=1&badge=0&autopause=0";
+  function heroVideoBg(){
+    var hero=document.querySelector(H+" .ps-home-hero");
+    if(!hero || hero.classList.contains("ps-hero-bg")) return;
+    hero.classList.add("ps-hero-bg");
+    var wrap=document.createElement("div"); wrap.className="ps-hero-vwrap";
+    var ifr=document.createElement("iframe");
+    ifr.src=HERO_BG_VIDEO;
+    ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture");
+    ifr.setAttribute("frameborder","0");
+    ifr.setAttribute("title","Vidéo de fond");
+    wrap.appendChild(ifr);
+    var scrim=document.createElement("div"); scrim.className="ps-hero-scrim";
+    var first=hero.firstChild;
+    hero.insertBefore(wrap, first);
+    hero.insertBefore(scrim, first);   // ordre DOM : wrap(z0), scrim(z1), contenu(z2)
+    /* masque la colonne vidéo latérale d'origine (la vidéo est maintenant en fond) */
+    var sideVid=hero.querySelector(".learnworlds-video-iframe-wrapper, .learnworlds-video-iframe");
+    var sideCol=sideVid && (sideVid.closest(".lw-cols > .col") || sideVid.closest(".col"));
+    if(sideCol) sideCol.classList.add("ps-hero-vidcol");
   }
 
   /* FAQ : transforme les `.faq-card` (chargées ouvertes) en accordéon — corps
@@ -550,7 +588,7 @@
 
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer(); cartes(); buildCabinets(); buildTimeline(); buildProfils(); setHeroVideo(); buildFaq();
+    styles(); marquer(); cartes(); buildCabinets(); buildTimeline(); buildProfils(); heroVideoBg(); setHeroVideo(); buildFaq();
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
