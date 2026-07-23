@@ -235,8 +235,18 @@
     H+" .ps-home-atouts .ps-hcard .flexible-part{width:100% !important;}",
     H+" .ps-home-atouts .ps-hcard .box-icon-wrapper .learnworlds-icon,"+H+" .ps-home-atouts .ps-hcard .learnworlds-icon-wrapper .learnworlds-icon{font-size:24px !important;}",
 
-    /* --- 5) BANDE CTA « Avez-vous besoin d'une formation » : centrée --- */
-    H+" .ps-home-cta{text-align:center !important;}",
+    /* --- 5) BANDE « Avez-vous besoin d'une formation » (constat) — REFONTE :
+       titre centré, mais le CORPS passe en COLONNE DE LECTURE alignée à gauche
+       (un pavé de ~1800 caractères centré est illisible). Les « Fait #1/#2 »
+       sont extraits en CALLOUTS d'accent (buildCta), et les <br><br> natifs
+       remplacés par des marges maîtrisées. --- */
+    H+" .ps-home-cta [data-magic='title']{text-align:center !important;margin:0 auto 6px !important;max-width:860px !important;}",
+    H+" .ps-home-cta [data-element-id='textNormal']{"+FT+"max-width:760px !important;margin:20px auto 0 !important;text-align:left !important;font-size:16.5px !important;line-height:1.75 !important;color:var(--ps-text-soft,#676879) !important;}",
+    H+" .ps-home-cta .ps-cta-p{margin:0 0 18px !important;}",
+    H+" .ps-home-cta .ps-cta-sp{display:none !important;}",   /* espaceurs <br> natifs -> marges */
+    H+" .ps-home-cta .ps-cta-fact{display:flex !important;align-items:center !important;gap:14px !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-left:4px solid var(--ps-accent,#507EC5) !important;border-radius:12px !important;padding:16px 20px !important;margin:22px 0 !important;box-shadow:0 4px 16px rgba(15,23,42,.05) !important;}",
+    H+" .ps-home-cta .ps-cta-fact-badge{flex:none !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;padding:5px 11px !important;border-radius:999px !important;background:var(--ps-accent-tint,#EDF4FF) !important;color:var(--ps-accent-hover,#486798) !important;"+FT+"font-size:11.5px !important;font-weight:800 !important;letter-spacing:.04em !important;text-transform:uppercase !important;white-space:nowrap !important;}",
+    H+" .ps-home-cta .ps-cta-fact-txt{"+FT+"font-size:16px !important;font-weight:700 !important;color:var(--ps-marine,#243B6B) !important;line-height:1.45 !important;}",
 
     /* --- 6) PREUVE (1% / 90%) : les chiffres en accent, la phrase en marine --- */
     H+" .ps-home-preuve .learnworlds-heading4{color:var(--ps-accent,#507EC5) !important;font-size:22px !important;font-weight:800 !important;letter-spacing:-.02em !important;}",
@@ -524,6 +534,29 @@
     }
   }
 
+  /* ================= BANDE CONSTAT : callouts « Fait #1/#2 » =================
+     Dans le corps de la section « Avez-vous besoin d'une formation », on tague
+     les <div> enfants : espaceurs <br> -> .ps-cta-sp (masqués), lignes « Fait #N :
+     … » -> callout .ps-cta-fact (badge + énoncé), reste -> paragraphe .ps-cta-p.
+     Auto-réparant si LW réécrit (on re-traite dès qu'il n'y a plus de .ps-cta-*). */
+  function buildCta(){
+    var body=document.querySelector(H+" .ps-home-cta [data-element-id='textNormal']");
+    if(!body || body.querySelector(".ps-cta-fact, .ps-cta-p")) return;
+    [].slice.call(body.children).forEach(function(d){
+      if(d.tagName!=="DIV") return;
+      var t=(d.textContent||"").replace(/\s+/g," ").trim();
+      if(!t){ d.classList.add("ps-cta-sp"); return; }               // espaceur <br>
+      var m=t.match(/^Fait\s*#?\s*(\d+)\s*:\s*(.+)$/i);
+      if(m){
+        d.classList.add("ps-cta-fact");
+        d.textContent="";
+        var b=document.createElement("span"); b.className="ps-cta-fact-badge"; b.textContent="Fait "+m[1];
+        var s=document.createElement("span"); s.className="ps-cta-fact-txt"; s.textContent=m[2];
+        d.appendChild(b); d.appendChild(s);
+      } else { d.classList.add("ps-cta-p"); }
+    });
+  }
+
   /* Reconstruit « Notre histoire » en timeline HORIZONTALE (4 jalons), révélée au
      scroll. Idempotent. Masque les rangées natives verticales. */
   function buildTimeline(){
@@ -773,7 +806,7 @@
 
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer(); cartes(); buildStats(); buildCabinets(); buildTimeline(); buildProfils(); heroVideoBg(); setHeroVideo(); buildFaq();
+    styles(); marquer(); cartes(); buildStats(); buildCta(); buildCabinets(); buildTimeline(); buildProfils(); heroVideoBg(); setHeroVideo(); buildFaq();
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
