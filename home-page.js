@@ -176,8 +176,8 @@
        font-size inline baladeurs dans l'intro). On rééquilibre TOUT en CSS :
        grille égalisée, plus d'air, hiérarchie sous-titre≠corps, bouton collé
        en bas et pleine largeur sur les deux cartes. --- */
-    H+" .ps-home-offres .lw-cols.multiple-rows{display:grid !important;grid-template-columns:1fr 1fr !important;gap:26px !important;max-width:1000px !important;margin:10px auto 0 !important;align-items:stretch !important;}",
-    "@media(max-width:820px){"+H+" .ps-home-offres .lw-cols.multiple-rows{grid-template-columns:1fr !important;gap:18px !important;}}",
+    H+" .ps-home-offres .lw-cols.multiple-rows{display:grid !important;grid-template-columns:1fr 1fr !important;gap:40px !important;max-width:1040px !important;margin:10px auto 0 !important;align-items:stretch !important;}",
+    "@media(max-width:820px){"+H+" .ps-home-offres .lw-cols.multiple-rows{grid-template-columns:1fr !important;gap:22px !important;}}",
     /* carte : plus d'air, colonne flex pour coller le bouton en bas */
     H+" .ps-home-offres .ps-hcard{display:flex !important;flex-direction:column !important;height:100% !important;padding:36px 34px !important;}",
     H+" .ps-home-offres .ps-hcard .flexible-part{display:flex !important;flex-direction:column !important;flex:1 1 auto !important;width:100% !important;}",
