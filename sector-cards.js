@@ -39,44 +39,45 @@
   var S="#pageContent";
   var GRID=S+" .cards-grandpa > .lw-cols.multiple-rows";
 
-  /* une carte = 1 teinte, déclinée en plein (picto) et en clair (bandeau) */
+  /* une carte = 1 teinte : picto en plein, et le CERCLE en clair (au lieu du bandeau) */
   function CYCLE(n, plein, clair){
     var C=S+" .cards-grandpa > .lw-cols > .col.lw-course-card:nth-child(6n+"+n+") ";
     return C+".ps-sicon svg{color:"+plein+" !important;}\n"
-         + C+".ps-shero{background:"+clair+" !important;}";
+         + C+".ps-sicon{background:"+clair+" !important;}";
   }
 
   // --- 2) Styles ---
   var CSS=[
     /* grille de 3, alignée comme la page Cours (1000px centrés) */
-    GRID+"{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
-    S+" .cards-grandpa > .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
-    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
-    /* on ne masque le natif QUE sur les cartes effectivement reconstruites */
-    S+" .lw-course-card[data-ps-s] > *:not(.ps-scard){display:none !important;}",
+    /* Style « carte cours » : cercle picto CENTRÉ qui FLOTTE au-dessus (cf. cabinet/course).
+       padding-top:78px (1re rangée) + row-gap:84px (rangées suivantes, sinon les cercles
+       flottants débordent sur la carte du dessus en grille multi-rangées). */
+    GRID+"{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:84px 24px !important;max-width:1000px !important;margin:0 auto !important;padding:78px 0 0 !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    /* overflow:visible pour le cercle flottant ; flex column ; position/cursor pour le lien-calque */
+    S+" .cards-grandpa > .lw-cols > .col.lw-course-card{position:relative !important;cursor:pointer !important;width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;overflow:visible !important;display:flex !important;flex-direction:column !important;isolation:isolate !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
+    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover{box-shadow:0 14px 34px rgba(0,0,0,.10) !important;transform:translateY(-3px) !important;}",
+    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover .ps-sicon{box-shadow:0 10px 26px rgba(15,23,42,.18) !important;}",
+    /* cercle + contenu + lien-calque = enfants directs de la carte -> exclus du masquage */
+    S+" .lw-course-card[data-ps-s] > *:not(.ps-scard):not(.ps-sicon):not(.ps-scover){display:none !important;}",
+    /* lien-calque : toute la carte cliquable, transparent, sous le CTA */
+    ".ps-scover{position:absolute !important;inset:0 !important;z-index:1 !important;border-radius:var(--ps-r-card,16px) !important;background:transparent !important;text-decoration:none !important;}",
 
     /* height:100% : sans ça .ps-scard s'arrête à son contenu au lieu de remplir
        la carte étirée par la grille -> le `margin-bottom:auto` de .ps-sdesc n'a
        aucun espace à absorber et les CTA ne s'alignent plus d'une carte à l'autre. */
-    ".ps-scard{display:flex !important;flex-direction:column !important;padding:0 !important;height:100% !important;}",
-    /* bandeau teinté + grand cercle blanc (motif monday) ; les coins hauts sont
-       découpés par le overflow:hidden de la carte. La teinte est accordée à la
-       couleur du picto, carte par carte (cf. cycle plus bas). */
-    ".ps-shero{height:196px !important;display:flex !important;align-items:center !important;justify-content:center !important;flex:none !important;}",
-    ".ps-sicon{width:138px !important;height:138px !important;border-radius:50% !important;background:#fff !important;display:flex !important;align-items:center !important;justify-content:center !important;flex:none !important;}",
-    /* Pictos BI-TON : le trait suit `currentColor` (posé par le cycle), et les
-       formes marquées .f se remplissent du même ton en aplat léger -> plus
-       "chargé" qu'un simple contour, sans partir sur des illustrations.
-       stroke-width 1.5 (et non 2) : à 52px pour un viewBox de 24, chaque unité
-       vaut ~2,2px à l'écran — un trait de 2 devient épais et pâteux. */
-    ".ps-sicon svg{width:52px !important;height:52px !important;fill:none !important;stroke:currentColor !important;stroke-width:1.5 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    /* .ps-scard = conteneur du contenu (sous le cercle), aligné à gauche */
+    ".ps-scard{display:flex !important;flex-direction:column !important;flex:1 1 auto !important;padding:0 24px 24px !important;text-align:left !important;}",
+    /* Cercle picto 140px CENTRÉ qui FLOTTE au-dessus (`margin:-70px auto`), bordure
+       blanche 4px + ombre — comme les cartes cours. Fond = teinte claire de la
+       couleur de la carte (posée par le cycle), picto en couleur pleine. */
+    ".ps-sicon{width:140px !important;height:140px !important;border-radius:50% !important;background:#fff !important;display:flex !important;align-items:center !important;justify-content:center !important;margin:-70px auto 16px !important;border:4px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.12) !important;flex:none !important;transition:box-shadow .25s ease !important;}",
+    ".ps-sicon svg{width:56px !important;height:56px !important;fill:none !important;stroke:currentColor !important;stroke-width:1.5 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-sicon svg .f{fill:currentColor !important;fill-opacity:.18 !important;}",
-    ".ps-sbody{display:flex !important;flex-direction:column !important;flex:1 1 auto !important;padding:22px 24px 24px !important;}",
     ".ps-stitle{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:21px !important;line-height:1.25 !important;font-weight:800 !important;color:var(--ps-text,#1c1f26) !important;margin:0 0 8px !important;}",
     /* description bornée à 3 lignes : les cartes gardent la même hauteur */
     ".ps-sdesc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;margin:0 0 auto !important;display:-webkit-box !important;-webkit-line-clamp:3 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
     /* même CTA que partout ailleurs */
-    ".ps-slink{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
+    ".ps-slink{position:relative !important;z-index:2 !important;display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-slink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-slink:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-slink:hover::after{transform:translateX(5px) !important;}",
@@ -237,25 +238,35 @@
       var link=card.querySelector("a.card-link[href], a[href]");
       var href=link ? link.getAttribute("href") : "#";
 
-      var d=document.createElement("div");
-      d.className="ps-scard";
-      /* bandeau teinté + cercle blanc + picto */
-      var hero=document.createElement("div"); hero.className="ps-shero";
+      /* 🔴 Clic DIRECT sur le LECTEUR (`/path-player?courseid=<slug>`) si INSCRIT
+         (barre de progression native), sinon présentation (un non-inscrit sur
+         /path-player est renvoyé à l'accueil). Cf. cabinet-cards.js. */
+      var enrolled = !!card.querySelector(".lw-course-card-progress-bar");
+      var slug = (href.match(/\/course\/([^\/?#]+)/) || [])[1] || "";
+      var target = (enrolled && slug) ? ("/path-player?courseid=" + encodeURIComponent(slug)) : href;
+
+      /* Cercle picto FLOTTANT (enfant direct de la carte, comme l'illustration cours) */
       var ic=document.createElement("span");
-      ic.className="ps-sicon"; ic.innerHTML=ICON[pick(title)]||ICON.doc;
-      hero.appendChild(ic);
-      /* corps : titre + description + CTA */
-      var body=document.createElement("div"); body.className="ps-sbody";
+      ic.className="ps-sicon"; ic.innerHTML=ICON[pick(title)]||ICON.doc;   // SVG statique, pas de données membre
+      ic.setAttribute("aria-hidden","true");
+
+      /* Contenu (sous le cercle) : titre + description + CTA */
+      var d=document.createElement("div"); d.className="ps-scard";
       var t=document.createElement("h3");
       t.className="ps-stitle"; t.textContent=title;          // textContent : pas d'injection
-      body.appendChild(t);
-      if(desc){ var p=document.createElement("p"); p.className="ps-sdesc"; p.textContent=desc; body.appendChild(p); }
+      d.appendChild(t);
+      if(desc){ var p=document.createElement("p"); p.className="ps-sdesc"; p.textContent=desc; d.appendChild(p); }
       var a=document.createElement("a");
-      a.className="ps-slink"; a.href=href; a.textContent="En savoir plus";
-      body.appendChild(a);
-      d.appendChild(hero); d.appendChild(body);
+      a.className="ps-slink"; a.href=target; a.textContent="En savoir plus";
+      d.appendChild(a);
 
-      card.appendChild(d);
+      /* Lien-calque : toute la carte cliquable (même destination que le CTA) */
+      var cover=document.createElement("a");
+      cover.className="ps-scover"; cover.href=target; cover.setAttribute("aria-label", title);
+
+      card.appendChild(ic);                    // cercle flottant, au-dessus
+      card.appendChild(d);                     // contenu
+      card.appendChild(cover);                 // calque cliquable
       card.dataset.psS="1";                    // déclenche le masquage du natif
     });
   }
