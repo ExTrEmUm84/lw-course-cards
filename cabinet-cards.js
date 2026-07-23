@@ -73,16 +73,20 @@
     /* grille de 3, alignée comme les autres pages (1000px centrés).
        Le natif fait 1120px ici (mesuré : 290->1410) : on reprend 1000 pour
        que les cartes tombent sur le même bord gauche que le hero. */
-    GRID+"{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
-    S+" .cards-grandpa > .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:none !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
-    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(0,0,0,.08) !important;transform:translateY(-3px) !important;}",
-    /* on ne masque le natif QUE sur les cartes effectivement reconstruites */
-    S+" .lw-course-card[data-ps-c] > *:not(.ps-ccab){display:none !important;}",
+    /* 🔴 padding-top:96px : laisse la place aux badges qui DÉBORDENT au-dessus des
+       cartes (style « carte cours » : cercle centré flottant, cf. course-cards.js). */
+    GRID+"{display:grid !important;grid-template-columns:repeat(3,1fr) !important;gap:24px !important;max-width:1000px !important;margin:0 auto !important;padding:96px 0 0 !important;background:transparent !important;border:0 !important;box-shadow:none !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    /* overflow:visible pour laisser sortir le badge ; flex column pour empiler
+       badge (flottant) puis contenu — comme les cartes cours. */
+    S+" .cards-grandpa > .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;overflow:visible !important;display:flex !important;flex-direction:column !important;isolation:isolate !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
+    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover{box-shadow:0 14px 34px rgba(0,0,0,.10) !important;transform:translateY(-3px) !important;}",
+    /* le badge est un enfant DIRECT de la carte (comme l'illustration cours) -> l'exclure du masquage */
+    S+" .lw-course-card[data-ps-c] > *:not(.ps-ccab):not(.ps-cab-logo){display:none !important;}",
 
     /* height:100% : sans ça la carte reconstruite s'arrête à son contenu au lieu
        de remplir la hauteur étirée par la grille -> le `margin-bottom:auto` de
        la description n'a rien à absorber et les CTA se désalignent entre cartes. */
-    ".ps-ccab{display:flex !important;flex-direction:column !important;height:100% !important;padding:26px !important;}",
+    ".ps-ccab{display:flex !important;flex-direction:column !important;flex:1 1 auto !important;padding:0 26px 26px !important;text-align:left !important;}",
     /* Logo du cabinet, HARMONISÉ sur toutes les cartes (demande de Ziad le 22/07) :
        hauteur fixe + `background-size:contain` -> aucun rognage, tous à la même
        échelle visuelle quel que soit le ratio du logo ; MONOCHROME via
@@ -91,17 +95,17 @@
        restaurée au survol de la carte, repère de reconnaissance. Le logo natif
        est un `background-image` sur `.learnworlds-image` (masqué) : build() en
        recopie l'URL sur cette div. */
-    /* Logo dans un CERCLE bleu #203866, logo en BLANC par-dessus (demande de Ziad
-       le 23/07). 🔴 Le blanchiment (`brightness(0) invert(1)`) est posé sur un
-       élément INTERNE `.ps-cab-logo-img` : appliqué au cercle entier il
-       blanchirait aussi le fond bleu. `contain`/66% évite le rognage des
-       wordmarks larges. */
-    ".ps-cab-logo{width:96px !important;height:96px !important;border-radius:50% !important;background-color:#203866 !important;display:flex !important;align-items:center !important;justify-content:center !important;box-shadow:0 4px 14px rgba(15,23,42,.10) !important;margin:0 0 22px !important;overflow:hidden !important;transition:box-shadow .25s ease, transform .25s ease !important;}",
+    /* CERCLE 180px CENTRÉ qui FLOTTE au-dessus de la carte (style « carte cours » :
+       `margin:-90px auto 18px` = remonte de la moitié + centré ; bordure blanche
+       5px + ombre, comme l'illustration ronde des cours). Fond bleu #203866, logo
+       en BLANC par-dessus. 🔴 Blanchiment (`brightness(0) invert(1)`) sur un
+       élément INTERNE `.ps-cab-logo-img` (sinon le fond bleu blanchit aussi). */
+    ".ps-cab-logo{width:180px !important;height:180px !important;border-radius:50% !important;background-color:#203866 !important;display:flex !important;align-items:center !important;justify-content:center !important;margin:-90px auto 18px !important;border:5px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.12) !important;overflow:hidden !important;flex:none !important;transition:box-shadow .25s ease !important;}",
     ".ps-cab-logo-img{width:66% !important;height:66% !important;background-repeat:no-repeat !important;background-position:center !important;background-size:contain !important;filter:brightness(0) invert(1) !important;}",
     /* Repli : cabinet sans logo hébergé transparent (Advancy, Sia, Kéa) ->
        initiales BLANCHES sur le même cercle bleu, look homogène. */
-    ".ps-cab-logo--ini{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:30px !important;font-weight:800 !important;color:#fff !important;letter-spacing:.5px !important;}",
-    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover .ps-cab-logo{box-shadow:0 8px 22px rgba(15,23,42,.18) !important;transform:scale(1.04) !important;}",
+    ".ps-cab-logo--ini{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:52px !important;font-weight:800 !important;color:#fff !important;letter-spacing:.5px !important;}",
+    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover .ps-cab-logo{box-shadow:0 10px 26px rgba(15,23,42,.18) !important;}",
     ".ps-cab-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:25px !important;line-height:1.2 !important;font-weight:800 !important;letter-spacing:-.02em !important;color:#243B6B !important;margin:0 0 10px !important;}",
     /* description bornée à 4 lignes : les cartes gardent la même hauteur */
     ".ps-cab-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;margin:0 !important;display:-webkit-box !important;-webkit-line-clamp:4 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
@@ -238,38 +242,33 @@
       var link=card.querySelector("a.card-link[href], a[href]");
       var href=link ? link.getAttribute("href") : "#";
 
-      var d=document.createElement("div");
-      d.className="ps-ccab";
-      /* Logo du cabinet : on recopie l'URL du background-image natif
-         (`.learnworlds-image`) sur une div dédiée, harmonisée + monochrome (cf.
-         CSS .ps-cab-logo). Pas de logo -> pas de div (la carte reste propre). */
-      /* Logo : priorité au vrai logo uploadé dans LearnWorlds (background-image du
-         `.learnworlds-image`). Sans logo LW, LW sert `course-default-img.png`
-         (placeholder rayé) qu'on EXCLUT → on retombe alors sur le logo de repli
-         hébergé (table LOGOS). Ni l'un ni l'autre (ex. Kéa) → pas de logo. */
-      /* 🔴 QUE les logos hébergés (transparents) : une image uploadée dans LW a un
-         fond opaque -> deviendrait un bloc blanc sous le filtre de blanchiment.
-         Le logo va dans un élément INTERNE pour que le filtre n'atteigne pas le
-         fond bleu du cercle. Pas de logo hébergé -> badge d'initiales. */
+      /* 🔴 Le BADGE est un enfant DIRECT de la carte (comme l'illustration ronde
+         des cartes cours), pas dans .ps-ccab : c'est lui qui FLOTTE au-dessus via
+         `margin-top:-90px`. On n'utilise QUE les logos hébergés transparents (une
+         image uploadée dans LW a un fond opaque -> bloc blanc sous le filtre). Le
+         logo va dans un élément INTERNE `.ps-cab-logo-img` (sinon le filtre
+         blanchit aussi le fond bleu). Pas de logo hébergé (Advancy/Sia/Kéa) ->
+         initiales blanches. */
+      var badge;
       var logo = logoFor(title);
       if(logo){
-        var lg=document.createElement("div");
-        lg.className="ps-cab-logo";
-        lg.setAttribute("role","img");
-        lg.setAttribute("aria-label","Logo "+title);
+        badge=document.createElement("div");
+        badge.className="ps-cab-logo";
+        badge.setAttribute("role","img");
+        badge.setAttribute("aria-label","Logo "+title);
         var im=document.createElement("div");
         im.className="ps-cab-logo-img";
         im.style.backgroundImage=logo;
-        lg.appendChild(im);
-        d.appendChild(lg);
+        badge.appendChild(im);
       } else {
-        /* Advancy / Sia / Kéa : initiales blanches sur le cercle bleu */
-        var ini=document.createElement("div");
-        ini.className="ps-cab-logo ps-cab-logo--ini";
-        ini.textContent=initialsOf(title);
-        ini.setAttribute("aria-hidden","true");
-        d.appendChild(ini);
+        badge=document.createElement("div");
+        badge.className="ps-cab-logo ps-cab-logo--ini";
+        badge.textContent=initialsOf(title);
+        badge.setAttribute("aria-hidden","true");
       }
+
+      var d=document.createElement("div");
+      d.className="ps-ccab";
       var t=document.createElement("h3");
       t.className="ps-cab-title"; t.textContent=title;        // textContent : pas d'injection
       d.appendChild(t);
@@ -278,7 +277,8 @@
       a.className="ps-cab-link"; a.href=href; a.textContent="En savoir plus";
       d.appendChild(a);
 
-      card.appendChild(d);
+      card.appendChild(badge);                 // badge flottant, au-dessus
+      card.appendChild(d);                     // puis le contenu
       card.dataset.psC="1";                    // déclenche le masquage du natif
     });
   }
