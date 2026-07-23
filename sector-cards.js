@@ -39,13 +39,11 @@
   var S="#pageContent";
   var GRID=S+" .cards-grandpa > .lw-cols.multiple-rows";
 
-  /* une carte = 1 teinte : picto en plein, le CERCLE en clair (au lieu du bandeau),
-     et la barre de progression reprend la MÊME teinte pleine (fiches inscrites). */
+  /* une carte = 1 teinte : picto en plein, et le CERCLE en clair (au lieu du bandeau) */
   function CYCLE(n, plein, clair){
     var C=S+" .cards-grandpa > .lw-cols > .col.lw-course-card:nth-child(6n+"+n+") ";
     return C+".ps-sicon svg{color:"+plein+" !important;}\n"
-         + C+".ps-sicon{background:"+clair+" !important;}\n"
-         + C+".ps-sca-prog-bar{background:"+plein+" !important;}";
+         + C+".ps-sicon{background:"+clair+" !important;}";
   }
 
   // --- 2) Styles ---
@@ -78,17 +76,6 @@
     ".ps-stitle{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:21px !important;line-height:1.25 !important;font-weight:800 !important;color:var(--ps-text,#1c1f26) !important;margin:0 0 8px !important;}",
     /* description bornée à 3 lignes : les cartes gardent la même hauteur */
     ".ps-sdesc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;margin:0 0 auto !important;display:-webkit-box !important;-webkit-line-clamp:3 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
-    /* ===== Barre de progression (fiches INSCRITES uniquement) =====
-       Donnée native (`.lw-course-card-progress-bar`, largeur inline), comme
-       profile-page.js. Ici pas de `margin-top:auto` sur le bloc : c'est le
-       `margin-bottom:auto` de .ps-sdesc qui pousse déjà progression+CTA en bas.
-       La barre prend la couleur de la carte (posée par CYCLE), la piste reste grise. */
-    ".ps-sca-prog + .ps-slink{margin-top:12px !important;}",
-    ".ps-sca-prog-head{display:flex !important;align-items:baseline !important;justify-content:space-between !important;margin-bottom:7px !important;}",
-    ".ps-sca-prog-pct{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:13px !important;font-weight:700 !important;color:var(--ps-text,#1c1f26) !important;}",
-    ".ps-sca-prog-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:500 !important;color:#8A93A5 !important;}",
-    ".ps-sca-prog-track{height:8px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;}",
-    ".ps-sca-prog-bar{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-f1,#6161FF) !important;transition:width .6s ease !important;}",
     /* même CTA que partout ailleurs */
     ".ps-slink{position:relative !important;z-index:2 !important;display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-slink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
@@ -116,6 +103,23 @@
     S+" h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
     S+" h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#6161FF) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     S+" .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
+    /* ─── Tuile de progression EN HAUT (portée de course-cards.js) ───
+       mountKpi() enveloppe le H1 + la tuile dans `.ps-herotop`. Moyenne de la
+       progression des fiches : non-inscrites = 0 au numérateur, dénominateur =
+       TOUTES les fiches (sémantique Cours). Accent = couleur de page (secteurs). */
+    S+" .ps-herotop{display:flex !important;align-items:flex-start !important;justify-content:space-between !important;gap:32px !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    S+" .ps-herotop > h1.learnworlds-heading{margin:0 !important;max-width:none !important;flex:1 1 auto !important;}",
+    S+" .ps-herotop > .ps-kpi{flex:0 0 352px !important;margin:6px 0 0 0 !important;}",
+    ".ps-kpi{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;padding:20px 22px !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 14px rgba(15,23,42,.05) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    ".ps-kpi-num{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
+    ".ps-kpi-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:500 !important;color:var(--ps-text-soft,#676879) !important;margin-top:2px !important;}",
+    ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:#F1F1FF !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    ".ps-kpi-bar{height:7px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
+    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#6161FF) !important;transition:width .6s ease !important;}",
+    ".ps-kpi-txt{flex:1 1 auto !important;min-width:0 !important;}",
+    "@media(max-width:900px){"+S+" .ps-herotop{flex-direction:column !important;gap:20px !important;}"+S+" .ps-herotop > .ps-kpi{flex:0 0 auto !important;width:100% !important;max-width:352px !important;}}",
+
     ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#6161FF) !important;white-space:nowrap !important;}",
     ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#6161FF) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
     "@keyframes ps-blink{50%{opacity:0}}",
@@ -237,9 +241,62 @@
     if(h && !h.dataset.psTw) h.dataset.psTw="1";
   },2500);
 
+  /* ─── Tuile de progression globale EN HAUT (portée de course-cards.js) ───
+     Moyenne de la progression des fiches. Dédup par lien (href). Non-inscrite
+     (pas de barre native) = 0 au numérateur, mais reste au dénominateur.
+     Aucune fiche inscrite -> pas de donnée : on démonte la tuile et le H1 reprend
+     toute la largeur. */
+  var ICON_KPI='<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/><path d="M15 7h4v4"/></svg>';
+  function mountKpi(){
+    var desc=document.querySelector(S+" .ps-desc");
+    if(!desc) return;                                // hero pas encore prêt : réessai
+    var vus=Object.create(null);
+    document.querySelectorAll(S+" .cards-grandpa .lw-course-card").forEach(function(card){
+      var a=card.querySelector("a.card-link[href], a[href]");
+      var cle=a ? a.getAttribute("href") : null;
+      if(!cle || cle in vus) return;                 // déjà compté : doublon
+      var nat=card.querySelector(".lw-course-card-progress-bar");
+      var p=nat ? parseInt((nat.style.width||"").replace("%",""),10) : NaN;
+      vus[cle]=isNaN(p) ? null : Math.max(0, Math.min(100, p));
+    });
+    var cles=Object.keys(vus);
+    var avecBarre=cles.filter(function(k){ return vus[k]!==null; });
+    var kpi=document.querySelector(S+" .ps-kpi");
+    var h1=document.querySelector(S+" h1.learnworlds-heading");
+    var top=document.querySelector(S+" .ps-herotop");
+    if(!cles.length || !avecBarre.length){           // aucune fiche inscrite -> pas de tuile
+      if(kpi) kpi.remove();
+      if(top){ if(h1) top.parentNode.insertBefore(h1, top); top.remove(); }
+      return;
+    }
+    var total=0;
+    cles.forEach(function(k){ total += (vus[k]||0); });
+    var pct=Math.round(total/cles.length);
+    /* Rangée haute (titre + tuile) créée UNE fois. Le H1 est seulement DÉPLACÉ :
+       la machine à écrire (posée sur ce même élément) survit au déplacement. */
+    if(h1 && !top){
+      top=document.createElement("div"); top.className="ps-herotop";
+      h1.parentNode.insertBefore(top, h1);
+      top.appendChild(h1);
+    }
+    if(!kpi || !kpi.querySelector(".ps-kpi-num")){
+      if(kpi) kpi.remove();
+      kpi=document.createElement("div");
+      kpi.className="ps-kpi";
+      kpi.innerHTML='<div class="ps-kpi-txt"><div class="ps-kpi-num"></div><div class="ps-kpi-lbl"></div><div class="ps-kpi-bar"><div class="ps-kpi-bar-in"></div></div></div><span class="ps-kpi-ic" aria-hidden="true">'+ICON_KPI+'</span>';
+    }
+    var hote=top||desc;
+    if(kpi.parentNode!==hote) hote.appendChild(kpi);
+    kpi.querySelector(".ps-kpi-num").textContent=pct+" %";
+    kpi.querySelector(".ps-kpi-lbl").textContent="Progression sur "+cles.length+" fiches";
+    kpi.querySelector(".ps-kpi-bar-in").style.width=pct+"%";
+    kpi.setAttribute("aria-label","Progression globale : "+pct+" % sur "+cles.length+" fiches");
+  }
+
   // --- 5) Construction ---
   function build(){
     heroText();
+    mountKpi();
     document.querySelectorAll(S+" .cards-grandpa .lw-course-card").forEach(function(card){
       if(card.dataset.psS) return;
       var h=card.querySelector(".learnworlds-heading3");
@@ -254,8 +311,7 @@
       /* 🔴 Clic DIRECT sur le LECTEUR (`/path-player?courseid=<slug>`) si INSCRIT
          (barre de progression native), sinon présentation (un non-inscrit sur
          /path-player est renvoyé à l'accueil). Cf. cabinet-cards.js. */
-      var natBar = card.querySelector(".lw-course-card-progress-bar");
-      var enrolled = !!natBar;
+      var enrolled = !!card.querySelector(".lw-course-card-progress-bar");
       var slug = (href.match(/\/course\/([^\/?#]+)/) || [])[1] || "";
       var target = (enrolled && slug) ? ("/path-player?courseid=" + encodeURIComponent(slug)) : href;
 
@@ -270,22 +326,6 @@
       t.className="ps-stitle"; t.textContent=title;          // textContent : pas d'injection
       d.appendChild(t);
       if(desc){ var p=document.createElement("p"); p.className="ps-sdesc"; p.textContent=desc; d.appendChild(p); }
-      /* Progression native (fiches inscrites uniquement) : largeur inline de la
-         barre native, comme profile-page.js. Barre teintée par CYCLE. */
-      var pct=natBar ? parseInt((natBar.style.width||"").replace("%",""),10) : NaN;
-      if(!isNaN(pct)){
-        var cp=Math.max(0,Math.min(pct,100));
-        var pr=document.createElement("div"); pr.className="ps-sca-prog";
-        var ph=document.createElement("div"); ph.className="ps-sca-prog-head";
-        var pv=document.createElement("span"); pv.className="ps-sca-prog-pct"; pv.textContent=cp+" %";
-        var pl=document.createElement("span"); pl.className="ps-sca-prog-lbl"; pl.textContent=cp>=100?"terminé":(cp>0?"complété":"pas commencé");
-        ph.appendChild(pv); ph.appendChild(pl);
-        var pt=document.createElement("div"); pt.className="ps-sca-prog-track";
-        var pb=document.createElement("div"); pb.className="ps-sca-prog-bar"; pb.style.width=(cp>0&&cp<2?2:cp)+"%";
-        pt.appendChild(pb);
-        pr.appendChild(ph); pr.appendChild(pt);
-        d.appendChild(pr);
-      }
       var a=document.createElement("a");
       a.className="ps-slink"; a.href=target; a.textContent="En savoir plus";
       d.appendChild(a);
