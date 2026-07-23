@@ -81,18 +81,38 @@
     [H+" .box-icon-wrapper",H+" .learnworlds-icon-wrapper"].join(",")+"{background:var(--ps-accent-tint,#edf4ff) !important;border-radius:50% !important;color:var(--ps-accent,#507EC5) !important;box-shadow:none !important;}",
     [H+" .box-icon-wrapper .learnworlds-icon",H+" .learnworlds-icon-wrapper .learnworlds-icon",H+" .box-icon-wrapper .standalone",H+" .learnworlds-icon-wrapper .standalone"].join(",")+"{color:var(--ps-accent,#507EC5) !important;}",
 
-    /* ================= 6) BANDEAU STATS (compteurs) ================= */
-    /* Le template met un fond bleu vif #3887B4 sur la section. On le passe au
-       MARINE #243B6B (plus premium, validé maquette) via `.ps-home-stats` (posée en
-       JS sur la section qui contient un `.progress-container_counter`). Chiffres +
-       sous-titres blancs, sous-libellés en bleu clair. */
+    /* ================= 6) BANDEAU STATS (compteurs) — REFONTE PREMIUM =================
+       Fond MARINE #243B6B. Chaque cellule est une PILE CENTRÉE : badge picto (SVG
+       ligne custom, injecté par buildStats) -> grand chiffre -> libellé. Révélation
+       au scroll EN CASCADE. Le compteur natif LW (0 -> cible) est conservé tel quel.
+       (Retour Ziad : « pas bien centré », « plus premium », « animation », « pictos
+       plus premium ».) */
     H+" .ps-home-stats{background:#243B6B !important;}",
-    H+" .ps-home-stats .progress-container_counter,"+H+" .ps-home-stats .learnworlds-subheading,"+H+" .ps-home-stats h1,"+H+" .ps-home-stats h2,"+H+" .ps-home-stats h3{color:#fff !important;}",
-    H+" .ps-home-stats .learnworlds-main-text{color:#C3D2EA !important;}",
-    H+" .ps-home-stats .progress-container_counter{"+FT+"font-weight:800 !important;letter-spacing:-.02em !important;}",
-    /* icônes du bandeau : bleu clair sur le marine (pas de cercle tint) */
-    H+" .ps-home-stats .box-icon-wrapper,"+H+" .ps-home-stats .learnworlds-icon-wrapper{background:transparent !important;color:#9FB3D6 !important;}",
-    H+" .ps-home-stats .learnworlds-icon{color:#9FB3D6 !important;}",
+    /* rangée : grille de 4 colonnes égalisée et centrée */
+    H+" .ps-home-stats .lw-cols.main{display:grid !important;grid-template-columns:repeat(4,1fr) !important;gap:28px 24px !important;max-width:1080px !important;margin:0 auto !important;align-items:start !important;}",
+    "@media(max-width:820px){"+H+" .ps-home-stats .lw-cols.main{grid-template-columns:repeat(2,1fr) !important;gap:40px 24px !important;}}",
+    "@media(max-width:480px){"+H+" .ps-home-stats .lw-cols.main{grid-template-columns:1fr !important;}}",
+    /* cellule = pile centrée + état de révélation */
+    H+" .ps-home-stats .ps-stat{display:flex !important;flex-direction:column !important;align-items:center !important;text-align:center !important;opacity:0 !important;transform:translateY(18px) !important;transition:opacity .6s ease,transform .6s ease !important;}",
+    H+" .ps-home-stats.ps-in .ps-stat{opacity:1 !important;transform:none !important;}",
+    /* cascade : léger décalage colonne par colonne */
+    H+" .ps-home-stats .lw-cols.main > .col:nth-child(2) .ps-stat{transition-delay:.08s !important;}",
+    H+" .ps-home-stats .lw-cols.main > .col:nth-child(3) .ps-stat{transition-delay:.16s !important;}",
+    H+" .ps-home-stats .lw-cols.main > .col:nth-child(4) .ps-stat{transition-delay:.24s !important;}",
+    /* rangée interne icône+chiffre -> COLONNE centrée (au lieu de côte à côte) */
+    H+" .ps-home-stats .ps-stat .with-flexible-parts{display:flex !important;flex-direction:column !important;align-items:center !important;justify-content:flex-start !important;}",
+    H+" .ps-home-stats .ps-stat .flexible-part{width:auto !important;margin:0 !important;}",
+    /* badge picto : cercle translucide sur le marine */
+    H+" .ps-home-stats .ps-stat-ic{display:inline-flex !important;align-items:center !important;justify-content:center !important;width:56px !important;height:56px !important;border-radius:50% !important;background:rgba(255,255,255,.08) !important;border:1px solid rgba(255,255,255,.16) !important;color:#BFD0EC !important;margin:0 0 18px !important;}",
+    H+" .ps-home-stats .ps-stat-ic svg{width:26px !important;height:26px !important;stroke:currentColor !important;fill:none !important;stroke-width:1.9 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    /* chiffre : grand, blanc */
+    [H+" .ps-home-stats .progress-container_counter",H+" .ps-home-stats .progress-container_counter h2"].join(",")+"{"+FT+"font-size:46px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1 !important;color:#fff !important;margin:0 !important;}",
+    "@media(max-width:820px){"+[H+" .ps-home-stats .progress-container_counter",H+" .ps-home-stats .progress-container_counter h2"].join(",")+"{font-size:40px !important;}}",
+    /* libellé : 1re ligne forte (bleu très clair) + 2e ligne discrète */
+    H+" .ps-home-stats [data-magic='title']{"+FT+"font-size:15px !important;font-weight:700 !important;color:#DCE6F5 !important;line-height:1.4 !important;letter-spacing:normal !important;text-transform:none !important;margin:16px auto 0 !important;max-width:230px !important;}",
+    H+" .ps-home-stats [data-magic='title'] div{font-weight:500 !important;color:#93A6C6 !important;font-size:13.5px !important;margin-top:3px !important;}",
+    /* note de bas de bandeau : centrée et discrète (était collée à gauche) */
+    H+" .ps-home-stats .learnworlds-main-text{color:#8DA0C2 !important;text-align:center !important;font-size:13px !important;max-width:760px !important;margin-left:auto !important;margin-right:auto !important;}",
 
     /* ================= 6b) HERO (section 2 : texte | vidéo) ================= */
     /* Section repérée en JS par la présence de la vidéo (`.ps-home-hero`). Colonnes
@@ -421,6 +441,53 @@
     });
   }
 
+  /* ================= BANDEAU STATS : pictos premium + révélation =================
+     Chaque cellule (.lw-progress-wrapper) reçoit .ps-stat ; l'icône FontAwesome
+     native est masquée et remplacée par un badge SVG (ligne, style Lucide). Le
+     compteur natif LW n'est PAS touché (il continue d'animer 0 -> cible). La
+     section reçoit .ps-in au scroll pour la cascade d'apparition. Idempotent. */
+  var STAT_ICON={
+    /* users (auditeurs libres) */
+    user:'<svg viewBox="0 0 24 24"><path d="M16 21v-1.8a4 4 0 0 0-4-4H6.6a4 4 0 0 0-4 4V21"/><circle cx="9.3" cy="7.4" r="3.6"/><path d="M21.4 21v-1.8a4 4 0 0 0-3-3.87M16.6 3.9a3.6 3.6 0 0 1 0 7"/></svg>',
+    /* graduation cap (candidats coachés intégrés) */
+    grad:'<svg viewBox="0 0 24 24"><path d="M21.6 9.4 12 5 2.4 9.4 12 13.8l9.6-4.4Z"/><path d="M6 11.3V16c0 1.35 2.7 2.7 6 2.7s6-1.35 6-2.7v-4.7"/><path d="M21.6 9.4v4.7"/></svg>',
+    /* trophy (offres Top-6 MBB) */
+    trophy:'<svg viewBox="0 0 24 24"><path d="M7.4 4h9.2v5.4a4.6 4.6 0 0 1-9.2 0V4Z"/><path d="M7.4 6H5.3a2 2 0 0 0 0 4h2.2M16.6 6h2.1a2 2 0 0 1 0 4h-2.2"/><path d="M9.4 21h5.2M12 16.8V21"/></svg>',
+    /* medal (offres Top-20) */
+    medal:'<svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="5.3"/><path d="m9.4 13.3-1.7 7.3L12 18.1l4.3 2.5-1.7-7.3"/><path d="m12 6.7.85 1.72 1.9.28-1.37 1.34.32 1.9L12 11.05l-1.7.89.32-1.9L9.25 8.7l1.9-.28L12 6.7Z"/></svg>',
+    _default:'<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/></svg>'
+  };
+  function statKey(cls){ cls=cls||"";
+    if(/fa-user/.test(cls)) return "user";
+    if(/fa-calendar/.test(cls)) return "grad";
+    if(/fa-clock/.test(cls)) return "trophy";
+    if(/fa-play/.test(cls)) return "medal";
+    return "_default";
+  }
+  function buildStats(){
+    var sec=document.querySelector(H+" .ps-home-stats"); if(!sec) return;
+    sec.querySelectorAll(".lw-progress-wrapper").forEach(function(w){
+      w.classList.add("ps-stat");
+      var fa=w.querySelector("span.learnworlds-icon");
+      if(fa && !w.querySelector(".ps-stat-ic")){
+        var badge=document.createElement("span");
+        badge.className="ps-stat-ic";
+        badge.innerHTML=STAT_ICON[statKey(fa.className)]||STAT_ICON._default;
+        fa.parentNode.insertBefore(badge, fa);
+        fa.classList.add("ps-home-hide");   /* masque l'icône FontAwesome native */
+      }
+    });
+    /* révélation en cascade (une seule fois) */
+    if(!sec.classList.contains("ps-in") && !sec.__psStatObs){
+      sec.__psStatObs=1;
+      if(window.IntersectionObserver){
+        var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ sec.classList.add("ps-in"); io.disconnect(); } }); },{threshold:0.15});
+        io.observe(sec);
+        setTimeout(function(){ var r=sec.getBoundingClientRect(); if(r.top<(window.innerHeight||800)) sec.classList.add("ps-in"); },450);
+      } else { sec.classList.add("ps-in"); }
+    }
+  }
+
   /* Reconstruit « Notre histoire » en timeline HORIZONTALE (4 jalons), révélée au
      scroll. Idempotent. Masque les rangées natives verticales. */
   function buildTimeline(){
@@ -670,7 +737,7 @@
 
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer(); cartes(); buildCabinets(); buildTimeline(); buildProfils(); heroVideoBg(); setHeroVideo(); buildFaq();
+    styles(); marquer(); cartes(); buildStats(); buildCabinets(); buildTimeline(); buildProfils(); heroVideoBg(); setHeroVideo(); buildFaq();
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
