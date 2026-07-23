@@ -110,8 +110,13 @@
     H+" .ps-home-hero.ps-hero-bg{position:relative !important;min-height:90vh !important;display:flex !important;align-items:center !important;overflow:hidden !important;width:100vw !important;margin-left:calc(50% - 50vw) !important;padding:0 !important;background:#0f1b33 !important;}",
     H+" .ps-hero-vwrap{position:absolute !important;inset:0 !important;overflow:hidden !important;z-index:0 !important;}",
     H+" .ps-hero-vwrap iframe{position:absolute !important;top:50% !important;left:50% !important;transform:translate(-50%,-50%) !important;width:100vw !important;height:56.25vw !important;min-width:177.78vh !important;min-height:100vh !important;border:0 !important;border-radius:0 !important;box-shadow:none !important;pointer-events:none !important;}",
-    H+" .ps-hero-scrim{position:absolute !important;inset:0 !important;z-index:1 !important;background:linear-gradient(90deg,rgba(15,27,51,.85) 0%,rgba(15,27,51,.55) 48%,rgba(15,27,51,.2) 100%) !important;}",
-    H+" .ps-home-hero.ps-hero-bg .lw-cols{position:relative !important;z-index:2 !important;max-width:1000px !important;margin:0 auto !important;width:100% !important;padding:0 24px !important;align-items:center !important;}",
+    /* 🔴 dégradé RENFORCÉ à gauche : panneau quasi-plein sur ~40% (derrière le texte)
+       qui fond vers transparent → la vidéo n'apparaît qu'à droite, l'œil ne voit pas
+       qu'elle est décalée. */
+    H+" .ps-hero-scrim{position:absolute !important;inset:0 !important;z-index:1 !important;background:linear-gradient(90deg,rgba(12,22,44,.97) 0%,rgba(12,22,44,.95) 34%,rgba(12,22,44,.6) 60%,rgba(12,22,44,.12) 82%,rgba(12,22,44,0) 100%) !important;}",
+    /* contenu aligné sur la grille du reste de la page (~1180px centrés = même bord
+       gauche que les titres de section), pas 1000px. */
+    H+" .ps-home-hero.ps-hero-bg .lw-cols{position:relative !important;z-index:2 !important;max-width:1180px !important;margin:0 auto !important;width:100% !important;padding:0 24px !important;align-items:center !important;}",
     H+" .ps-home-hero.ps-hero-bg .ps-hero-vidcol{display:none !important;}",
     H+" .ps-home-hero.ps-hero-bg .lw-cols > .col{width:100% !important;max-width:640px !important;flex:1 1 auto !important;}",
     [H+" .ps-home-hero.ps-hero-bg .learnworlds-heading4",H+" .ps-home-hero.ps-hero-bg .learnworlds-heading",H+" .ps-home-hero.ps-hero-bg .learnworlds-subheading",H+" .ps-home-hero.ps-hero-bg .learnworlds-main-text"].join(",")+"{color:#fff !important;}",
