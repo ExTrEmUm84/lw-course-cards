@@ -59,6 +59,13 @@
   function normName(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,""); }
   function logoFor(title){ var f=LOGOS[normName(title)]; return f ? 'url("'+LOGO_BASE+f+'")' : ""; }
 
+  /** Initiales du cabinet (repli quand il n'y a pas de logo). */
+  function initialsOf(name){
+    var w=(name||"").trim().split(/\s+/).filter(Boolean);
+    if(!w.length) return "?";
+    return (w.length===1 ? w[0].slice(0,2) : (w[0][0]+w[1][0])).toUpperCase();
+  }
+
   // --- 2) Styles ---
   var CSS=[
     /* grille de 3, alignée comme les autres pages (1000px centrés).
@@ -82,8 +89,15 @@
        restaurée au survol de la carte, repère de reconnaissance. Le logo natif
        est un `background-image` sur `.learnworlds-image` (masqué) : build() en
        recopie l'URL sur cette div. */
-    ".ps-cab-logo{height:46px !important;margin:0 0 20px !important;background-repeat:no-repeat !important;background-position:left center !important;background-size:contain !important;filter:grayscale(1) !important;opacity:.72 !important;transition:filter .25s ease, opacity .25s ease !important;}",
-    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover .ps-cab-logo{filter:grayscale(0) !important;opacity:1 !important;}",
+    /* Logo dans un CERCLE (demande de Ziad le 23/07) : badge rond 96px, fond
+       blanc + fine bordure + ombre douce, logo CONTENU au centre (66% pour
+       laisser une marge). Monochrome au repos, couleur au survol de la carte.
+       Les logos étant des wordmarks larges, `contain`/66% évite le rognage. */
+    ".ps-cab-logo{width:96px !important;height:96px !important;border-radius:50% !important;background-color:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;box-shadow:0 4px 14px rgba(15,23,42,.06) !important;margin:0 0 22px !important;background-repeat:no-repeat !important;background-position:center !important;background-size:66% auto !important;filter:grayscale(1) !important;opacity:.8 !important;transition:filter .25s ease, opacity .25s ease, box-shadow .25s ease !important;}",
+    /* Repli : cabinet sans logo (ex. Kéa) -> badge d'initiales, pour que TOUTES
+       les cartes portent un cercle. */
+    ".ps-cab-logo--ini{background-color:var(--ps-accent-tint,#EDEDFF) !important;background-image:none !important;filter:none !important;opacity:1 !important;display:flex !important;align-items:center !important;justify-content:center !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:30px !important;font-weight:800 !important;color:var(--ps-accent-hover,#4B4BE0) !important;letter-spacing:.5px !important;}",
+    S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover .ps-cab-logo{filter:grayscale(0) !important;opacity:1 !important;box-shadow:0 8px 22px rgba(15,23,42,.12) !important;}",
     ".ps-cab-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:25px !important;line-height:1.2 !important;font-weight:800 !important;letter-spacing:-.02em !important;color:#243B6B !important;margin:0 0 10px !important;}",
     /* description bornée à 4 lignes : les cartes gardent la même hauteur */
     ".ps-cab-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;margin:0 !important;display:-webkit-box !important;-webkit-line-clamp:4 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
@@ -240,6 +254,13 @@
         lg.setAttribute("role","img");
         lg.setAttribute("aria-label","Logo "+title);
         d.appendChild(lg);
+      } else {
+        /* pas de logo (ex. Kéa) : badge d'initiales, pour que toutes les cartes aient un cercle */
+        var ini=document.createElement("div");
+        ini.className="ps-cab-logo ps-cab-logo--ini";
+        ini.textContent=initialsOf(title);
+        ini.setAttribute("aria-hidden","true");
+        d.appendChild(ini);
       }
       var t=document.createElement("h3");
       t.className="ps-cab-title"; t.textContent=title;        // textContent : pas d'injection
