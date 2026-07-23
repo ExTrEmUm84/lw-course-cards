@@ -108,9 +108,16 @@
     /* chiffre : grand, blanc */
     [H+" .ps-home-stats .progress-container_counter",H+" .ps-home-stats .progress-container_counter h2"].join(",")+"{"+FT+"font-size:46px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1 !important;color:#fff !important;margin:0 !important;}",
     "@media(max-width:820px){"+[H+" .ps-home-stats .progress-container_counter",H+" .ps-home-stats .progress-container_counter h2"].join(",")+"{font-size:40px !important;}}",
-    /* libellé : 1re ligne forte (bleu très clair) + 2e ligne discrète */
-    H+" .ps-home-stats [data-magic='title']{"+FT+"font-size:15px !important;font-weight:700 !important;color:#DCE6F5 !important;line-height:1.4 !important;letter-spacing:normal !important;text-transform:none !important;margin:16px auto 0 !important;max-width:230px !important;}",
-    H+" .ps-home-stats [data-magic='title'] div{font-weight:500 !important;color:#93A6C6 !important;font-size:13.5px !important;margin-top:3px !important;}",
+    /* libellé reconstruit en 2 spans par buildStats (le contenu natif est
+       incohérent : certaines cellules ont un <div> 2e ligne, une autre a un
+       texte fusionné « reçoiventune » sans espace). Ligne principale
+       semi-grasse + sous-ligne RÉGULIÈRE nettement plus légère (fin du « tout
+       en gras »). text-wrap:balance évite les orphelins (« K) » seul). */
+    H+" .ps-home-stats [data-magic='title']{"+FT+"margin:14px auto 0 !important;max-width:250px !important;letter-spacing:normal !important;text-transform:none !important;}",
+    H+" .ps-home-stats .ps-stat-lbl{display:block !important;font-size:15px !important;font-weight:600 !important;color:#EAF1FB !important;line-height:1.35 !important;text-wrap:balance !important;}",
+    H+" .ps-home-stats .ps-stat-sub{display:block !important;font-size:13.5px !important;font-weight:400 !important;color:#93A6C6 !important;line-height:1.4 !important;margin-top:4px !important;text-wrap:balance !important;}",
+    /* pas de marge native parasite autour du compteur (espacement chiffre↔libellé) */
+    [H+" .ps-home-stats .lw-progress",H+" .ps-home-stats .progress-container_counter"].join(",")+"{margin:0 !important;padding:0 !important;}",
     /* note de bas de bandeau : centrée et discrète (était collée à gauche) */
     H+" .ps-home-stats .learnworlds-main-text{color:#8DA0C2 !important;text-align:center !important;font-size:13px !important;max-width:760px !important;margin-left:auto !important;margin-right:auto !important;}",
 
@@ -464,6 +471,26 @@
     if(/fa-play/.test(cls)) return "medal";
     return "_default";
   }
+  /* Le contenu natif des libellés stats est INCOHÉRENT (saisi à la main dans le
+     Customizer) : la plupart ont un <div> pour la 2e ligne, mais au moins une
+     cellule a un texte fusionné SANS espace ni <div> (« reçoiventune offre… »).
+     On en extrait proprement [ligne principale, sous-ligne] :
+       - <div> présent -> principal = texte avant le div, sous = texte du div ;
+       - sinon -> on répare l'espace manquant du gabarit et on découpe sur le
+         motif (« …reçoivent | une offre… » ou « … | (…) »). Sans motif : 1 ligne. */
+  function splitStatLabel(lbl){
+    var div=lbl.querySelector(":scope > div");
+    if(div){
+      var sub=(div.textContent||"").replace(/ /g," ").replace(/\s+/g," ").trim();
+      var main="";
+      for(var i=0;i<lbl.childNodes.length;i++){ var n=lbl.childNodes[i]; if(n===div) break; if(n.nodeType===3) main+=n.nodeValue; }
+      return [main.replace(/ /g," ").replace(/\s+/g," ").trim(), sub];
+    }
+    var full=(lbl.textContent||"").replace(/ /g," ").replace(/\s+/g," ").trim();
+    full=full.replace(/reçoivent(?=une offre)/i,"reçoivent ");   /* espace manquant */
+    var m=full.match(/^(.*?reçoivent)\s+(une offre.*)$/i) || full.match(/^(.*?\S)\s*(\(.+\))$/);
+    return m ? [m[1].trim(), m[2].trim()] : [full, ""];
+  }
   function buildStats(){
     var sec=document.querySelector(H+" .ps-home-stats"); if(!sec) return;
     sec.querySelectorAll(".lw-progress-wrapper").forEach(function(w){
@@ -476,6 +503,15 @@
         fa.parentNode.insertBefore(badge, fa);
         fa.classList.add("ps-home-hide");   /* masque l'icône FontAwesome native */
       }
+    });
+    /* libellés reconstruits en 2 spans propres (auto-réparé si LW réécrit :
+       on re-traite dès que le span .ps-stat-lbl a disparu). */
+    sec.querySelectorAll("[data-magic='title']").forEach(function(lbl){
+      if(lbl.querySelector(".ps-stat-lbl")) return;
+      var p=splitStatLabel(lbl);
+      lbl.textContent="";
+      var a=document.createElement("span"); a.className="ps-stat-lbl"; a.textContent=p[0]; lbl.appendChild(a);
+      if(p[1]){ var b=document.createElement("span"); b.className="ps-stat-sub"; b.textContent=p[1]; lbl.appendChild(b); }
     });
     /* révélation en cascade (une seule fois) */
     if(!sec.classList.contains("ps-in") && !sec.__psStatObs){
