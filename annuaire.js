@@ -257,6 +257,15 @@
     return h;
   }
 
+  /** Pastille d'initiales colorée (avatar par défaut, et repli si une photo ne charge pas). */
+  function initialsAvatar(m) {
+    var av = el("div", "psa-avatar", m.initials || "?");
+    var h = hueOf(m.name || "");
+    av.style.background = "linear-gradient(135deg,hsl(" + h + " 62% 52%),hsl(" + ((h + 40) % 360) + " 62% 44%))";
+    av.setAttribute("aria-hidden", "true");
+    return av;
+  }
+
   /** Construit la carte via le DOM — jamais innerHTML avec des données membres :
       une bio contenant du HTML doit s'afficher comme du texte, pas s'exécuter. */
   function carte(m) {
@@ -267,13 +276,13 @@
       img.src = m.photo;
       img.alt = "";
       img.loading = "lazy";
+      /* repli sur les initiales si la photo ne charge pas (source externe) */
+      img.onerror = function () {
+        if (img.parentNode) img.parentNode.replaceChild(initialsAvatar(m), img);
+      };
       c.appendChild(img);
     } else {
-      var av = el("div", "psa-avatar", m.initials || "?");
-      var h = hueOf(m.name || "");
-      av.style.background = "linear-gradient(135deg,hsl(" + h + " 62% 52%),hsl(" + ((h + 40) % 360) + " 62% 44%))";
-      av.setAttribute("aria-hidden", "true");
-      c.appendChild(av);
+      c.appendChild(initialsAvatar(m));
     }
 
     c.appendChild(el("h3", "psa-name", m.name));
@@ -468,6 +477,22 @@
      (ou supprimer ce bloc + la ligne « if (DEMO_FILL) … » plus bas).
      ═══════════════════════════════════════════════════════════════════ */
   var DEMO_FILL = true;
+
+  /* Photos des profils démo (choix de Ziad : portraits réalistes). Source
+     externe randomuser.me, assortie au GENRE du prénom, déterministe (même
+     profil = même photo car les indices sont attribués dans l'ordre du tableau).
+     Repli sur les initiales si l'image ne charge pas (voir img.onerror).
+     🔴 Purement démo — disparaît avec DEMO_FILL/DEMO_MEMBERS. */
+  var DEMO_FEMALE = { "Claire":1,"Léa":1,"Sarah":1,"Inès":1,"Nour":1,"Camille":1,"Juliette":1,"Fatou":1,"Chloé":1,"Manon":1,"Emma":1,"Aya":1,"Salomé":1,"Jeanne":1,"Lina":1,"Yasmine":1,"Margaux":1,"Alice":1,"Maëlys":1,"Romane":1,"Anaïs":1 };
+  var _demoIdx = { men: 0, women: 0 };
+  function demoPhoto(m) {
+    if (m.photo) return m;                                   // idempotent
+    var first = (m.name || "").split(/\s+/)[0];
+    var g = DEMO_FEMALE[first] ? "women" : "men";
+    m.photo = "https://randomuser.me/api/portraits/" + g + "/" + (_demoIdx[g]++) + ".jpg";
+    return m;
+  }
+
   var DEMO_MEMBERS =   [
     {
       "id": "m01",
@@ -1284,7 +1309,7 @@
       })
       .then(function (data) {
         membres = Array.isArray(data.members) ? data.members : [];
-        if (DEMO_FILL) membres = membres.concat(DEMO_MEMBERS);
+        if (DEMO_FILL) membres = membres.concat(DEMO_MEMBERS.map(demoPhoto));
         if (!membres.length) {
           grid.replaceChildren();
           count.textContent = "";
