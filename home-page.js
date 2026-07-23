@@ -38,21 +38,25 @@
 
   var CSS=[
     /* ================= 1) TYPOGRAPHIE ================= */
-    /* Figtree sur tous les titres et textes (le template est en Poppins/Raleway). */
-    [H+" h1",H+" h2",H+" h3",H+" h4",H+" .learnworlds-heading",H+" .learnworlds-subheading",
-     H+" .learnworlds-heading3",H+" .learnworlds-heading4",H+" .learnworlds-main-text",
+    /* Figtree sur tous les titres et textes (le template est en Poppins/Raleway).
+       🔴 `:not(.learnworlds-icon)` PARTOUT : sur ce template, des `.learnworlds-subheading`
+       (et heading) sont AUSSI des icônes FontAwesome (bandeau stats) — forcer une police
+       dessus casse le glyphe (carrés vides). On exclut donc les icônes des règles de police. */
+    [H+" h1:not(.learnworlds-icon)",H+" h2:not(.learnworlds-icon)",H+" h3:not(.learnworlds-icon)",H+" h4:not(.learnworlds-icon)",
+     H+" .learnworlds-heading:not(.learnworlds-icon)",H+" .learnworlds-subheading:not(.learnworlds-icon)",
+     H+" .learnworlds-heading3:not(.learnworlds-icon)",H+" .learnworlds-heading4:not(.learnworlds-icon)",H+" .learnworlds-main-text",
      H+" .learnworlds-main-text-large",H+" .learnworlds-main-text-small",H+" p",H+" li",H+" a"].join(",")+"{"+FT+"}",
     /* Grands titres (H1) : graisse forte + interlettrage serré, couleur texte du site. */
-    H+" h1.learnworlds-heading,"+H+" .learnworlds-heading{font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:var(--ps-text,#1c1f26) !important;}",
+    H+" h1.learnworlds-heading:not(.learnworlds-icon),"+H+" .learnworlds-heading:not(.learnworlds-icon){font-weight:800 !important;letter-spacing:-.025em !important;line-height:1.14 !important;color:var(--ps-text,#1c1f26) !important;}",
     /* Corps de texte : gris doux du site. */
     H+" .learnworlds-main-text,"+H+" .learnworlds-main-text-large,"+H+" .learnworlds-main-text-small{color:var(--ps-text-soft,#676879) !important;line-height:1.65 !important;}",
 
-    /* ================= 2) SOUS-TITRES DE SECTION = ACCENT ================= */
-    /* Convention du site (course/case/sector…) : le sous-titre de section prend
-       l'accent. Ancre de spécificité `line-height` comme sur les autres scripts.
-       🔴 Exclus le bandeau stats (fond accent) : ses sous-titres restent blancs
-       (géré en 6). On cible donc les subheadings hors `.ps-home-stats`. */
-    H+" .learnworlds-subheading{"+FT+"font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#507EC5) !important;}",
+    /* ================= 2) TITRES DE SECTION = MARINE (premium, comme la maquette) ================= */
+    /* Les grands titres de section (`.learnworlds-subheading`) en MARINE #243B6B — pas
+       en accent (le tout-bleu faisait « pas premium »). L'accent reste pour boutons /
+       icônes / liens / dates. 🔴 hors icônes (cf. ci-dessus) ; le bandeau stats repasse
+       ses titres en blanc plus bas. */
+    H+" .learnworlds-subheading:not(.learnworlds-icon){"+FT+"font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-marine,#243B6B) !important;}",
 
     /* ================= 3) BOUTONS -> PILULES DA ================= */
     H+" .learnworlds-button{"+FT+"border-radius:var(--ps-r-pill,999px) !important;font-weight:600 !important;letter-spacing:0 !important;box-shadow:none !important;transition:background .18s ease,color .18s ease,border-color .18s ease,transform .18s ease !important;}",
@@ -125,29 +129,27 @@
     H+" .learnworlds-image{border-radius:var(--ps-r-card,16px) !important;}",
 
     /* ================= 9) SECTIONS SPÉCIFIQUES ================= */
-    /* --- 3) OFFRES : les colonnes portant une icône deviennent des cartes --- */
-    H+" .ps-home-offres .lw-cols > .col:has(.box-icon-wrapper),"+H+" .ps-home-offres .lw-cols > .col:has(.learnworlds-icon-wrapper){background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;padding:26px !important;transition:box-shadow .2s ease,transform .2s ease !important;}",
-    H+" .ps-home-offres .lw-cols > .col:has(.box-icon-wrapper):hover,"+H+" .ps-home-offres .lw-cols > .col:has(.learnworlds-icon-wrapper):hover{box-shadow:0 14px 34px rgba(0,0,0,.10) !important;transform:translateY(-3px) !important;}",
+    /* --- CARTES OFFRES / ATOUTS (classes .ps-hcard/.ps-hgrid posées en JS, pas de :has) --- */
+    H+" .ps-hcard{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 16px rgba(15,23,42,.05) !important;padding:24px !important;margin:0 !important;width:auto !important;transition:box-shadow .2s ease,transform .2s ease !important;}",
+    H+" .ps-hcard:hover{box-shadow:0 12px 30px rgba(0,0,0,.09) !important;transform:translateY(-3px) !important;}",
+    /* atouts : la rangée des cartes passe en grille de 4 */
+    H+" .ps-home-atouts .ps-hgrid{display:grid !important;grid-template-columns:repeat(4,1fr) !important;gap:14px !important;}",
+    "@media(max-width:820px){"+H+" .ps-home-atouts .ps-hgrid{grid-template-columns:repeat(2,1fr) !important;}}",
     /* icône offres : tuile arrondie (au lieu du cercle global) */
     H+" .ps-home-offres .box-icon-wrapper,"+H+" .ps-home-offres .learnworlds-icon-wrapper{border-radius:14px !important;width:54px !important;height:54px !important;}",
     H+" .ps-home-offres .learnworlds-main-text-large{font-size:14px !important;font-weight:600 !important;color:var(--ps-accent,#507EC5) !important;}",
+    H+" .ps-home-atouts .learnworlds-heading3{font-size:16px !important;color:var(--ps-marine,#243B6B) !important;margin-top:10px !important;}",
 
-    /* --- 5) BANDE CTA « Avez-vous besoin d'une formation » : centrée, titre marine --- */
+    /* --- 5) BANDE CTA « Avez-vous besoin d'une formation » : centrée --- */
     H+" .ps-home-cta{text-align:center !important;}",
-    [H+" .ps-home-cta h1",H+" .ps-home-cta h2",H+" .ps-home-cta h3",H+" .ps-home-cta h4"].join(",")+"{color:var(--ps-marine,#243B6B) !important;}",
 
     /* --- 6) PREUVE (1% / 90%) : les chiffres en accent, la phrase en marine --- */
     H+" .ps-home-preuve .learnworlds-heading4{color:var(--ps-accent,#507EC5) !important;font-size:22px !important;font-weight:800 !important;letter-spacing:-.02em !important;}",
     H+" .ps-home-preuve .learnworlds-heading3{color:var(--ps-marine,#243B6B) !important;font-weight:800 !important;}",
 
-    /* --- 7) ATOUTS : grille de cartes (les 8 colonnes à icône) --- */
-    H+" .ps-home-atouts .lw-cols:has(.box-icon-wrapper),"+H+" .ps-home-atouts .lw-cols:has(.learnworlds-icon-wrapper){display:grid !important;grid-template-columns:repeat(4,1fr) !important;gap:14px !important;}",
-    H+" .ps-home-atouts .lw-cols:has(.box-icon-wrapper) > .col,"+H+" .ps-home-atouts .lw-cols:has(.learnworlds-icon-wrapper) > .col{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 14px rgba(15,23,42,.05) !important;padding:20px !important;margin:0 !important;width:auto !important;transition:box-shadow .2s ease,transform .2s ease !important;}",
-    H+" .ps-home-atouts .lw-cols:has(.box-icon-wrapper) > .col:hover,"+H+" .ps-home-atouts .lw-cols:has(.learnworlds-icon-wrapper) > .col:hover{box-shadow:0 12px 26px rgba(0,0,0,.09) !important;transform:translateY(-2px) !important;}",
-    H+" .ps-home-atouts .learnworlds-heading3{font-size:16px !important;color:var(--ps-marine,#243B6B) !important;margin-top:10px !important;}",
-    "@media(max-width:820px){"+H+" .ps-home-atouts .lw-cols:has(.box-icon-wrapper),"+H+" .ps-home-atouts .lw-cols:has(.learnworlds-icon-wrapper){grid-template-columns:repeat(2,1fr) !important;}}",
-
-    /* --- 8) PROFILS : les 2 cartes reçoivent un liseré d'accent en haut --- */
+    /* --- 8) PROFILS : fond blanc (le fond bleu clair du template écrasait le titre),
+         cartes à liseré d'accent en haut --- */
+    H+" .ps-home-profils{background:#fff !important;}",
     H+" .ps-home-profils .box-shadow-round-light,"+H+" .ps-home-profils .radius-15{border-top:3px solid var(--ps-accent,#507EC5) !important;padding:26px !important;}",
     H+" .ps-home-profils .learnworlds-heading4{color:var(--ps-marine,#243B6B) !important;}",
 
@@ -163,8 +165,12 @@
     H+" .ps-home-articles .learnworlds-button{background:transparent !important;border:1.5px solid var(--ps-accent,#507EC5) !important;color:var(--ps-accent,#507EC5) !important;}",
     H+" .ps-home-articles .learnworlds-button:hover{background:var(--ps-accent,#507EC5) !important;color:#fff !important;}",
 
-    /* --- 13) RDV : bande foncée #203866 -> titres blancs, bouton blanc --- */
-    [H+" .ps-home-rdv h1",H+" .ps-home-rdv h2",H+" .ps-home-rdv h3",H+" .ps-home-rdv h4",H+" .ps-home-rdv .learnworlds-main-text"].join(",")+"{color:#fff !important;}",
+    /* --- 13) RDV : bande foncée #203866 -> titres blancs, bouton blanc.
+         🔴 on cible AUSSI les titres en <div> (learnworlds-heading/subheading) sinon la
+         règle globale marine gagne et le titre reste sombre sur fond sombre (illisible). */
+    [H+" .ps-home-rdv h1",H+" .ps-home-rdv h2",H+" .ps-home-rdv h3",H+" .ps-home-rdv h4",
+     H+" .ps-home-rdv .learnworlds-heading",H+" .ps-home-rdv .learnworlds-subheading:not(.learnworlds-icon)",
+     H+" .ps-home-rdv .learnworlds-heading3",H+" .ps-home-rdv .learnworlds-heading4",H+" .ps-home-rdv .learnworlds-main-text"].join(",")+"{color:#fff !important;}",
     H+" .ps-home-rdv .learnworlds-button{background:#fff !important;border:0 !important;color:var(--ps-accent,#507EC5) !important;}",
     H+" .ps-home-rdv .learnworlds-button:hover{background:var(--ps-accent-tint,#EDF4FF) !important;color:var(--ps-accent-hover,#486798) !important;}",
 
@@ -206,8 +212,9 @@
       if(s.querySelector(".progress-container_counter")) s.classList.add("ps-home-stats");
       /* hero = la section qui porte la vidéo (iframe / learnworlds-video-iframe) */
       if(s.querySelector(".learnworlds-video-iframe, iframe")) s.classList.add("ps-home-hero");
-      /* tag par titre */
-      var htext=""; s.querySelectorAll("h1,h2,h3,h4").forEach(function(x){ htext+=" "+(x.textContent||""); });
+      /* tag par titre — on lit AUSSI les titres en <div> (learnworlds-heading/subheading),
+         car sur ce template beaucoup de titres ne sont pas des balises h1-h4. */
+      var htext=""; s.querySelectorAll("h1,h2,h3,h4,.learnworlds-heading,.learnworlds-subheading,.learnworlds-heading3,.learnworlds-heading4").forEach(function(x){ htext+=" "+(x.textContent||""); });
       SECTAGS.forEach(function(t){ if(t[0].test(htext)) s.classList.add(t[1]); });
       /* bande neutre : fond gris-rosé du template (rgb(245,243,245)) */
       var bg=getComputedStyle(s).backgroundColor;
@@ -269,13 +276,32 @@
     btnRows.forEach(function(r){ r.classList.add("ps-home-hide"); });
   }
 
-  function build(){
-    if(!surLaPage()) return;
-    styles(); marquer(); buildCabinets();
+  /* Cartes offres/atouts SANS `:has` (peu fiable ici) : on tague en JS les colonnes
+     qui portent une icône, et la rangée de la section atouts pour la passer en grille. */
+  function cartes(){
+    ["ps-home-offres","ps-home-atouts"].forEach(function(cl){
+      var sec=document.querySelector(H+" ."+cl); if(!sec) return;
+      sec.querySelectorAll(".lw-cols > .col").forEach(function(col){
+        if(col.querySelector(".box-icon-wrapper, .learnworlds-icon-wrapper")) col.classList.add("ps-hcard");
+      });
+      if(cl==="ps-home-atouts"){
+        sec.querySelectorAll(".lw-cols").forEach(function(row){
+          if(row.querySelector(".ps-hcard")) row.classList.add("ps-hgrid");
+        });
+      }
+    });
   }
 
+  function build(){
+    if(!surLaPage()) return;
+    styles(); marquer(); cartes(); buildCabinets();
+  }
+
+  /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
+     d'arrière-plan, ce qui empêchait marquer()/buildCabinets() de rattraper les sections
+     rendues tard. setTimeout tourne même en arrière-plan. */
   var scheduled=false;
-  function schedule(){ if(scheduled) return; scheduled=true; requestAnimationFrame(function(){ scheduled=false; build(); }); }
+  function schedule(){ if(scheduled) return; scheduled=true; setTimeout(function(){ scheduled=false; build(); }, 60); }
   var obs=new MutationObserver(schedule);
   function start(){ build(); obs.observe(document.documentElement,{childList:true,subtree:true}); }
   if(document.readyState!=="loading") start(); else document.addEventListener("DOMContentLoaded",start);
