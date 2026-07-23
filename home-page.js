@@ -248,9 +248,21 @@
     H+" .ps-home-cta .ps-cta-fact-badge{flex:none !important;display:inline-flex !important;align-items:center !important;justify-content:center !important;padding:5px 11px !important;border-radius:999px !important;background:var(--ps-accent-tint,#EDF4FF) !important;color:var(--ps-accent-hover,#486798) !important;"+FT+"font-size:11.5px !important;font-weight:800 !important;letter-spacing:.04em !important;text-transform:uppercase !important;white-space:nowrap !important;}",
     H+" .ps-home-cta .ps-cta-fact-txt{"+FT+"font-size:16px !important;font-weight:700 !important;color:var(--ps-marine,#243B6B) !important;line-height:1.45 !important;}",
 
-    /* --- 6) PREUVE (1% / 90%) : les chiffres en accent, la phrase en marine --- */
-    H+" .ps-home-preuve .learnworlds-heading4{color:var(--ps-accent,#507EC5) !important;font-size:22px !important;font-weight:800 !important;letter-spacing:-.02em !important;}",
-    H+" .ps-home-preuve .learnworlds-heading3{color:var(--ps-marine,#243B6B) !important;font-weight:800 !important;}",
+    /* --- 6) PREUVE (graphes 1% / 90%) — REFONTE : les 2 « tables » sont des IMAGES
+       de graphes enfermées dans un widget « écran » natif LW (cadre daté + légende
+       vide + cadre 16:9 qui ROGNE le graphe). buildPreuve() les réinjecte en <img>
+       PLEIN (non rogné) dans une carte propre. Titres au-dessus, conclusion forte
+       centrée dessous, révélation au scroll. --- */
+    H+" .ps-home-preuve .lw-cols.one-row{display:grid !important;grid-template-columns:1fr 1fr !important;gap:30px !important;max-width:1080px !important;margin:0 auto !important;align-items:start !important;}",
+    "@media(max-width:860px){"+H+" .ps-home-preuve .lw-cols.one-row{grid-template-columns:1fr !important;gap:24px !important;}}",
+    H+" .ps-home-preuve .learnworlds-heading4{"+FT+"color:var(--ps-marine,#243B6B) !important;font-size:18px !important;font-weight:800 !important;letter-spacing:-.01em !important;text-align:center !important;margin:0 0 14px !important;}",
+    H+" .ps-home-preuve .ps-preuve-graph{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:16px !important;box-shadow:0 6px 22px rgba(15,23,42,.07) !important;padding:16px !important;overflow:hidden !important;opacity:0 !important;transform:translateY(18px) !important;transition:opacity .6s ease,transform .6s ease !important;}",
+    H+" .ps-home-preuve.ps-in .ps-preuve-graph{opacity:1 !important;transform:none !important;}",
+    H+" .ps-home-preuve .lw-cols.one-row > .col:nth-child(2) .ps-preuve-graph{transition-delay:.1s !important;}",
+    H+" .ps-home-preuve .ps-preuve-graph img{display:block !important;width:100% !important;height:auto !important;border-radius:8px !important;}",
+    /* conclusion : phrase forte marine centrée + note légère */
+    H+" .ps-home-preuve .learnworlds-heading3{"+FT+"color:var(--ps-marine,#243B6B) !important;font-weight:800 !important;font-size:28px !important;letter-spacing:-.02em !important;text-align:center !important;max-width:820px !important;margin:40px auto 10px !important;line-height:1.25 !important;}",
+    H+" .ps-home-preuve .learnworlds-main-text:not(.ps-home-hide){"+FT+"text-align:center !important;color:var(--ps-text-soft,#676879) !important;font-size:16px !important;max-width:680px !important;margin:0 auto !important;}",
 
     /* --- 8) PROFILS v2 (buildProfils) : REFONTE — donut animé (répartition) + 2 cartes
          profils à pastilles + cabinets en TIERS à chips. Le natif (pie moche + accordéons
@@ -557,6 +569,40 @@
     });
   }
 
+  /* ================= PREUVE : graphes en <img> plein + reveal =================
+     Chaque « table » est une image de graphe dans un widget écran natif LW
+     (cadre + légende vide + cadre 16:9 qui rogne). On récupère l'URL réelle
+     (style inline, pas le gif de lazy-load), on l'injecte en <img> plein dans
+     une carte .ps-preuve-graph, et on masque le widget natif. Les rangées vides
+     du template sont masquées. Réveil au scroll. Idempotent / auto-réparant. */
+  function buildPreuve(){
+    var sec=document.querySelector(H+" .ps-home-preuve"); if(!sec) return;
+    sec.querySelectorAll(".learnworlds-screen-wrapper").forEach(function(w){
+      if(w.classList.contains("ps-home-hide")) return;
+      var imgDiv=w.querySelector("[data-magic='image']");
+      var m=imgDiv ? (imgDiv.getAttribute("style")||"").match(/background-image:\s*url\(([^)]+)\)/) : null;
+      var url=m ? m[1].replace(/["']/g,"").trim() : null;
+      if(!url || /^data:/.test(url)) return;   /* image réelle pas encore posée (lazy) -> réessai */
+      var fig=document.createElement("div"); fig.className="ps-preuve-graph";
+      var img=document.createElement("img"); img.src=url; img.alt=""; img.loading="lazy";
+      fig.appendChild(img);
+      w.parentNode.insertBefore(fig, w);
+      w.classList.add("ps-home-hide");         /* masque le widget écran natif */
+    });
+    /* rangées vides du template (colonnes span_2_of_12 sans contenu) -> masquées */
+    sec.querySelectorAll(".lw-cols").forEach(function(row){
+      if(!(row.textContent||"").trim() && !row.querySelector("img,.ps-preuve-graph,.learnworlds-screen-wrapper")) row.classList.add("ps-home-hide");
+    });
+    if(!sec.classList.contains("ps-in") && !sec.__psPreuveObs){
+      sec.__psPreuveObs=1;
+      if(window.IntersectionObserver){
+        var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ sec.classList.add("ps-in"); io.disconnect(); } }); },{threshold:0.12});
+        io.observe(sec);
+        setTimeout(function(){ var r=sec.getBoundingClientRect(); if(r.top<(window.innerHeight||800)) sec.classList.add("ps-in"); },450);
+      } else { sec.classList.add("ps-in"); }
+    }
+  }
+
   /* Reconstruit « Notre histoire » en timeline HORIZONTALE (4 jalons), révélée au
      scroll. Idempotent. Masque les rangées natives verticales. */
   function buildTimeline(){
@@ -806,7 +852,7 @@
 
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer(); cartes(); buildStats(); buildCta(); buildCabinets(); buildTimeline(); buildProfils(); heroVideoBg(); setHeroVideo(); buildFaq();
+    styles(); marquer(); cartes(); buildStats(); buildCta(); buildPreuve(); buildCabinets(); buildTimeline(); buildProfils(); heroVideoBg(); setHeroVideo(); buildFaq();
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
