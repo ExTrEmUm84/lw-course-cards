@@ -338,7 +338,12 @@
          PLEIN). Le direct-au-player fiable = réglage NATIF (Site Builder → élément Cours →
          « Lorsque l'on clique sur » → Inscrits → « Lecteur du cours »), qui met la bonne
          URL (avec unité) dans le href natif — que ce `target` recopie tel quel. */
-      var slug = (href.match(/\/course\/([^\/?#]+)/) || [])[1] || "";   // gardé pour le flag retour (sessionStorage)
+      /* Identifiant pour le flag retour = ce que le PLAYER verra en `courseid`.
+         🔴 courseid ≠ slug d'URL (ex. courseid "test2" pour le slug "bain-…-gorilla").
+         Avec le réglage natif « Lecteur du cours », le href est déjà `?courseid=…` → on
+         le lit ; sinon repli sur le slug de `/course/<slug>`. */
+      var slug = (href.match(/courseid=([^&]+)/) || href.match(/\/course\/([^\/?#]+)/) || [])[1] || "";
+      if(slug){ try{ slug=decodeURIComponent(slug); }catch(e){} }
       var target = href;
 
       /* 🔴 Le BADGE est un enfant DIRECT de la carte (comme l'illustration ronde
