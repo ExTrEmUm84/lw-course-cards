@@ -338,12 +338,6 @@
          PLEIN). Le direct-au-player fiable = réglage NATIF (Site Builder → élément Cours →
          « Lorsque l'on clique sur » → Inscrits → « Lecteur du cours »), qui met la bonne
          URL (avec unité) dans le href natif — que ce `target` recopie tel quel. */
-      /* Identifiant pour le flag retour = ce que le PLAYER verra en `courseid`.
-         🔴 courseid ≠ slug d'URL (ex. courseid "test2" pour le slug "bain-…-gorilla").
-         Avec le réglage natif « Lecteur du cours », le href est déjà `?courseid=…` → on
-         le lit ; sinon repli sur le slug de `/course/<slug>`. */
-      var slug = (href.match(/courseid=([^&]+)/) || href.match(/\/course\/([^\/?#]+)/) || [])[1] || "";
-      if(slug){ try{ slug=decodeURIComponent(slug); }catch(e){} }
       var target = href;
 
       /* 🔴 Le BADGE est un enfant DIRECT de la carte (comme l'illustration ronde
@@ -390,24 +384,8 @@
       cover.className="ps-cab-cover"; cover.href=target;
       cover.setAttribute("aria-label", title);
       card.appendChild(cover);
-      /* Mémorise l'origine pour le bouton retour du player (voir playerBack() dans
-         tokens.js) : au clic sur cette carte, le player du cours saura revenir ici.
-         Capture-phase pour poser le flag AVANT la navigation. Couleur lue au clic
-         (accent de la page = vert cabinet). slug === courseid côté player. */
-      if(slug){
-        (function(sl){
-          card.addEventListener("click", function(){
-            try{
-              sessionStorage.setItem("psPlayerReturn", JSON.stringify({
-                url: location.pathname,
-                label: "Retour aux fiches cabinet",
-                slug: sl,
-                color: getComputedStyle(document.documentElement).getPropertyValue("--ps-accent").trim()
-              }));
-            }catch(e){}
-          }, true);
-        })(slug);
-      }
+      /* Origine mémorisée pour le bouton retour du player : géré de façon GÉNÉRIQUE
+         dans tokens.js (playerFlag, site-wide) — plus besoin de le poser ici. */
       card.dataset.psC="1";                    // déclenche le masquage du natif
     });
   }

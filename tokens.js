@@ -312,8 +312,30 @@
     }, {passive:true});
   }
 
-  cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer();
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); });
+  /* ====================================================================
+     BOUTON RETOUR DU PLAYER → PAGE PRINCIPALE, GÉNÉRIQUE (site-wide)
+     --------------------------------------------------------------------
+     Sur une page de LISTE, au clic d'un lien de cours, on mémorise l'origine
+     dans sessionStorage.psPlayerReturn. playerBack() (plus haut) réécrit alors le
+     bouton retour natif du player (« Retour à la page du cours ») pour revenir
+     DIRECT à cette page principale, sans passer par la présentation. Marche sur
+     TOUTES les pages sans script par page. Libellé selon le slug de la page. */
+  var RETURN_LABELS={empty:"Retour aux cours",sentrainer:"Retour à l'entraînement","emptykk-clone-clone":"Retour aux études de cas","fiches-secteur":"Retour aux fiches secteur","fiches-secteur-clone":"Retour aux fiches cabinet","page-introduction":"Retour aux compétences"};
+  function returnLabel(){ var m=(((document.body&&document.body.className)||"")).match(/slug-([a-z0-9-]+)/); return (m&&RETURN_LABELS[m[1]])||"Retour"; }
+  function playerFlag(){
+    if(window.__psFlagOn) return; window.__psFlagOn=true;
+    document.addEventListener("click", function(e){
+      if(/\/path-player/.test(location.pathname)) return;                  // pas depuis le player
+      var a=e.target&&e.target.closest&&e.target.closest("a[href]"); if(!a) return;
+      var href=a.getAttribute("href")||"";
+      var m=href.match(/courseid=([^&]+)/)||href.match(/\/course\/([^\/?#]+)/); if(!m) return;   // pas un lien de cours
+      var slug; try{ slug=decodeURIComponent(m[1]); }catch(_){ slug=m[1]; }
+      try{ sessionStorage.setItem("psPlayerReturn", JSON.stringify({url:location.pathname,label:returnLabel(),slug:slug})); }catch(_){}
+    }, true);   // capture, avant navigation
+  }
+
+  cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
      quelques relances pour attraper la classe active. */
   [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); setTimeout(immersivePlayer,d); });
