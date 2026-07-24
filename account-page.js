@@ -91,17 +91,23 @@
     B+".account-section-header{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;margin-bottom:18px !important;}",
     B+".account-section-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:21px !important;font-weight:800 !important;letter-spacing:-.015em !important;color:#243B6B !important;}",
 
-    /* --- bouton "Modifier" : le CTA violet du site --- */
-    B+".account-section-header button.learnworlds-button{background:transparent !important;border:0 !important;box-shadow:none !important;padding:0 !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;cursor:pointer !important;transition:color .18s ease !important;}",
-    B+".account-section-header button.learnworlds-button:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
+    /* --- bouton "Modifier" : PILULE OUTLINE moderne (se remplit au survol) --- */
+    B+".account-section-header button.learnworlds-button{background:#fff !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;box-shadow:none !important;padding:8px 18px !important;border-radius:var(--ps-r-pill,999px) !important;color:var(--ps-accent,#507EC5) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:600 !important;line-height:1 !important;cursor:pointer !important;transition:background .18s ease,color .18s ease,border-color .18s ease !important;}",
+    B+".account-section-header button.learnworlds-button:hover{background:var(--ps-accent,#507EC5) !important;border-color:var(--ps-accent,#507EC5) !important;color:#fff !important;}",
 
     /* --- menu latéral --- */
     B+".account-menu-content{position:sticky !important;top:24px !important;}",
     B+".account-section-navigation a{display:block !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;color:#4B5563 !important;text-decoration:none !important;padding:9px 12px !important;margin-bottom:2px !important;border-radius:9px !important;transition:color .15s ease, background .15s ease !important;}",
-    B+".account-section-navigation a:hover{color:var(--ps-accent,#6161FF) !important;background:#F3F1FF !important;}",
+    B+".account-section-navigation a:hover{color:var(--ps-accent,#507EC5) !important;background:var(--ps-accent-tint,#EDF4FF) !important;}",
     /* item actif : AUCUN état natif (vérifié : cliquer n'ajoute aucune classe
        et le hash reste vide) -> classe posée en JS par l'observateur. */
-    B+".account-section-navigation a.ps-acc-on{color:var(--ps-accent,#6161FF) !important;background:var(--ps-accent-tint,#EDEDFF) !important;}",
+    B+".account-section-navigation a.ps-acc-on{color:var(--ps-accent,#507EC5) !important;background:var(--ps-accent-tint,#EDF4FF) !important;}",
+
+    /* --- COURS RETIRÉS (demande Ziad) : on masque la section « Cours et
+       programmes » ET son entrée de menu. La progression par cours n'est donc
+       plus lancée (cf. run()). --- */
+    B+"#courses-programs{display:none !important;}",
+    B+".account-section-navigation a[href='#courses-programs']{display:none !important;}",
 
     /* --- champs / valeurs --- */
     B+".personal-details-values{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
@@ -323,7 +329,11 @@
 
   function run(){
     if(!surLaPage()) return;
-    figtree(); styles(); spy(); progression();
+    figtree(); styles(); spy();
+    /* progression() n'est PLUS appelée : la section « Cours et programmes » est
+       masquée (cf. CSS), donc inutile d'aller chercher l'avancement via le
+       Worker/Turnstile. Le code de progression est conservé plus haut au cas où
+       la section serait ré-affichée. */
   }
 
   if(document.readyState!=="loading") run(); else document.addEventListener("DOMContentLoaded",run);
