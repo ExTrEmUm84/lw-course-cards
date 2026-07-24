@@ -90,10 +90,18 @@
     B+"section.account-section:hover{box-shadow:0 6px 20px rgba(15,23,42,.05) !important;}",
     B+".account-section-header{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;margin-bottom:18px !important;}",
     B+".account-section-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:21px !important;font-weight:800 !important;letter-spacing:-.015em !important;color:#243B6B !important;}",
+    /* petite icône du titre de section : en accent, un peu plus grande */
+    B+".account-section-title-icon{color:var(--ps-accent,#507EC5) !important;width:22px !important;height:22px !important;margin-right:9px !important;vertical-align:-3px !important;}",
+    [B+".account-section-title-icon path",B+".account-section-title-icon circle",B+".account-section-title-icon rect"].join(",")+"{fill:var(--ps-accent,#507EC5) !important;}",
 
     /* --- bouton "Modifier" : PILULE OUTLINE moderne (se remplit au survol) --- */
     B+".account-section-header button.learnworlds-button{background:#fff !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;box-shadow:none !important;padding:8px 18px !important;border-radius:var(--ps-r-pill,999px) !important;color:var(--ps-accent,#507EC5) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:600 !important;line-height:1 !important;cursor:pointer !important;transition:background .18s ease,color .18s ease,border-color .18s ease !important;}",
     B+".account-section-header button.learnworlds-button:hover{background:var(--ps-accent,#507EC5) !important;border-color:var(--ps-accent,#507EC5) !important;color:#fff !important;}",
+    /* en mode édition, le header porte « Enregistrer » (.p-0.lw-brand-text) +
+       « Annuler ». On rend « Enregistrer » PLEIN (action primaire) ; « Annuler »
+       garde la pilule outline ci-dessus. */
+    B+".account-section-header button.learnworlds-button.p-0.lw-brand-text{background:var(--ps-accent,#507EC5) !important;border-color:var(--ps-accent,#507EC5) !important;color:#fff !important;}",
+    B+".account-section-header button.learnworlds-button.p-0.lw-brand-text:hover{background:var(--ps-accent-hover,#486798) !important;border-color:var(--ps-accent-hover,#486798) !important;color:#fff !important;}",
 
     /* --- menu latéral --- */
     B+".account-menu-content{position:sticky !important;top:24px !important;}",
@@ -111,7 +119,13 @@
 
     /* --- champs / valeurs --- */
     B+".personal-details-values{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
-    B+".account-user-avatar{border-radius:var(--ps-r-card,16px) !important;overflow:hidden !important;}",
+    /* avatar : ROND avec anneau tint + ombre douce (look profil moderne) */
+    B+".account-user-avatar{border-radius:50% !important;overflow:hidden !important;border:3px solid #fff !important;box-shadow:0 0 0 2px var(--ps-accent-tint,#EDF4FF),0 4px 14px rgba(15,23,42,.08) !important;}",
+
+    /* --- mode ÉDITION : champs de saisie modernes (radius + anneau de focus
+       accent, au lieu du bord gris fin radius 4px natif) --- */
+    B+".account-app .learnworlds-input{border:1.5px solid var(--ps-border,#E6E9EF) !important;border-radius:10px !important;padding:10px 14px !important;font-size:15px !important;background:#fff !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;transition:border-color .15s ease,box-shadow .15s ease !important;}",
+    B+".account-app .learnworlds-input:focus{border-color:var(--ps-accent,#507EC5) !important;box-shadow:0 0 0 3px var(--ps-accent-tint,#EDF4FF) !important;outline:none !important;}",
 
     /* --- barre de progression par cours (injectée en JS dans #courses-programs) ---
        🔴 La cellule de ligne est en display:flex (direction row) : sans
