@@ -302,14 +302,23 @@
     }
     if(window.__psImmOn) return; window.__psImmOn=true;
     var hideT;
+    function scheduleHide(){ clearTimeout(hideT); hideT=setTimeout(function(){ document.body.classList.add("ps-imm-nobottom"); }, 1200); }
     document.addEventListener("mousemove", function(e){
-      if((window.innerHeight - e.clientY) < 110){                 // souris près du bas -> montre
-        document.body.classList.remove("ps-imm-nobottom"); clearTimeout(hideT);
-      } else {                                                    // ailleurs -> re-cache après un court délai
-        clearTimeout(hideT);
-        hideT=setTimeout(function(){ document.body.classList.add("ps-imm-nobottom"); }, 800);
-      }
+      if((window.innerHeight - e.clientY) < 110){ document.body.classList.remove("ps-imm-nobottom"); clearTimeout(hideT); }  // près du bas -> montre
+      else scheduleHide();                                                                                                   // ailleurs -> re-cache après délai
     }, {passive:true});
+    document.addEventListener("mouseleave", scheduleHide, {passive:true});
+    /* 🔴 Le contenu de lecture est dans une IFRAME same-origin : les mousemove N'Y
+       REMONTENT PAS au document parent → sans ça la barre ne se re-cache jamais quand
+       on lit (bug « ne disparaît pas quand on quitte la zone »). On écoute AUSSI
+       l'iframe : toute activité dedans = lecture → programme le masquage. Ré-attaché
+       périodiquement (l'iframe se recharge à chaque leçon). */
+    function hookIframe(){
+      var f=document.querySelector("#coursePlayerWrapper iframe");
+      if(!f) return;
+      try{ var d=f.contentDocument; if(d && !d.__psImmHook){ d.__psImmHook=true; d.addEventListener("mousemove", scheduleHide, {passive:true}); } }catch(_){}
+    }
+    hookIframe(); setInterval(hookIframe, 2000);
   }
 
   /* ====================================================================
