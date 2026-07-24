@@ -327,12 +327,11 @@
       var link=card.querySelector("a.card-link[href], a[href]");
       var href=link ? link.getAttribute("href") : "#";
 
-      /* 🔴 Clic DIRECT sur le LECTEUR (`/path-player?courseid=<slug>`) si INSCRIT
-         (barre de progression native), sinon présentation (un non-inscrit sur
-         /path-player est renvoyé à l'accueil). Cf. cabinet-cards.js. */
-      var enrolled = !!card.querySelector(".lw-course-card-progress-bar");
-      var slug = (href.match(/\/course\/([^\/?#]+)/) || [])[1] || "";
-      var target = (enrolled && slug) ? ("/path-player?courseid=" + encodeURIComponent(slug)) : href;
+      /* 🔴 Lien = lien NATIF LW (href). On NE fabrique PLUS « /path-player?courseid= » :
+         une URL lecteur SANS unité rend une PAGE BLANCHE (cf. cabinet-cards.js, 24/07). Le
+         direct-au-player fiable = réglage natif de l'élément Cours (Site Builder →
+         « Lorsque l'on clique sur » → Inscrits → « Lecteur du cours »). */
+      var target = href;
 
       /* Cercle picto FLOTTANT (enfant direct de la carte, comme l'illustration cours) */
       var ic=document.createElement("span");

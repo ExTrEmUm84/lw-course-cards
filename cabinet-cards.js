@@ -332,14 +332,14 @@
       var desc=dEl ? (dEl.textContent||"").replace(/\s+/g," ").trim() : "";
       var link=card.querySelector("a.card-link[href], a[href]");
       var href=link ? link.getAttribute("href") : "#";
-      /* 🔴 Clic DIRECT sur le LECTEUR (`/path-player?courseid=<slug>`, slug===courseid)
-         au lieu de la page de présentation `/course/<slug>` — MAIS uniquement si on
-         est INSCRIT (barre de progression native présente) : un non-inscrit sur
-         /path-player est renvoyé à l'accueil, donc pour lui on garde la présentation
-         (où il accède/s'inscrit). Vérifié en live : le lecteur s'ouvre bien. */
-      var enrolled = !!card.querySelector(".lw-course-card-progress-bar");
-      var slug = (href.match(/\/course\/([^\/?#]+)/) || [])[1] || "";
-      var target = (enrolled && slug) ? ("/path-player?courseid=" + encodeURIComponent(slug)) : href;
+      /* 🔴 Lien = lien NATIF LW (href de la carte). On NE fabrique PLUS
+         « /path-player?courseid=<slug> » à la main : cette URL lecteur est SANS unité
+         → LW rend une PAGE BLANCHE (constaté 24/07 sur bain-…-gorilla, un cours pourtant
+         PLEIN). Le direct-au-player fiable = réglage NATIF (Site Builder → élément Cours →
+         « Lorsque l'on clique sur » → Inscrits → « Lecteur du cours »), qui met la bonne
+         URL (avec unité) dans le href natif — que ce `target` recopie tel quel. */
+      var slug = (href.match(/\/course\/([^\/?#]+)/) || [])[1] || "";   // gardé pour le flag retour (sessionStorage)
+      var target = href;
 
       /* 🔴 Le BADGE est un enfant DIRECT de la carte (comme l'illustration ronde
          des cartes cours), pas dans .ps-ccab : c'est lui qui FLOTTE au-dessus via
