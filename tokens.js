@@ -236,11 +236,44 @@
     _revObs.observe(document.documentElement,{childList:true,subtree:true});
   }
 
-  cloak(); poser(); accentPage(); heroBtns(); watchReveal();
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); });
+  /* ====================================================================
+     BOUTON RETOUR sur le PLAYER (page /path-player)
+     --------------------------------------------------------------------
+     Le bouton natif du player LW (dans le burger) n'est pas pilotable de
+     façon fiable (SPA qui se peint tard). À la place : quand une carte de
+     liste (ex. fiches cabinet) est cliquée, le script de la page pose
+     sessionStorage.psPlayerReturn = {url,label,slug,color}. Ici, si on est
+     sur le player DU cours qu'on vient d'ouvrir (slug === courseid), on
+     injecte NOTRE bouton retour, en position:fixed (indépendant du DOM du
+     player). Calé en haut à gauche à côté du burger — top/left ajustables.
+     Batch : marche pour tout cours ouvert depuis une page qui pose ce flag. */
+  function playerBack(){
+    if(!/\/path-player/.test(location.pathname) && !(document.body && document.body.classList.contains("slug-path-player"))) return;
+    if(!document.body || document.getElementById("ps-player-back")) return;
+    var raw; try{ raw=sessionStorage.getItem("psPlayerReturn"); }catch(e){ return; }
+    if(!raw) return;
+    var d; try{ d=JSON.parse(raw); }catch(e){ return; }
+    if(!d || !d.url) return;
+    var cid=(new URLSearchParams(location.search)).get("courseid")||"";
+    if(d.slug && cid && d.slug!==cid) return;   // pas le cours ouvert depuis la liste -> pas de bouton
+    if(!document.getElementById("ps-player-back-css")){
+      var s=document.createElement("style"); s.id="ps-player-back-css";
+      s.textContent="#ps-player-back{position:fixed !important;top:9px !important;left:58px !important;z-index:2147483000 !important;display:inline-flex !important;align-items:center !important;gap:7px !important;height:38px !important;padding:0 16px 0 12px !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#507EC5) !important;color:#fff !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:600 !important;line-height:1 !important;text-decoration:none !important;box-shadow:0 2px 10px rgba(15,23,42,.2) !important;transition:filter .18s ease,transform .18s ease !important;}#ps-player-back:hover{filter:brightness(.92) !important;transform:translateY(-1px) !important;color:#fff !important;text-decoration:none !important;}#ps-player-back svg{width:16px !important;height:16px !important;stroke:#fff !important;fill:none !important;stroke-width:2.4 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}@media(max-width:640px){#ps-player-back span{display:none !important;}#ps-player-back{left:54px !important;padding:0 !important;width:38px !important;justify-content:center !important;}}";
+      (document.head||document.documentElement).appendChild(s);
+    }
+    var a=document.createElement("a");
+    a.id="ps-player-back"; a.href=d.url;
+    a.setAttribute("aria-label", (d.label||"Retour").replace(/[<>&"]/g,""));
+    if(d.color) a.style.setProperty("background", d.color, "important");
+    a.innerHTML='<svg viewBox="0 0 24 24" aria-hidden="true"><polyline points="15 18 9 12 15 6"></polyline></svg><span>'+((d.label||"Retour").replace(/[<>&]/g,""))+'</span>';
+    document.body.appendChild(a);
+  }
+
+  cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
      quelques relances pour attraper la classe active. */
-  [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); });
+  [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); });
   setTimeout(reveal, 3500);   // filet de sécurité anti-flash
 
   /* ====================================================================

@@ -385,6 +385,24 @@
       cover.className="ps-cab-cover"; cover.href=target;
       cover.setAttribute("aria-label", title);
       card.appendChild(cover);
+      /* Mémorise l'origine pour le bouton retour du player (voir playerBack() dans
+         tokens.js) : au clic sur cette carte, le player du cours saura revenir ici.
+         Capture-phase pour poser le flag AVANT la navigation. Couleur lue au clic
+         (accent de la page = vert cabinet). slug === courseid côté player. */
+      if(slug){
+        (function(sl){
+          card.addEventListener("click", function(){
+            try{
+              sessionStorage.setItem("psPlayerReturn", JSON.stringify({
+                url: location.pathname,
+                label: "Retour aux fiches cabinet",
+                slug: sl,
+                color: getComputedStyle(document.documentElement).getPropertyValue("--ps-accent").trim()
+              }));
+            }catch(e){}
+          }, true);
+        })(slug);
+      }
       card.dataset.psC="1";                    // déclenche le masquage du natif
     });
   }
