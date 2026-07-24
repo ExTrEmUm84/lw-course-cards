@@ -281,11 +281,37 @@
     }
   }
 
-  cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack();
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); });
+  /* ====================================================================
+     LECTEUR IMMERSIF (page /path-player) — chrome auto-masqué
+     --------------------------------------------------------------------
+     Modernisation : la barre de navigation du bas (.-default-course-player-topbar)
+     et le sommaire de gauche (.-first-col) se cachent quand on lit (souris au
+     centre) et réapparaissent près des bords. Transform !important piloté par des
+     classes body (.ps-imm-nobottom / .ps-imm-noside) selon la position souris.
+     🔴 Barre du bas VALIDÉE en direct ; sommaire non vérifiable dans l'onglet auto
+     (sa position par défaut y diffère) → Ziad teste/ajuste (seuils 95/60/460, vitesse). */
+  function immersivePlayer(){
+    var onP = /\/path-player/.test(location.pathname) || (document.body && document.body.classList.contains("slug-path-player"));
+    if(!onP || !document.body) return;
+    if(!document.getElementById("ps-imm-css")){
+      var s=document.createElement("style"); s.id="ps-imm-css";
+      s.textContent="#coursePlayerWrapper .-default-course-player-topbar,#coursePlayerWrapper .-first-col{transition:transform .35s cubic-bezier(.4,0,.2,1) !important;}body.ps-imm-nobottom #coursePlayerWrapper .-default-course-player-topbar{transform:translateY(120%) !important;}body.ps-imm-noside #coursePlayerWrapper .-first-col{transform:translateX(-102%) !important;}";
+      (document.head||document.documentElement).appendChild(s);
+      document.body.classList.add("ps-imm-nobottom"); document.body.classList.add("ps-imm-noside");   // démarre en lecture immersive
+    }
+    if(window.__psImmOn) return; window.__psImmOn=true;
+    document.addEventListener("mousemove", function(e){
+      document.body.classList.toggle("ps-imm-nobottom", (window.innerHeight - e.clientY) > 95);   // barre bas : cachée sauf près du bas
+      if(e.clientX < 60) document.body.classList.remove("ps-imm-noside");        // bord gauche -> révèle le sommaire
+      else if(e.clientX > 460) document.body.classList.add("ps-imm-noside");     // loin (> largeur sommaire) -> cache
+    }, {passive:true});
+  }
+
+  cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
      quelques relances pour attraper la classe active. */
-  [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); });
+  [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); setTimeout(immersivePlayer,d); });
   setTimeout(reveal, 3500);   // filet de sécurité anti-flash
 
   /* ====================================================================
