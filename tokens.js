@@ -126,7 +126,7 @@
   var PAGE_ACCENTS={
     "fiches-secteur":"#fad54a",        /* Secteurs — jaune */
     "emptykk-clone-clone":"#6b7280",   /* Cas — gris */
-    "fiches-secteur-clone":"#c51d4a"   /* Cabinets — rouge */
+    "fiches-secteur-clone":"#007260"   /* Cabinets — vert (choix Ziad 24/07, était rouge #c51d4a) */
   };
 
   function _chan(hex){var h=hex.replace("#","");if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
