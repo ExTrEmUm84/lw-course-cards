@@ -282,28 +282,33 @@
   }
 
   /* ====================================================================
-     LECTEUR IMMERSIF (page /path-player) — chrome auto-masqué
+     LECTEUR IMMERSIF (page /path-player) — barre du bas auto-masquée
      --------------------------------------------------------------------
-     Modernisation : la barre de navigation du bas (.-default-course-player-topbar)
-     et le sommaire de gauche (.-first-col) se cachent quand on lit (souris au
-     centre) et réapparaissent près des bords. Transform !important piloté par des
-     classes body (.ps-imm-nobottom / .ps-imm-noside) selon la position souris.
-     🔴 Barre du bas VALIDÉE en direct ; sommaire non vérifiable dans l'onglet auto
-     (sa position par défaut y diffère) → Ziad teste/ajuste (seuils 95/60/460, vitesse). */
+     La barre de navigation du bas (.-default-course-player-topbar) se cache
+     pendant la lecture et réapparaît quand la souris s'approche du bas, puis se
+     re-cache ~0,8 s après que la souris s'éloigne (auto-masquage temporisé, pour
+     qu'elle disparaisse même si la souris s'arrête). 🔴 Le SOMMAIRE (.-first-col)
+     a été RETIRÉ de l'immersif : le masquer par transform écrasait le burger natif
+     (symptôme « pas de sommaire »). Le sommaire reste piloté par le burger.
+     Seuils (110px) / délai (800ms) / vitesse (.3s) ajustables ici. */
   function immersivePlayer(){
     var onP = /\/path-player/.test(location.pathname) || (document.body && document.body.classList.contains("slug-path-player"));
     if(!onP || !document.body) return;
     if(!document.getElementById("ps-imm-css")){
       var s=document.createElement("style"); s.id="ps-imm-css";
-      s.textContent="#coursePlayerWrapper .-default-course-player-topbar,#coursePlayerWrapper .-first-col{transition:transform .35s cubic-bezier(.4,0,.2,1) !important;}body.ps-imm-nobottom #coursePlayerWrapper .-default-course-player-topbar{transform:translateY(120%) !important;}body.ps-imm-noside #coursePlayerWrapper .-first-col{transform:translateX(-102%) !important;}";
+      s.textContent="#coursePlayerWrapper .-default-course-player-topbar{transition:transform .3s ease !important;}body.ps-imm-nobottom #coursePlayerWrapper .-default-course-player-topbar{transform:translateY(130%) !important;}";
       (document.head||document.documentElement).appendChild(s);
-      document.body.classList.add("ps-imm-nobottom"); document.body.classList.add("ps-imm-noside");   // démarre en lecture immersive
+      document.body.classList.add("ps-imm-nobottom");   // démarre caché
     }
     if(window.__psImmOn) return; window.__psImmOn=true;
+    var hideT;
     document.addEventListener("mousemove", function(e){
-      document.body.classList.toggle("ps-imm-nobottom", (window.innerHeight - e.clientY) > 95);   // barre bas : cachée sauf près du bas
-      if(e.clientX < 60) document.body.classList.remove("ps-imm-noside");        // bord gauche -> révèle le sommaire
-      else if(e.clientX > 460) document.body.classList.add("ps-imm-noside");     // loin (> largeur sommaire) -> cache
+      if((window.innerHeight - e.clientY) < 110){                 // souris près du bas -> montre
+        document.body.classList.remove("ps-imm-nobottom"); clearTimeout(hideT);
+      } else {                                                    // ailleurs -> re-cache après un court délai
+        clearTimeout(hideT);
+        hideT=setTimeout(function(){ document.body.classList.add("ps-imm-nobottom"); }, 800);
+      }
     }, {passive:true});
   }
 
