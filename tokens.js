@@ -364,4 +364,18 @@
     _fs.async=true;
     (document.head||document.documentElement).appendChild(_fs);
   }
+
+  /* ====================================================================
+     CHARGEMENT DU RESTYLE DU LECTEUR (player.js) — page /path-player
+     --------------------------------------------------------------------
+     Idem : chargé d'ici UNIQUEMENT sur le player → tout le CSS/JS du player
+     (burger 3 traits, navigation, liste, DA marine/Figtree) est versionné dans
+     le repo, plus rien dans le Code personnalisé de la page (3 loaders suffisent). */
+  if((/\/path-player/.test(location.pathname) || (document.body && document.body.classList.contains("slug-path-player"))) && !document.getElementById("ps-player-js")){
+    var _pl=document.createElement("script");
+    _pl.id="ps-player-js";
+    _pl.src="https://extremum84.github.io/lw-course-cards/player.js";
+    _pl.async=true;
+    (document.head||document.documentElement).appendChild(_pl);
+  }
 })();
