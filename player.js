@@ -53,7 +53,10 @@
         + W + ".-lrn-path-wrapper *:not(svg):not(i){font-family:" + FONT + " !important;}",
 
       /* --- Burger : flèche native → 3 traits (technique de Ziad) --- */
-      W + ".-default-course-player-topbar-back{position:relative !important;color:#fff !important;}",
+      /* left:15px s'ajoute au transform natif (qui fait dépasser le burger) sans le
+         casser → burger non rogné (passait de left -5 à +10). border-radius symétrique
+         + ombre légère = burger flottant propre (au lieu du bord plat rogné). */
+      W + ".-default-course-player-topbar-back{position:relative !important;color:#fff !important;left:15px !important;border-radius:8px !important;box-shadow:0 3px 12px rgba(15,23,42,.2) !important;}",
       W + ".-first-col[style*='left: -'] .-default-course-player-topbar-back{color:#fff !important;}",
       W + ".-default-course-player-topbar-back-arrow{width:34px !important;height:34px !important;overflow:visible !important;"
         + "background:linear-gradient(currentColor,currentColor) center calc(50% - 8px)/26px 4px no-repeat,"
