@@ -53,12 +53,18 @@
         + W + ".-lrn-path-wrapper *:not(svg):not(i){font-family:" + FONT + " !important;}",
 
       /* --- Burger : flèche native → 3 traits (technique de Ziad) --- */
-      /* Historique : left:-5 natif rognait le burger à gauche ; on avait sur-corrigé à
-         +15 + radius + ombre (« flottant ») → le bouton DÉPASSAIT du chrome marine (fond
-         visible derrière). On neutralise le -5 natif (left:0) et on retire le flottant :
-         burger à plat dans la barre, ni rogné ni débordant. */
+      /* 🔴 LE MÊME élément .-default-course-player-topbar-back sert de burger dans les DEUX
+         états → il faut un décalage PAR ÉTAT, sinon on répare l'un en cassant l'autre :
+           • FERMÉ : la boîte tombe à x=-5 (transform natif translateX(45) sur base -50) →
+             burger collé/rogné au bord gauche. Fix : left:16px → inset à x≈11.
+           • OUVERT : ce même +16 poussait le burger (haut-droite du sommaire) HORS du
+             panneau marine (débordait de ~11px dans le blanc). D'où : left:0 en BASE
+             (ouvert = à plat, pas de débordement), +16 SEULEMENT en fermé.
+         L'état est encodé dans le style inline de .-first-col : fermé ⇒ left négatif
+         (ex. -446px) → sélecteur [style*='left: -']. Vérifié en direct : fermé inset,
+         ouvert -5px à l'intérieur du bord marine. Valeur d'inset (16px) ajustable. */
       W + ".-default-course-player-topbar-back{position:relative !important;color:#fff !important;left:0 !important;}",
-      W + ".-first-col[style*='left: -'] .-default-course-player-topbar-back{color:#fff !important;}",
+      W + ".-first-col[style*='left: -'] .-default-course-player-topbar-back{color:#fff !important;left:16px !important;}",
       W + ".-default-course-player-topbar-back-arrow{width:34px !important;height:34px !important;overflow:visible !important;"
         + "background:linear-gradient(currentColor,currentColor) center calc(50% - 8px)/26px 4px no-repeat,"
         + "linear-gradient(currentColor,currentColor) center center/26px 4px no-repeat,"
@@ -81,9 +87,25 @@
       W + ".lrn-path-cont:hover .lrn-path-cont-name{color:" + MARINE + " !important;}",
       W + ".lrn-path-cont-extras{margin-left:auto !important;padding-left:8px !important;}",
 
-      /* --- Barre de progression : bleu de marque sur translucide --- */
-      W + ".-default-course-player-progress-wrapper .progress," + W + "[class*='progress-bar-full']{background:rgba(255,255,255,.22) !important;}",
-      W + "[class*='progress-bar-current']," + W + ".-default-course-player-progress-wrapper .progress>*{background:" + ACCENT + " !important;}",
+      /* --- Coche de complétion : pastille accent + ✓ blanche, centrée ---
+         🔴 Natif = ✓ FIN en #3887B4 (bleu des filtres, pas notre accent) ; le wrapper
+         .lrn-path-completion est épinglé EN HAUT (top:-3;bottom:27) et le cercle est en
+         position:absolute + translate(-50%) → tick petit, mauvaise couleur, collé en haut
+         (« moche et pas aligné »). Fix : le wrapper occupe toute la hauteur de ligne
+         (top:0;bottom:0) en flex centré ; le cercle repasse en position:static pour être
+         centré par le flex ; on en fait un DISQUE accent 18px avec ✓ blanche. Centrage
+         vérifié en direct (delta=0 vs le nom). Ne touche que .completed (leçons finies). */
+      W + ".lrn-path-completion{top:0 !important;bottom:0 !important;right:12px !important;height:auto !important;transform:none !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+      W + ".lrn-path-completion-circle.completed{position:static !important;top:auto !important;left:auto !important;right:auto !important;bottom:auto !important;width:18px !important;height:18px !important;min-width:18px !important;border-radius:50% !important;background:" + ACCENT + " !important;transform:none !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+      W + ".lrn-path-completion-circle.completed::after{content:'\\2713' !important;color:#fff !important;font-size:11px !important;line-height:1 !important;font-weight:700 !important;position:static !important;transform:none !important;}",
+
+      /* --- Barre de progression : bleu de marque sur piste translucide ---
+         🔴 Le vrai DOM LW = .-default-course-player-progress-bar (PISTE) +
+         .-default-course-player-progress-bar-interior (REMPLISSAGE, porte clr1-bg
+         → blanc natif). Les anciens sélecteurs progress-bar-full/current N'EXISTAIENT
+         PAS → le remplissage restait BLANC. Corrigé sur les vrais noms. */
+      W + ".-default-course-player-progress-bar{background:rgba(255,255,255,.28) !important;}",
+      W + ".-default-course-player-progress-bar-interior{background:" + ACCENT + " !important;}",
 
       /* --- Boutons de navigation prev/suivant : libellés + chevrons (Ziad) --- */
       ".default-course-player-nav-btn{max-width:42% !important;display:flex !important;align-items:center !important;}",
