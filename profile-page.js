@@ -246,6 +246,105 @@
     return m ? Math.min(100,parseInt(m[1],10)) : 0;
   }
 
+  /* ---- Source des domaines : page, mémoire locale, puis Worker ----
+     🔴 HISTORIQUE : le board recopiait la section « Vue par thématique ». Ziad
+     l'ayant retirée de la page, il n'y avait plus AUCUNE donnée (0 carte) et le
+     board disparaissait. On ne dépend donc plus du widget :
+       1. `me.userLearningPrograms` (global LearnWorlds du membre connecté) donne
+          la LISTE de ses programmes INSTANTANÉMENT, sans réseau → les tuiles
+          s'affichent tout de suite, avec leur nom.
+       2. Le dernier résultat connu est gardé en mémoire locale → au retour sur la
+          page, les % s'affichent instantanément (puis sont rafraîchis).
+       3. Le Worker (/lp) calcule le vrai % par programme (moyenne des cours du
+          programme où le membre est inscrit) et met tout à jour.
+     🔴 L'identifiant vient de `me.id` : la résolution par e-mail côté Worker
+     tombait sur le MAUVAIS compte (LearnWorlds ignore un filtre inconnu et
+     renvoie le premier utilisateur de l'école). */
+  var LP_ENDPOINT="https://annuaire-prepastrat.ziedbencheikh.workers.dev/";
+  /* Clé de site Turnstile : PUBLIQUE par nature (c'est la clé secrète, côté
+     Worker, qui valide). Même clé que l'annuaire et /account.
+     🔴 Ne JAMAIS mettre ici une clé de service qui contourne Turnstile : ce
+     dépôt est PUBLIC, tout ce qui y est écrit est lisible par n'importe qui. */
+  var LP_SITEKEY="0x4AAAAAAD35WbGwkjYZmALf";
+  var LP_STORE="psLpProgress";
+  var lpData=null;        // [{name,pct}] une fois connu (mémoire locale ou Worker)
+  var lpAsked=false;
+  var lpTsEl=null;
+
+  function meUser(){ try{ return (typeof me==="object" && me) ? me : null; }catch(e){ return null; } }
+
+  /* Programmes du membre connectés, sans aucun appel réseau. */
+  function lpFromPage(){
+    var u=meUser();
+    var arr=u && u.userLearningPrograms;
+    if(!arr || !arr.length) return null;
+    return [].slice.call(arr).map(function(p){
+      return {name:domainLabel(p.title||p.id||""), pct:null};
+    }).filter(function(p){ return p.name; });
+  }
+
+  function lpFromStore(){
+    try{
+      var raw=localStorage.getItem(LP_STORE);
+      if(!raw) return null;
+      var j=JSON.parse(raw);
+      return (j && j.programs && j.programs.length) ? j.programs : null;
+    }catch(e){ return null; }
+  }
+
+  /* Appel au Worker, derrière Turnstile (comme l'annuaire et /account) : le
+     Worker refuse toute requête sans jeton valide. Le widget est invisible et
+     auto-injecté — rien à ajouter dans la page. La réponse est mise en cache
+     côté Worker (renvoi immédiat + rafraîchissement en arrière-plan), et côté
+     navigateur dans LP_STORE : l'attente n'est visible qu'à la 1re visite. */
+  function lpFetch(jeton){
+    var u=meUser();
+    if(!u || !u.id) return;
+    fetch(LP_ENDPOINT+"lp?uid="+encodeURIComponent(u.id),{
+      headers:{ Accept:"application/json", "X-Turnstile-Token":jeton, "X-LW-User":String(u.id) }
+    })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        if(!j || !j.programs || !j.programs.length) return;
+        var progs=j.programs.map(function(p){ return {name:domainLabel(p.name||""), pct:p.pct}; });
+        lpData=progs;
+        try{ localStorage.setItem(LP_STORE, JSON.stringify({t:Date.now(), programs:progs})); }catch(e){}
+        mountBoard();                       // repeint avec les vrais %
+      })
+      .catch(function(){});
+  }
+
+  /* Turnstile auto-injecté, widget invisible hors écran mais RENDU (un
+     display:none empêcherait son exécution). Repris de account-page.js. */
+  function lpStart(){
+    if(lpAsked) return;
+    var u=meUser();
+    if(!u || !u.id) return;                  // membre non identifié : rien à demander
+    lpAsked=true;
+    if(!lpTsEl){
+      lpTsEl=document.createElement("div");
+      lpTsEl.style.cssText="position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;";
+      (document.body||document.documentElement).appendChild(lpTsEl);
+    }
+    window.psLpTsReady=function(){
+      try{
+        window.turnstile.render(lpTsEl,{
+          sitekey:LP_SITEKEY,
+          callback:lpFetch,
+          "error-callback":function(){ return true; },
+          "expired-callback":function(){ try{ window.turnstile.reset(lpTsEl); }catch(e){} },
+        });
+      }catch(e){ console.error("[profile-board] turnstile",e); }
+    };
+    if(window.turnstile){ window.psLpTsReady(); return; }
+    if(document.getElementById("ps-lp-ts-api")) return;
+    var s=document.createElement("script");
+    s.id="ps-lp-ts-api";
+    s.src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=psLpTsReady&render=explicit";
+    s.async=true; s.defer=true;
+    (document.head||document.documentElement).appendChild(s);
+  }
+
   /* Construit/actualise le board dans le grandpa des tuiles. Idempotent grâce à
      une signature : ne se reconstruit que si les domaines ou les % changent
      (l'observer rappelle build() à chaque mutation). */
@@ -259,6 +358,11 @@
       if(!raw || seen[raw]) return; seen[raw]=1;
       progs.push({name:domainLabel(raw), pct:programPct(card)});
     });
+    /* Pas de widget « Vue par thématique » sur la page (cas courant depuis que
+       Ziad l'a retiré) : on prend le Worker, sinon la mémoire locale, sinon la
+       liste de la page — dans cet ordre de fraîcheur. */
+    if(!progs.length) progs = lpData || lpFromStore() || lpFromPage() || [];
+    lpStart();                                     // rafraîchit (une seule fois)
     if(!progs.length) return;                       // programmes pas encore rendus : réessai
     var sig=progs.map(function(p){return p.name+"="+p.pct;}).join("|");
     var board=grandpa.querySelector(".ps-pf-board");
@@ -267,14 +371,18 @@
     board.dataset.sig=sig;
     board.textContent="";
     progs.forEach(function(p){
+      /* pct null = pas encore connu (1re visite, réponse du Worker en route) :
+         la tuile s'affiche quand même avec son nom, le chiffre arrive ensuite. */
+      var known=(typeof p.pct==="number" && isFinite(p.pct));
+      var val=known?Math.max(0,Math.min(100,Math.round(p.pct))):0;
       var tile=document.createElement("div"); tile.className="ps-pf-bt";
       var top=document.createElement("div"); top.className="ps-pf-bt-top";
-      var pc=document.createElement("span"); pc.className="ps-pf-bt-pct"; pc.textContent=p.pct+" %";
+      var pc=document.createElement("span"); pc.className="ps-pf-bt-pct"; pc.textContent=known?(val+" %"):"—";
       var ic=document.createElement("span"); ic.className="ps-pf-bt-ic"; ic.innerHTML=BOARD_ICON;
       top.appendChild(pc); top.appendChild(ic);
       var nm=document.createElement("div"); nm.className="ps-pf-bt-name"; nm.textContent=p.name;
       var tr=document.createElement("div"); tr.className="ps-pf-bt-track";
-      var fl=document.createElement("div"); fl.className="ps-pf-bt-fill"; fl.style.width=(p.pct>0&&p.pct<2?2:p.pct)+"%";
+      var fl=document.createElement("div"); fl.className="ps-pf-bt-fill"; fl.style.width=(known?(val>0&&val<2?2:val):0)+"%";
       tr.appendChild(fl);
       tile.appendChild(top); tile.appendChild(nm); tile.appendChild(tr);
       board.appendChild(tile);
