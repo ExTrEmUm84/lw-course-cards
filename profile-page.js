@@ -85,16 +85,51 @@
        (progression des Learning Programs déjà rendue plus bas) -> instantané.
        Le board est injecté DANS le grandpa des tuiles ; les tuiles natives sont
        masquées via `ps-has-board`. */
+    /* Mode DASHBOARD : anneau de progression + bouton « Continuer », une couleur
+       par domaine (celle de sa page, posée en inline `--c` par le JS). */
     S+" .ps-pf-tiles.ps-has-board > *:not(.ps-pf-board){display:none !important;}",
-    S+" .ps-pf-board{display:grid !important;grid-template-columns:repeat(auto-fit,minmax(150px,1fr)) !important;gap:14px !important;}",
-    S+" .ps-pf-bt{background:#fff !important;border-radius:var(--ps-r-card,16px) !important;padding:18px 20px !important;box-shadow:0 4px 14px rgba(15,23,42,.06) !important;display:flex !important;flex-direction:column !important;gap:11px !important;transition:transform .2s ease, box-shadow .2s ease !important;}",
-    S+" .ps-pf-bt:hover{transform:translateY(-2px) !important;box-shadow:0 10px 26px rgba(15,23,42,.10) !important;}",
-    S+" .ps-pf-bt-top{display:flex !important;align-items:flex-start !important;justify-content:space-between !important;}",
-    S+" .ps-pf-bt-pct{"+FT+"font-size:26px !important;font-weight:800 !important;line-height:1 !important;letter-spacing:-.02em !important;color:#243B6B !important;}",
-    S+" .ps-pf-bt-ic{width:34px !important;height:34px !important;border-radius:50% !important;background:var(--ps-accent-tint,#EDEDFF) !important;display:flex !important;align-items:center !important;justify-content:center !important;color:var(--ps-accent,#6161FF) !important;flex:none !important;}",
-    S+" .ps-pf-bt-name{"+FT+"font-size:13px !important;font-weight:600 !important;color:#4B5563 !important;line-height:1.3 !important;}",
-    S+" .ps-pf-bt-track{height:7px !important;border-radius:999px !important;background:#EEF1F6 !important;overflow:hidden !important;}",
-    S+" .ps-pf-bt-fill{height:100% !important;border-radius:999px !important;background:var(--ps-accent,#6161FF) !important;transition:width .6s ease !important;}",
+    S+" .ps-pf-board{display:grid !important;grid-template-columns:repeat(auto-fit,minmax(196px,1fr)) !important;gap:14px !important;}",
+    S+" .ps-pf-bt{background:#fff !important;border-radius:var(--ps-r-card,16px) !important;padding:16px 17px 15px !important;box-shadow:0 4px 14px rgba(15,23,42,.06) !important;display:flex !important;flex-direction:column !important;gap:12px !important;transition:transform .2s ease, box-shadow .2s ease !important;animation:psPfUp .55s ease both !important;}",
+    S+" .ps-pf-bt:hover{transform:translateY(-3px) !important;box-shadow:0 12px 28px rgba(15,23,42,.12) !important;}",
+    S+" .ps-pf-bt-top{display:flex !important;align-items:center !important;gap:13px !important;}",
+    S+" .ps-pf-ring{width:58px !important;height:58px !important;flex:none !important;position:relative !important;}",
+    S+" .ps-pf-ring svg{transform:rotate(-90deg) !important;display:block !important;}",
+    /* l'anneau s'anime en dessinant son tracé (stroke-dashoffset) */
+    S+" .ps-pf-ring .ps-pf-arc{transition:stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1) !important;}",
+    S+" .ps-pf-bt-pct{position:absolute !important;inset:0 !important;display:flex !important;align-items:center !important;justify-content:center !important;"+FT+"font-size:14px !important;font-weight:800 !important;color:#243B6B !important;letter-spacing:-.02em !important;}",
+    S+" .ps-pf-bt-name{"+FT+"font-size:13.5px !important;font-weight:700 !important;color:#243B6B !important;line-height:1.25 !important;}",
+    S+" .ps-pf-bt-sub{"+FT+"font-size:11.5px !important;font-weight:500 !important;color:#8A93A5 !important;margin-top:2px !important;}",
+    S+" .ps-pf-go{display:flex !important;align-items:center !important;justify-content:center !important;gap:6px !important;"+FT+"font-size:12.5px !important;font-weight:700 !important;padding:9px 12px !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--c,#507EC5) !important;color:#fff !important;text-decoration:none !important;border:0 !important;transition:filter .15s ease, transform .15s ease !important;}",
+    S+" .ps-pf-go:hover{filter:brightness(1.09) !important;transform:translateY(-1px) !important;color:#fff !important;text-decoration:none !important;}",
+    S+" .ps-pf-go::after{content:\"\\2192\" !important;font-size:14px !important;line-height:1 !important;}",
+    /* fond neutre sous le board pour l'effet « tableau de bord » (1 ligne à retirer si Ziad préfère la bande bleue) */
+    S+" section.learnworlds-section.ps-pf-dash{background:#F7F9FC !important;}",
+    S+" .ps-pf-dash .learnworlds-section-overlay{display:none !important;}",
+    S+" .ps-pf-dash h1.learnworlds-heading{color:#243B6B !important;}",
+
+    /* ============ 2c) EN-TÊTE « dashboard » (avatar + identité + stats) ============
+       L'en-tête natif (petit avatar centré + nom + bouton) faisait vide et perdu.
+       On construit `.ps-pf-hero` (bandeau marine) et on MASQUE le natif de cette
+       section. 🔴 Le bouton « Edit profile » est DÉPLACÉ dans notre en-tête, jamais
+       recréé : il porte un handler LearnWorlds qu'on perdrait en le clonant. */
+    S+" .ps-pf-heroed .learnworlds-section-content > *:not(.ps-pf-hero){display:none !important;}",
+    S+" .ps-pf-hero{background:#243B6B !important;border-radius:20px !important;padding:30px 32px 26px !important;color:#fff !important;"+FT+"}",
+    S+" .ps-pf-hero-row{display:flex !important;align-items:center !important;gap:22px !important;flex-wrap:wrap !important;}",
+    S+" .ps-pf-av{width:92px !important;height:92px !important;border-radius:50% !important;background:var(--ps-accent,#507EC5) !important;display:flex !important;align-items:center !important;justify-content:center !important;font-size:32px !important;font-weight:800 !important;color:#fff !important;flex:none !important;box-shadow:0 0 0 4px rgba(255,255,255,.18) !important;overflow:hidden !important;animation:psPfIn .5s ease both !important;}",
+    S+" .ps-pf-av img{width:100% !important;height:100% !important;object-fit:cover !important;border-radius:50% !important;}",
+    S+" .ps-pf-id{min-width:0 !important;flex:1 1 260px !important;}",
+    S+" .ps-pf-hname{"+FT+"font-size:27px !important;font-weight:800 !important;letter-spacing:-.02em !important;color:#fff !important;margin:0 0 4px !important;line-height:1.15 !important;animation:psPfIn .5s .05s ease both !important;}",
+    S+" .ps-pf-hrole{"+FT+"font-size:13px !important;color:rgba(255,255,255,.72) !important;margin:0 0 12px !important;animation:psPfIn .5s .1s ease both !important;}",
+    S+" .ps-pf-chips{display:flex !important;flex-wrap:wrap !important;gap:7px !important;}",
+    S+" .ps-pf-chip{"+FT+"font-size:12px !important;font-weight:700 !important;padding:5px 13px !important;border-radius:var(--ps-r-pill,999px) !important;background:rgba(255,255,255,.14) !important;border:1px solid rgba(255,255,255,.16) !important;color:#fff !important;animation:psPfIn .5s ease both !important;}",
+    S+" .ps-pf-chip.-hi{background:var(--ps-accent,#507EC5) !important;border-color:var(--ps-accent,#507EC5) !important;}",
+    S+" .ps-pf-hero .ps-pf-edit{margin-left:auto !important;align-self:flex-start !important;flex:none !important;}",
+    S+" .ps-pf-stats{display:flex !important;gap:12px !important;margin-top:20px !important;flex-wrap:wrap !important;}",
+    S+" .ps-pf-st{flex:1 1 130px !important;background:rgba(255,255,255,.09) !important;border:1px solid rgba(255,255,255,.12) !important;border-radius:13px !important;padding:12px 14px !important;animation:psPfIn .5s ease both !important;}",
+    S+" .ps-pf-st b{display:block !important;"+FT+"font-size:21px !important;font-weight:800 !important;color:#fff !important;line-height:1.1 !important;}",
+    S+" .ps-pf-st span{"+FT+"font-size:11.5px !important;color:rgba(255,255,255,.66) !important;}",
+    "@keyframes psPfIn{from{opacity:0;transform:translateY(-7px)}to{opacity:1;transform:none}}",
+    "@keyframes psPfUp{from{opacity:0;transform:translateY(11px)}to{opacity:1;transform:none}}",
 
     /* ============ 3) titres de section ============ */
     /* On garde LEURS couleurs (rouge / vert / bleu) : c'est un choix éditorial
@@ -260,6 +295,30 @@
      🔴 L'identifiant vient de `me.id` : la résolution par e-mail côté Worker
      tombait sur le MAUVAIS compte (LearnWorlds ignore un filtre inconnu et
      renvoie le premier utilisateur de l'école). */
+  /* ---- Domaine -> page du site + couleur ----
+     🔴 Le bouton « Continuer » mène à LA PAGE du domaine, PAS à une URL de lecteur
+     fabriquée : le lien natif d'un programme est `/path-player?courseid=<X>&
+     learningProgramId=<Y>` et exige un courseid PRÉCIS (la leçon où reprendre),
+     qu'on ne connaît pas — une URL lecteur incomplète rend une PAGE BLANCHE.
+     Couleur = celle de la page (cf. PAGE_ACCENTS de tokens.js) pour que chaque
+     tuile rappelle sa section. Ajouter/changer un domaine = 1 ligne ici.
+     Clé = l'id du programme LearnWorlds (bundle id). */
+  var PROG_PAGES={
+    "introduction-conseil-strategie":                    {url:"/empty",               col:"#507EC5"},
+    "module-de-formation-les-autres-types-de-conseil":   {url:"/empty",               col:"#507EC5"},
+    "introduction":                                      {url:"/page-introduction",   col:"#243B6B"},
+    "fit":                                               {url:"/page-introduction",   col:"#243B6B"},
+    "mathematiques":                                     {url:"/page-introduction",   col:"#243B6B"},
+    "etudes-de-cas":                                     {url:"/emptykk-clone-clone", col:"#6B7280"},
+    "etudes-de-cas2":                                    {url:"/emptykk-clone-clone", col:"#6B7280"},
+    "fiches-secteurs":                                   {url:"/fiches-secteur",      col:"#C9A227"},
+    "fiches-cabinet-and-tests-en-ligne":                 {url:"/fiches-secteur-clone",col:"#007260"},
+    "s-entrainer":                                       {url:"/sentrainer",          col:"#3887B4"}
+  };
+  /* Domaine inconnu -> page « Nos formations », qui les liste tous. */
+  var PROG_FALLBACK={url:"/page-introduction", col:"#507EC5"};
+  function progPage(id){ return (id && PROG_PAGES[id]) || PROG_FALLBACK; }
+
   var LP_ENDPOINT="https://annuaire-prepastrat.ziedbencheikh.workers.dev/";
   /* Clé de site Turnstile : PUBLIQUE par nature (c'est la clé secrète, côté
      Worker, qui valide). Même clé que l'annuaire et /account.
@@ -279,7 +338,7 @@
     var arr=u && u.userLearningPrograms;
     if(!arr || !arr.length) return null;
     return [].slice.call(arr).map(function(p){
-      return {name:domainLabel(p.title||p.id||""), pct:null};
+      return {id:p.id||"", name:domainLabel(p.title||p.id||""), pct:null};
     }).filter(function(p){ return p.name; });
   }
 
@@ -306,7 +365,7 @@
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(j){
         if(!j || !j.programs || !j.programs.length) return;
-        var progs=j.programs.map(function(p){ return {name:domainLabel(p.name||""), pct:p.pct}; });
+        var progs=j.programs.map(function(p){ return {id:p.id||"", name:domainLabel(p.name||""), pct:p.pct, courses:p.courses}; });
         lpData=progs;
         try{ localStorage.setItem(LP_STORE, JSON.stringify({t:Date.now(), programs:progs})); }catch(e){}
         mountBoard();                       // repeint avec les vrais %
@@ -345,6 +404,106 @@
     (document.head||document.documentElement).appendChild(s);
   }
 
+  /* ---- EN-TÊTE « dashboard » : avatar + identité + stats ----
+     Tout vient de `me` (global LearnWorlds du membre connecté) : aucun appel
+     réseau, donc aucune attente et aucune donnée exposée. `me.custom_fields`
+     porte les champs de l'annuaire (cf_ecole, cf_niveau, cf_recherche, cf_langue,
+     cf_poste, cf_promo) ; `me.total_time` le temps de formation cumulé.
+     🔴 Le bouton natif « Edit profile » est DÉPLACÉ (pas recréé) : il porte un
+     handler LearnWorlds qu'un clone perdrait. */
+  function fmtDuree(sec){
+    var s=Number(sec)||0, h=Math.floor(s/3600), m=Math.round((s%3600)/60);
+    if(m===60){ h+=1; m=0; }
+    return h ? (h+" h "+(m<10?"0":"")+m) : (m+" min");
+  }
+  function initialesDe(n){
+    return String(n||"").split(/\s+/).filter(Boolean).slice(0,2)
+      .map(function(w){ return w[0].toUpperCase(); }).join("") || "?";
+  }
+  function buildHero(){
+    var u=meUser(); if(!u) return;
+    var img=document.querySelector(S+" img.user-image");
+    var sec=img && img.closest("section.learnworlds-section");
+    if(!sec) return;
+    var content=sec.querySelector(".learnworlds-section-content")||sec;
+    var f=u.custom_fields||u.custom||{};
+    var nom=[u.firstName||u.first_name, u.lastName||u.last_name].filter(Boolean).join(" ")||u.username||"Membre";
+    var chips=[];
+    if(f.cf_ecole)     chips.push({t:f.cf_ecole, hi:true});
+    if(f.cf_niveau)    chips.push({t:"Niveau "+f.cf_niveau});
+    if(f.cf_recherche) chips.push({t:f.cf_recherche});
+    if(f.cf_langue)    chips.push({t:f.cf_langue});
+    var role=[f.cf_poste, f.cf_promo?("Promo "+f.cf_promo):null].filter(Boolean).join(" · ");
+    /* progression globale : moyenne des domaines connus (vide tant que le
+       Worker n'a pas répondu ET qu'aucune valeur n'est mémorisée). */
+    var src=lpData||lpFromStore()||[], moy=null;
+    var chiffres=src.filter(function(p){ return typeof p.pct==="number"; });
+    if(chiffres.length){
+      moy=Math.round(chiffres.reduce(function(a,p){ return a+p.pct; },0)/chiffres.length);
+    }
+    var nbProg=(u.userLearningPrograms&&u.userLearningPrograms.length)||src.length||0;
+    var sig=[nom,role,chips.map(function(c){return c.t;}).join(","),moy,nbProg,u.total_time].join("|");
+
+    var hero=content.querySelector(".ps-pf-hero");
+    if(hero && hero.dataset.sig===sig){ sec.classList.add("ps-pf-heroed"); return; }
+    if(!hero){
+      hero=document.createElement("div");
+      hero.className="ps-pf-hero";
+      content.insertBefore(hero, content.firstChild);
+    }
+    hero.dataset.sig=sig;
+    hero.textContent="";
+
+    var row=document.createElement("div"); row.className="ps-pf-hero-row";
+    var av=document.createElement("div"); av.className="ps-pf-av";
+    var photo=f.cf_photo && String(f.cf_photo).trim();
+    if(photo){
+      var im=document.createElement("img");
+      im.src=photo; im.alt="";
+      im.onerror=function(){ av.textContent=initialesDe(nom); };   // photo morte -> initiales
+      av.appendChild(im);
+    } else av.textContent=initialesDe(nom);
+    row.appendChild(av);
+
+    var id=document.createElement("div"); id.className="ps-pf-id";
+    var h=document.createElement("p"); h.className="ps-pf-hname"; h.textContent=nom;   // textContent : jamais d'injection
+    id.appendChild(h);
+    if(role){ var r=document.createElement("p"); r.className="ps-pf-hrole"; r.textContent=role; id.appendChild(r); }
+    if(chips.length){
+      var cw=document.createElement("div"); cw.className="ps-pf-chips";
+      chips.forEach(function(c,i){
+        var s=document.createElement("span");
+        s.className="ps-pf-chip"+(c.hi?" -hi":"");
+        s.style.animationDelay=(0.14+i*0.04)+"s";
+        s.textContent=c.t;
+        cw.appendChild(s);
+      });
+      id.appendChild(cw);
+    }
+    row.appendChild(id);
+
+    /* on récupère le bouton natif là où il est (il a pu rester dans le natif masqué) */
+    var edit=sec.querySelector("button.learnworlds-button");
+    if(edit){ edit.classList.add("ps-pf-edit"); row.appendChild(edit); }
+    hero.appendChild(row);
+
+    var stats=[
+      {v:fmtDuree(u.total_time), l:"de formation"},
+      {v:String(nbProg),         l:nbProg>1?"programmes":"programme"},
+      {v:(moy==null?"—":moy+" %"), l:"progression"}
+    ];
+    var sw=document.createElement("div"); sw.className="ps-pf-stats";
+    stats.forEach(function(st,i){
+      var d=document.createElement("div"); d.className="ps-pf-st";
+      d.style.animationDelay=(0.3+i*0.05)+"s";
+      var b=document.createElement("b"); b.textContent=st.v;
+      var sp=document.createElement("span"); sp.textContent=st.l;
+      d.appendChild(b); d.appendChild(sp); sw.appendChild(d);
+    });
+    hero.appendChild(sw);
+    sec.classList.add("ps-pf-heroed");
+  }
+
   /* Construit/actualise le board dans le grandpa des tuiles. Idempotent grâce à
      une signature : ne se reconstruit que si les domaines ou les % changent
      (l'observer rappelle build() à chaque mutation). */
@@ -370,30 +529,74 @@
     if(!board){ board=document.createElement("div"); board.className="ps-pf-board"; grandpa.insertBefore(board,grandpa.firstChild); }
     board.dataset.sig=sig;
     board.textContent="";
-    progs.forEach(function(p){
+    var R=24, CIRC=2*Math.PI*R;                      // anneau de progression
+    progs.forEach(function(p,i){
       /* pct null = pas encore connu (1re visite, réponse du Worker en route) :
          la tuile s'affiche quand même avec son nom, le chiffre arrive ensuite. */
       var known=(typeof p.pct==="number" && isFinite(p.pct));
       var val=known?Math.max(0,Math.min(100,Math.round(p.pct))):0;
-      var tile=document.createElement("div"); tile.className="ps-pf-bt";
+      var conf=progPage(p.id);
+
+      var tile=document.createElement("div");
+      tile.className="ps-pf-bt";
+      tile.style.setProperty("--c", conf.col);
+      tile.style.animationDelay=(0.05+i*0.06)+"s";
+
       var top=document.createElement("div"); top.className="ps-pf-bt-top";
+      var ring=document.createElement("div"); ring.className="ps-pf-ring";
+      /* SVG en createElementNS : un innerHTML sur du SVG ne construit pas les
+         bons noeuds dans tous les navigateurs. */
+      var NS="http://www.w3.org/2000/svg";
+      var svg=document.createElementNS(NS,"svg");
+      svg.setAttribute("width","58"); svg.setAttribute("height","58");
+      function cercle(stroke,dash,off){
+        var c=document.createElementNS(NS,"circle");
+        c.setAttribute("cx","29"); c.setAttribute("cy","29"); c.setAttribute("r",String(R));
+        c.setAttribute("fill","none"); c.setAttribute("stroke",stroke); c.setAttribute("stroke-width","6");
+        if(dash!=null){ c.setAttribute("stroke-linecap","round"); c.setAttribute("stroke-dasharray",String(dash)); c.setAttribute("stroke-dashoffset",String(off)); }
+        return c;
+      }
+      svg.appendChild(cercle("#EEF1F6",null,null));
+      var arc=cercle(conf.col,CIRC,CIRC);            // part de 0 puis s'anime
+      arc.setAttribute("class","ps-pf-arc");
+      svg.appendChild(arc);
+      ring.appendChild(svg);
       var pc=document.createElement("span"); pc.className="ps-pf-bt-pct"; pc.textContent=known?(val+" %"):"—";
-      var ic=document.createElement("span"); ic.className="ps-pf-bt-ic"; ic.innerHTML=BOARD_ICON;
-      top.appendChild(pc); top.appendChild(ic);
+      ring.appendChild(pc);
+      top.appendChild(ring);
+
+      var txt=document.createElement("div"); txt.style.minWidth="0";
       var nm=document.createElement("div"); nm.className="ps-pf-bt-name"; nm.textContent=p.name;
-      var tr=document.createElement("div"); tr.className="ps-pf-bt-track";
-      var fl=document.createElement("div"); fl.className="ps-pf-bt-fill"; fl.style.width=(known?(val>0&&val<2?2:val):0)+"%";
-      tr.appendChild(fl);
-      tile.appendChild(top); tile.appendChild(nm); tile.appendChild(tr);
+      txt.appendChild(nm);
+      if(typeof p.courses==="number" && p.courses>0){
+        var sb=document.createElement("div"); sb.className="ps-pf-bt-sub";
+        sb.textContent=p.courses+(p.courses>1?" cours":" cours");
+        txt.appendChild(sb);
+      }
+      top.appendChild(txt);
+      tile.appendChild(top);
+
+      var go=document.createElement("a");
+      go.className="ps-pf-go"; go.href=conf.url;
+      go.textContent=(known && val>0) ? "Continuer" : "Commencer";
+      tile.appendChild(go);
+
       board.appendChild(tile);
+      /* remplissage de l'anneau après insertion (sinon pas de transition) */
+      if(known && val>0){
+        setTimeout(function(){ arc.setAttribute("stroke-dashoffset", String(CIRC-(CIRC*val/100))); }, 220+i*70);
+      }
     });
     grandpa.classList.add("ps-has-board");
+    /* fond neutre « tableau de bord » sur la section qui porte le board */
+    var sec=grandpa.closest && grandpa.closest("section.learnworlds-section");
+    if(sec) sec.classList.add("ps-pf-dash");
   }
 
   function build(){
     /* garde évalué ICI, pas au chargement : cf. l'avertissement en tête */
     if(!surLaPage()) return;
-    figtree(); styles(); marquer(); mountBoard();
+    figtree(); styles(); marquer(); buildHero(); mountBoard();
     document.querySelectorAll(S+" .ps-pf-courses .lw-course-card").forEach(function(card){
       if(card.dataset.psPf) return;
       var h=card.querySelector(".learnworlds-heading3"); if(!h) return;
