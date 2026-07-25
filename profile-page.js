@@ -480,14 +480,21 @@
       return;
     }
 
+    /* Construction complète. 🔴 Le bouton natif est d'abord MIS À L'ABRI dans la
+       section : si un en-tête d'une version précédente est présent (transition de
+       cache), on doit le vider — sans ça son contenu se dupliquait (6 stats au
+       lieu de 3) — et un vidage emporterait le bouton avec lui. */
+    var edit=sec.querySelector("button.learnworlds-button");
+    if(edit && hero && hero.contains(edit)) sec.appendChild(edit);
     if(!hero){
       hero=document.createElement("div");
       hero.className="ps-pf-hero";
       content.insertBefore(hero, content.firstChild);
+    } else {
+      hero.textContent="";                    // sûr : le bouton est à l'abri
     }
     hero.dataset.sig=sig;
     hero.dataset.built="1";
-    var edit=sec.querySelector("button.learnworlds-button");
 
     var row=document.createElement("div"); row.className="ps-pf-hero-row";
     var av=document.createElement("div"); av.className="ps-pf-av";
