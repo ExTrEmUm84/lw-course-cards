@@ -105,7 +105,12 @@
     /* fond neutre sous le board pour l'effet « tableau de bord » (1 ligne à retirer si Ziad préfère la bande bleue) */
     S+" section.learnworlds-section.ps-pf-dash{background:#F7F9FC !important;}",
     S+" .ps-pf-dash .learnworlds-section-overlay{display:none !important;}",
-    S+" .ps-pf-dash h1.learnworlds-heading{color:#243B6B !important;}",
+    /* 🔴 Le titre de section était BLANC (il vivait sur la bande bleue) : sur notre
+       fond clair il devenait invisible. La règle globale `h1.learnworlds-heading`
+       bat un sélecteur trop court — on remonte la spécificité (même piège que la
+       home) avec section + :not(.learnworlds-icon). */
+    S+" section.learnworlds-section.ps-pf-dash h1.learnworlds-heading:not(.learnworlds-icon),"
+      +S+" section.learnworlds-section.ps-pf-dash h1.learnworlds-heading:not(.learnworlds-icon) *{color:#243B6B !important;}",
 
     /* ============ 2c) EN-TÊTE « dashboard » (avatar + identité + stats) ============
        L'en-tête natif (petit avatar centré + nom + bouton) faisait vide et perdu.
@@ -441,7 +446,10 @@
     if(chiffres.length){
       moy=Math.round(chiffres.reduce(function(a,p){ return a+p.pct; },0)/chiffres.length);
     }
-    var nbProg=(u.userLearningPrograms&&u.userLearningPrograms.length)||src.length||0;
+    /* Nombre de programmes : celui du BOARD s'il est connu (il fait foi, c'est ce
+       que le membre voit), sinon la liste de `me`. Sans ça on affichait « 7 »
+       au-dessus de 8 tuiles. */
+    var nbProg=src.length||(u.userLearningPrograms&&u.userLearningPrograms.length)||0;
     var sig=[nom,role,chips.map(function(c){return c.t;}).join(","),moy,nbProg,u.total_time].join("|");
 
     var hero=content.querySelector(".ps-pf-hero");
@@ -452,6 +460,12 @@
       content.insertBefore(hero, content.firstChild);
     }
     hero.dataset.sig=sig;
+    /* 🔴 METTRE LE BOUTON NATIF À L'ABRI AVANT DE VIDER : au 2e passage (les stats
+       changent quand le Worker répond), `hero.textContent=""` DÉTRUISAIT le bouton
+       « Edit profile » qu'on y avait déplacé — il disparaissait alors de la page
+       pour de bon, sans moyen de le recréer (son handler est interne à LW). */
+    var edit=sec.querySelector("button.learnworlds-button");
+    if(edit && hero.contains(edit)) sec.appendChild(edit);
     hero.textContent="";
 
     var row=document.createElement("div"); row.className="ps-pf-hero-row";
@@ -482,8 +496,7 @@
     }
     row.appendChild(id);
 
-    /* on récupère le bouton natif là où il est (il a pu rester dans le natif masqué) */
-    var edit=sec.querySelector("button.learnworlds-button");
+    /* le bouton natif (mis à l'abri plus haut) rejoint l'en-tête */
     if(edit){ edit.classList.add("ps-pf-edit"); row.appendChild(edit); }
     hero.appendChild(row);
 
