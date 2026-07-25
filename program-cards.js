@@ -191,6 +191,11 @@
     var cur=document.createElement("span"); cur.className="ps-tw-cur";
     slot.appendChild(txt); slot.appendChild(cur);
     h1.textContent=""; h1.appendChild(pre); h1.appendChild(slot);
+    /* 🔴 Le H1 ENTIER sort de la portée de Weglot : on le reconstruit en JS, donc
+       Weglot traduit le préfixe mais ne sait plus le RESTAURER au retour à la
+       langue d'origine -> « Our training programs for » restait affiché sur une
+       page repassée en français (constaté en prod). On traduit tout nous-mêmes. */
+    h1.classList.add("wg-notranslate");
 
     /* largeur réservée = la phrase la plus longue, mesurée police chargée,
        sinon le titre tremble à chaque lettre */
@@ -215,10 +220,13 @@
             résultat. Retour à la langue d'origine -> phrases d'origine.
        🔴 Weglot est injecté par LearnWorlds APRÈS nous -> on réessaie ~16 s,
        et on s'abonne à « languageChanged » dès qu'il est là. */
-    var PARTS0=parts.slice(), twBound=false;
+    var PARTS0=parts.slice(), PREFIX0=prefix, twBound=false;
     var twRM=!!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    /* list = [préfixe traduit, ...segments traduits] ; null = langue d'origine */
     function psTwApply(list){
-      for(var k=0;k<parts.length;k++) parts[k]=(list&&list[k])||PARTS0[k];
+      pre.textContent=((list && list[0]) || PREFIX0)+" ";
+      for(var k=0;k<parts.length;k++) parts[k]=(list && list[k+1])||PARTS0[k];
+      h1.setAttribute("aria-label", pre.textContent+parts.join(", "));
       reserve();
       if(twRM) txt.textContent=parts[0];               // pas d'animation : on repose la 1re phrase
     }
@@ -234,8 +242,8 @@
       var from=(W.options && W.options.language_from) || "fr";
       if(!to || to===from){ psTwApply(null); return true; }
       try{
-        W.translate({ words:PARTS0.map(function(p){ return {t:1,w:p}; }), languageTo:to },
-          function(res){ if(res && res.length===PARTS0.length) psTwApply(res); });
+        W.translate({ words:[{t:1,w:PREFIX0}].concat(PARTS0.map(function(p){ return {t:1,w:p}; })), languageTo:to },
+          function(res){ if(res && res.length===PARTS0.length+1) psTwApply(res); });
       }catch(e){}
       return true;
     }

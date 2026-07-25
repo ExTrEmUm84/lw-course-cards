@@ -400,7 +400,12 @@
         ".ps-flag::after{content:'' !important;position:absolute !important;left:50% !important;bottom:0 !important;"+
           "width:0 !important;height:2px !important;border-radius:2px !important;background:var(--ps-accent,#507EC5) !important;"+
           "transform:translateX(-50%) !important;transition:width .18s ease !important;}"+
-        ".ps-flag.ps-flag-on::after{width:calc(100% - 8px) !important;}";
+        ".ps-flag.ps-flag-on::after{width:calc(100% - 8px) !important;}"+
+        /* 🔴 Pas de RECTANGLE de focus après un clic souris (le drapeau est un
+           `role=button tabindex=0` : le navigateur dessinait un cadre bleu autour,
+           visible sur la capture de Ziad). On le garde pour le CLAVIER seulement. */
+        ".ps-flag:focus{outline:none !important;}"+
+        ".ps-flag:focus-visible{outline:2px solid var(--ps-accent,#507EC5) !important;outline-offset:3px !important;border-radius:4px !important;}";
       (document.head||document.documentElement).appendChild(st);
     }
     /* 🔴 On REMPLACE le lien LW par un <span> neutre au lieu d'intercepter son
