@@ -449,6 +449,107 @@
     }, 400);
   })();
 
+  /* ====================================================================
+     COURS PAR LANGUE — n'afficher que les cours de la langue courante
+     --------------------------------------------------------------------
+     Ziad prépare des versions ANGLAISES (SCORM EN) de ses cours. Règle
+     retenue (choix de Ziad le 25/07) :
+       • en ANGLAIS  -> on n'affiche QUE les cours tagués « EN » ;
+       • en FRANÇAIS -> on affiche tout SAUF les cours tagués « EN ».
+     🔴 Un cours SANS tag de langue est considéré FRANÇAIS : sans cette
+     tolérance, les 51 cours de l'école disparaîtraient tant que Ziad n'a
+     pas tout tagué. Le tag « FR » est donc facultatif, le tag « EN » est
+     celui qui compte.
+     🔴 Le marquage est un TAG LearnWorlds (Cours -> Tags), pas un suffixe
+     de nom : le titre reste libre et rien ne casse sur une faute de frappe.
+     Source : `/api/courses` (catalogue de l'école, lisible côté page, sans
+     Worker ni secret) -> table slug -> tags. Apparié aux cartes par le slug
+     de leur lien (`?courseid=` ou `/course/<slug>`) : vérifié 12/12 en direct.
+     Le catalogue est mis en cache pour la session (il bouge rarement). */
+  var LANG_TAG_EN="EN";
+  var _cat=null, _catEnCours=false;
+
+  function catalogue(cb){
+    if(_cat){ cb(_cat); return; }
+    try{
+      var brut=sessionStorage.getItem("psCatTags");
+      if(brut){ _cat=JSON.parse(brut); cb(_cat); return; }
+    }catch(e){}
+    if(_catEnCours) return;                       // un seul appel en vol
+    _catEnCours=true;
+    try{
+      fetch("/api/courses",{credentials:"include",headers:{Accept:"application/json"}})
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(j){
+          var arr=(j && j.courses) ? Object.keys(j.courses).map(function(k){ return j.courses[k]; }) : [];
+          var map={};
+          arr.forEach(function(c){
+            if(!c || !c.titleId) return;
+            map[c.titleId]=(c.tags||[]).map(function(t){ return String(t).trim().toUpperCase(); });
+          });
+          _cat=map; _catEnCours=false;
+          try{ sessionStorage.setItem("psCatTags", JSON.stringify(map)); }catch(e){}
+          cb(map);
+        })
+        .catch(function(){ _catEnCours=false; });
+    }catch(e){ _catEnCours=false; }
+  }
+
+  function slugDeCarte(card){
+    var a=card.querySelector("a[href]"); if(!a) return "";
+    var h=a.getAttribute("href")||"";
+    var m=h.match(/courseid=([^&]+)/)||h.match(/\/course\/([^\/?#]+)/);
+    if(!m) return "";
+    try{ return decodeURIComponent(m[1]); }catch(e){ return m[1]; }
+  }
+
+  var _langBound=false;
+  function langCourses(evLang){
+    var W=window.Weglot;
+    /* 🔴 Abonnement fait ICI et pas au chargement : Weglot est injecté par
+       LearnWorlds APRÈS nous, donc un `Weglot.on(...)` en haut de fichier ne
+       s'exécuterait jamais (même piège que le titre animé). */
+    if(!_langBound && W && W.on){ try{ W.on("languageChanged", langCourses); _langBound=true; }catch(e){} }
+    var from=(W && W.options && W.options.language_from) || "fr";
+    var lang=(typeof evLang==="string" && evLang) ? evLang
+           : (W && W.initialized && W.getCurrentLang ? W.getCurrentLang() : from);
+    var cards=document.querySelectorAll(".lw-course-card");
+    if(!cards.length) return;
+
+    if(!document.getElementById("ps-lang-css")){
+      var st=document.createElement("style"); st.id="ps-lang-css";
+      st.textContent=".lw-course-card.ps-lang-off{display:none !important;}"+
+        ".ps-lang-empty{grid-column:1/-1 !important;padding:34px 4px !important;text-align:center !important;"+
+        "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;"+
+        "font-size:16px !important;color:var(--ps-text-soft,#676879) !important;}";
+      (document.head||document.documentElement).appendChild(st);
+    }
+
+    catalogue(function(map){
+      var enAnglais=(lang!==from);
+      var visibles=0, masques=0;
+      [].slice.call(cards).forEach(function(card){
+        var tags=map[slugDeCarte(card)]||[];
+        var estEN=tags.indexOf(LANG_TAG_EN)>=0;
+        var off=enAnglais ? !estEN : estEN;        // EN -> que les EN ; FR -> tout sauf EN
+        card.classList.toggle("ps-lang-off", off);
+        if(off) masques++; else visibles++;
+      });
+      /* Grille vide (cas courant tant que le catalogue anglais n'existe pas) :
+         un mot d'explication vaut mieux qu'une page qui semble cassée. */
+      var grille=cards[0] && cards[0].parentNode;
+      if(grille){
+        var note=grille.querySelector(".ps-lang-empty");
+        if(!visibles && masques){
+          if(!note){ note=document.createElement("div"); note.className="ps-lang-empty"; grille.appendChild(note); }
+          note.textContent="Aucun cours n'est encore disponible dans cette langue.";
+        } else if(note){ note.remove(); }
+      }
+    });
+  }
+  /* Les cartes sont rendues par le JS catalogue de LW, souvent après nous. */
+  [400,1000,2000,3500,6000].forEach(function(d){ setTimeout(function(){ langCourses(); }, d); });
+
   cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag();
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
