@@ -1605,6 +1605,100 @@
     }, 10000);
   }
 
+  /* ====================================================================
+     BLOCS COMMUNAUTÉ (Slack / WhatsApp) — cartes modernes compactes
+     --------------------------------------------------------------------
+     Deux blocs de contenu LW (colonnes .col span_6_of_12) au-dessus de
+     l'annuaire, repérés par le TEXTE de leur H2 (« Groupe Slack » / « Groupe
+     Whatsapp »). On les transforme en cartes HORIZONTALES compactes (~77px) :
+       [gros picto de marque] · titre + sous-titre · bouton « Rejoindre ».
+     🔴 Titre ET sous-titre ont une taille posée par LW en CSS PAR-ID de widget
+     (#el_...) qui bat nos classes → on force la taille en INLINE (seul l'inline
+     !important gagne). 🔴 Largeur : la section est en conteneur « wide » (~1170px)
+     plus large que le hero/annuaire (1000px, la boîte de #psa-root) → on contraint
+     la rangée .lw-cols à max-width:1000 + marges auto pour l'aligner pile dessous.
+     🔴 Les boutons N'ONT PAS de lien tant que Ziad ne l'ajoute pas dans le Site
+     Builder (élément bouton → « Lien ») : invitation Slack + groupe WhatsApp. */
+  var PSC = "body.slug-annuaire-partenaire-de-cas ";
+  var COMM_CSS = [
+    PSC + ".psa-comm{display:flex !important;flex-direction:row !important;align-items:center !important;gap:12px !important;background:#fff !important;border:1px solid #eceff3 !important;border-radius:16px !important;padding:12px 18px !important;text-align:left !important;box-shadow:0 6px 18px rgba(20,30,60,.05) !important;transition:transform .18s ease, box-shadow .18s ease !important;box-sizing:border-box !important;}",
+    PSC + ".psa-comm:hover{transform:translateY(-2px) !important;box-shadow:0 12px 28px rgba(20,30,60,.1) !important;}",
+    PSC + ".psa-comm-badge{flex:0 0 auto !important;width:46px !important;height:46px !important;border-radius:14px !important;display:flex !important;align-items:center !important;justify-content:center !important;margin:0 !important;}",
+    PSC + ".psa-comm--slack .psa-comm-badge{background:#F5F1FB !important;border:1px solid #ece4f7 !important;}",
+    PSC + ".psa-comm--wa .psa-comm-badge{background:#25D366 !important;box-shadow:0 6px 14px rgba(37,211,102,.3) !important;}",
+    PSC + ".psa-comm-txt{display:flex !important;flex-direction:column !important;justify-content:center !important;min-width:0 !important;flex:1 1 auto !important;}",
+    /* titre : couleur/poids ici, TAILLE en inline (cf. plus bas) */
+    PSC + ".psa-comm h2.learnworlds-subheading{color:#243B6B !important;font-weight:700 !important;text-align:left !important;margin:0 !important;}",
+    PSC + ".psa-comm h2.learnworlds-subheading::before{display:none !important;}",
+    /* sous-titre : wrap autorisé (le picto domine la hauteur → reste compact) */
+    PSC + ".psa-comm .learnworlds-main-text{color:#6B7280 !important;text-align:left !important;margin:1px 0 0 !important;white-space:normal !important;}",
+    PSC + ".psa-comm .learnworlds-button-wrapper{margin:0 !important;flex:0 0 auto !important;width:auto !important;display:flex !important;align-items:center !important;}",
+    PSC + ".psa-comm .learnworlds-button{display:inline-flex !important;align-items:center !important;padding:9px 20px !important;border-radius:999px !important;font-weight:700 !important;font-size:13.5px !important;font-family:Figtree,sans-serif !important;color:#fff !important;text-decoration:none !important;border:0 !important;white-space:nowrap !important;transition:filter .15s ease, transform .15s ease !important;}",
+    PSC + ".psa-comm .learnworlds-button:hover{filter:brightness(1.08) !important;transform:translateY(-1px) !important;}",
+    PSC + ".psa-comm--slack .learnworlds-button{background:#4A154B !important;}",
+    PSC + ".psa-comm--wa .learnworlds-button{background:#25D366 !important;}",
+    PSC + ".psa-comm-row{max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}"
+  ].join("\n");
+
+  var COMM_SLACK = '<svg viewBox="0 0 122.8 122.8" width="34" height="34" aria-hidden="true">'
+    + '<path d="M25.8 77.6c0 7.1-5.8 12.9-12.9 12.9S0 84.7 0 77.6s5.8-12.9 12.9-12.9h12.9v12.9z" fill="#E01E5A"/>'
+    + '<path d="M32.3 77.6c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9v32.3c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9V77.6z" fill="#E01E5A"/>'
+    + '<path d="M45.2 25.8c-7.1 0-12.9-5.8-12.9-12.9S38.1 0 45.2 0s12.9 5.8 12.9 12.9v12.9H45.2z" fill="#36C5F0"/>'
+    + '<path d="M45.2 32.3c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9H12.9C5.8 58.1 0 52.3 0 45.2s5.8-12.9 12.9-12.9h32.3z" fill="#36C5F0"/>'
+    + '<path d="M97 45.2c0-7.1 5.8-12.9 12.9-12.9s12.9 5.8 12.9 12.9-5.8 12.9-12.9 12.9H97V45.2z" fill="#2EB67D"/>'
+    + '<path d="M90.5 45.2c0 7.1-5.8 12.9-12.9 12.9s-12.9-5.8-12.9-12.9V12.9C64.7 5.8 70.5 0 77.6 0s12.9 5.8 12.9 12.9v32.3z" fill="#2EB67D"/>'
+    + '<path d="M77.6 97c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9-12.9-5.8-12.9-12.9V97h12.9z" fill="#ECB22E"/>'
+    + '<path d="M77.6 90.5c-7.1 0-12.9-5.8-12.9-12.9s5.8-12.9 12.9-12.9h32.3c7.1 0 12.9 5.8 12.9 12.9s-5.8 12.9-12.9 12.9H77.6z" fill="#ECB22E"/></svg>';
+  var COMM_WA = '<svg viewBox="0 0 448 512" width="32" height="32" aria-hidden="true"><path fill="#fff" d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.2-157zM223.9 438.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.5-186.6 184.5zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>';
+
+  function communityBlocks() {
+    if (!document.getElementById("psa-comm-css")) {
+      var st = document.createElement("style");
+      st.id = "psa-comm-css";
+      st.textContent = COMM_CSS;
+      (document.head || document.documentElement).appendChild(st);
+    }
+    function col(txt) {
+      var h = [].slice.call(document.querySelectorAll("h2.learnworlds-subheading")).filter(function (x) {
+        return (x.textContent || "").trim().toLowerCase().indexOf(txt) >= 0;
+      })[0];
+      if (!h) return null;
+      var c = h;
+      for (var i = 0; i < 8 && c; i++) { if (c.classList && c.classList.contains("col")) break; c = c.parentElement; }
+      return (c && c.classList && c.classList.contains("col")) ? c : null;
+    }
+    function deco(txt, mod, svg) {
+      var c = col(txt);
+      if (!c) return;
+      c.classList.add("psa-comm", mod);
+      if (!c.querySelector(".psa-comm-badge")) {
+        var b = document.createElement("div");
+        b.className = "psa-comm-badge";
+        b.innerHTML = svg;
+        c.insertBefore(b, c.firstChild);
+      }
+      var h2 = c.querySelector("h2.learnworlds-subheading");
+      var mt = c.querySelector(".learnworlds-main-text");
+      if (h2 && !c.querySelector(".psa-comm-txt")) {
+        var tw = document.createElement("div");
+        tw.className = "psa-comm-txt";
+        h2.parentNode.insertBefore(tw, h2);
+        tw.appendChild(h2);
+        if (mt) tw.appendChild(mt);
+      }
+      /* 🔴 Tailles en INLINE : le CSS par-ID de LW bat nos classes. */
+      if (h2) { h2.style.setProperty("font-size", "16px", "important"); h2.style.setProperty("line-height", "1.2", "important"); }
+      if (mt) { mt.style.setProperty("font-size", "12.5px", "important"); mt.style.setProperty("line-height", "1.25", "important"); }
+      var btn = c.querySelector(".learnworlds-button, .learnworlds-button-wrapper a, .learnworlds-button-wrapper button");
+      if (btn) { var lbl = btn.querySelector("span") || btn; if ((lbl.textContent || "").trim() !== "Rejoindre") lbl.textContent = "Rejoindre"; }
+      /* aligne la rangée sur la largeur de la page (1000px, comme le hero) */
+      var row = c.closest ? c.closest(".lw-cols") : null;
+      if (row) row.classList.add("psa-comm-row");
+    }
+    deco("slack", "psa-comm--slack", COMM_SLACK);
+    deco("whatsapp", "psa-comm--wa", COMM_WA);
+  }
+
   /* Le titre est indépendant de l'annuaire : il doit s'animer même si le point
      de montage manque. D'où hero() ici et non dans monter() — sinon un oubli de
      <div id="psa-root"> laisserait le H1 masqué par le CSS, donc la page sans
@@ -1614,6 +1708,10 @@
     styles();
     hero();
     monter();
+    /* Blocs communauté : rendus par le Site Builder, parfois APRÈS nous →
+       on tente tout de suite puis on relance quelques fois (idempotent). */
+    communityBlocks();
+    [400, 1000, 2000, 3500].forEach(function (d) { setTimeout(communityBlocks, d); });
   }
 
   if (document.readyState === "loading") {
