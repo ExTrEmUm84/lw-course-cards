@@ -343,6 +343,99 @@
     }, true);   // capture, avant navigation
   }
 
+  /* ====================================================================
+     DRAPEAUX FR / EN DU HEADER -> VRAI SWITCHER WEGLOT (site-wide)
+     --------------------------------------------------------------------
+     Les 2 drapeaux du header sont des IMAGES posées à la main dans le Site
+     Builder, enveloppées dans un lien `a.js-linked-node`. 🔴 Ces liens
+     pointaient vers `/courses-clone` et `/courses-clone-clone` — des pages
+     sans aucun rapport (placeholders jamais nettoyés) : cliquer un drapeau
+     envoyait donc sur une page au hasard au lieu de changer de langue.
+     Ici on INTERCEPTE le clic (phase capture, avant la navigation) et on
+     appelle l'API Weglot : `Weglot.switchTo('fr'|'en')`. Weglot traduit SUR
+     PLACE, sans rechargement (vérifié en direct : la page entière, y compris
+     nos contenus injectés, bascule en anglais).
+     🔴 Weglot vient de l'intégration NATIVE de LearnWorlds et se charge de
+     façon asynchrone -> on réessaie jusqu'à ce qu'il soit prêt.
+     L'ordre des drapeaux dans le header donne les langues (1er = FR, 2e = EN) :
+     changer FLAG_LANGS suffit si Ziad en ajoute ou les inverse. */
+  var FLAG_LANGS=["fr","en"];
+
+  function flagLinks(){
+    /* Les drapeaux = liens du header contenant une petite image. On ne se fie
+       PAS au href (il est faux) ni à une classe (aucune ne les distingue). */
+    return [].slice.call(document.querySelectorAll("a.js-linked-node")).filter(function(a){
+      if(!a.querySelector("img")) return false;
+      var r=a.getBoundingClientRect();
+      return r.top<130 && r.width>0 && r.width<80 && r.height<60;
+    });
+  }
+  function flagActive(){
+    var cur=""; try{ cur=window.Weglot.getCurrentLang(); }catch(e){ return; }
+    document.querySelectorAll(".ps-flag[data-ps-lang]").forEach(function(a){
+      var on=(a.getAttribute("data-ps-lang")===cur);
+      a.classList.toggle("ps-flag-on", on);
+      a.setAttribute("aria-current", on?"true":"false");
+    });
+  }
+  function weglotFlags(){
+    if(!window.Weglot || !window.Weglot.initialized || typeof window.Weglot.switchTo!=="function") return false;
+    /* déjà convertis (les <a> n'existent plus) : on se contente de rafraîchir l'état actif */
+    if(document.querySelectorAll(".ps-flag[data-ps-lang]").length>=2){ flagActive(); return true; }
+    var links=flagLinks();
+    if(links.length<2) return false;
+
+    if(!document.getElementById("ps-flag-css")){
+      var st=document.createElement("style"); st.id="ps-flag-css";
+      /* langue inactive en retrait, active pleine — repère visuel qui manquait */
+      st.textContent=
+        ".ps-flag img{opacity:.45 !important;filter:grayscale(1) !important;transition:opacity .18s ease, filter .18s ease, transform .18s ease !important;}"+
+        ".ps-flag:hover img{opacity:1 !important;filter:none !important;transform:translateY(-1px) !important;}"+
+        ".ps-flag.ps-flag-on img{opacity:1 !important;filter:none !important;}"+
+        ".ps-flag{cursor:pointer !important;}";
+      (document.head||document.documentElement).appendChild(st);
+    }
+    /* 🔴 On REMPLACE le lien LW par un <span> neutre au lieu d'intercepter son
+       clic : LearnWorlds pose un écouteur sur `a.js-linked-node` qui STOPPE LA
+       PROPAGATION avant d'atteindre le document — notre handler n'était jamais
+       appelé (constaté : seul un écouteur posé sur `window` voyait l'événement).
+       Sans balise <a>, plus rien n'intercepte. L'image d'origine est conservée
+       (on déplace les enfants), donc le visuel ne change pas. */
+    links.slice(0,2).forEach(function(a,i){
+      var lang=FLAG_LANGS[i]||"";
+      if(!lang) return;
+      var span=document.createElement("span");
+      span.className="ps-flag";
+      span.setAttribute("data-ps-lang", lang);
+      span.setAttribute("role","button");
+      span.setAttribute("tabindex","0");
+      span.setAttribute("title", (lang==="en")?"English":"Français");
+      span.setAttribute("aria-label", (lang==="en")?"Switch to English":"Passer en français");
+      span.style.cssText="display:inline-flex;align-items:center;cursor:pointer;";
+      while(a.firstChild) span.appendChild(a.firstChild);
+      a.parentNode.replaceChild(span, a);
+      function go(){
+        if(!window.Weglot) return;
+        try{ if(window.Weglot.getCurrentLang()!==lang) window.Weglot.switchTo(lang); }catch(_){}
+        setTimeout(flagActive, 60);
+      }
+      span.addEventListener("click", function(e){ e.preventDefault(); e.stopPropagation(); go(); });
+      span.addEventListener("keydown", function(e){        // accessible au clavier
+        if(e.key==="Enter"||e.key===" "){ e.preventDefault(); go(); }
+      });
+    });
+    flagActive();
+    try{ window.Weglot.on("languageChanged", flagActive); }catch(_){}
+    return true;
+  }
+  /* Weglot est injecté par LearnWorlds APRÈS nous : on retente jusqu'à ~20 s. */
+  (function(){
+    if(weglotFlags()) return;
+    var n=0, iv=setInterval(function(){
+      if(weglotFlags() || ++n>50) clearInterval(iv);
+    }, 400);
+  })();
+
   cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag();
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
