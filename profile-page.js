@@ -453,20 +453,41 @@
     var sig=[nom,role,chips.map(function(c){return c.t;}).join(","),moy,nbProg,u.total_time].join("|");
 
     var hero=content.querySelector(".ps-pf-hero");
-    if(hero && hero.dataset.sig===sig){ sec.classList.add("ps-pf-heroed"); return; }
+
+    /* 🔴 ON NE VIDE JAMAIS L'EN-TÊTE. Une 1re version le reconstruisait à chaque
+       changement de signature (`hero.textContent=""`), ce qui DÉTRUISAIT le bouton
+       natif « Edit profile » qu'on y avait déplacé — perdu définitivement, son
+       handler étant interne à LearnWorlds. Désormais : squelette construit UNE
+       fois, puis on ne réécrit que les VALEURS (stats, pastilles). */
+    if(hero && hero.dataset.built==="1"){
+      sec.classList.add("ps-pf-heroed");
+      if(hero.dataset.sig!==sig){
+        hero.dataset.sig=sig;
+        var bs=hero.querySelectorAll(".ps-pf-st b");
+        if(bs[0]) bs[0].textContent=fmtDuree(u.total_time);
+        if(bs[1]) bs[1].textContent=String(nbProg);
+        if(bs[2]) bs[2].textContent=(moy==null?"—":moy+" %");
+        var lbl=hero.querySelectorAll(".ps-pf-st span");
+        if(lbl[1]) lbl[1].textContent=(nbProg>1?"programmes":"programme");
+      }
+      /* le bouton natif peut être rendu APRÈS nous : on le rapatrie s'il traîne. */
+      var late=sec.querySelector("button.learnworlds-button");
+      if(late && !hero.contains(late)){
+        late.classList.add("ps-pf-edit");
+        var r0=hero.querySelector(".ps-pf-hero-row");
+        if(r0) r0.appendChild(late);
+      }
+      return;
+    }
+
     if(!hero){
       hero=document.createElement("div");
       hero.className="ps-pf-hero";
       content.insertBefore(hero, content.firstChild);
     }
     hero.dataset.sig=sig;
-    /* 🔴 METTRE LE BOUTON NATIF À L'ABRI AVANT DE VIDER : au 2e passage (les stats
-       changent quand le Worker répond), `hero.textContent=""` DÉTRUISAIT le bouton
-       « Edit profile » qu'on y avait déplacé — il disparaissait alors de la page
-       pour de bon, sans moyen de le recréer (son handler est interne à LW). */
+    hero.dataset.built="1";
     var edit=sec.querySelector("button.learnworlds-button");
-    if(edit && hero.contains(edit)) sec.appendChild(edit);
-    hero.textContent="";
 
     var row=document.createElement("div"); row.className="ps-pf-hero-row";
     var av=document.createElement("div"); av.className="ps-pf-av";
