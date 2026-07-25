@@ -387,12 +387,20 @@
 
     if(!document.getElementById("ps-flag-css")){
       var st=document.createElement("style"); st.id="ps-flag-css";
-      /* langue inactive en retrait, active pleine — repère visuel qui manquait */
+      /* Repère de langue active. 🔴 PAS de `grayscale` sur la langue inactive :
+         Ziad n'aime pas le drapeau qui devient gris. Les deux drapeaux gardent
+         donc LEURS COULEURS ; l'actif se distingue par un petit trait dessous
+         (couleur d'accent) + une opacité pleine, l'inactif est juste un peu
+         estompé et se réveille au survol. */
       st.textContent=
-        ".ps-flag img{opacity:.45 !important;filter:grayscale(1) !important;transition:opacity .18s ease, filter .18s ease, transform .18s ease !important;}"+
-        ".ps-flag:hover img{opacity:1 !important;filter:none !important;transform:translateY(-1px) !important;}"+
-        ".ps-flag.ps-flag-on img{opacity:1 !important;filter:none !important;}"+
-        ".ps-flag{cursor:pointer !important;}";
+        ".ps-flag{cursor:pointer !important;position:relative !important;padding-bottom:5px !important;}"+
+        ".ps-flag img{opacity:.72 !important;transition:opacity .18s ease, transform .18s ease !important;}"+
+        ".ps-flag:hover img{opacity:1 !important;transform:translateY(-1px) !important;}"+
+        ".ps-flag.ps-flag-on img{opacity:1 !important;}"+
+        ".ps-flag::after{content:'' !important;position:absolute !important;left:50% !important;bottom:0 !important;"+
+          "width:0 !important;height:2px !important;border-radius:2px !important;background:var(--ps-accent,#507EC5) !important;"+
+          "transform:translateX(-50%) !important;transition:width .18s ease !important;}"+
+        ".ps-flag.ps-flag-on::after{width:calc(100% - 8px) !important;}";
       (document.head||document.documentElement).appendChild(st);
     }
     /* 🔴 On REMPLACE le lien LW par un <span> neutre au lieu d'intercepter son

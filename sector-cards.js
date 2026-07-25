@@ -240,11 +240,16 @@
       reserve();
       if(twRM) txt.textContent=parts[0];               // pas d'animation : on repose la 1re phrase
     }
-    function psTwTr(){
+    function psTwTr(evLang){
       var W=window.Weglot;
       if(!W || !W.initialized || typeof W.translate!=="function") return false;
       if(!twBound){ try{ W.on("languageChanged", psTwTr); twBound=true; }catch(e){} }
-      var to=W.getCurrentLang(), from=(W.options && W.options.language_from) || "fr";
+      /* 🔴 « languageChanged » fournit la NOUVELLE langue en argument. On DOIT
+         l'utiliser : au moment du callback, getCurrentLang() peut encore
+         renvoyer l'ANCIENNE -> en revenant au français on retraduisait vers
+         l'anglais et le titre restait bloqué en anglais (signalé en prod). */
+      var to=(typeof evLang==="string" && evLang) ? evLang : W.getCurrentLang();
+      var from=(W.options && W.options.language_from) || "fr";
       if(!to || to===from){ psTwApply(null); return true; }
       try{
         W.translate({ words:PARTS0.map(function(p){ return {t:1,w:p}; }), languageTo:to },
