@@ -573,12 +573,19 @@
     /* dans la rangée (à côté du titre) si elle existe, sinon repli dans la desc */
     var hote=top||desc;
     if(kpi.parentNode!==hote) hote.appendChild(kpi);
-    /* textContent : jamais de concaténation HTML */
-    kpi.querySelector(".ps-kpi-num").textContent=pct+" %";
-    kpi.querySelector(".ps-kpi-lbl").textContent="Progression sur "+cles.length+" cours";
+    /* textContent : jamais de concaténation HTML.
+       🔴 N'ÉCRIRE QUE SI LA VALEUR CHANGE (cf. sector-cards.js) : sinon on
+       réécrit le FRANÇAIS par-dessus la traduction Weglot à chaque passage de
+       build(), Weglot retraduit, et la tuile clignote FR/EN en boucle. */
+    var sigKpi=pct+"|"+cles.length;
+    if(kpi.getAttribute("data-ps-sig")!==sigKpi){
+      kpi.setAttribute("data-ps-sig",sigKpi);
+      kpi.querySelector(".ps-kpi-num").textContent=pct+" %";
+      kpi.querySelector(".ps-kpi-lbl").textContent="Progression sur "+cles.length+" cours";
+      /* la barre est décorative : le chiffre est déjà lisible juste au-dessus */
+      kpi.setAttribute("aria-label","Progression globale : "+pct+" % sur "+cles.length+" cours");
+    }
     kpi.querySelector(".ps-kpi-bar-in").style.width=pct+"%";
-    /* la barre est décorative : le chiffre est déjà lisible juste au-dessus */
-    kpi.setAttribute("aria-label","Progression globale : "+pct+" % sur "+cles.length+" cours");
   }
 
   /* Le liseré : un rect SVG qui épouse la carte. createElementNS obligatoire —
@@ -659,7 +666,7 @@
     var pre=document.createElement("span");
     pre.textContent=prefix+" ";                       // textContent : pas d'injection HTML
     var slot=document.createElement("span");
-    slot.className="ps-tw"; slot.setAttribute("aria-hidden","true");
+    slot.className="ps-tw wg-notranslate"; slot.setAttribute("aria-hidden","true");
     var txt=document.createElement("span"); txt.className="ps-tw-txt";
     var cur=document.createElement("span"); cur.className="ps-tw-cur";
     slot.appendChild(txt); slot.appendChild(cur);
@@ -675,6 +682,38 @@
     }
     if(document.fonts && document.fonts.ready) document.fonts.ready.then(reserve); else reserve();
     var rt; window.addEventListener("resize",function(){ clearTimeout(rt); rt=setTimeout(reserve,150); });
+
+    /* 🔴 TRADUCTION DES SEGMENTS ANIMÉS (Weglot) — sinon le titre fait des
+       ALLERS-RETOURS FR/EN : Weglot traduisait le slot pendant que notre
+       minuteur y réécrivait le français, chacun défaisant l'autre en boucle
+       (constaté en prod : préfixe traduit « Our training programs for » mais
+       segment resté « la stratégie »). Parade en deux temps :
+         1. le slot porte `wg-notranslate` -> Weglot ne le touche plus ;
+         2. on traduit les phrases nous-mêmes via l'API Weglot (vérifiée en
+            direct : « la stratégie » -> « the strategy »), puis on anime le
+            résultat. Retour à la langue d'origine -> phrases d'origine.
+       🔴 Weglot est injecté par LearnWorlds APRÈS nous -> on réessaie ~16 s,
+       et on s'abonne à « languageChanged » dès qu'il est là. */
+    var PARTS0=parts.slice(), twBound=false;
+    var twRM=!!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    function psTwApply(list){
+      for(var k=0;k<parts.length;k++) parts[k]=(list&&list[k])||PARTS0[k];
+      reserve();
+      if(twRM) txt.textContent=parts[0];               // pas d'animation : on repose la 1re phrase
+    }
+    function psTwTr(){
+      var W=window.Weglot;
+      if(!W || !W.initialized || typeof W.translate!=="function") return false;
+      if(!twBound){ try{ W.on("languageChanged", psTwTr); twBound=true; }catch(e){} }
+      var to=W.getCurrentLang(), from=(W.options && W.options.language_from) || "fr";
+      if(!to || to===from){ psTwApply(null); return true; }
+      try{
+        W.translate({ words:PARTS0.map(function(p){ return {t:1,w:p}; }), languageTo:to },
+          function(res){ if(res && res.length===PARTS0.length) psTwApply(res); });
+      }catch(e){}
+      return true;
+    }
+    if(!psTwTr()){ var twN=0, twIv=setInterval(function(){ if(psTwTr()||++twN>40) clearInterval(twIv); }, 400); }
 
     if(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches){
       txt.textContent=parts[0]; return;               // pas d'animation si l'utilisateur la refuse
