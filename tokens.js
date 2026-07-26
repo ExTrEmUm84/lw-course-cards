@@ -526,6 +526,8 @@
     if(!document.getElementById("ps-lang-css")){
       var st=document.createElement("style"); st.id="ps-lang-css";
       st.textContent=".lw-course-card.ps-lang-off{display:none !important;}"+
+        /* même règle pour les cartes de PROGRAMME (page Compétences) */
+        "[class*='learning-program-card'].ps-lang-off{display:none !important;}"+
         /* Bloc entier masqué quand AUCUNE de ses cartes n'est de la langue
            courante : c'est le cas d'usage « un élément par programme » (un bloc
            FR + un bloc EN sur la même page) — sans ça on verrait un carrousel
@@ -547,6 +549,26 @@
         card.classList.toggle("ps-lang-off", off);
         if(off) masques++; else visibles++;
       });
+
+      /* 🔴 Cartes de PROGRAMME (page Compétences) : elles ne sont pas des cours,
+         elles n'ont donc pas de tag. On se fie au SUFFIXE du nom — convention
+         retenue avec Ziad : le programme anglais s'appelle « … - EN ». Sans ça,
+         le programme anglais resterait visible en français (et son 0 % ferait
+         chuter la tuile de progression de la page). */
+      document.querySelectorAll("[class*='learning-program-card']").forEach(function(pc){
+        var h=pc.querySelector("h3")||pc.querySelector("[class*='heading']");
+        var titre=(h?h.textContent:"").replace(/\s+/g," ").trim();
+        if(!titre) return;
+        var estEN=/[-–]\s*EN$/i.test(titre);
+        pc.classList.toggle("ps-lang-off", enAnglais ? !estEN : estEN);
+      });
+      /* 🔴 Prévenir les scripts de page : la tuile « Progression sur N cours »
+         fait la moyenne des cartes PRÉSENTES. Masquer une carte en CSS ne la
+         retire pas du DOM -> sans ce signal, les cours de l'autre langue (à 0 %)
+         resteraient dans le dénominateur et feraient chuter le pourcentage.
+         Les scripts de cartes écoutent « ps-lang-change » et recalculent. */
+      try{ window.dispatchEvent(new Event("ps-lang-change")); }catch(e){}
+
       /* 🔴 UN BLOC PAR PROGRAMME (organisation retenue avec Ziad le 26/07) :
          la page porte un élément « Cours » par langue — celui du programme FR
          et celui du programme EN. On masque donc le BLOC ENTIER dont aucune

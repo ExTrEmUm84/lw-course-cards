@@ -292,6 +292,7 @@
 
     var vus=Object.create(null);
     document.querySelectorAll(S+" .lw-learning-program-card").forEach(function(pc){
+      if(pc.classList.contains("ps-lang-off")) return;   // autre langue : hors calcul
       var titleEl=pc.querySelector("h3");
       var cle=titleEl ? (titleEl.textContent||"").replace(/\s+/g," ").trim() : null;
       if(!cle || cle in vus) return;                 // doublon éventuel
@@ -358,4 +359,7 @@
   function start(){ build(); obs.observe(document.body,{childList:true,subtree:true}); }
   if(document.readyState!=="loading") start(); else document.addEventListener("DOMContentLoaded",start);
   window.addEventListener("load",build);
+  /* Le filtre de langue ne pose qu'une CLASSE (pas une mutation observée) :
+     sans cet écouteur la tuile garderait le dénominateur de l'autre langue. */
+  window.addEventListener("ps-lang-change", build);
 })();

@@ -306,6 +306,7 @@
     if(!h1) return;                                  // hero prêt = H1 présent (avant : ancré sur .ps-desc, qui disparaît si Ziad retire le texte sous le H1)
     var vus=Object.create(null);
     document.querySelectorAll(S+" .cards-grandpa .lw-course-card").forEach(function(card){
+      if(card.classList.contains("ps-lang-off")) return;   // autre langue : hors calcul
       var a=card.querySelector("a.card-link[href], a[href]");
       var cle=a ? a.getAttribute("href") : null;
       if(!cle || cle in vus) return;                 // déjà compté : doublon
@@ -418,5 +419,9 @@
   function start(){ build(); obs.observe(document.body,{childList:true,subtree:true}); }
   if(document.readyState!=="loading") start(); else document.addEventListener("DOMContentLoaded",start);
   window.addEventListener("load",build);
+  /* 🔴 Le filtre de langue ne fait que poser une CLASSE : ce n'est pas une
+     mutation observée -> sans cet écouteur la tuile de progression garderait
+     le dénominateur de l'autre langue. tokens.js émet cet événement. */
+  window.addEventListener("ps-lang-change", build);
   [200,600,1200,2500].forEach(function(d){ setTimeout(build,d); });
 })();
