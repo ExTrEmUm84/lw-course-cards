@@ -471,9 +471,16 @@
 
   function catalogue(cb){
     if(_cat){ cb(_cat); return; }
+    /* 🔴 Cache À DURÉE LIMITÉE (10 min). Sans expiration, une catégorie ajoutée
+       dans LearnWorlds n'était prise en compte qu'après fermeture de l'onglet :
+       constaté en prod pendant la création des cours EN, le filtre travaillait
+       sur un catalogue périmé. */
     try{
       var brut=sessionStorage.getItem("psCatTags");
-      if(brut){ _cat=JSON.parse(brut); cb(_cat); return; }
+      if(brut){
+        var j=JSON.parse(brut);
+        if(j && j.t && (Date.now()-j.t)<600000 && j.map){ _cat=j.map; cb(_cat); return; }
+      }
     }catch(e){}
     if(_catEnCours) return;                       // un seul appel en vol
     _catEnCours=true;
@@ -488,7 +495,7 @@
             map[c.titleId]=(c.tags||[]).map(function(t){ return String(t).trim().toUpperCase(); });
           });
           _cat=map; _catEnCours=false;
-          try{ sessionStorage.setItem("psCatTags", JSON.stringify(map)); }catch(e){}
+          try{ sessionStorage.setItem("psCatTags", JSON.stringify({t:Date.now(), map:map})); }catch(e){}
           cb(map);
         })
         .catch(function(){ _catEnCours=false; });
