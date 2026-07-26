@@ -526,6 +526,11 @@
     if(!document.getElementById("ps-lang-css")){
       var st=document.createElement("style"); st.id="ps-lang-css";
       st.textContent=".lw-course-card.ps-lang-off{display:none !important;}"+
+        /* Bloc entier masqué quand AUCUNE de ses cartes n'est de la langue
+           courante : c'est le cas d'usage « un élément par programme » (un bloc
+           FR + un bloc EN sur la même page) — sans ça on verrait un carrousel
+           vide avec son titre. */
+        ".ps-lang-bloc-off{display:none !important;}"+
         ".ps-lang-empty{grid-column:1/-1 !important;padding:34px 4px !important;text-align:center !important;"+
         "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;"+
         "font-size:16px !important;color:var(--ps-text-soft,#676879) !important;}";
@@ -542,14 +547,41 @@
         card.classList.toggle("ps-lang-off", off);
         if(off) masques++; else visibles++;
       });
-      /* Grille vide (cas courant tant que le catalogue anglais n'existe pas) :
-         un mot d'explication vaut mieux qu'une page qui semble cassée. */
+      /* 🔴 UN BLOC PAR PROGRAMME (organisation retenue avec Ziad le 26/07) :
+         la page porte un élément « Cours » par langue — celui du programme FR
+         et celui du programme EN. On masque donc le BLOC ENTIER dont aucune
+         carte n'est de la langue courante, sinon il resterait un carrousel vide
+         avec son titre. Le bloc est le conteneur de cartes (`.cards-grandpa`,
+         ou à défaut le parent direct des cartes) ; on remonte aussi à sa
+         SECTION si celle-ci ne contient que ce bloc, pour emporter le titre. */
+      var blocs=[];
+      [].slice.call(cards).forEach(function(card){
+        var bloc=card.closest(".cards-grandpa")||card.parentNode;
+        if(bloc && blocs.indexOf(bloc)<0) blocs.push(bloc);
+      });
+      blocs.forEach(function(bloc){
+        var dedans=bloc.querySelectorAll(".lw-course-card");
+        var cachees=bloc.querySelectorAll(".lw-course-card.ps-lang-off");
+        var vide=(dedans.length>0 && dedans.length===cachees.length);
+        bloc.classList.toggle("ps-lang-bloc-off", vide);
+        var sec=bloc.closest("section.learnworlds-section");
+        /* on n'emporte la section que si elle n'existe QUE pour ces cartes */
+        if(sec && sec.querySelectorAll(".lw-course-card").length===dedans.length){
+          sec.classList.toggle("ps-lang-bloc-off", vide);
+        }
+      });
+
+      /* Message seulement si PLUS RIEN n'est visible sur toute la page (cas où
+         aucune version dans cette langue n'existe encore). */
       var grille=cards[0] && cards[0].parentNode;
       if(grille){
-        var note=grille.querySelector(".ps-lang-empty");
+        var note=document.querySelector(".ps-lang-empty");
         if(!visibles && masques){
           if(!note){ note=document.createElement("div"); note.className="ps-lang-empty"; grille.appendChild(note); }
           note.textContent="Aucun cours n'est encore disponible dans cette langue.";
+          note.classList.remove("ps-lang-bloc-off");
+          var pBloc=note.closest(".ps-lang-bloc-off");
+          if(pBloc) pBloc.classList.remove("ps-lang-bloc-off");   // sinon le message serait masqué avec son bloc
         } else if(note){ note.remove(); }
       }
     });
