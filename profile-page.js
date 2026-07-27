@@ -270,7 +270,7 @@
     t=(t||"").replace(/\s+/g," ").trim();
     t=t.replace(/^Module de Formation\s*[-–—:]\s*/i,"");
     t=t.replace(/^Tout Savoir sur\s+(les?\s+|l['’]\s*)?/i,"");
-    t=t.replace(/\s*[-–]\s*EN$/i,"");        // le suffixe de langue n'a rien à faire à l'écran
+    t=t.replace(/[\s\-–—:(\[]+EN[)\]]?\s*$/i,"");   // le suffixe de langue n'a rien à faire à l'écran
     return t;
   }
 
@@ -281,7 +281,11 @@
      n'a pas de catégorie, contrairement à un cours — cf. tokens.js).
      🔴 Le test se fait sur le nom BRUT, avant domainLabel() qui retire justement
      ce suffixe. */
-  function progEN(nom){ return /[-–]\s*EN\s*$/i.test(String(nom||"").trim()); }
+  /* 🔴 Le suffixe de langue n'est PAS toujours « - EN » : le programme de Ziad
+     s'appelle « Module de Formation - Conseil en Stratégie EN » (espace, sans
+     tiret). On accepte donc espace, tiret, deux-points, parenthèses/crochets. */
+  var RE_EN=/(?:^|[\s\-–—:(\[])EN[)\]]?\s*$/i;
+  function progEN(nom){ return RE_EN.test(String(nom||"").trim()); }
 
   function langueCourante(){
     var W=window.Weglot;

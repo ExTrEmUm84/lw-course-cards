@@ -559,7 +559,7 @@
         var h=pc.querySelector("h3")||pc.querySelector("[class*='heading']");
         var titre=(h?h.textContent:"").replace(/\s+/g," ").trim();
         if(!titre) return;
-        var estEN=/[-–]\s*EN$/i.test(titre);
+        var estEN=/(?:^|[\s\-–—:(\[])EN[)\]]?\s*$/i.test(titre);   // « … - EN » OU « … EN »
         pc.classList.toggle("ps-lang-off", enAnglais ? !estEN : estEN);
       });
       /* 🔴 Prévenir les scripts de page : la tuile « Progression sur N cours »
