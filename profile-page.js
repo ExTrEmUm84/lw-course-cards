@@ -270,7 +270,24 @@
     t=(t||"").replace(/\s+/g," ").trim();
     t=t.replace(/^Module de Formation\s*[-–—:]\s*/i,"");
     t=t.replace(/^Tout Savoir sur\s+(les?\s+|l['’]\s*)?/i,"");
+    t=t.replace(/\s*[-–]\s*EN$/i,"");        // le suffixe de langue n'a rien à faire à l'écran
     return t;
+  }
+
+  /* ---- Langue du tableau de progression ----
+     🔴 Le tableau ignorait TOTALEMENT la langue : il affichait les programmes
+     français ET anglais ensemble, dans les deux langues (signalé par Ziad).
+     Convention du site : un programme anglais se nomme « … - EN » (un programme
+     n'a pas de catégorie, contrairement à un cours — cf. tokens.js).
+     🔴 Le test se fait sur le nom BRUT, avant domainLabel() qui retire justement
+     ce suffixe. */
+  function progEN(nom){ return /[-–]\s*EN\s*$/i.test(String(nom||"").trim()); }
+
+  function langueCourante(){
+    var W=window.Weglot;
+    var from=(W && W.options && W.options.language_from) || "fr";
+    var lang=(W && W.initialized && W.getCurrentLang) ? W.getCurrentLang() : from;
+    return { lang:lang, from:from, enAnglais:(lang!==from) };
   }
 
   /* % d'un programme thématique : d'abord la largeur inline d'un remplissage
@@ -343,7 +360,7 @@
     var arr=u && u.userLearningPrograms;
     if(!arr || !arr.length) return null;
     return [].slice.call(arr).map(function(p){
-      return {id:p.id||"", name:domainLabel(p.title||p.id||""), pct:null};
+      return {id:p.id||"", name:domainLabel(p.title||p.id||""), raw:(p.title||p.id||""), pct:null};
     }).filter(function(p){ return p.name; });
   }
 
@@ -370,7 +387,7 @@
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(j){
         if(!j || !j.programs || !j.programs.length) return;
-        var progs=j.programs.map(function(p){ return {id:p.id||"", name:domainLabel(p.name||""), pct:p.pct, courses:p.courses}; });
+        var progs=j.programs.map(function(p){ return {id:p.id||"", name:domainLabel(p.name||""), raw:(p.name||""), pct:p.pct, courses:p.courses}; });
         lpData=progs;
         try{ localStorage.setItem(LP_STORE, JSON.stringify({t:Date.now(), programs:progs})); }catch(e){}
         mountBoard();                       // repeint avec les vrais %
@@ -556,12 +573,23 @@
       var h=card.querySelector(".learnworlds-heading3")||card.querySelector("[class*='heading']");
       var raw=h?(h.textContent||"").replace(/\s+/g," ").trim():"";
       if(!raw || seen[raw]) return; seen[raw]=1;
-      progs.push({name:domainLabel(raw), pct:programPct(card)});
+      progs.push({name:domainLabel(raw), raw:raw, pct:programPct(card)});
     });
     /* Pas de widget « Vue par thématique » sur la page (cas courant depuis que
        Ziad l'a retiré) : on prend le Worker, sinon la mémoire locale, sinon la
        liste de la page — dans cet ordre de fraîcheur. */
     if(!progs.length) progs = lpData || lpFromStore() || lpFromPage() || [];
+
+    /* 🔴 FILTRE DE LANGUE : en anglais on ne garde que les programmes « - EN »,
+       en français tous les autres. Sans ça les deux langues s'empilaient dans le
+       tableau et les pourcentages n'avaient plus de sens. Garde-fou : si le
+       filtre ne laisse rien (langue sans programme), on n'affiche pas de tableau
+       vide — les tuiles natives de LearnWorlds reprennent la main. */
+    var L=langueCourante();
+    progs = progs.filter(function(p){
+      var brut=(p.raw!==undefined ? p.raw : p.name);
+      return L.enAnglais ? progEN(brut) : !progEN(brut);
+    });
     lpStart();                                     // rafraîchit (une seule fois)
     if(!progs.length) return;                       // programmes pas encore rendus : réessai
     var sig=progs.map(function(p){return p.name+"="+p.pct;}).join("|");
@@ -712,5 +740,17 @@
   function start(){ build(); obs.observe(document.body,{childList:true,subtree:true}); }
   if(document.readyState!=="loading") start(); else document.addEventListener("DOMContentLoaded",start);
   window.addEventListener("load",build);
+  /* Le tableau dépend de la langue -> le reconstruire quand elle change.
+     Deux sources : l'événement émis par tokens.js, et Weglot directement (sur
+     une page sans carte de cours, tokens.js n'émet pas). */
+  window.addEventListener("ps-lang-change", build);
+  (function(){
+    var n=0, iv=setInterval(function(){
+      if(window.Weglot && window.Weglot.on){
+        try{ window.Weglot.on("languageChanged", function(){ setTimeout(build,50); }); }catch(e){}
+        clearInterval(iv);
+      } else if(++n>50) clearInterval(iv);
+    }, 400);
+  })();
   [200,600,1200,2500].forEach(function(d){ setTimeout(build,d); });
 })();
