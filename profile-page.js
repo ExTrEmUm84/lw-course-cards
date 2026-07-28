@@ -88,7 +88,22 @@
     /* Mode DASHBOARD : anneau de progression + bouton « Continuer », une couleur
        par domaine (celle de sa page, posée en inline `--c` par le JS). */
     S+" .ps-pf-tiles.ps-has-board > *:not(.ps-pf-board){display:none !important;}",
-    S+" .ps-pf-board{display:grid !important;grid-template-columns:repeat(auto-fit,minmax(196px,1fr)) !important;gap:14px !important;}",
+    /* 🔴 Le board n'est plus une grille de tuiles à plat : c'est une PILE DE
+       SECTIONS, une par page du site (cf. PAGE_LABELS). La grille descend d'un
+       cran, sur `.ps-pf-grp-g`, et garde exactement les mêmes réglages qu'avant
+       (auto-fit 196px, gap 14) pour que les tuiles ne changent pas d'allure. */
+    S+" .ps-pf-board{display:flex !important;flex-direction:column !important;gap:26px !important;}",
+    /* 🔴 auto-FILL et non auto-FIT : avec auto-fit, une section qui n'a qu'UN
+       parcours (Fiches cabinet, Fiches secteur…) voyait sa tuile s'étirer sur
+       toute la largeur — un pavé énorme à côté des sections à 2 ou 4 tuiles.
+       auto-fill garde les colonnes vides, donc toutes les tuiles du tableau ont
+       la même taille quelle que soit la section. */
+    S+" .ps-pf-grp-g{display:grid !important;grid-template-columns:repeat(auto-fill,minmax(196px,1fr)) !important;gap:14px !important;}",
+    S+" .ps-pf-grp-h{display:flex !important;align-items:center !important;gap:10px !important;margin:0 0 11px !important;}",
+    /* petit trait vertical à la couleur de la page : même repère que les tuiles */
+    S+" .ps-pf-grp-h::before{content:'' !important;flex:none !important;width:4px !important;height:16px !important;border-radius:3px !important;background:var(--c,#507EC5) !important;}",
+    S+" .ps-pf-grp-t{"+FT+"font-size:12.5px !important;font-weight:800 !important;letter-spacing:.06em !important;text-transform:uppercase !important;color:#243B6B !important;}",
+    S+" .ps-pf-grp-n{"+FT+"font-size:11.5px !important;font-weight:600 !important;color:#8A93A5 !important;}",
     S+" .ps-pf-bt{background:#fff !important;border-radius:var(--ps-r-card,16px) !important;padding:16px 17px 15px !important;box-shadow:0 4px 14px rgba(15,23,42,.06) !important;display:flex !important;flex-direction:column !important;gap:12px !important;transition:transform .2s ease, box-shadow .2s ease !important;animation:psPfUp .55s ease both !important;}",
     S+" .ps-pf-bt:hover{transform:translateY(-3px) !important;box-shadow:0 12px 28px rgba(15,23,42,.12) !important;}",
     S+" .ps-pf-bt-top{display:flex !important;align-items:center !important;gap:13px !important;}",
@@ -345,6 +360,33 @@
   var PROG_FALLBACK={url:"/page-introduction", col:"#507EC5"};
   function progPage(id){ return (id && PROG_PAGES[id]) || PROG_FALLBACK; }
 
+  /* ---- Regroupement du tableau PAR PAGE DU SITE (demande de Ziad, 29/07) ----
+     Avant : une liste plate de 10 tuiles, une par programme LearnWorlds — le
+     membre ne voyait pas à quelle PAGE du site chaque progression correspondait.
+     Maintenant : une section par page, et les programmes de cette page dedans.
+     🔴 Le regroupement se fait sur l'URL rendue par `progPage()`, pas sur le nom
+     du programme : c'est la même source que le bouton « Continuer » de la tuile,
+     donc une tuile est TOUJOURS dans la section vers laquelle elle pointe (rien
+     ne peut diverger).
+     La page Cours en a naturellement DEUX (« Conseil en Stratégie » et « Les
+     autres types de Conseil »), ce qui est exactement ce que Ziad voulait voir.
+     🔴 Ajouter une page = 1 ligne dans PAGE_LABELS **et** 1 dans PAGE_ORDRE ; une
+     page absente de ces tables tombe dans « Autres » (plus jamais de tuile
+     perdue). Les pages sans aucun programme ne s'affichent pas du tout. */
+  var PAGE_LABELS={
+    "/empty":                "Cours",
+    "/fiches-secteur-clone": "Fiches cabinet",
+    "/fiches-secteur":       "Fiches secteur",
+    "/emptykk-clone-clone":  "Études de cas",
+    "/page-introduction":    "Compétences",
+    "/sentrainer":           "S'entraîner"
+  };
+  /* Ordre d'affichage voulu par Ziad : Cours, Cabinet, Secteur, Études de cas,
+     puis le reste. */
+  var PAGE_ORDRE=["/empty","/fiches-secteur-clone","/fiches-secteur","/emptykk-clone-clone","/page-introduction","/sentrainer"];
+  function rangPage(u){ var i=PAGE_ORDRE.indexOf(u); return i<0 ? 99 : i; }
+  function labelPage(u){ return PAGE_LABELS[u] || "Autres"; }
+
   var LP_ENDPOINT="https://annuaire-prepastrat.ziedbencheikh.workers.dev/";
   /* Clé de site Turnstile : PUBLIQUE par nature (c'est la clé secrète, côté
      Worker, qui valide). Même clé que l'annuaire et /account.
@@ -596,14 +638,49 @@
     });
     lpStart();                                     // rafraîchit (une seule fois)
     if(!progs.length) return;                       // programmes pas encore rendus : réessai
-    var sig=progs.map(function(p){return p.name+"="+p.pct;}).join("|");
+    /* 🔴 La signature porte AUSSI la page : sans ça, un programme qui change de
+       section (1 ligne dans PROG_PAGES) ne repeindrait pas le tableau. */
+    var sig=progs.map(function(p){return progPage(p.id).url+">"+p.name+"="+p.pct;}).join("|");
     var board=grandpa.querySelector(".ps-pf-board");
     if(board && board.dataset.sig===sig){ grandpa.classList.add("ps-has-board"); return; }
     if(!board){ board=document.createElement("div"); board.className="ps-pf-board"; grandpa.insertBefore(board,grandpa.firstChild); }
     board.dataset.sig=sig;
     board.textContent="";
     var R=24, CIRC=2*Math.PI*R;                      // anneau de progression
-    progs.forEach(function(p,i){
+
+    /* Regroupement par page, puis tri selon l'ordre voulu (cf. PAGE_ORDRE). */
+    var groupes={}, urls=[];
+    progs.forEach(function(p){
+      var c=progPage(p.id);
+      if(!groupes[c.url]){ groupes[c.url]={col:c.col, items:[]}; urls.push(c.url); }
+      groupes[c.url].items.push(p);
+    });
+    urls.sort(function(a,b){ return rangPage(a)-rangPage(b); });
+
+    /* 🔴 `i` est un compteur GLOBAL, pas l'index dans la section : la cascade
+       d'apparition doit traverser tout le tableau, sinon chaque section
+       redémarrerait son animation à zéro et l'ensemble clignoterait par paquets. */
+    var i=0;
+    urls.forEach(function(u){
+      var g=groupes[u];
+      var grp=document.createElement("div");
+      grp.className="ps-pf-grp";
+      grp.style.setProperty("--c", g.col);
+
+      var head=document.createElement("div"); head.className="ps-pf-grp-h";
+      var ttl=document.createElement("span"); ttl.className="ps-pf-grp-t";
+      ttl.textContent=labelPage(u);
+      head.appendChild(ttl);
+      var cnt=document.createElement("span"); cnt.className="ps-pf-grp-n";
+      cnt.textContent=g.items.length+" parcours";   // « parcours » est invariable
+      head.appendChild(cnt);
+      grp.appendChild(head);
+
+      var grille=document.createElement("div"); grille.className="ps-pf-grp-g";
+      grp.appendChild(grille);
+      board.appendChild(grp);
+
+      g.items.forEach(function(p){
       /* pct null = pas encore connu (1re visite, réponse du Worker en route) :
          la tuile s'affiche quand même avec son nom, le chiffre arrive ensuite. */
       var known=(typeof p.pct==="number" && isFinite(p.pct));
@@ -654,11 +731,15 @@
       go.textContent=(known && val>0) ? "Continuer" : "Commencer";
       tile.appendChild(go);
 
-      board.appendChild(tile);
+      grille.appendChild(tile);
       /* remplissage de l'anneau après insertion (sinon pas de transition) */
       if(known && val>0){
-        setTimeout(function(){ arc.setAttribute("stroke-dashoffset", String(CIRC-(CIRC*val/100))); }, 220+i*70);
+        (function(rang){
+          setTimeout(function(){ arc.setAttribute("stroke-dashoffset", String(CIRC-(CIRC*val/100))); }, 220+rang*70);
+        })(i);
       }
+      i++;
+      });
     });
     grandpa.classList.add("ps-has-board");
     /* fond neutre « tableau de bord » sur la section qui porte le board */
