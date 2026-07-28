@@ -662,7 +662,18 @@
   var PARTENAIRES={
     essec:{
       nom:"ESSEC",
-      tags:["cf_ecole_ESSEC","ecole-essec"],
+      /* 🔴🔴 TAG D'AUTOMATISATION UNIQUEMENT (bascule demandée le 29/07).
+         `cf_ecole_ESSEC` a été RETIRÉ volontairement : ce tag vient du champ
+         « école » que l'étudiant remplit LUI-MÊME dans l'annuaire — n'importe qui
+         pouvait donc se déclarer ESSEC et récupérer le co-branding d'une école
+         payante. Le tag ci-dessous est posé par une AUTOMATISATION LearnWorlds sur
+         le domaine de l'e-mail, adresse vérifiée à l'inscription : il ne peut pas
+         être obtenu sans posséder une adresse @essec.edu.
+         🔴 Le nom doit correspondre EXACTEMENT au tag de l'automatisation. */
+      tags:["ecole-essec"],
+      /* Repli de secours si l'automatisation n'a pas encore tourné (tags posés
+         seulement APRÈS activation chez LearnWorlds : les comptes existants se
+         traitent en lot). Le domaine est celui de l'adresse VÉRIFIÉE. */
       domaines:["essec.edu"],
       logo:"",                       // SVG transparent à déposer dans /logos, sinon bloc typo
       pastille:"Accès offert par votre école",
