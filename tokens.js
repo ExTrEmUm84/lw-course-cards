@@ -344,6 +344,31 @@
   }
 
   /* ====================================================================
+     PANNEAU FLOTTANT WEGLOT -> MASQUÉ (site-wide, demandé par Ziad)
+     --------------------------------------------------------------------
+     Weglot ajoute de lui-même son propre sélecteur de langue : un
+     `div.weglot-container` collé au `<body>` qui contient un
+     `aside.weglot_switcher` en `position:fixed` en bas à droite
+     (« Français ▸ »). Il faisait DOUBLON avec les drapeaux du header
+     (ci-dessous, qui sont notre vrai switcher) et se superposait à ce qui
+     traîne dans ce coin de l'écran.
+     🔴 On masque l'INTERFACE, pas la traduction : `Weglot.switchTo()` ne
+     dépend pas de ce panneau — les drapeaux continuent de fonctionner
+     (vérifié en direct : cycle FR -> EN -> FR avec le panneau masqué).
+     🔴 CSS et pas JS : la règle est posée AVANT que Weglot n'injecte son
+     panneau (il se charge après nous), donc il n'apparaît jamais — pas de
+     clignotement, et rien à rejouer au changement de page.
+     Pour le faire revenir un jour : supprimer ce bloc. Le même réglage
+     existe côté Weglot (`hide_switcher`) mais il vit dans les paramètres
+     Weglot/LearnWorlds, hors de ce dépôt. */
+  (function(){
+    if(document.getElementById("ps-wg-hide")) return;
+    var st=document.createElement("style"); st.id="ps-wg-hide";
+    st.textContent=".weglot-container,aside.weglot_switcher{display:none !important;}";
+    (document.head||document.documentElement).appendChild(st);
+  })();
+
+  /* ====================================================================
      DRAPEAUX FR / EN DU HEADER -> VRAI SWITCHER WEGLOT (site-wide)
      --------------------------------------------------------------------
      Les 2 drapeaux du header sont des IMAGES posées à la main dans le Site
