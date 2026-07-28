@@ -88,31 +88,66 @@
     /* Mode DASHBOARD : anneau de progression + bouton « Continuer », une couleur
        par domaine (celle de sa page, posée en inline `--c` par le JS). */
     S+" .ps-pf-tiles.ps-has-board > *:not(.ps-pf-board){display:none !important;}",
-    /* 🔴 Le board n'est plus une grille de tuiles à plat : c'est une PILE DE
-       SECTIONS, une par page du site (cf. PAGE_LABELS). La grille descend d'un
-       cran, sur `.ps-pf-grp-g`, et garde exactement les mêmes réglages qu'avant
-       (auto-fit 196px, gap 14) pour que les tuiles ne changent pas d'allure. */
-    S+" .ps-pf-board{display:flex !important;flex-direction:column !important;gap:26px !important;}",
-    /* 🔴 auto-FILL et non auto-FIT : avec auto-fit, une section qui n'a qu'UN
-       parcours (Fiches cabinet, Fiches secteur…) voyait sa tuile s'étirer sur
-       toute la largeur — un pavé énorme à côté des sections à 2 ou 4 tuiles.
-       auto-fill garde les colonnes vides, donc toutes les tuiles du tableau ont
-       la même taille quelle que soit la section. */
-    S+" .ps-pf-grp-g{display:grid !important;grid-template-columns:repeat(auto-fill,minmax(196px,1fr)) !important;gap:14px !important;}",
-    S+" .ps-pf-grp-h{display:flex !important;align-items:center !important;gap:10px !important;margin:0 0 11px !important;}",
-    /* petit trait vertical à la couleur de la page : même repère que les tuiles */
-    S+" .ps-pf-grp-h::before{content:'' !important;flex:none !important;width:4px !important;height:16px !important;border-radius:3px !important;background:var(--c,#507EC5) !important;}",
-    S+" .ps-pf-grp-t{"+FT+"font-size:12.5px !important;font-weight:800 !important;letter-spacing:.06em !important;text-transform:uppercase !important;color:#243B6B !important;}",
-    S+" .ps-pf-grp-n{"+FT+"font-size:11.5px !important;font-weight:600 !important;color:#8A93A5 !important;}",
-    S+" .ps-pf-bt{background:#fff !important;border-radius:var(--ps-r-card,16px) !important;padding:16px 17px 15px !important;box-shadow:0 4px 14px rgba(15,23,42,.06) !important;display:flex !important;flex-direction:column !important;gap:12px !important;transition:transform .2s ease, box-shadow .2s ease !important;animation:psPfUp .55s ease both !important;}",
-    S+" .ps-pf-bt:hover{transform:translateY(-3px) !important;box-shadow:0 12px 28px rgba(15,23,42,.12) !important;}",
+    /* 🔴 MISE EN PAGE « BOARD » (29/07, retour de Ziad sur capture : « c'est très
+       petit et vide, je veux de grosses cartes qui s'imbriquent pour occuper la
+       largeur »). Le problème : chaque section prenait une LIGNE entière, donc
+       une section à 1 parcours laissait les 3/4 de la ligne vides.
+       Solution : le board est une grille de 4 colonnes et CHAQUE SECTION EST UNE
+       CARTE dont la largeur suit son contenu — 1 parcours = 1 colonne, 2 = 2,
+       4 = toute la largeur. Avec `grid-auto-flow:dense`, les petites cartes
+       viennent COMBLER les trous laissés par les grandes : plus de vide.
+       🔴 La largeur passe par une CLASSE (`ps-pf-w1..w4`) et non par un
+       `span var(--n)` : `span` attend un entier littéral, une variable CSS ou un
+       `min()` n'y est pas accepté — et il faut de toute façon pouvoir réduire
+       les spans aux paliers responsive. */
+    S+" .ps-pf-board{display:grid !important;grid-template-columns:repeat(4,minmax(0,1fr)) !important;gap:16px !important;grid-auto-flow:dense !important;align-items:start !important;}",
+    S+" .ps-pf-w1{grid-column:span 1 !important;} "+S+" .ps-pf-w2{grid-column:span 2 !important;}",
+    S+" .ps-pf-w3{grid-column:span 3 !important;} "+S+" .ps-pf-w4{grid-column:span 4 !important;}",
+    /* la section EST la carte : c'est elle qui porte le fond blanc et l'ombre */
+    S+" .ps-pf-grp{text-align:left !important;background:#fff !important;border-radius:var(--ps-r-card,16px) !important;padding:18px 20px 20px !important;box-shadow:0 4px 16px rgba(15,23,42,.07) !important;animation:psPfUp .55s ease both !important;}",
+    S+" .ps-pf-grp-h{display:flex !important;align-items:center !important;gap:10px !important;margin:0 0 14px !important;}",
+    /* trait vertical à la couleur de la page : repère de section */
+    S+" .ps-pf-grp-h::before{content:'' !important;flex:none !important;width:4px !important;height:18px !important;border-radius:3px !important;background:var(--c,#507EC5) !important;}",
+    S+" .ps-pf-grp-t{"+FT+"font-size:14px !important;font-weight:800 !important;letter-spacing:.05em !important;text-transform:uppercase !important;color:#243B6B !important;}",
+    S+" .ps-pf-grp-n{"+FT+"font-size:12px !important;font-weight:600 !important;color:#8A93A5 !important;margin-left:auto !important;white-space:nowrap !important;}",
+    /* auto-fit ici est SANS DANGER : la carte est déjà dimensionnée sur son
+       nombre de parcours, donc une tuile seule ne s'étire pas démesurément. */
+    S+" .ps-pf-grp-g{display:grid !important;grid-template-columns:repeat(auto-fit,minmax(190px,1fr)) !important;gap:12px !important;}",
+    /* paliers : 4 colonnes -> 2 -> 1, en écrasant les spans */
+    "@media (max-width:1040px){"+S+" .ps-pf-board{grid-template-columns:repeat(2,minmax(0,1fr)) !important;}"
+      +S+" .ps-pf-w2,"+S+" .ps-pf-w3,"+S+" .ps-pf-w4{grid-column:span 2 !important;}}",
+    "@media (max-width:620px){"+S+" .ps-pf-board{grid-template-columns:minmax(0,1fr) !important;}"
+      +S+" .ps-pf-w1,"+S+" .ps-pf-w2,"+S+" .ps-pf-w3,"+S+" .ps-pf-w4{grid-column:span 1 !important;}}",
+
+    /* ---- bandeau de grade (gamification), pleine largeur en tête du board ---- */
+    S+" .ps-pf-rank{text-align:left !important;grid-column:1 / -1 !important;display:flex !important;align-items:center !important;gap:22px !important;"
+      +"background:#243B6B !important;border-radius:var(--ps-r-card,16px) !important;padding:22px 26px !important;"
+      +"box-shadow:0 8px 24px rgba(36,59,107,.22) !important;animation:psPfUp .55s ease both !important;}",
+    S+" .ps-pf-rank-med{flex:none !important;width:76px !important;height:76px !important;border-radius:50% !important;"
+      +"background:var(--ps-accent,#507EC5) !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+    S+" .ps-pf-rank-txt{flex:1 !important;min-width:0 !important;}",
+    S+" .ps-pf-rank-over{"+FT+"font-size:11.5px !important;font-weight:700 !important;letter-spacing:.08em !important;text-transform:uppercase !important;color:#A9C0E4 !important;}",
+    S+" .ps-pf-rank-name{"+FT+"font-size:26px !important;font-weight:800 !important;color:#fff !important;letter-spacing:-.02em !important;line-height:1.2 !important;margin:2px 0 5px !important;}",
+    S+" .ps-pf-rank-msg{"+FT+"font-size:13.5px !important;font-weight:500 !important;color:#C8D8EF !important;line-height:1.45 !important;margin:0 0 12px !important;}",
+    S+" .ps-pf-rank-bar{height:8px !important;border-radius:5px !important;background:rgba(255,255,255,.18) !important;overflow:hidden !important;}",
+    S+" .ps-pf-rank-fill{display:block !important;height:100% !important;width:0 !important;border-radius:5px !important;background:#7FA8DE !important;transition:width 1.1s cubic-bezier(.4,0,.2,1) !important;}",
+    S+" .ps-pf-rank-r{flex:none !important;text-align:right !important;}",
+    S+" .ps-pf-rank-pct{"+FT+"font-size:38px !important;font-weight:800 !important;color:#fff !important;letter-spacing:-.03em !important;line-height:1 !important;}",
+    S+" .ps-pf-rank-lbl{"+FT+"font-size:12px !important;font-weight:600 !important;color:#A9C0E4 !important;margin-top:3px !important;}",
+    "@media (max-width:620px){"+S+" .ps-pf-rank{flex-wrap:wrap !important;gap:16px !important;padding:20px !important;}"
+      +S+" .ps-pf-rank-pct{font-size:30px !important;}}",
+    /* 🔴 La tuile n'est plus une carte blanche flottante : la CARTE, c'est
+       désormais la section. La tuile devient une plaque intérieure sobre, sinon
+       on empile deux niveaux d'ombre et le tout fait « boîtes dans des boîtes ». */
+    S+" .ps-pf-bt{background:#F7F9FC !important;border:1px solid #EDF1F7 !important;border-radius:13px !important;padding:16px 17px 15px !important;display:flex !important;flex-direction:column !important;gap:13px !important;transition:transform .2s ease, box-shadow .2s ease, background .2s ease !important;}",
+    S+" .ps-pf-bt:hover{transform:translateY(-2px) !important;background:#fff !important;box-shadow:0 10px 24px rgba(15,23,42,.10) !important;}",
     S+" .ps-pf-bt-top{display:flex !important;align-items:center !important;gap:13px !important;}",
-    S+" .ps-pf-ring{width:58px !important;height:58px !important;flex:none !important;position:relative !important;}",
+    S+" .ps-pf-ring{width:64px !important;height:64px !important;flex:none !important;position:relative !important;}",
     S+" .ps-pf-ring svg{transform:rotate(-90deg) !important;display:block !important;}",
     /* l'anneau s'anime en dessinant son tracé (stroke-dashoffset) */
     S+" .ps-pf-ring .ps-pf-arc{transition:stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1) !important;}",
-    S+" .ps-pf-bt-pct{position:absolute !important;inset:0 !important;display:flex !important;align-items:center !important;justify-content:center !important;"+FT+"font-size:14px !important;font-weight:800 !important;color:#243B6B !important;letter-spacing:-.02em !important;}",
-    S+" .ps-pf-bt-name{"+FT+"font-size:13.5px !important;font-weight:700 !important;color:#243B6B !important;line-height:1.25 !important;}",
+    S+" .ps-pf-bt-pct{position:absolute !important;inset:0 !important;display:flex !important;align-items:center !important;justify-content:center !important;"+FT+"font-size:15px !important;font-weight:800 !important;color:#243B6B !important;letter-spacing:-.02em !important;}",
+    S+" .ps-pf-bt-name{"+FT+"font-size:14.5px !important;font-weight:700 !important;color:#243B6B !important;line-height:1.25 !important;}",
     S+" .ps-pf-bt-sub{"+FT+"font-size:11.5px !important;font-weight:500 !important;color:#8A93A5 !important;margin-top:2px !important;}",
     S+" .ps-pf-go{display:flex !important;align-items:center !important;justify-content:center !important;gap:6px !important;"+FT+"font-size:12.5px !important;font-weight:700 !important;padding:9px 12px !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--c,#507EC5) !important;color:#fff !important;text-decoration:none !important;border:0 !important;transition:filter .15s ease, transform .15s ease !important;}",
     S+" .ps-pf-go:hover{filter:brightness(1.09) !important;transform:translateY(-1px) !important;color:#fff !important;text-decoration:none !important;}",
@@ -387,6 +422,109 @@
   function rangPage(u){ var i=PAGE_ORDRE.indexOf(u); return i<0 ? 99 : i; }
   function labelPage(u){ return PAGE_LABELS[u] || "Autres"; }
 
+  /* ====================================================================
+     BANDEAU DE GRADE (gamification) — en tête du tableau
+     --------------------------------------------------------------------
+     Demande de Ziad (29/07) : au-dessus des sections, un bandeau qui félicite
+     le membre et lui donne un GRADE selon son avancement global.
+     Échelle retenue (choix de Ziad) : la CARRIÈRE EN CONSEIL — c'est la promesse
+     du site (« intégrez les meilleurs cabinets »), donc le grade raconte ce que
+     l'étudiant vient chercher. Changer un palier ou un libellé = 1 ligne ici.
+     🔴 Les seuils sont des MINIMA, dans l'ordre croissant : `gradeDe()` prend le
+     dernier atteint. Ne pas les désordonner. */
+  var GRADES=[
+    {min:0,  nom:"Candidat",          mot:"Votre préparation démarre. Chaque module compte."},
+    {min:10, nom:"Analyste",          mot:"Les bases sont posées, continuez sur cette lancée."},
+    {min:25, nom:"Consultant",        mot:"Beau parcours, vous tenez le rythme."},
+    {min:45, nom:"Consultant senior", mot:"Vous maîtrisez l'essentiel, la marche suivante est proche."},
+    {min:65, nom:"Manager",           mot:"Excellent niveau, les entretiens exigeants sont à votre portée."},
+    {min:85, nom:"Partner",           mot:"Parcours complet : vous avez de quoi viser les meilleurs cabinets."}
+  ];
+  function gradeDe(pct){
+    var g=GRADES[0], suivant=null;
+    for(var i=0;i<GRADES.length;i++){
+      if(pct>=GRADES[i].min){ g=GRADES[i]; suivant=GRADES[i+1]||null; }
+    }
+    return {actuel:g, suivant:suivant};
+  }
+
+  /* % global = moyenne PONDÉRÉE PAR LE NOMBRE DE COURS (choix de Ziad) : un
+     parcours de 10 cours doit peser plus qu'un parcours d'1 cours, sinon finir
+     un tout petit parcours ferait bondir la jauge autant qu'un gros.
+     🔴 Repli sur la moyenne simple quand aucun parcours ne connaît son nombre de
+     cours — c'est le cas de la source `me.userLearningPrograms` (affichage
+     instantané, avant la réponse du Worker) : sans ce repli, le bandeau
+     resterait vide à la 1re visite. */
+  function pctGlobal(progs){
+    var somPond=0, nbCours=0, som=0, n=0;
+    progs.forEach(function(p){
+      if(typeof p.pct!=="number" || !isFinite(p.pct)) return;
+      var v=Math.max(0,Math.min(100,p.pct));
+      n++; som+=v;
+      var c=(typeof p.courses==="number" && p.courses>0) ? p.courses : 0;
+      if(c){ somPond+=v*c; nbCours+=c; }
+    });
+    if(nbCours) return Math.round(somPond/nbCours);
+    return n ? Math.round(som/n) : null;
+  }
+
+  var MEDAILLE='<circle cx="12" cy="9" r="6"/><path d="M8.5 14.6 L7 22 l5-2.9 5 2.9 -1.5-7.4"/>';
+
+  /* Le bandeau n'est construit QUE si le % global est connu : afficher
+     « Candidat 0 % » pendant que le Worker répond serait un faux message
+     décourageant (et il changerait sous les yeux du membre). */
+  function buildRank(progs){
+    var pct=pctGlobal(progs);
+    if(pct===null) return null;
+    var g=gradeDe(pct);
+
+    var box=document.createElement("div"); box.className="ps-pf-rank";
+
+    var med=document.createElement("div"); med.className="ps-pf-rank-med";
+    var NS="http://www.w3.org/2000/svg";
+    var svg=document.createElementNS(NS,"svg");
+    svg.setAttribute("viewBox","0 0 24 24"); svg.setAttribute("width","36"); svg.setAttribute("height","36");
+    svg.setAttribute("fill","none"); svg.setAttribute("stroke","#fff");
+    svg.setAttribute("stroke-width","1.7"); svg.setAttribute("stroke-linecap","round"); svg.setAttribute("stroke-linejoin","round");
+    /* innerHTML sur du SVG ne construit pas toujours les bons noeuds : on passe
+       par un conteneur SVG temporaire parsé en XML (même précaution que l'anneau). */
+    var tmp=document.createElementNS(NS,"g");
+    tmp.innerHTML=MEDAILLE;
+    while(tmp.firstChild) svg.appendChild(tmp.firstChild);
+    med.appendChild(svg);
+    box.appendChild(med);
+
+    var txt=document.createElement("div"); txt.className="ps-pf-rank-txt";
+    var ov=document.createElement("div"); ov.className="ps-pf-rank-over"; ov.textContent="Votre grade";
+    txt.appendChild(ov);
+    var nm=document.createElement("div"); nm.className="ps-pf-rank-name"; nm.textContent=g.actuel.nom;
+    txt.appendChild(nm);
+    var ms=document.createElement("div"); ms.className="ps-pf-rank-msg";
+    ms.textContent = g.suivant
+      ? (g.actuel.mot+" Encore "+Math.max(1,g.suivant.min-pct)+" % pour devenir "+g.suivant.nom.toLowerCase()+".")
+      : g.actuel.mot;
+    txt.appendChild(ms);
+    var bar=document.createElement("div"); bar.className="ps-pf-rank-bar";
+    var fill=document.createElement("i"); fill.className="ps-pf-rank-fill";
+    bar.appendChild(fill); txt.appendChild(bar);
+    box.appendChild(txt);
+
+    var right=document.createElement("div"); right.className="ps-pf-rank-r";
+    var big=document.createElement("div"); big.className="ps-pf-rank-pct"; big.textContent=pct+" %";
+    right.appendChild(big);
+    var lbl=document.createElement("div"); lbl.className="ps-pf-rank-lbl"; lbl.textContent="global";
+    right.appendChild(lbl);
+    box.appendChild(right);
+
+    /* largeur posée après insertion, sinon pas de transition (même raison que
+       les anneaux des tuiles) */
+    /* 🔴 setProperty(...,"important") et NON `style.width=` : la règle CSS pose
+       `width:0 !important`, qui bat un style inline ordinaire — la barre restait
+       donc vide (mesuré : inline 29%, calculé 0px). */
+    setTimeout(function(){ fill.style.setProperty("width", Math.max(2,pct)+"%", "important"); }, 260);
+    return box;
+  }
+
   var LP_ENDPOINT="https://annuaire-prepastrat.ziedbencheikh.workers.dev/";
   /* Clé de site Turnstile : PUBLIQUE par nature (c'est la clé secrète, côté
      Worker, qui valide). Même clé que l'annuaire et /account.
@@ -646,7 +784,7 @@
     if(!board){ board=document.createElement("div"); board.className="ps-pf-board"; grandpa.insertBefore(board,grandpa.firstChild); }
     board.dataset.sig=sig;
     board.textContent="";
-    var R=24, CIRC=2*Math.PI*R;                      // anneau de progression
+    var R=27, CIRC=2*Math.PI*R;                      // anneau de progression
 
     /* Regroupement par page, puis tri selon l'ordre voulu (cf. PAGE_ORDRE). */
     var groupes={}, urls=[];
@@ -661,10 +799,16 @@
        d'apparition doit traverser tout le tableau, sinon chaque section
        redémarrerait son animation à zéro et l'ensemble clignoterait par paquets. */
     var i=0;
+    var bandeau=buildRank(progs);              // grade global, en tête du board
+    if(bandeau) board.appendChild(bandeau);
+
     urls.forEach(function(u){
       var g=groupes[u];
       var grp=document.createElement("div");
-      grp.className="ps-pf-grp";
+      /* largeur de la carte = nombre de parcours (plafonné à 4 colonnes) :
+         c'est ce qui fait que les sections s'imbriquent au lieu de laisser
+         des lignes à moitié vides. */
+      grp.className="ps-pf-grp ps-pf-w"+Math.min(4, g.items.length);
       grp.style.setProperty("--c", g.col);
 
       var head=document.createElement("div"); head.className="ps-pf-grp-h";
@@ -698,10 +842,10 @@
          bons noeuds dans tous les navigateurs. */
       var NS="http://www.w3.org/2000/svg";
       var svg=document.createElementNS(NS,"svg");
-      svg.setAttribute("width","58"); svg.setAttribute("height","58");
+      svg.setAttribute("width","64"); svg.setAttribute("height","64");
       function cercle(stroke,dash,off){
         var c=document.createElementNS(NS,"circle");
-        c.setAttribute("cx","29"); c.setAttribute("cy","29"); c.setAttribute("r",String(R));
+        c.setAttribute("cx","32"); c.setAttribute("cy","32"); c.setAttribute("r",String(R));
         c.setAttribute("fill","none"); c.setAttribute("stroke",stroke); c.setAttribute("stroke-width","6");
         if(dash!=null){ c.setAttribute("stroke-linecap","round"); c.setAttribute("stroke-dasharray",String(dash)); c.setAttribute("stroke-dashoffset",String(off)); }
         return c;
