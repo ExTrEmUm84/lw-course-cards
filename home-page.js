@@ -998,9 +998,109 @@
     });
   }
 
+  /* ====================================================================
+     SECTION PARTENAIRE (école cliente) — juste sous le hero
+     --------------------------------------------------------------------
+     Pendant du badge d'en-tête posé par `tokens.js`. Toute la donnée (nom,
+     titre, texte, puces) vient de la table PARTENAIRES de tokens.js, exposée
+     ici via `window.PS_PARTENAIRE` : ajouter une école ne touche QUE tokens.js.
+     🔴 Rien ne s'affiche pour un visiteur anonyme (`me` n'existe pas) ni pour un
+     membre sans école partenaire — c'est voulu.
+     🔴 tokens.js peut être chargé APRÈS nous : `PS_PARTENAIRE` est donc lu à
+     chaque passage de build() (relances + MutationObserver), pas une seule fois.
+     Placement : après la 2e section de tête (section 1 = topbar, section 2 = le
+     vrai hero vidéo) → la bande partenaire est la 1re chose sous le hero. */
+  var PART_ICONS=[
+    '<path d="M7 11V8a5 5 0 0 1 9.9-1"/><rect x="4" y="11" width="16" height="10" rx="2"/>',
+    '<path d="M17 20v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9.5" cy="7" r="4"/><path d="M22 20v-2a4 4 0 0 0-3-3.9"/>',
+    '<rect x="3" y="5" width="18" height="16" rx="2"/><path d="M16 3v4M8 3v4M3 11h18"/>'
+  ];
+  function buildPartenaire(){
+    var p=window.PS_PARTENAIRE;
+    if(!p) return;
+    var hote=document.querySelector(H);
+    if(!hote) return;
+    var deja=hote.querySelector(".ps-part");
+    if(deja){ if(deja.getAttribute("data-ps-part")===p.nom) return; deja.remove(); }
+
+    if(!document.getElementById("ps-part-css")){
+      var st=document.createElement("style"); st.id="ps-part-css";
+      st.textContent=
+        /* 🔴 font-size ET text-align redéclarés : les sections LW posent
+           `font-size:0` + `text-align:center`, qui descendent jusqu'ici. */
+        H+" .ps-part{font-size:16px !important;text-align:left !important;padding:34px 20px 6px !important;}"+
+        H+" .ps-part-in{max-width:1120px !important;margin:0 auto !important;background:#F4F7FC !important;"+
+          "border:1px solid #E3E8F0 !important;border-radius:var(--ps-r-card,16px) !important;padding:28px 30px 30px !important;}"+
+        H+" .ps-part-head{display:flex !important;align-items:center !important;gap:14px !important;flex-wrap:wrap !important;margin-bottom:14px !important;}"+
+        H+" .ps-part-nom{"+FT+"font-size:17px !important;font-weight:800 !important;letter-spacing:.16em !important;color:#243B6B !important;"+
+          "border:2px solid #243B6B !important;border-radius:5px !important;padding:5px 12px !important;line-height:1.2 !important;}"+
+        H+" .ps-part-img{height:34px !important;width:auto !important;display:block !important;}"+
+        H+" .ps-part-pill{"+FT+"font-size:11.5px !important;font-weight:700 !important;letter-spacing:.06em !important;text-transform:uppercase !important;"+
+          "background:#E4EDFA !important;color:#1B3D6B !important;padding:6px 12px !important;border-radius:var(--ps-r-pill,999px) !important;}"+
+        H+" .ps-part-t{"+FT+"font-size:26px !important;font-weight:800 !important;color:#243B6B !important;letter-spacing:-.02em !important;"+
+          "line-height:1.25 !important;margin:0 0 9px !important;}"+
+        H+" .ps-part-x{"+FT+"font-size:15px !important;font-weight:500 !important;color:#4B5563 !important;line-height:1.6 !important;"+
+          "margin:0 0 20px !important;max-width:660px !important;}"+
+        H+" .ps-part-g{display:grid !important;grid-template-columns:repeat(auto-fit,minmax(180px,1fr)) !important;gap:13px !important;}"+
+        H+" .ps-part-c{background:#fff !important;border:1px solid #E9EEF6 !important;border-radius:11px !important;padding:14px 16px !important;}"+
+        H+" .ps-part-c svg{display:block !important;color:var(--ps-accent,#507EC5) !important;margin-bottom:7px !important;}"+
+        H+" .ps-part-ct{"+FT+"font-size:14px !important;font-weight:700 !important;color:#243B6B !important;margin:0 !important;}"+
+        H+" .ps-part-cs{"+FT+"font-size:13px !important;font-weight:500 !important;color:#8A93A5 !important;margin:2px 0 0 !important;}"+
+        "@media (max-width:700px){"+H+" .ps-part-t{font-size:21px !important;}"+H+" .ps-part-in{padding:22px 20px 24px !important;}}";
+      (document.head||document.documentElement).appendChild(st);
+    }
+
+    var wrap=document.createElement("div");
+    wrap.className="ps-part";
+    wrap.setAttribute("data-ps-part", p.nom);
+    var box=document.createElement("div"); box.className="ps-part-in";
+
+    var head=document.createElement("div"); head.className="ps-part-head";
+    if(p.logo){
+      var im=document.createElement("img"); im.className="ps-part-img"; im.src=p.logo; im.alt=p.nom;
+      head.appendChild(im);
+    } else {
+      var nm=document.createElement("span"); nm.className="ps-part-nom"; nm.textContent=p.nom;
+      head.appendChild(nm);
+    }
+    if(p.pastille){
+      var pl=document.createElement("span"); pl.className="ps-part-pill"; pl.textContent=p.pastille;
+      head.appendChild(pl);
+    }
+    box.appendChild(head);
+
+    var t=document.createElement("h2"); t.className="ps-part-t"; t.textContent=p.titre||""; box.appendChild(t);
+    var x=document.createElement("p"); x.className="ps-part-x"; x.textContent=p.texte||""; box.appendChild(x);
+
+    if(p.puces && p.puces.length){
+      var g=document.createElement("div"); g.className="ps-part-g";
+      var NS="http://www.w3.org/2000/svg";
+      p.puces.forEach(function(pc,i){
+        var c=document.createElement("div"); c.className="ps-part-c";
+        var svg=document.createElementNS(NS,"svg");
+        svg.setAttribute("viewBox","0 0 24 24"); svg.setAttribute("width","20"); svg.setAttribute("height","20");
+        svg.setAttribute("fill","none"); svg.setAttribute("stroke","currentColor");
+        svg.setAttribute("stroke-width","1.8"); svg.setAttribute("stroke-linecap","round"); svg.setAttribute("stroke-linejoin","round");
+        var tmp=document.createElementNS(NS,"g");
+        tmp.innerHTML=PART_ICONS[i%PART_ICONS.length];
+        while(tmp.firstChild) svg.appendChild(tmp.firstChild);
+        c.appendChild(svg);
+        var ct=document.createElement("p"); ct.className="ps-part-ct"; ct.textContent=pc.t||""; c.appendChild(ct);
+        var cs=document.createElement("p"); cs.className="ps-part-cs"; cs.textContent=pc.s||""; c.appendChild(cs);
+        g.appendChild(c);
+      });
+      box.appendChild(g);
+    }
+
+    wrap.appendChild(box);
+    var secs=hote.querySelectorAll(":scope > section.learnworlds-section, :scope > section");
+    if(secs.length>=2 && secs[1].parentNode) secs[1].parentNode.insertBefore(wrap, secs[1].nextSibling);
+    else hote.insertBefore(wrap, hote.firstChild);
+  }
+
   function build(){
     if(!surLaPage()) return;
-    styles(); marquer(); cartes(); buildStats(); buildCta(); buildPreuve(); buildAtouts(); buildCabinets(); buildTimeline(); buildProfils(); buildEquipe(); heroVideoBg(); setHeroVideo(); buildFaq();
+    styles(); marquer(); cartes(); buildStats(); buildCta(); buildPreuve(); buildAtouts(); buildCabinets(); buildTimeline(); buildProfils(); buildEquipe(); heroVideoBg(); setHeroVideo(); buildFaq(); buildPartenaire();
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet

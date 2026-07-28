@@ -636,11 +636,119 @@
   /* Les cartes sont rendues par le JS catalogue de LW, souvent après nous. */
   [400,1000,2000,3500,6000].forEach(function(d){ setTimeout(function(){ langCourses(); }, d); });
 
-  cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag();
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); });
+  /* ====================================================================
+     CO-BRANDING PARTENAIRE (écoles clientes) — site-wide
+     --------------------------------------------------------------------
+     Une école qui achète la formation pour ses étudiants veut voir SA marque.
+     Ici : un badge « avec ESSEC » à côté du logo PrepaStrat dans l'en-tête ;
+     `home-page.js` ajoute en plus une section d'accueil (il lit la même table
+     via `window.PS_PARTENAIRE`, posé par `partenaire()` ci-dessous).
+
+     🔴🔴 DÉTECTION SANS RÉSEAU : LearnWorlds fabrique tout seul un tag
+     `cf_<champ>_<valeur>` pour chaque champ personnalisé rempli — vérifié en
+     direct, le compte de Ziad porte `cf_ecole_ESCP` dans `me.tags`. Reconnaître
+     l'école se réduit donc à lire `me.tags` : aucun appel, aucun Worker.
+     🔴 Lire les TAGS et pas `me.custom_fields`, qui est VIDE côté page.
+     🔴 `me` n'existe que pour un membre CONNECTÉ : un prospect anonyme ne voit
+     aucun co-branding. C'est une limite du dispositif, pas un bug.
+     ⚠️ `cf_ecole` est déclaré par l'étudiant et facultatif : pour une école
+     facturée, le signal fiable est un tag posé par AUTOMATISATION sur le domaine
+     e-mail. Les deux sont acceptés ci-dessous (tag d'abord, domaine en repli).
+
+     AJOUTER UNE ÉCOLE = UNE ENTRÉE dans PARTENAIRES. Rien d'autre à toucher.
+     🔴 Le logo est pour l'instant un bloc TYPOGRAPHIQUE : le logo d'une école est
+     une marque déposée, on ne le récupère pas sur son site — il arrive par le
+     contrat, puis se dépose dans /logos (champ `logo` ci-dessous). */
+  var PARTENAIRES={
+    essec:{
+      nom:"ESSEC",
+      tags:["cf_ecole_ESSEC","ecole-essec"],
+      domaines:["essec.edu"],
+      logo:"",                       // SVG transparent à déposer dans /logos, sinon bloc typo
+      pastille:"Accès offert par votre école",
+      titre:"Votre préparation au conseil, financée par l'ESSEC",
+      texte:"L'ESSEC met la formation PrepaStrat à disposition de ses étudiants : l'intégralité des cours, des études de cas et des fiches cabinets, sans frais pour vous.",
+      puces:[
+        {t:"Catalogue complet", s:"Aucun paiement"},
+        {t:"Promo ESSEC",       s:"Annuaire entre étudiants"},
+        {t:"Webinars",          s:"Tous les mois"}
+      ]
+    }
+  };
+
+  function membrePS(){ try{ return (typeof me==="object" && me) ? me : null; }catch(e){ return null; } }
+
+  var _part;                       // undefined = pas encore cherché, null = aucun
+  function partenaire(){
+    if(_part!==undefined) return _part;
+    _part=null;
+    var u=membrePS();
+    if(u){
+      var tags=[].slice.call(u.tags||[]).map(function(t){
+        return String(typeof t==="string" ? t : (t && t.name) || "").toLowerCase();
+      });
+      var dom=(String(u.email||"").split("@")[1]||"").toLowerCase();
+      for(var k in PARTENAIRES){
+        var p=PARTENAIRES[k], ok=false;
+        for(var i=0;i<p.tags.length && !ok;i++){ if(tags.indexOf(p.tags[i].toLowerCase())>=0) ok=true; }
+        for(var j=0;j<p.domaines.length && !ok;j++){
+          var d=p.domaines[j].toLowerCase();
+          if(dom===d || (dom.length>d.length && dom.slice(-(d.length+1))==="."+d)) ok=true;
+        }
+        if(ok){ _part=p; break; }
+      }
+    }
+    window.PS_PARTENAIRE=_part;    // home-page.js lit ça pour sa section d'accueil
+    return _part;
+  }
+
+  function partnerHeader(){
+    var p=partenaire();
+    if(!p) return;
+    if(document.querySelector(".ps-cob")) return;          // déjà posé
+    var logo=document.querySelector("img.lw-logo");
+    if(!logo) return;                                       // en-tête pas encore rendu -> relance
+    /* On se pose APRÈS le lien qui enveloppe le logo, dans la même rangée flex. */
+    var ancre=(logo.closest && logo.closest("a")) || logo;
+    if(!ancre.parentNode) return;
+
+    if(!document.getElementById("ps-cob-css")){
+      var st=document.createElement("style"); st.id="ps-cob-css";
+      st.textContent=
+        ".ps-cob{display:inline-flex !important;align-items:center !important;gap:9px !important;margin-left:14px !important;vertical-align:middle !important;}"+
+        ".ps-cob-sep{display:block !important;width:1px !important;height:26px !important;background:#E3E8F0 !important;}"+
+        ".ps-cob-av{font-family:var(--ps-font,Figtree,sans-serif) !important;font-size:10.5px !important;font-weight:700 !important;"+
+          "letter-spacing:.07em !important;text-transform:uppercase !important;color:#8A93A5 !important;}"+
+        ".ps-cob-nom{font-family:var(--ps-font,Figtree,sans-serif) !important;font-size:14px !important;font-weight:700 !important;"+
+          "letter-spacing:.14em !important;color:var(--ps-cob-c,#243B6B) !important;border:1.5px solid var(--ps-cob-c,#243B6B) !important;"+
+          "border-radius:4px !important;padding:3px 9px !important;line-height:1.2 !important;}"+
+        ".ps-cob-img{height:26px !important;width:auto !important;display:block !important;}"+
+        /* en petit écran l'en-tête est déjà serré : on ne garde que la marque */
+        "@media (max-width:900px){.ps-cob-av{display:none !important;}.ps-cob{margin-left:9px !important;gap:7px !important;}}";
+      (document.head||document.documentElement).appendChild(st);
+    }
+
+    var box=document.createElement("span");
+    box.className="ps-cob";
+    box.style.setProperty("--ps-cob-c", "#243B6B");
+    var sep=document.createElement("span"); sep.className="ps-cob-sep"; box.appendChild(sep);
+    var av=document.createElement("span"); av.className="ps-cob-av"; av.textContent="avec"; box.appendChild(av);
+    if(p.logo){
+      var im=document.createElement("img");
+      im.className="ps-cob-img"; im.src=p.logo; im.alt=p.nom;
+      box.appendChild(im);
+    } else {
+      var nm=document.createElement("span"); nm.className="ps-cob-nom"; nm.textContent=p.nom;
+      box.appendChild(nm);
+    }
+    ancre.parentNode.insertBefore(box, ancre.nextSibling);
+  }
+
+  cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
      quelques relances pour attraper la classe active. */
-  [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); setTimeout(immersivePlayer,d); });
+  [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); setTimeout(immersivePlayer,d); setTimeout(partnerHeader,d); });
   setTimeout(reveal, 3500);   // filet de sécurité anti-flash
 
   /* ====================================================================
