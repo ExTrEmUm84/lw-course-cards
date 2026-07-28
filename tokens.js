@@ -527,6 +527,15 @@
     }catch(e){ _catEnCours=false; }
   }
 
+  /* Convention maison : un contenu anglais se termine par « - EN » (ou « EN »).
+     Sert de SECONDE source au filtre de langue, et de source unique pour les
+     cartes de programme (un programme n'a pas de tag). */
+  var RE_TITRE_EN=/(?:^|[\s\-–—:(\[])EN[)\]]?\s*$/i;
+  function titreDeCarte(card){
+    var h=card.querySelector(".learnworlds-heading3")||card.querySelector("[class*='heading']");
+    return (h ? h.textContent : "").replace(/\s+/g," ").trim();
+  }
+
   function slugDeCarte(card){
     var a=card.querySelector("a[href]"); if(!a) return "";
     var h=a.getAttribute("href")||"";
@@ -568,8 +577,20 @@
       var enAnglais=(lang!==from);
       var visibles=0, masques=0;
       [].slice.call(cards).forEach(function(card){
-        var tags=map[slugDeCarte(card)]||[];
-        var estEN=tags.indexOf(LANG_TAG_EN)>=0;
+        /* 🔴🔴 DEUX SOURCES, PAS UNE (bug signalé le 29/07 : sur un compte élève
+           les cours FR et EN s'affichaient MÉLANGÉS, alors que le même filtre
+           marchait sur le compte admin).
+           Mécanique : `map[slug]` ne trouvait rien pour ce compte -> `tags` vide
+           -> `estEN` faux -> le cours anglais passait pour français et restait
+           visible. Le catalogue lui-même est PROPRE (vérifié : les 6 cours EN
+           portent bien le tag `EN`), c'est l'APPARIEMENT carte -> cours qui rate
+           — l'identifiant du lien (`?courseid=`) n'est pas toujours le `titleId`.
+           Parade : si le tag ne tranche pas, on retombe sur le SUFFIXE DU TITRE
+           (« … - EN »), exactement la convention déjà utilisée plus bas pour les
+           cartes de PROGRAMME. Le repli ne peut se déclencher que sur un titre
+           qui se TERMINE par EN, donc aucun cours français n'est menacé. */
+        var tags=map[slugDeCarte(card)];
+        var estEN=(!!tags && tags.indexOf(LANG_TAG_EN)>=0) || RE_TITRE_EN.test(titreDeCarte(card));
         var off=enAnglais ? !estEN : estEN;        // EN -> que les EN ; FR -> tout sauf EN
         card.classList.toggle("ps-lang-off", off);
         if(off) masques++; else visibles++;
@@ -584,7 +605,7 @@
         var h=pc.querySelector("h3")||pc.querySelector("[class*='heading']");
         var titre=(h?h.textContent:"").replace(/\s+/g," ").trim();
         if(!titre) return;
-        var estEN=/(?:^|[\s\-–—:(\[])EN[)\]]?\s*$/i.test(titre);   // « … - EN » OU « … EN »
+        var estEN=RE_TITRE_EN.test(titre);            // « … - EN » OU « … EN » (même règle que les cours)
         pc.classList.toggle("ps-lang-off", enAnglais ? !estEN : estEN);
       });
       /* 🔴 Prévenir les scripts de page : la tuile « Progression sur N cours »

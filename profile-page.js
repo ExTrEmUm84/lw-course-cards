@@ -393,7 +393,48 @@
   };
   /* Domaine inconnu -> page « Nos formations », qui les liste tous. */
   var PROG_FALLBACK={url:"/page-introduction", col:"#507EC5"};
-  function progPage(id){ return (id && PROG_PAGES[id]) || PROG_FALLBACK; }
+
+  /* 🔴🔴 SECONDE CLÉ : LE NOM DU PROGRAMME (bug signalé le 29/07 sur un compte
+     élève — les 12 parcours tombaient TOUS dans « Compétences »).
+     Cause : `PROG_PAGES` est indexé par le slug du programme, qui n'est servi que
+     par le Worker `/lp`. La source INSTANTANÉE `me.userLearningPrograms` donne,
+     elle, des **id hexadécimaux** (`6a27ca91…`) qui ne matchent aucune clé —
+     donc repli sur `/page-introduction` pour tout le monde. Le compte admin ne
+     le voyait pas : son `localStorage` gardait déjà la réponse du Worker.
+     Parade : à défaut d'id connu, on apparie sur le NOM normalisé (minuscules,
+     sans accents ni ponctuation), qui est disponible dans les TROIS sources.
+     Ajouter un programme = 1 ligne ici (et non plus une par identifiant). */
+  var PAGE_COL={
+    "/empty":               "#507EC5",
+    "/fiches-secteur-clone":"#007260",
+    "/fiches-secteur":      "#C9A227",
+    "/emptykk-clone-clone": "#6B7280",
+    "/page-introduction":   "#243B6B",
+    "/sentrainer":          "#3887B4"
+  };
+  var PROG_NOMS={
+    "conseilenstrategie":        "/empty",
+    "lesautrestypesdeconseil":   "/empty",
+    "fichescabinettestsenligne": "/fiches-secteur-clone",
+    "fichessecteurs":            "/fiches-secteur",
+    "etudesdecas":               "/emptykk-clone-clone",
+    "businesssense":             "/page-introduction",
+    "fit":                       "/page-introduction",
+    "mathematiques":             "/page-introduction",
+    "webinarsprepastrat":        "/page-introduction",
+    "sentrainer":                "/sentrainer"
+  };
+  function normProg(s){
+    return String(s||"").toLowerCase()
+      .normalize("NFD").replace(/[̀-ͯ]/g,"")   // accents
+      .replace(/[^a-z0-9]/g,"");                          // espaces, &, apostrophes, tirets
+  }
+  function progPage(id, nom, brut){
+    if(id && PROG_PAGES[id]) return PROG_PAGES[id];
+    var u=PROG_NOMS[normProg(nom)] || PROG_NOMS[normProg(brut)];
+    if(u) return {url:u, col:PAGE_COL[u]||PROG_FALLBACK.col};
+    return PROG_FALLBACK;
+  }
 
   /* ---- Regroupement du tableau PAR PAGE DU SITE (demande de Ziad, 29/07) ----
      Avant : une liste plate de 10 tuiles, une par programme LearnWorlds — le
@@ -778,7 +819,7 @@
     if(!progs.length) return;                       // programmes pas encore rendus : réessai
     /* 🔴 La signature porte AUSSI la page : sans ça, un programme qui change de
        section (1 ligne dans PROG_PAGES) ne repeindrait pas le tableau. */
-    var sig=progs.map(function(p){return progPage(p.id).url+">"+p.name+"="+p.pct;}).join("|");
+    var sig=progs.map(function(p){return progPage(p.id,p.name,p.raw).url+">"+p.name+"="+p.pct;}).join("|");
     var board=grandpa.querySelector(".ps-pf-board");
     if(board && board.dataset.sig===sig){ grandpa.classList.add("ps-has-board"); return; }
     if(!board){ board=document.createElement("div"); board.className="ps-pf-board"; grandpa.insertBefore(board,grandpa.firstChild); }
@@ -789,7 +830,7 @@
     /* Regroupement par page, puis tri selon l'ordre voulu (cf. PAGE_ORDRE). */
     var groupes={}, urls=[];
     progs.forEach(function(p){
-      var c=progPage(p.id);
+      var c=progPage(p.id,p.name,p.raw);
       if(!groupes[c.url]){ groupes[c.url]={col:c.col, items:[]}; urls.push(c.url); }
       groupes[c.url].items.push(p);
     });
@@ -829,7 +870,7 @@
          la tuile s'affiche quand même avec son nom, le chiffre arrive ensuite. */
       var known=(typeof p.pct==="number" && isFinite(p.pct));
       var val=known?Math.max(0,Math.min(100,Math.round(p.pct))):0;
-      var conf=progPage(p.id);
+      var conf=progPage(p.id,p.name,p.raw);
 
       var tile=document.createElement("div");
       tile.className="ps-pf-bt";
