@@ -859,7 +859,8 @@
            On force donc `nowrap` sur CE conteneur (classe posée par le script,
            jamais sur tous les wrappers du site) et on empêche le badge de se
            comprimer ou de se couper en deux. */
-        ".ps-cob-host{flex-wrap:nowrap !important;align-items:center !important;}"+
+        ".ps-cob-host{flex-wrap:nowrap !important;align-items:center !important;"+
+          "width:auto !important;max-width:none !important;flex:0 0 auto !important;}"+
         ".ps-cob{display:inline-flex !important;align-items:center !important;gap:9px !important;margin-left:14px !important;"+
           "vertical-align:middle !important;flex:none !important;white-space:nowrap !important;}"+
         ".ps-cob-sep{display:block !important;width:1px !important;height:26px !important;background:#E3E8F0 !important;}"+
@@ -887,9 +888,19 @@
       var nm=document.createElement("span"); nm.className="ps-cob-nom"; nm.textContent=p.nom;
       box.appendChild(nm);
     }
-    ancre.parentNode.insertBefore(box, ancre.nextSibling);
-    /* le conteneur du logo ne doit plus renvoyer le badge à la ligne */
-    if(ancre.parentNode.classList) ancre.parentNode.classList.add("ps-cob-host");
+    /* 🔴🔴 On se pose dans la COLONNE du logo, pas à côté du logo lui-même.
+       Mesuré sur le site : `div.lw-topbar-logo-wrapper` fait EXACTEMENT la largeur
+       du logo (138 px, zéro place restante) — y glisser le badge le renvoyait donc
+       à la ligne, et `flex-wrap:nowrap` seul n'y changeait rien puisqu'il n'y a
+       pas de place. En le posant dans la colonne parente et en libérant la largeur
+       des deux conteneurs, la colonne s'élargit (188 -> 326 px) et la hauteur de
+       l'en-tête ne bouge pas (55 px avant comme après, vérifié en direct). */
+    var conteneur=ancre.parentNode;
+    var colonne=conteneur && conteneur.parentNode;
+    var cible=(colonne && colonne.classList && /logo-col/.test(colonne.className)) ? colonne : conteneur;
+    cible.appendChild(box);
+    if(conteneur.classList) conteneur.classList.add("ps-cob-host");
+    if(cible!==conteneur && cible.classList) cible.classList.add("ps-cob-host");
   }
 
   cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
