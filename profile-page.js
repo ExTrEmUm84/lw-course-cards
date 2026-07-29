@@ -819,7 +819,18 @@
 
     var row=document.createElement("div"); row.className="ps-pf-hero-row";
     var av=document.createElement("div"); av.className="ps-pf-av";
-    var photo=f.cf_photo && String(f.cf_photo).trim();
+    /* 🔴🔴 LA VRAIE PHOTO EST DANS `me.image` (bug signalé le 29/07 : « la page
+       profil ne récupère pas les photos »). On ne lisait que le champ
+       personnalisé `cf_photo` : il EXISTE bien dans l'école (vérifié en direct
+       sur /profile, aux côtés de cf_ecole, cf_niveau…), mais **personne ne le
+       remplit** — c'est une saisie manuelle d'URL. Résultat : tout le monde
+       tombait sur les initiales, alors que LearnWorlds expose déjà l'avatar du
+       compte dans `me.image` (URL absolue en .jpg, renseignée).
+       ⚠️ `custom_fields` n'est peuplé que sur les pages MEMBRE : sur les écrans
+       d'administration il ressort vide. Ne pas en conclure qu'il l'est partout.
+       Ordre retenu : `cf_photo` d'abord (il permet de surcharger volontairement),
+       sinon la photo du compte. `onerror` garde le repli sur les initiales. */
+    var photo=(f.cf_photo && String(f.cf_photo).trim()) || (u && u.image && String(u.image).trim());
     if(photo){
       var im=document.createElement("img");
       im.src=photo; im.alt="";
