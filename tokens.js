@@ -746,8 +746,11 @@
       domaines:["essec.edu"],
       logo:"",                       // SVG transparent à déposer dans /logos, sinon bloc typo
       pastille:"Accès offert par votre école",
-      titre:"Votre préparation au conseil, financée par l'ESSEC",
-      texte:"L'ESSEC met la formation PrepaStrat à disposition de ses étudiants : l'intégralité des cours, des études de cas et des fiches cabinets, sans frais pour vous.",
+      /* Texte fourni par Ziad le 29/07 — c'est du contenu commercial, il est
+         maître du mot à mot. Deux corrections de saisie seulement : « moduldes »
+         -> « modules », et « modules de formations » -> « de formation ». */
+      titre:"Votre préparation au conseil, sponsorisée par l'Essec Career Center",
+      texte:"Bénéficiez de l'intégralité de la plateforme en ligne : des modules de formation, une banque d'études de cas complète, des fiches cabinets et fiches secteurs.",
       puces:[
         {t:"Catalogue complet", s:"Aucun paiement"},
         {t:"Promo ESSEC",       s:"Annuaire entre étudiants"},
