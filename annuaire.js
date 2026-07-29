@@ -1348,6 +1348,51 @@
     }
   ];
 
+  /* --- Dépôt de la photo du membre connecté ----------------------------
+     🔴 POURQUOI : l'API d'administration LearnWorlds n'expose AUCUNE photo
+     (champs relevés le 29/07 : pas le moindre avatar), et l'URL n'est pas
+     reconstructible (elle contient un hash propre au fichier envoyé). La seule
+     source qui existe est `me.image` — que chaque membre a, mais UNIQUEMENT
+     pour lui-même, dans sa propre session. Chacun dépose donc SA photo en
+     passant ici, et l'annuaire se remplit tout seul, sans formulaire, sans
+     fichier hébergé et sans rien à modérer.
+     🔴 Le Worker n'accepte que les URLs servies par LearnWorlds : c'est ce qui
+     rend cette écriture acceptable alors que Turnstile ne prouve pas l'identité.
+     🔴 Un SECOND jeton Turnstile est nécessaire : celui de `charger()` a déjà
+     servi et ils sont à usage unique. Widget invisible, rendu hors écran — un
+     `display:none` empêcherait son exécution.
+     Une fois par session et par membre : au-delà, on ne réécrit rien. */
+  function deposerPhoto() {
+    var u = null;
+    try { u = (typeof me === "object" && me) ? me : null; } catch (e) { return; }
+    if (!u || !u.id || !u.image) return;                 // anonyme, ou aucune photo de compte
+    try { if (sessionStorage.getItem("psaPhoto") === String(u.id)) return; } catch (e) {}
+    if (!window.turnstile) return;                        // API pas chargée : tant pis, ce n'est pas critique
+
+    var boite = el("div", "");
+    boite.style.cssText = "position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;";
+    document.body.appendChild(boite);
+    try {
+      window.turnstile.render(boite, {
+        sitekey: SITEKEY,
+        callback: function (jeton2) {
+          fetch(ENDPOINT + "photo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json", "X-Turnstile-Token": jeton2 },
+            body: JSON.stringify({ id: String(u.id), url: String(u.image) }),
+          })
+            .then(function (r) {
+              /* on ne retient le succès que s'il est réel : sinon on retentera
+                 à la prochaine visite plutôt que de perdre la photo. */
+              if (r.ok) { try { sessionStorage.setItem("psaPhoto", String(u.id)); } catch (e) {} }
+            })
+            .catch(function () {});
+        },
+        "error-callback": function () { return true; },   // silencieux : l'annuaire marche sans
+      });
+    } catch (e) {}
+  }
+
   // --- Chargement -------------------------------------------------------
   function charger(jeton) {
     fetch(ENDPOINT, { headers: { Accept: "application/json", "X-Turnstile-Token": jeton } })
@@ -1367,6 +1412,7 @@
         }
         remplirFiltres();
         rendre();
+        deposerPhoto();          // alimente l'annuaire avec la photo du visiteur
       })
       .catch(function (err) {
         console.error("[annuaire]", err);
