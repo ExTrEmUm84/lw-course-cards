@@ -250,6 +250,8 @@
     /* flèche inactive (début / fin du carrousel) : GRISÉE mais toujours
        visible, pour garder les deux flèches gauche+droite en permanence. */
     ".ps-car-btn[disabled]{opacity:.35 !important;pointer-events:none !important;}",
+    /* carrousel inutile (tout tient à l'écran) : plus de flèches du tout */
+    ".ps-car-off .ps-car-btn{display:none !important;}",
     ".ps-car-prev{left:4px !important;}",
     ".ps-car-next{right:4px !important;}",
     /* responsive : 2 puis 1 carte, flèches collées aux bords */
@@ -811,6 +813,14 @@
     var prev=wrap.querySelector(".ps-car-prev"), next=wrap.querySelector(".ps-car-next");
     if(!track || !prev || !next) return;
     var max=track.scrollWidth-track.clientWidth;
+    /* 🔴 RIEN À FAIRE DÉFILER -> PAS DE CARROUSEL (signalé par Ziad : sur
+       « S'entraîner » il n'y a que 3 cartes, elles tiennent toutes à l'écran, et
+       deux flèches inertes n'apportent que du bruit). Le test porte sur le
+       DÉBORDEMENT RÉEL, pas sur un nombre de cartes en dur : la même page devient
+       un carrousel si Ziad ajoute des cours, ou sur un écran étroit — et
+       redevient une simple rangée sinon. Réévalué au scroll et au redimensionnement,
+       là où `refresh` est déjà appelé. */
+    wrap.classList.toggle("ps-car-off", max<=2);
     prev.disabled = track.scrollLeft<=2;
     next.disabled = track.scrollLeft>=max-2;
   }
