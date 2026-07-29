@@ -134,6 +134,18 @@
     S+" .ps-pf-rank-r{flex:none !important;text-align:right !important;}",
     S+" .ps-pf-rank-pct{"+FT+"font-size:38px !important;font-weight:800 !important;color:#fff !important;letter-spacing:-.03em !important;line-height:1 !important;}",
     S+" .ps-pf-rank-lbl{"+FT+"font-size:12px !important;font-weight:600 !important;color:#A9C0E4 !important;margin-top:3px !important;}",
+    /* ---- bandeau d'attente / d'indisponibilite (jamais de tuiles muettes) ---- */
+    S+" .ps-pf-wait{text-align:left !important;grid-column:1 / -1 !important;display:flex !important;align-items:flex-start !important;gap:15px !important;"
+      +"background:#EEF3FA !important;border:1px solid #DCE6F4 !important;border-radius:var(--ps-r-card,16px) !important;padding:18px 20px !important;}",
+    S+" .ps-pf-wait-ko{background:#FFF6E8 !important;border-color:#F5E0BE !important;}",
+    S+" .ps-pf-wait-ic{flex:none !important;width:44px !important;height:44px !important;border-radius:50% !important;background:#fff !important;"
+      +"display:flex !important;align-items:center !important;justify-content:center !important;color:var(--ps-accent,#507EC5) !important;}",
+    S+" .ps-pf-wait-ko .ps-pf-wait-ic{color:#B8791B !important;}",
+    S+" .ps-pf-wait-ic svg{animation:psPfPulse 1.6s ease-in-out infinite !important;}",
+    S+" .ps-pf-wait-ko .ps-pf-wait-ic svg{animation:none !important;}",
+    S+" .ps-pf-wait-t{"+FT+"font-size:16px !important;font-weight:800 !important;color:#243B6B !important;margin-bottom:3px !important;}",
+    S+" .ps-pf-wait-x{"+FT+"font-size:13.5px !important;font-weight:500 !important;color:#5A6b85 !important;line-height:1.5 !important;}",
+    "@keyframes psPfPulse{0%,100%{opacity:1}50%{opacity:.35}}",
     "@media (max-width:620px){"+S+" .ps-pf-rank{flex-wrap:wrap !important;gap:16px !important;padding:20px !important;}"
       +S+" .ps-pf-rank-pct{font-size:30px !important;}}",
     /* 🔴 La tuile n'est plus une carte blanche flottante : la CARTE, c'est
@@ -510,6 +522,52 @@
   }
 
   var MEDAILLE='<circle cx="12" cy="9" r="6"/><path d="M8.5 14.6 L7 22 l5-2.9 5 2.9 -1.5-7.4"/>';
+  var SABLIER='<path d="M6 2h12M6 22h12M8 2v4a4 4 0 0 0 4 4 4 4 0 0 0 4-4V2M8 22v-4a4 4 0 0 1 4-4 4 4 0 0 1 4 4v4"/>';
+
+  /* ====================================================================
+     BANDEAU D'ATTENTE — jamais de tuiles vides sans explication
+     --------------------------------------------------------------------
+     Demande de Ziad (29/07) : « mets un message type revenez plus tard, profil
+     en cours de mise à jour, pour que les étudiants n'arrivent pas sur une page
+     sans pourcentage ». Le cas est réel : le calcul de progression passe par le
+     Worker, qui peut être long (l'API LearnWorlds plafonne à 30 requêtes/10 s)
+     voire échouer quand le membre est inscrit à TOUT le catalogue.
+     Le bandeau prend la place du bandeau de grade tant qu'aucun % n'est connu,
+     et disparaît de lui-même dès que les chiffres arrivent (mountBoard est
+     rappelé par lpFetch).
+     🔴 Deux états distincts : tant que ça calcule on rassure (« dans quelques
+     instants »), au-delà de LP_DELAI_MAX ou en cas d'erreur on invite à revenir
+     — mentir sur un calcul mort ferait attendre l'étudiant pour rien. */
+  function buildAttente(){
+    var echec=(lpEtat==="echec");
+    var box=document.createElement("div");
+    box.className="ps-pf-wait"+(echec?" ps-pf-wait-ko":"");
+
+    var ic=document.createElement("div"); ic.className="ps-pf-wait-ic";
+    var NS="http://www.w3.org/2000/svg";
+    var svg=document.createElementNS(NS,"svg");
+    svg.setAttribute("viewBox","0 0 24 24"); svg.setAttribute("width","26"); svg.setAttribute("height","26");
+    svg.setAttribute("fill","none"); svg.setAttribute("stroke","currentColor");
+    svg.setAttribute("stroke-width","1.7"); svg.setAttribute("stroke-linecap","round"); svg.setAttribute("stroke-linejoin","round");
+    var tmp=document.createElementNS(NS,"g");
+    tmp.innerHTML=SABLIER;
+    while(tmp.firstChild) svg.appendChild(tmp.firstChild);
+    ic.appendChild(svg);
+    box.appendChild(ic);
+
+    var txt=document.createElement("div"); txt.className="ps-pf-wait-txt";
+    var t=document.createElement("div"); t.className="ps-pf-wait-t";
+    t.textContent = echec ? "Profil en cours de mise à jour"
+                          : "Calcul de votre progression…";
+    txt.appendChild(t);
+    var x=document.createElement("div"); x.className="ps-pf-wait-x";
+    x.textContent = echec
+      ? "Vos pourcentages ne sont pas disponibles pour le moment. Revenez dans quelques minutes : vos parcours et vos accès, eux, sont bien actifs."
+      : "Vos pourcentages s'affichent dans quelques instants. Vous pouvez commencer un parcours sans attendre.";
+    txt.appendChild(x);
+    box.appendChild(txt);
+    return box;
+  }
 
   /* Le bandeau n'est construit QUE si le % global est connu : afficher
      « Candidat 0 % » pendant que le Worker répond serait un faux message
@@ -576,8 +634,20 @@
   var lpData=null;        // [{name,pct}] une fois connu (mémoire locale ou Worker)
   var lpAsked=false;
   var lpTsEl=null;
+  /* État du calcul de progression, pour ne JAMAIS laisser l'étudiant devant des
+     tuiles vides sans explication (demande de Ziad, 29/07) :
+       "attente" -> le Worker calcule (peut durer, cf. plafond API LearnWorlds)
+       "ok"      -> pourcentages reçus
+       "echec"   -> Worker en erreur ou trop lent -> on invite à revenir plus tard */
+  var lpEtat="attente";
+  var LP_DELAI_MAX=75000;   // au-delà, on considère que le calcul n'aboutira pas
 
   function meUser(){ try{ return (typeof me==="object" && me) ? me : null; }catch(e){ return null; } }
+
+  /* Crochet de VÉRIFICATION uniquement (harnais local) : permet de forcer l'état
+     d'échec pour voir le message « revenez plus tard » sans casser le Worker.
+     Inoffensif en production — rien sur le site ne l'appelle. */
+  window.__psForceEchec=function(){ lpEtat="echec"; mountBoard(); };
 
   /* Programmes du membre connectés, sans aucun appel réseau. */
   function lpFromPage(){
@@ -611,13 +681,18 @@
     })
       .then(function(r){ return r.ok ? r.json() : null; })
       .then(function(j){
-        if(!j || !j.programs || !j.programs.length) return;
+        /* 🔴 Une reponse vide ou en erreur n'est PAS silencieuse : sans ca le
+           membre restait devant des tuiles a « — » sans la moindre explication
+           (cas reel : Worker en 502 quand le membre est inscrit a tout le
+           catalogue). On bascule le bandeau sur « revenez plus tard ». */
+        if(!j || !j.programs || !j.programs.length){ lpEtat="echec"; mountBoard(); return; }
+        lpEtat="ok";
         var progs=j.programs.map(function(p){ return {id:p.id||"", name:domainLabel(p.name||""), raw:(p.name||""), pct:p.pct, courses:p.courses}; });
         lpData=progs;
         try{ localStorage.setItem(LP_STORE, JSON.stringify({t:Date.now(), programs:progs})); }catch(e){}
         mountBoard();                       // repeint avec les vrais %
       })
-      .catch(function(){});
+      .catch(function(){ lpEtat="echec"; mountBoard(); });
   }
 
   /* Turnstile auto-injecté, widget invisible hors écran mais RENDU (un
@@ -627,6 +702,10 @@
     var u=meUser();
     if(!u || !u.id) return;                  // membre non identifié : rien à demander
     lpAsked=true;
+    /* Filet de securite : si le Worker ne repond jamais (ni succes ni erreur —
+       requete perdue, onglet en veille), on ne laisse pas le bandeau tourner
+       indefiniment. Au-dela du delai, on invite a revenir plus tard. */
+    setTimeout(function(){ if(lpEtat==="attente"){ lpEtat="echec"; mountBoard(); } }, LP_DELAI_MAX);
     if(!lpTsEl){
       lpTsEl=document.createElement("div");
       lpTsEl.style.cssText="position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;";
@@ -819,7 +898,7 @@
     if(!progs.length) return;                       // programmes pas encore rendus : réessai
     /* 🔴 La signature porte AUSSI la page : sans ça, un programme qui change de
        section (1 ligne dans PROG_PAGES) ne repeindrait pas le tableau. */
-    var sig=progs.map(function(p){return progPage(p.id,p.name,p.raw).url+">"+p.name+"="+p.pct;}).join("|");
+    var sig=lpEtat+"~"+progs.map(function(p){return progPage(p.id,p.name,p.raw).url+">"+p.name+"="+p.pct;}).join("|");
     var board=grandpa.querySelector(".ps-pf-board");
     if(board && board.dataset.sig===sig){ grandpa.classList.add("ps-has-board"); return; }
     if(!board){ board=document.createElement("div"); board.className="ps-pf-board"; grandpa.insertBefore(board,grandpa.firstChild); }
@@ -840,8 +919,10 @@
        d'apparition doit traverser tout le tableau, sinon chaque section
        redémarrerait son animation à zéro et l'ensemble clignoterait par paquets. */
     var i=0;
-    var bandeau=buildRank(progs);              // grade global, en tête du board
-    if(bandeau) board.appendChild(bandeau);
+    /* Grade si le % global est connu, sinon message d'attente : dans tous les
+       cas l'etudiant a une explication en haut du tableau. */
+    var bandeau=buildRank(progs) || buildAttente();
+    board.appendChild(bandeau);
 
     urls.forEach(function(u){
       var g=groupes[u];
