@@ -1046,6 +1046,31 @@
         H+" .ps-part-c svg{display:block !important;color:var(--ps-accent,#507EC5) !important;margin-bottom:7px !important;}"+
         H+" .ps-part-ct{"+FT+"font-size:14px !important;font-weight:700 !important;color:#243B6B !important;margin:0 !important;}"+
         H+" .ps-part-cs{"+FT+"font-size:13px !important;font-weight:500 !important;color:#8A93A5 !important;margin:2px 0 0 !important;}"+
+        /* ---- cartes d'accompagnement, sous la bande partenaire ---- */
+        H+" .ps-offres{max-width:1120px !important;margin:16px auto 0 !important;display:grid !important;"+
+          "grid-template-columns:repeat(auto-fit,minmax(232px,1fr)) !important;gap:14px !important;}"+
+        H+" .ps-offre{display:flex !important;flex-direction:column !important;background:#fff !important;"+
+          "border:1px solid #E3E8F0 !important;border-radius:var(--ps-r-card,16px) !important;padding:18px 19px 19px !important;"+
+          "transition:transform .2s ease, box-shadow .2s ease !important;}"+
+        H+" .ps-offre:hover{transform:translateY(-2px) !important;box-shadow:0 10px 26px rgba(15,23,42,.10) !important;}"+
+        H+" .ps-offre-h{display:flex !important;align-items:center !important;gap:9px !important;margin-bottom:11px !important;flex-wrap:wrap !important;}"+
+        H+" .ps-offre-t{"+FT+"font-size:16.5px !important;font-weight:800 !important;color:#243B6B !important;line-height:1.25 !important;}"+
+        H+" .ps-offre-lg{"+FT+"font-size:10.5px !important;font-weight:800 !important;letter-spacing:.08em !important;text-transform:uppercase !important;"+
+          "background:#E4EDFA !important;color:#1B3D6B !important;padding:3px 8px !important;border-radius:var(--ps-r-pill,999px) !important;}"+
+        H+" .ps-offre-l{"+FT+"font-size:13.5px !important;font-weight:500 !important;color:#4B5563 !important;line-height:1.5 !important;"+
+          "margin:0 0 7px !important;padding-left:14px !important;position:relative !important;}"+
+        /* puce ronde à la couleur d'accent, alignée sur la 1re ligne de texte */
+        H+" .ps-offre-l::before{content:'' !important;position:absolute !important;left:0 !important;top:7px !important;"+
+          "width:5px !important;height:5px !important;border-radius:50% !important;background:var(--ps-accent,#507EC5) !important;}"+
+        /* le bouton est collé en bas : les 4 cartes s'alignent malgré des textes de longueurs différentes */
+        H+" .ps-offre-cta{margin-top:auto !important;display:block !important;text-align:center !important;"+FT+
+          "font-size:13.5px !important;font-weight:700 !important;padding:11px 14px !important;"+
+          "border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#507EC5) !important;color:#fff !important;"+
+          "text-decoration:none !important;border:0 !important;}"+
+        H+" a.ps-offre-cta:hover{filter:brightness(1.08) !important;color:#fff !important;text-decoration:none !important;}"+
+        /* 🔴 URL pas encore fournie : pastille inerte, curseur par défaut — un
+           lien mort renverrait l'étudiant en haut de page. */
+        H+" span.ps-offre-cta{opacity:.55 !important;cursor:default !important;}"+
         "@media (max-width:700px){"+H+" .ps-part-t{font-size:21px !important;}"+H+" .ps-part-in{padding:22px 20px 24px !important;}}";
       (document.head||document.documentElement).appendChild(st);
     }
@@ -1093,6 +1118,37 @@
     }
 
     wrap.appendChild(box);
+
+    /* Cartes d'accompagnement (présentiel), sous la bande partenaire. */
+    if(p.offres && p.offres.length){
+      var grille=document.createElement("div"); grille.className="ps-offres";
+      p.offres.forEach(function(o){
+        var c=document.createElement("div"); c.className="ps-offre";
+        var head=document.createElement("div"); head.className="ps-offre-h";
+        var t=document.createElement("span"); t.className="ps-offre-t"; t.textContent=o.titre||"";
+        head.appendChild(t);
+        if(o.langue){
+          var lg=document.createElement("span"); lg.className="ps-offre-lg"; lg.textContent=o.langue;
+          head.appendChild(lg);
+        }
+        c.appendChild(head);
+        (o.lignes||[]).forEach(function(txt){
+          var l=document.createElement("p"); l.className="ps-offre-l"; l.textContent=txt;
+          c.appendChild(l);
+        });
+        if(o.cta){
+          /* lien si l'URL est connue, pastille inerte sinon (cf. commentaire CSS) */
+          var b=document.createElement(o.url ? "a" : "span");
+          b.className="ps-offre-cta";
+          if(o.url) b.href=o.url;
+          b.textContent=o.cta;
+          c.appendChild(b);
+        }
+        grille.appendChild(c);
+      });
+      wrap.appendChild(grille);
+    }
+
     var secs=hote.querySelectorAll(":scope > section.learnworlds-section, :scope > section");
     if(secs.length>=2 && secs[1].parentNode) secs[1].parentNode.insertBefore(wrap, secs[1].nextSibling);
     else hote.insertBefore(wrap, hote.firstChild);

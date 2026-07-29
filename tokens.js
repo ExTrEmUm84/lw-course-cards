@@ -755,6 +755,38 @@
         {t:"Catalogue complet", s:"Aucun paiement"},
         {t:"Promo ESSEC",       s:"Annuaire entre étudiants"},
         {t:"Webinars",          s:"Tous les mois"}
+      ],
+      /* Accompagnements en présentiel proposés à l'école, affichés en 4 cartes
+         sous la bande partenaire (contenu fourni par Ziad le 29/07).
+         🔴 `url` VIDE = le bouton est rendu en pastille NON cliquable plutôt
+         qu'en lien mort : un `href="#"` renverrait l'étudiant en haut de page,
+         ce qui est pire que pas de lien. Renseigner l'URL suffit à l'activer. */
+      offres:[
+        {
+          titre:"Ace Your Interview", langue:"fr & en",
+          lignes:["Entretien individuel en conditions réelles. 1 h avec un consultant ou ex-consultant MBB",
+                  "1 fois dans l'année"],
+          cta:"Réserver un créneau", url:""
+        },
+        {
+          titre:"Task Force", langue:"fr",
+          lignes:["17 h de formation sur 3 jours",
+                  "30 € de frais d'inscription — gratuit pour les étudiants boursiers"],
+          cta:"S'inscrire à une session", url:""
+        },
+        {
+          titre:"Consulting Squad", langue:"en",
+          lignes:["Curieux du conseil à l'international ? 4 h de formation sur le recrutement dans une région du monde",
+                  "8 personnes par squad"],
+          cta:"S'inscrire à une session", url:""
+        },
+        {
+          titre:"Classe Étoile", langue:"fr",
+          lignes:["Pour les étudiants au 2e tour de top cabinet",
+                  "4 personnes par classe",
+                  "3 h de formation + 1 h d'entretien individuel"],
+          cta:"S'inscrire à une session", url:""
+        }
       ]
     }
   };
