@@ -350,7 +350,41 @@
     kpi.querySelector(".ps-kpi-bar-in").style.width=pct+"%";
   }
 
-  function build(){ styles(); heroText(); mountKpi(); recalerSwipers(); }
+  /* ====================================================================
+     LIBELLÉ DU BOUTON SELON L'AVANCEMENT
+     --------------------------------------------------------------------
+     Ziad (29/07) : « on affiche "Continuer" alors que l'étudiant n'a même pas
+     commencé ». Sur cette page le bouton est celui de LEARNWORLDS — on ne faisait
+     que le restyler, donc il annonçait « Continuer » quel que soit l'avancement.
+     Même règle que les cartes de la page Cours (course-cards.js) :
+       barre absente -> on ne touche à rien (visiteur non inscrit : LW affiche
+                        son propre appel à l'action, « S'inscrire » etc.)
+       0 %           -> « Commencer »
+       1-99 %        -> « Continuer »
+       100 %         -> « Terminé »
+     🔴 On n'écrit QUE si la valeur a changé (`data-ps-cta`) : réécrire à chaque
+     passage écraserait la traduction de Weglot, qui retraduirait aussitôt — le
+     clignotement FR/EN sans fin déjà rencontré le 25/07. On compare notre
+     libellé mémorisé, PAS le texte affiché (qui peut être traduit). */
+  function libelleCTA(){
+    document.querySelectorAll(S+" .lw-learning-program-card").forEach(function(pc){
+      var btn=pc.querySelector("button.learnworlds-button")||pc.querySelector("a.learnworlds-button");
+      if(!btn) return;
+      var bars=[].slice.call(pc.querySelectorAll(".lw-course-card-progress-bar"));
+      var own=bars.filter(function(b){ return !b.closest(".lw-course-card-item"); })[0] || bars[0];
+      if(!own) return;                                  // pas inscrit -> libellé natif intact
+      var p=parseInt((own.style.width||"").replace("%",""),10);
+      if(isNaN(p)) return;
+      var label=(p>=100) ? "Terminé" : (p>0 ? "Continuer" : "Commencer");
+      if(btn.getAttribute("data-ps-cta")===label) return;   // déjà posé : ne pas se battre avec Weglot
+      btn.setAttribute("data-ps-cta", label);
+      /* le libellé peut être dans un enfant (span) : on vise le porteur du texte */
+      var cible=btn.querySelector("span")||btn;
+      cible.textContent=label;
+    });
+  }
+
+  function build(){ styles(); heroText(); mountKpi(); libelleCTA(); recalerSwipers(); }
 
   var t;
   function schedule(){ clearTimeout(t); t=setTimeout(build,120); }
