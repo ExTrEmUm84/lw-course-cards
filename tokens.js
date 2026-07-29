@@ -296,11 +296,33 @@
     if(!onP || !document.body) return;
     if(!document.getElementById("ps-imm-css")){
       var s=document.createElement("style"); s.id="ps-imm-css";
-      s.textContent="#coursePlayerWrapper .-default-course-player-topbar{transition:transform .3s ease !important;}body.ps-imm-nobottom #coursePlayerWrapper .-default-course-player-topbar{transform:translateY(130%) !important;}";
+      /* 🔴🔴 DEUX classes exigées : `ps-imm-bas` atteste que la barre est
+         RÉELLEMENT en bas de l'écran. Sur une unité QUIZ, LearnWorlds rend cette
+         même barre EN HAUT (l'élément s'appelle d'ailleurs `topbar`) — et un
+         `translateY(130%)` sur une barre du haut ne la sort pas de l'écran, il la
+         POUSSE DANS LE CONTENU : elle restait visible et décalée (signalé par
+         Ziad, capture d'un quiz à l'appui). On ne masque donc que ce qui est
+         vraiment en bas. */
+      s.textContent="#coursePlayerWrapper .-default-course-player-topbar{transition:transform .3s ease !important;}"+
+        "body.ps-imm-nobottom.ps-imm-bas #coursePlayerWrapper .-default-course-player-topbar{transform:translateY(130%) !important;}";
       (document.head||document.documentElement).appendChild(s);
       document.body.classList.add("ps-imm-nobottom");   // démarre caché
     }
-    if(window.__psImmOn) return; window.__psImmOn=true;
+
+    if(window.__psImmOn) return; window.__psImmOn=true;   // 🔴 tout ce qui suit ne s'enregistre QU'UNE FOIS (4 appels : démarrage + 3 relances)
+    /* Barre en bas ou en haut ? Le test tient dans les DEUX états : masquée, une
+       barre du bas reste sous la moitié de l'écran, et une barre du haut au-dessus.
+       Réévalué en continu car le lecteur change d'unité sans recharger la page. */
+    function evaluerBarre(){
+      var b=document.querySelector("#coursePlayerWrapper .-default-course-player-topbar");
+      if(!b){ document.body.classList.remove("ps-imm-bas"); return; }
+      var r=b.getBoundingClientRect();
+      if(!r.height){ document.body.classList.remove("ps-imm-bas"); return; }
+      document.body.classList.toggle("ps-imm-bas", (r.top + r.height/2) > (window.innerHeight/2));
+    }
+    evaluerBarre();
+    setInterval(evaluerBarre, 1000);
+    window.addEventListener("resize", evaluerBarre, {passive:true});
     var hideT;
     function scheduleHide(){ clearTimeout(hideT); hideT=setTimeout(function(){ document.body.classList.add("ps-imm-nobottom"); }, 1200); }
     document.addEventListener("mousemove", function(e){
