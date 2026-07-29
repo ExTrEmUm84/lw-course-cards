@@ -830,7 +830,16 @@
     if(!document.getElementById("ps-cob-css")){
       var st=document.createElement("style"); st.id="ps-cob-css";
       st.textContent=
-        ".ps-cob{display:inline-flex !important;align-items:center !important;gap:9px !important;margin-left:14px !important;vertical-align:middle !important;}"+
+        /* 🔴🔴 Le logo vit dans un `div.lw-topbar-logo-wrapper` en `display:flex`
+           avec **flex-wrap:wrap** (structure relevée sur le site). Sans annuler ce
+           wrap, le badge passe à la ligne dès qu'il manque quelques pixels et
+           l'en-tête grandit d'un cran — exactement ce que Ziad a constaté.
+           On force donc `nowrap` sur CE conteneur (classe posée par le script,
+           jamais sur tous les wrappers du site) et on empêche le badge de se
+           comprimer ou de se couper en deux. */
+        ".ps-cob-host{flex-wrap:nowrap !important;align-items:center !important;}"+
+        ".ps-cob{display:inline-flex !important;align-items:center !important;gap:9px !important;margin-left:14px !important;"+
+          "vertical-align:middle !important;flex:none !important;white-space:nowrap !important;}"+
         ".ps-cob-sep{display:block !important;width:1px !important;height:26px !important;background:#E3E8F0 !important;}"+
         ".ps-cob-av{font-family:var(--ps-font,Figtree,sans-serif) !important;font-size:10.5px !important;font-weight:700 !important;"+
           "letter-spacing:.07em !important;text-transform:uppercase !important;color:#8A93A5 !important;}"+
@@ -857,6 +866,8 @@
       box.appendChild(nm);
     }
     ancre.parentNode.insertBefore(box, ancre.nextSibling);
+    /* le conteneur du logo ne doit plus renvoyer le badge à la ligne */
+    if(ancre.parentNode.classList) ancre.parentNode.classList.add("ps-cob-host");
   }
 
   cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
