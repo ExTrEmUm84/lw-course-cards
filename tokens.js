@@ -763,25 +763,25 @@
          ce qui est pire que pas de lien. Renseigner l'URL suffit à l'activer. */
       offres:[
         {
-          titre:"Ace Your Interview", langue:"fr & en",
+          titre:"Ace Your Interview",
           lignes:["Entretien individuel en conditions réelles. 1 h avec un consultant ou ex-consultant MBB",
                   "1 fois dans l'année"],
           cta:"Réserver un créneau", url:""
         },
         {
-          titre:"Task Force", langue:"fr",
+          titre:"Task Force",
           lignes:["17 h de formation sur 3 jours",
                   "30 € de frais d'inscription — gratuit pour les étudiants boursiers"],
           cta:"S'inscrire à une session", url:""
         },
         {
-          titre:"Consulting Squad", langue:"en",
+          titre:"Consulting Squad",
           lignes:["Curieux du conseil à l'international ? 4 h de formation sur le recrutement dans une région du monde",
                   "8 personnes par squad"],
           cta:"S'inscrire à une session", url:""
         },
         {
-          titre:"Classe Étoile", langue:"fr",
+          titre:"Classe Étoile",
           lignes:["Pour les étudiants au 2e tour de top cabinet",
                   "4 personnes par classe",
                   "3 h de formation + 1 h d'entretien individuel"],
