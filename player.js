@@ -32,15 +32,6 @@
     var W = "#coursePlayerWrapper ";
     var css = [
       /* --- Chrome unifié en MARINE (barre haute, navigation, burger, header) --- */
-      /* 🔴🔴 La barre de navigation EN BAS, y compris sur les unités QUIZ.
-         LearnWorlds la place lui-même en `position:absolute; top:0` sur ces
-         unités (mesuré en direct : top=0, bottom=819) alors qu'elle est en bas
-         sur les leçons ordinaires — d'où le « c'est toujours en haut » signalé
-         par Ziad. On force donc le bas partout : sur une leçon normale la règle
-         ne change rien (la barre y est déjà), sur un quiz elle la remet à sa
-         place. Effet de bord assumé : ~60 px de recouvrement avec le contenu du
-         quiz, invisible en pratique puisque la barre s'auto-masque (immersif). */
-      W + ".-default-course-player-topbar{top:auto !important;bottom:0 !important;}",
       W + ".-default-course-player-topbar{background:" + MARINE + " !important;height:60px !important;border-bottom:none !important;box-shadow:0 -2px 16px rgba(15,23,42,.16) !important;}",
       W + ".-default-course-player-nav{background:" + MARINE + " !important;height:60px !important;display:flex !important;align-items:center !important;}",
       W + ".-default-course-player-hamburger,"
