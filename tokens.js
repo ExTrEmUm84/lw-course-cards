@@ -573,7 +573,20 @@
       (document.head||document.documentElement).appendChild(st);
     }
 
-    catalogue(function(map){
+    /* 🔴🔴 PASSE IMMÉDIATE, SANS RÉSEAU (retour de Ziad, 29/07 : « on voit la
+       carte disparaître, c'est pas top »). Le filtre n'agissait qu'APRÈS la
+       réponse de `/api/courses` : les cartes anglaises s'affichaient, puis
+       disparaissaient — un clignotement bien visible au premier chargement (les
+       suivants sont instantanés grâce au cache de session).
+       Or le SUFFIXE DU TITRE tranche déjà sans le moindre appel : on classe donc
+       tout de suite avec lui, et la passe réseau ne fait plus que confirmer et
+       rattraper les cas où le titre ne dirait rien (tag `EN` sans suffixe).
+       🔴 Les DEUX passes appellent le même code : aucune règle ne peut diverger
+       entre l'affichage immédiat et la correction qui suit. */
+    appliquer(null);
+    catalogue(appliquer);
+
+    function appliquer(map){
       var enAnglais=(lang!==from);
       var visibles=0, masques=0;
       [].slice.call(cards).forEach(function(card){
@@ -589,7 +602,7 @@
            (« … - EN »), exactement la convention déjà utilisée plus bas pour les
            cartes de PROGRAMME. Le repli ne peut se déclencher que sur un titre
            qui se TERMINE par EN, donc aucun cours français n'est menacé. */
-        var tags=map[slugDeCarte(card)];
+        var tags=map ? map[slugDeCarte(card)] : null;
         var estEN=(!!tags && tags.indexOf(LANG_TAG_EN)>=0) || RE_TITRE_EN.test(titreDeCarte(card));
         var off=enAnglais ? !estEN : estEN;        // EN -> que les EN ; FR -> tout sauf EN
         card.classList.toggle("ps-lang-off", off);
@@ -652,10 +665,45 @@
           if(pBloc) pBloc.classList.remove("ps-lang-bloc-off");   // sinon le message serait masqué avec son bloc
         } else if(note){ note.remove(); }
       }
-    });
+    }
   }
   /* Les cartes sont rendues par le JS catalogue de LW, souvent après nous. */
   [400,1000,2000,3500,6000].forEach(function(d){ setTimeout(function(){ langCourses(); }, d); });
+
+  /* 🔴🔴 OBSERVATEUR — classer DÈS QUE la carte entre dans le DOM.
+     Les relances ci-dessus sont à intervalles fixes : une carte rendue à 1,2 s
+     n'était filtrée qu'à 2 s, soit ~800 ms pendant lesquels l'étudiant voyait la
+     carte anglaise AVANT sa disparition (mesuré en harnais : 2,2 s). Avec
+     l'observateur, la classification suit l'apparition de la carte.
+     🔴 On n'observe QUE `childList` : nos propres `classList.toggle` sont des
+     mutations d'ATTRIBUT, donc ils ne se re-déclenchent pas eux-mêmes (pas de
+     boucle). Le petit délai regroupe les cartes rendues en rafale. */
+  (function(){
+    var enAttente=false;
+    var obsLang=new MutationObserver(function(mutations){
+      if(enAttente) return;
+      var pertinent=false;
+      for(var i=0;i<mutations.length && !pertinent;i++){
+        var aj=mutations[i].addedNodes;
+        for(var j=0;j<aj.length;j++){
+          var n=aj[j];
+          if(n.nodeType!==1) continue;
+          if((n.classList && n.classList.contains("lw-course-card")) ||
+             (n.querySelector && n.querySelector(".lw-course-card"))){ pertinent=true; break; }
+        }
+      }
+      if(!pertinent) return;
+      /* 🔴 MICROTÂCHE et non setTimeout : les minuteurs sont BRIDÉS à ~1 s dans
+         un onglet d'arrière-plan (mesuré : 1,7 s au lieu de 30 ms). Une
+         microtâche s'exécute à la fin de la tâche courante, sans bridage — donc
+         le masquage suit vraiment l'apparition de la carte. Elle regroupe aussi
+         les cartes rendues en rafale : un seul passage pour tout le lot. */
+      enAttente=true;
+      Promise.resolve().then(function(){ enAttente=false; langCourses(); });
+    });
+    function brancher(){ if(document.body) obsLang.observe(document.body,{childList:true,subtree:true}); }
+    if(document.body) brancher(); else document.addEventListener("DOMContentLoaded", brancher);
+  })();
 
   /* ====================================================================
      CO-BRANDING PARTENAIRE (écoles clientes) — site-wide
