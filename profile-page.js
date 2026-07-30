@@ -474,6 +474,31 @@
     "webinarsprepastrat":        "/formation-par-comptences",
     "sentrainer":                "/sentrainer"
   };
+  /* ---- Parcours RETIRÉS du tableau de bord (demande de Ziad, 30/07) ---------
+     « Tout Savoir sur les Études de Cas » : il vit en réalité sur la page
+     Compétences (vérifié : c'est l'une des 4 cartes de programme de cette page),
+     et comme `domainLabel()` lui retire son préfixe il se retrouvait rangé à côté
+     de « ETUDES DE CAS » — deux tuiles côte à côte pointant vers la même page.
+     « S'entraîner » : retiré du tableau à la demande de Ziad.
+     🔴🔴 ON FILTRE SUR LE NOM BRUT, JAMAIS SUR LE LIBELLÉ NETTOYÉ : après
+     `domainLabel()`, « Tout Savoir sur les Études de Cas » et « ETUDES DE CAS »
+     portent le MÊME libellé (« Études de Cas ») — filtrer là-dessus supprimerait
+     les DEUX, alors que le second doit rester. Le nom brut les distingue.
+     Ajouter une exclusion = 1 ligne (nom brut normalisé : minuscules, sans
+     accents ni ponctuation). */
+  var PROG_EXCLUS={
+    "toutsavoirsurlesetudesdecas": 1,
+    "sentrainer":                  1
+  };
+  function progExclu(p){
+    if(!p) return false;
+    if(PROG_EXCLUS[normProg(p.raw||"")]) return true;
+    /* Repli quand le nom brut n'est pas disponible. Sans risque ici : le libellé
+       nettoyé de « Tout Savoir… » est « Études de Cas », qui n'est PAS dans la
+       table — donc « ETUDES DE CAS » ne peut pas être emporté par ce repli. */
+    return !!PROG_EXCLUS[normProg(p.name||"")];
+  }
+
   function normProg(s){
     return String(s||"").toLowerCase()
       .normalize("NFD").replace(/[̀-ͯ]/g,"")   // accents
@@ -949,6 +974,10 @@
       var brut=(p.raw!==undefined ? p.raw : p.name);
       return L.enAnglais ? progEN(brut) : !progEN(brut);
     });
+    /* Exclusions demandées (cf. PROG_EXCLUS). Placé APRÈS le filtre de langue et
+       AVANT la signature et le bandeau de grade : ce qui n'est pas affiché ne doit
+       pas non plus peser dans le pourcentage global. */
+    progs = progs.filter(function(p){ return !progExclu(p); });
     lpStart();                                     // rafraîchit (une seule fois)
     if(!progs.length) return;                       // programmes pas encore rendus : réessai
     /* 🔴 La signature porte AUSSI la page : sans ça, un programme qui change de
