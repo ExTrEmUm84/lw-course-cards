@@ -725,6 +725,16 @@
      On suffixe donc par l'identifiant du membre. Repli sans suffixe uniquement si
      `me` n'est pas encore là, auquel cas on n'écrit rien (cf. lpStoreKey). */
   var LP_STORE_BASE="psLpProgress";
+  /* 🔴 VERSION DES VALEURS MISES EN CACHE. À incrémenter dès que la façon de
+     calculer les pourcentages change côté Worker — sinon les valeurs déjà
+     stockées dans le navigateur survivent au correctif et le membre continue de
+     voir les anciennes.
+     Vécu le 30/07 : le Worker inventait des 100 % à partir d'un statut, on a
+     corrigé, et Ziad voyait toujours 67 % — la valeur venait de SON localStorage,
+     et comme elle s'affiche avant la réponse du Worker (et reste seule si Turnstile
+     échoue), rien ne la remplaçait jamais. Même piège que le cache côté Worker.
+     v2 = suppression de l'heuristique « statut completed = 100 % ». */
+  var LP_STORE_V=2;
   function lpStoreKey(){
     var u=meUser();
     return (u && u.id) ? (LP_STORE_BASE+":"+u.id) : null;
@@ -767,7 +777,11 @@
       try{ localStorage.removeItem(LP_STORE_BASE); }catch(e){}
       if(!raw) return null;
       var j=JSON.parse(raw);
-      return (j && j.programs && j.programs.length) ? j.programs : null;
+      /* 🔴 Valeurs produites par une AUTRE version du calcul : on les jette au
+         lieu de les afficher. Sans ça, un correctif côté Worker reste invisible
+         pour tous ceux qui ont déjà des valeurs en cache. */
+      if(!j || j.v!==LP_STORE_V){ try{ localStorage.removeItem(cle); }catch(e){} return null; }
+      return (j.programs && j.programs.length) ? j.programs : null;
     }catch(e){ return null; }
   }
 
@@ -801,7 +815,7 @@
         var progs=j.programs.map(function(p){ return {id:p.id||"", name:domainLabel(p.name||""), raw:(p.name||""), pct:p.pct, courses:p.courses, page:p.page||null}; });
         lpData=progs;
         var cle=lpStoreKey();
-        if(cle){ try{ localStorage.setItem(cle, JSON.stringify({t:Date.now(), programs:progs})); }catch(e){} }
+        if(cle){ try{ localStorage.setItem(cle, JSON.stringify({v:LP_STORE_V, t:Date.now(), programs:progs})); }catch(e){} }
         mountBoard();                       // repeint avec les vrais %
       })
       .catch(function(){ lpEtat="echec"; mountBoard(); });
