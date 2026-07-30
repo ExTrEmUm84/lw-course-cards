@@ -1448,12 +1448,20 @@
     var pre = document.createElement("span");
     pre.textContent = prefix + " "; /* textContent : pas d'injection HTML */
     var slot = document.createElement("span");
-    slot.className = "ps-tw";
+    /* 🔴 `wg-notranslate` : Weglot ne doit PAS toucher au slot animé. Sinon il le
+       traduit pendant que notre minuteur y réécrit le français, chacun défaisant
+       l'autre — le titre fait des allers-retours FR/EN sans fin. */
+    slot.className = "ps-tw wg-notranslate";
     slot.setAttribute("aria-hidden", "true");
     var txt = document.createElement("span"); txt.className = "ps-tw-txt";
     var cur = document.createElement("span"); cur.className = "ps-tw-cur";
     slot.appendChild(txt); slot.appendChild(cur);
     h1.textContent = ""; h1.appendChild(pre); h1.appendChild(slot);
+    /* 🔴 Le H1 ENTIER sort de la portée de Weglot : on le reconstruit en JS, donc
+       Weglot sait traduire le préfixe mais ne sait plus le RESTAURER au retour à
+       la langue d'origine — le préfixe restait bloqué en anglais sur une page
+       repassée en français. On traduit donc tout nous-mêmes, ci-dessous. */
+    h1.classList.add("wg-notranslate");
 
     /* Largeur réservée = phrase la plus longue, mesurée police chargée. Sans
        ça le titre tremble à chaque lettre. */
@@ -1471,7 +1479,47 @@
     var rt;
     window.addEventListener("resize", function () { clearTimeout(rt); rt = setTimeout(reserve, 150); });
 
-    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+    /* 🔴 TRADUCTION DES SEGMENTS ANIMÉS (porté de case-cards.js, 30/07) — ce bloc
+       manquait ICI, et c'est toute l'explication du titre mal traduit sur cette
+       page : `hero()` capture le texte UNE SEULE FOIS, reconstruit le H1 en JS,
+       et sans ce bloc les segments restaient figés dans la langue capturée au
+       chargement (le préfixe pouvant, lui, rester dans l'autre langue).
+       Parade en deux temps :
+         1. le slot et le H1 portent `wg-notranslate` -> Weglot n'y touche plus ;
+         2. on traduit préfixe et segments NOUS-MÊMES via l'API Weglot, puis on
+            anime le résultat. Retour à la langue d'origine -> phrases d'origine.
+       🔴 Weglot est injecté par LearnWorlds APRÈS nous -> on réessaie ~16 s, et
+       on s'abonne à « languageChanged » dès qu'il est disponible. */
+    var PARTS0 = parts.slice(), PREFIX0 = prefix, twBound = false;
+    var twRM = !!(window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches);
+    /* list = [préfixe traduit, ...segments traduits] ; null = langue d'origine */
+    function psTwApply(list) {
+      pre.textContent = ((list && list[0]) || PREFIX0) + " ";
+      for (var k = 0; k < parts.length; k++) parts[k] = (list && list[k + 1]) || PARTS0[k];
+      h1.setAttribute("aria-label", pre.textContent + parts.join(", "));
+      reserve();
+      if (twRM) txt.textContent = parts[0];          /* pas d'animation : on repose la 1re phrase */
+    }
+    function psTwTr(evLang) {
+      var W = window.Weglot;
+      if (!W || !W.initialized || typeof W.translate !== "function") return false;
+      if (!twBound) { try { W.on("languageChanged", psTwTr); twBound = true; } catch (e) {} }
+      /* 🔴 « languageChanged » fournit la NOUVELLE langue en 1er argument. On DOIT
+         l'utiliser : au moment du callback, getCurrentLang() peut encore renvoyer
+         l'ANCIENNE -> en revenant au français on retraduisait vers l'anglais et le
+         titre restait bloqué en anglais. */
+      var to = (typeof evLang === "string" && evLang) ? evLang : W.getCurrentLang();
+      var from = (W.options && W.options.language_from) || "fr";
+      if (!to || to === from) { psTwApply(null); return true; }
+      try {
+        W.translate({ words: [{ t: 1, w: PREFIX0 }].concat(PARTS0.map(function (p) { return { t: 1, w: p }; })), languageTo: to },
+          function (res) { if (res && res.length === PARTS0.length + 1) psTwApply(res); });
+      } catch (e) {}
+      return true;
+    }
+    if (!psTwTr()) { var twN = 0, twIv = setInterval(function () { if (psTwTr() || ++twN > 40) clearInterval(twIv); }, 400); }
+
+    if (twRM) {
       txt.textContent = parts[0];
       return; /* pas d'animation si l'utilisateur la refuse */
     }
