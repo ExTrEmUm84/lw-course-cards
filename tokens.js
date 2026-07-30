@@ -903,11 +903,168 @@
     if(cible!==conteneur && cible.classList) cible.classList.add("ps-cob-host");
   }
 
+  /* ====================================================================
+     DÉPÔT DE LA PROGRESSION (site-wide) — mesuré le 30/07
+     --------------------------------------------------------------------
+     🔴 POURQUOI : calculer la progression par l'API d'administration coûte
+     ~1 appel PAR COURS et par membre (~60 pour un inscrit au catalogue complet),
+     face à une limite LearnWorlds de 30 requêtes / 10 s qu'aucun plan Cloudflare
+     ne relève. Or la progression est DÉJÀ dans la page : chaque membre dépose
+     donc la sienne en passant (même principe que sa photo), et le Worker n'a plus
+     qu'à LIRE. Quasi temps réel, et plus aucun appel LearnWorlds par membre.
+
+     🔴 Ce qu'on lit : `.lw-course-card-progress-bar` PORTE lui-même
+     `style="width:N%"` — l'élément EST le remplissage, il n'a aucun enfant
+     (lire `firstElementChild.style.width` ne renvoie rien : piège vécu).
+     🔴 Ce qu'on envoie : le `titleId` du lien de la carte, le SEUL identifiant
+     commun à la page et à l'API d'administration (mesuré 46/46 ; les clés
+     24-hexa de `/api/courses` ne matchent 0/46 et ne sortent jamais de la page).
+     🔴 Ce qu'on n'invente pas : une carte SANS barre est ignorée. Poser un 0 %
+     fabriquerait un faux « pas commencé », indiscernable d'un vrai.
+     🔴 UNE PAGE NE MONTRE QU'UNE PARTIE DU CATALOGUE (10 cours sur Cours, 12 sur
+     Cas… union de 46 sur 58 inscrits) : c'est le Worker qui FUSIONNE, on n'envoie
+     ici que ce que la page courante sait. */
+  var DEP_ENDPOINT="https://annuaire-prepastrat.ziedbencheikh.workers.dev/depot";
+  /* Clé de SITE Turnstile : publique par nature (c'est la clé secrète, côté
+     Worker, qui valide). Même clé que l'annuaire, /account et /profile.
+     🔴 Jamais de clé de service ici : ce dépôt est PUBLIC. */
+  var DEP_SITEKEY="0x4AAAAAAD35WbGwkjYZmALf";
+  var DEP_SIG="psDepotSig";
+  var depEnVol=false, depTsEl=null, depRendu=false, depCorps=null, depSig="";
+
+  function depMe(){ try{ return (typeof me==="object" && me && me.id) ? me : null; }catch(e){ return null; } }
+
+  /* Paires titleId -> % présentes sur la page courante. null si rien. */
+  function depLire(){
+    var cards=document.querySelectorAll(".lw-course-card");
+    var out={}, n=0;
+    for(var i=0;i<cards.length;i++){
+      var bar=cards[i].querySelector(".lw-course-card-progress-bar");
+      if(!bar) continue;
+      var w=(bar.style && bar.style.width)||"";
+      if(w.indexOf("%")<0) continue;
+      var p=parseFloat(w);
+      if(!isFinite(p)) continue;
+      var slug=slugDeCarte(cards[i]);
+      if(!slug) continue;
+      out[slug]=Math.max(0,Math.min(100,Math.round(p)));
+      n++;
+    }
+    return n?out:null;
+  }
+
+  /* Programmes du membre : `me.userLearningPrograms`, disponible sans réseau et
+     COMPLET quelle que soit la page.
+     🔴 C'est LUI le signal d'inscription, pas la présence d'une barre : les barres
+     apparaissent quasi partout pour un membre connecté (mesuré 10/11, 3/3, 11/11,
+     10/10, 12/12), donc une barre à 0 % ne prouve rien. Sans cette liste, un
+     rapport d'école compterait des non-inscrits comme « inscrits à 0 % ». */
+  /* 🔴 On envoie les DEUX identifiants de chaque programme. Mesuré en direct le
+     30/07 : côté page un programme a un `id` de 24 caractères hexadécimaux ET un
+     `titleId` court, exactement comme les cours — et c'est l'identifiant COURT que
+     parle `/bundles` côté API d'administration. N'envoyer que `id` donnait une
+     intersection VIDE côté Worker (13 programmes d'un côté, 12 de l'autre, 0 en
+     commun). Envoyer les deux évite de parier sur le bon, et le Worker n'a qu'à
+     tester l'appartenance. */
+  function depProgrammes(u){
+    var arr=u && u.userLearningPrograms;
+    if(!arr || !arr.length) return [];
+    var out=[];
+    for(var i=0;i<arr.length;i++){
+      var p=arr[i]; if(!p) continue;
+      if(p.id) out.push(String(p.id));
+      if(p.titleId && p.titleId!==p.id) out.push(String(p.titleId));
+    }
+    return out;
+  }
+
+  function depEnvoyer(jeton){
+    if(!depCorps){ depEnVol=false; return; }
+    var envoye=depSig;
+    fetch(DEP_ENDPOINT,{
+      method:"POST",
+      headers:{ "Content-Type":"application/json", "X-Turnstile-Token":jeton },
+      body:JSON.stringify(depCorps)
+    })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      .then(function(j){
+        /* 🔴 On ne mémorise la signature QUE si le Worker a bien répondu : sinon
+           un échec réseau ferait sauter le dépôt jusqu'à la prochaine session,
+           et la progression serait perdue pour rien. */
+        if(j && j.ok){ try{ sessionStorage.setItem(DEP_SIG, envoye); }catch(e){} }
+      })
+      .catch(function(){})
+      .then(function(){ depEnVol=false; });
+  }
+
+  /* Turnstile invisible, auto-injecté. Widget rendu HORS ÉCRAN et non
+     `display:none` : caché de cette façon il ne s'exécuterait pas.
+     🔴 Un jeton est à USAGE UNIQUE : celui de /profile ou de l'annuaire a déjà
+     servi, il faut le nôtre (même leçon que le dépôt de photo). */
+  function depTurnstile(){
+    if(!depTsEl){
+      depTsEl=document.createElement("div");
+      depTsEl.style.cssText="position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;";
+      (document.body||document.documentElement).appendChild(depTsEl);
+    }
+    window.psDepTsReady=function(){
+      try{
+        /* 🔴 Le widget ne se rend qu'UNE fois ; pour un 2e dépôt (la page a fini
+           d'afficher ses cartes entre-temps) on demande un NOUVEAU jeton par
+           `reset` — un jeton Turnstile ne se rejoue pas, le Worker le refuserait
+           en « timeout-or-duplicate ». */
+        if(depRendu){ window.turnstile.reset(depTsEl); return; }
+        window.turnstile.render(depTsEl,{
+          sitekey:DEP_SITEKEY,
+          callback:depEnvoyer,
+          "error-callback":function(){ depEnVol=false; return true; },
+          "expired-callback":function(){ try{ window.turnstile.reset(depTsEl); }catch(e){} }
+        });
+        depRendu=true;
+      }catch(e){ depEnVol=false; console.error("[ps-depot] turnstile",e); }
+    };
+    if(window.turnstile){ window.psDepTsReady(); return; }
+    if(document.getElementById("ps-dep-ts-api")) return;
+    var s=document.createElement("script");
+    s.id="ps-dep-ts-api";
+    s.src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=psDepTsReady&render=explicit";
+    s.async=true; s.defer=true;
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  function depotProgression(){
+    if(depEnVol) return;                      // un dépôt déjà en cours d'envoi
+    var u=depMe();
+    if(!u) return;                            // anonyme : rien à déposer
+    var cours=depLire();
+    if(!cours) return;                        // page sans carte : on repassera
+    var slugs=Object.keys(cours).sort();
+    var progs=depProgrammes(u);
+    /* Signature = ce qu'on s'apprête à envoyer. 🔴 Sans elle, un membre qui
+       navigue déclencherait un POST et une écriture KV par page — or KV plafonne
+       à 1 écriture par seconde et par clé. On ne parle au Worker que quand la
+       valeur a VRAIMENT changé — mais on RESTE capable de renvoyer plus tard dans
+       la même page, quand le Site Builder a fini d'afficher ses cartes. */
+    var sig=slugs.map(function(s){ return s+":"+cours[s]; }).join(",")+"|"+progs.join(",");
+    var vue=null;
+    try{ vue=sessionStorage.getItem(DEP_SIG); }catch(e){}
+    if(vue===sig) return;
+    depEnVol=true;
+    depSig=sig;
+    depCorps={ uid:String(u.id), cours:cours, programmes:progs };
+    depTurnstile();
+  }
+
   cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
      quelques relances pour attraper la classe active. */
   [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); setTimeout(immersivePlayer,d); setTimeout(partnerHeader,d); });
+  /* 🔴 Le dépôt est relancé PLUS TARD que le reste : les cartes du Site Builder
+     n'apparaissent qu'au bout de plusieurs secondes (mesuré : ~5 à 8 s avant que
+     le compte de barres se stabilise). Déposer trop tôt n'enverrait qu'une partie
+     de la page — et la signature nous empêcherait de renvoyer le complément. */
+  [4000,9000,15000].forEach(function(d){ setTimeout(depotProgression,d); });
   setTimeout(reveal, 3500);   // filet de sécurité anti-flash
 
   /* ====================================================================

@@ -679,8 +679,14 @@
     fetch(LP_ENDPOINT+"lp?uid="+encodeURIComponent(u.id),{
       headers:{ Accept:"application/json", "X-Turnstile-Token":jeton, "X-LW-User":String(u.id) }
     })
-      .then(function(r){ return r.ok ? r.json() : null; })
+      /* 🔴 On lit le CORPS même en erreur : depuis le 30/07 le Worker répond 503
+         avec `attente:true` quand trop de calculs en direct tournent en même temps
+         (garde-fou de mise à l'échelle). Ce n'est PAS une panne — le traiter comme
+         un échec ferait clignoter « revenez plus tard » alors que la réponse
+         arrivera d'elle-même à la visite suivante. */
+      .then(function(r){ return r.json().catch(function(){ return null; }); })
       .then(function(j){
+        if(j && j.attente){ lpEtat="attente"; mountBoard(); return; }
         /* 🔴 Une reponse vide ou en erreur n'est PAS silencieuse : sans ca le
            membre restait devant des tuiles a « — » sans la moindre explication
            (cas reel : Worker en 502 quand le membre est inscrit a tout le
