@@ -441,8 +441,13 @@
     "fiches-cabinet-and-tests-en-ligne":                 {url:"/fiches-secteur-clone",     col:"#007260"},
     "s-entrainer":                                       {url:"/sentrainer",               col:"#3887B4"}
   };
-  /* Domaine inconnu -> page « Nos formations », qui les liste tous. */
-  var PROG_FALLBACK={url:"/formation-par-comptences", col:"#507EC5"};
+  /* 🔴 PARCOURS INCONNU : AUCUNE page, donc section « Autres » (30/07).
+     Avant, le repli pointait sur Compétences — c'est ce qui faisait apparaître
+     « Webinars PrepaStrat » dans cette section alors qu'il n'est sur AUCUNE page
+     du site (signalé par Ziad). Inventer un rangement est pire que d'assumer
+     qu'on ne sait pas : `url` vide ⇒ `labelPage()` renvoie « Autres » et la
+     section se range en dernier. */
+  var PROG_FALLBACK={url:"", col:"#507EC5"};
 
   /* 🔴🔴 SECONDE CLÉ : LE NOM DU PROGRAMME (bug signalé le 29/07 sur un compte
      élève — les 12 parcours tombaient TOUS dans « Compétences »).
@@ -471,7 +476,10 @@
     "businesssense":             "/formation-par-comptences",
     "fit":                       "/formation-par-comptences",
     "mathematiques":             "/formation-par-comptences",
-    "webinarsprepastrat":        "/formation-par-comptences",
+    /* 🔴 « Webinars PrepaStrat » RETIRÉ de cette table : il n'a de carte sur AUCUNE
+       page du site, cette ligne le rangeait donc faussement dans Compétences.
+       Sans elle, il tombe dans « Autres » — et il rejoindra sa vraie section tout
+       seul le jour où il apparaîtra quelque part. */
     "sentrainer":                "/sentrainer"
   };
   /* ---- Parcours RETIRÉS du tableau de bord (demande de Ziad, 30/07) ---------
@@ -487,7 +495,12 @@
      Ajouter une exclusion = 1 ligne (nom brut normalisé : minuscules, sans
      accents ni ponctuation). */
   var PROG_EXCLUS={
-    "toutsavoirsurlesetudesdecas": 1,
+    /* 🔴 « Tout Savoir sur les Études de Cas » N'EST PLUS EXCLU (30/07). Il l'avait
+       été parce qu'il s'affichait en doublon à côté de « ETUDES DE CAS » — mais
+       c'était un symptôme, pas la maladie : il vit en réalité sur la page
+       Compétences, et c'est notre table écrite à la main qui le rangeait au mauvais
+       endroit. Le rangement vient désormais de la page RÉELLEMENT observée, donc
+       il retrouve sa place et n'est plus un doublon. */
     "sentrainer":                  1
   };
   function progExclu(p){
@@ -504,7 +517,19 @@
       .normalize("NFD").replace(/[̀-ͯ]/g,"")   // accents
       .replace(/[^a-z0-9]/g,"");                          // espaces, &, apostrophes, tirets
   }
-  function progPage(id, nom, brut){
+  /* 🔴🔴 LA PAGE OBSERVÉE PASSE AVANT TOUT (30/07). Les deux tables ci-dessus sont
+     écrites À LA MAIN et avaient dérivé du contenu réel : « Tout Savoir sur les
+     Études de Cas » est un élément de la page Compétences mais était rangé dans
+     Études de cas, et « Webinars PrepaStrat » n'est sur AUCUNE page mais
+     s'affichait quand même dans Compétences. Signalé par Ziad.
+     Le Worker renvoie désormais `page` : la page où une carte de ce parcours a été
+     RÉELLEMENT vue, relevée par le collecteur au fil des visites. Les tables ne
+     servent plus que de repli, le temps qu'une page soit visitée au moins une fois.
+     🔴 Plus de repli inventé : un parcours sans page connue et absent des tables
+     tombe dans « Autres » plutôt que d'être affiché dans une section où il n'est
+     pas. Mieux vaut « Autres » qu'un rangement faux. */
+  function progPage(id, nom, brut, page){
+    if(page) return {url:page, col:PAGE_COL[page]||PROG_FALLBACK.col};
     if(id && PROG_PAGES[id]) return PROG_PAGES[id];
     var u=PROG_NOMS[normProg(nom)] || PROG_NOMS[normProg(brut)];
     if(u) return {url:u, col:PAGE_COL[u]||PROG_FALLBACK.col};
@@ -693,7 +718,17 @@
      🔴 Ne JAMAIS mettre ici une clé de service qui contourne Turnstile : ce
      dépôt est PUBLIC, tout ce qui y est écrit est lisible par n'importe qui. */
   var LP_SITEKEY="0x4AAAAAAD35WbGwkjYZmALf";
-  var LP_STORE="psLpProgress";
+  /* 🔴 CLÉ PAR MEMBRE (30/07). Avant, la clé était `psLpProgress` tout court :
+     sur un poste partagé — une salle informatique, un ordinateur familial — le
+     membre suivant voyait brièvement les POURCENTAGES DU PRÉCÉDENT, le temps que
+     le Worker réponde. Constaté en changeant de compte dans le même navigateur.
+     On suffixe donc par l'identifiant du membre. Repli sans suffixe uniquement si
+     `me` n'est pas encore là, auquel cas on n'écrit rien (cf. lpStoreKey). */
+  var LP_STORE_BASE="psLpProgress";
+  function lpStoreKey(){
+    var u=meUser();
+    return (u && u.id) ? (LP_STORE_BASE+":"+u.id) : null;
+  }
   var lpData=null;        // [{name,pct}] une fois connu (mémoire locale ou Worker)
   var lpAsked=false;
   var lpTsEl=null;
@@ -724,7 +759,12 @@
 
   function lpFromStore(){
     try{
-      var raw=localStorage.getItem(LP_STORE);
+      var cle=lpStoreKey();
+      if(!cle) return null;                    // membre inconnu : on ne lit RIEN
+      var raw=localStorage.getItem(cle);
+      /* Ménage : l'ancienne clé commune n'appartenait à personne et pouvait
+         afficher les % d'un autre membre. On la retire au passage. */
+      try{ localStorage.removeItem(LP_STORE_BASE); }catch(e){}
       if(!raw) return null;
       var j=JSON.parse(raw);
       return (j && j.programs && j.programs.length) ? j.programs : null;
@@ -735,7 +775,7 @@
      Worker refuse toute requête sans jeton valide. Le widget est invisible et
      auto-injecté — rien à ajouter dans la page. La réponse est mise en cache
      côté Worker (renvoi immédiat + rafraîchissement en arrière-plan), et côté
-     navigateur dans LP_STORE : l'attente n'est visible qu'à la 1re visite. */
+     navigateur sous une clé PAR MEMBRE : l'attente n'est visible qu'à la 1re visite. */
   function lpFetch(jeton){
     var u=meUser();
     if(!u || !u.id) return;
@@ -756,9 +796,12 @@
            catalogue). On bascule le bandeau sur « revenez plus tard ». */
         if(!j || !j.programs || !j.programs.length){ lpEtat="echec"; mountBoard(); return; }
         lpEtat="ok";
-        var progs=j.programs.map(function(p){ return {id:p.id||"", name:domainLabel(p.name||""), raw:(p.name||""), pct:p.pct, courses:p.courses}; });
+        /* `page` = la page où une carte de ce parcours a été réellement vue
+           (relevée par le collecteur). C'est elle qui décide de la section. */
+        var progs=j.programs.map(function(p){ return {id:p.id||"", name:domainLabel(p.name||""), raw:(p.name||""), pct:p.pct, courses:p.courses, page:p.page||null}; });
         lpData=progs;
-        try{ localStorage.setItem(LP_STORE, JSON.stringify({t:Date.now(), programs:progs})); }catch(e){}
+        var cle=lpStoreKey();
+        if(cle){ try{ localStorage.setItem(cle, JSON.stringify({t:Date.now(), programs:progs})); }catch(e){} }
         mountBoard();                       // repeint avec les vrais %
       })
       .catch(function(){ lpEtat="echec"; mountBoard(); });
@@ -982,7 +1025,7 @@
     if(!progs.length) return;                       // programmes pas encore rendus : réessai
     /* 🔴 La signature porte AUSSI la page : sans ça, un programme qui change de
        section (1 ligne dans PROG_PAGES) ne repeindrait pas le tableau. */
-    var sig=lpEtat+"~"+progs.map(function(p){return progPage(p.id,p.name,p.raw).url+">"+p.name+"="+p.pct;}).join("|");
+    var sig=lpEtat+"~"+progs.map(function(p){return progPage(p.id,p.name,p.raw,p.page).url+">"+p.name+"="+p.pct;}).join("|");
     var board=grandpa.querySelector(".ps-pf-board");
     if(board && board.dataset.sig===sig){ grandpa.classList.add("ps-has-board"); return; }
     if(!board){ board=document.createElement("div"); board.className="ps-pf-board"; grandpa.insertBefore(board,grandpa.firstChild); }
@@ -993,7 +1036,7 @@
     /* Regroupement par page, puis tri selon l'ordre voulu (cf. PAGE_ORDRE). */
     var groupes={}, urls=[];
     progs.forEach(function(p){
-      var c=progPage(p.id,p.name,p.raw);
+      var c=progPage(p.id,p.name,p.raw,p.page);
       if(!groupes[c.url]){ groupes[c.url]={col:c.col, items:[]}; urls.push(c.url); }
       groupes[c.url].items.push(p);
     });
@@ -1035,7 +1078,7 @@
          la tuile s'affiche quand même avec son nom, le chiffre arrive ensuite. */
       var known=(typeof p.pct==="number" && isFinite(p.pct));
       var val=known?Math.max(0,Math.min(100,Math.round(p.pct))):0;
-      var conf=progPage(p.id,p.name,p.raw);
+      var conf=progPage(p.id,p.name,p.raw,p.page);
 
       var tile=document.createElement("div");
       tile.className="ps-pf-bt";

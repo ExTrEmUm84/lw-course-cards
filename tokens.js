@@ -979,7 +979,7 @@
     for(var i=0;i<arr.length;i++){
       if(arr[i] && arr[i].id && arr[i].titleId) court[String(arr[i].id)]=String(arr[i].titleId);
     }
-    var out={}, n=0;
+    var out={}, pages={}, n=0;
     for(var j=0;j<cards.length;j++){
       var bar=cards[j].querySelector(".lw-course-card-progress-bar");
       if(!bar) continue;                           // pas de barre : on n'invente pas un 0 %
@@ -996,8 +996,15 @@
       try{ id=decodeURIComponent(m[1]); }catch(e){ id=m[1]; }
       out[id]=p; n++;
       if(court[id]) out[court[id]]=p;              // même valeur sous l'identifiant court
+      /* 🔴 On note AUSSI la page où cette carte est apparue. Le rangement des
+         tuiles du board venait jusqu'ici de tables écrites à la main, qui avaient
+         dérivé du contenu réel : un parcours de la page Compétences se retrouvait
+         rangé dans Études de cas, et un parcours présent sur AUCUNE page
+         s'affichait quand même dans Compétences. On arrête de deviner. */
+      pages[id]=location.pathname;
+      if(court[id]) pages[court[id]]=location.pathname;
     }
-    return n?out:null;
+    return n?{pct:out, pages:pages}:null;
   }
 
   /* Programmes du membre : `me.userLearningPrograms`, disponible sans réseau et
@@ -1094,7 +1101,9 @@
     var u=depMe();
     if(!u) return;                            // anonyme : rien à déposer
     var cours=depLire();
-    var progpct=depLireProgrammes(u);
+    var lu=depLireProgrammes(u);
+    var progpct=lu?lu.pct:null;
+    var progpage=lu?lu.pages:null;
     /* 🔴 On accepte l'UN ou l'AUTRE. La page Compétences n'a AUCUNE carte de cours
        (mesuré : 0 carte de cours, 4 cartes de programme) — exiger `cours` comme
        avant y aurait bloqué le dépôt et c'est précisément la page qui porte la
@@ -1108,15 +1117,17 @@
        valeur a VRAIMENT changé — mais on RESTE capable de renvoyer plus tard dans
        la même page, quand le Site Builder a fini d'afficher ses cartes. */
     var pcles=progpct?Object.keys(progpct).sort():[];
+    var gcles=progpage?Object.keys(progpage).sort():[];
     var sig=slugs.map(function(s){ return s+":"+cours[s]; }).join(",")
           +"|"+progs.join(",")
-          +"|"+pcles.map(function(k){ return k+":"+progpct[k]; }).join(",");
+          +"|"+pcles.map(function(k){ return k+":"+progpct[k]; }).join(",")
+          +"|"+gcles.map(function(k){ return k+">"+progpage[k]; }).join(",");
     var vue=null;
     try{ vue=sessionStorage.getItem(DEP_SIG); }catch(e){}
     if(vue===sig) return;
     depEnVol=true;
     depSig=sig;
-    depCorps={ uid:String(u.id), cours:cours||{}, programmes:progs, progpct:progpct||{} };
+    depCorps={ uid:String(u.id), cours:cours||{}, programmes:progs, progpct:progpct||{}, progpage:progpage||{} };
     depTurnstile();
   }
 

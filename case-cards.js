@@ -119,6 +119,26 @@
        catégories du filtre : on ne stylise que la description marquée en JS
        (cf. heroText), jamais la classe nue. */
     "#pageContent .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
+    /* ─── Tuile de progression EN HAUT (portée de cabinet-cards.js, 30/07) ───
+       Signalée manquante par Ziad : « la page études de cas n'a pas le widget
+       progression à côté du H1 alors que la page Cours l'a ». `case-cards.js`
+       était en effet le SEUL script de fiches sans `mountKpi` — la tuile avait été
+       portée dans course/cabinet/sector/program-cards et jamais ici.
+       🔴 La description passe en pleine largeur quand la tuile est là : son
+       `padding-right:38%` la comprimait à côté d'un bloc de 352px. */
+    "#pageContent .ps-herotop{display:flex !important;align-items:flex-start !important;justify-content:space-between !important;gap:32px !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    "#pageContent .ps-herotop > h1.learnworlds-heading{margin:0 !important;max-width:none !important;flex:1 1 auto !important;}",
+    "#pageContent .ps-herotop > .ps-kpi{flex:0 0 352px !important;margin:6px 0 0 0 !important;}",
+    "#pageContent .ps-herotop ~ .ps-desc{padding-right:0 !important;}",
+    ".ps-kpi{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;padding:20px 22px !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 14px rgba(15,23,42,.05) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    ".ps-kpi-num{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
+    ".ps-kpi-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:500 !important;color:var(--ps-text-soft,#676879) !important;margin-top:2px !important;}",
+    ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:#F1F1FF !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    ".ps-kpi-bar{height:7px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
+    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#6161FF) !important;transition:width .6s ease !important;}",
+    ".ps-kpi-txt{flex:1 1 auto !important;min-width:0 !important;}",
+    "@media(max-width:900px){#pageContent .ps-herotop{flex-direction:column !important;gap:20px !important;}#pageContent .ps-herotop > .ps-kpi{flex:0 0 auto !important;width:100% !important;max-width:352px !important;}}",
     /* machine à écrire : le slot réserve la largeur de la phrase la plus longue
        pour que le titre ne tremble pas à chaque lettre */
     ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#6161FF) !important;white-space:nowrap !important;}",
@@ -345,8 +365,70 @@
     el.setAttribute("aria-label", cabinet+" et "+client);
   }
 
+  /* ─── Tuile de progression globale EN HAUT (portée de cabinet-cards.js) ───
+     Moyenne de la progression des fiches, dédupliquée par lien. Une fiche non
+     inscrite (pas de barre native) compte 0 au numérateur mais reste au
+     dénominateur — c'est la sémantique retenue sur les autres pages.
+     🔴 Aucune fiche avec barre (visiteur anonyme) ⇒ on DÉMONTE la tuile et le H1
+     reprend toute la largeur, au lieu d'afficher un 0 % trompeur.
+     🔴 Le H1 est DÉPLACÉ, jamais recréé : la machine à écrire est posée sur cet
+     élément et ne survivrait pas à un clone. */
+  var ICON_KPI='<svg viewBox="0 0 24 24"><path d="M3 3v18h18"/><path d="m7 14 4-4 3 3 5-6"/><path d="M15 7h4v4"/></svg>';
+  function mountKpi(){
+    var desc=document.querySelector(S+" .ps-desc");
+    if(!desc) return;                                 // hero pas encore prêt : on réessaiera
+    var vus=Object.create(null);
+    document.querySelectorAll(S+" .lw-course-card").forEach(function(card){
+      if(card.classList.contains("ps-lang-off")) return;   // autre langue : hors calcul
+      var a=card.querySelector("a.card-link[href], a[href]");
+      var cle=a ? a.getAttribute("href") : null;
+      if(!cle || cle in vus) return;                  // doublon déjà compté
+      var nat=card.querySelector(".lw-course-card-progress-bar");
+      var p=nat ? parseInt((nat.style.width||"").replace("%",""),10) : NaN;
+      vus[cle]=isNaN(p) ? null : Math.max(0, Math.min(100, p));
+    });
+    var cles=Object.keys(vus);
+    var avecBarre=cles.filter(function(k){ return vus[k]!==null; });
+    var kpi=document.querySelector(S+" .ps-kpi");
+    var h1=document.querySelector(S+" h1.learnworlds-heading");
+    var top=document.querySelector(S+" .ps-herotop");
+    if(!cles.length || !avecBarre.length){
+      if(kpi) kpi.remove();
+      if(top){ if(h1) top.parentNode.insertBefore(h1, top); top.remove(); }
+      return;
+    }
+    var total=0;
+    cles.forEach(function(k){ total += (vus[k]||0); });
+    var pct=Math.round(total/cles.length);
+    if(h1 && !top){
+      top=document.createElement("div"); top.className="ps-herotop";
+      h1.parentNode.insertBefore(top, h1);
+      top.appendChild(h1);
+    }
+    if(!kpi || !kpi.querySelector(".ps-kpi-num")){
+      if(kpi) kpi.remove();
+      kpi=document.createElement("div");
+      kpi.className="ps-kpi";
+      kpi.innerHTML='<div class="ps-kpi-txt"><div class="ps-kpi-num"></div><div class="ps-kpi-lbl"></div><div class="ps-kpi-bar"><div class="ps-kpi-bar-in"></div></div></div><span class="ps-kpi-ic" aria-hidden="true">'+ICON_KPI+'</span>';
+    }
+    var hote=top||desc;
+    if(kpi.parentNode!==hote) hote.appendChild(kpi);
+    /* 🔴 N'ÉCRIRE QUE SI LA VALEUR CHANGE : sinon on réécrit le FRANÇAIS par-dessus
+       la traduction Weglot à chaque passage de build(), Weglot retraduit, et la
+       tuile clignote FR/EN sans fin (vécu le 25/07 sur les autres pages). */
+    var sigKpi=pct+"|"+cles.length;
+    if(kpi.getAttribute("data-ps-sig")!==sigKpi){
+      kpi.setAttribute("data-ps-sig",sigKpi);
+      kpi.querySelector(".ps-kpi-num").textContent=pct+" %";
+      kpi.querySelector(".ps-kpi-lbl").textContent="Progression sur "+cles.length+" cas";
+      kpi.setAttribute("aria-label","Progression globale : "+pct+" % sur "+cles.length+" cas");
+    }
+    kpi.querySelector(".ps-kpi-bar-in").style.width=pct+"%";
+  }
+
   function build(){
     heroText();
+    mountKpi();
     document.querySelectorAll("#pageContent .lw-course-card").forEach(function(card){
       if(card.querySelector(".ps-cc")) return;
       var h=card.querySelector(".learnworlds-heading3"); if(!h) return;
