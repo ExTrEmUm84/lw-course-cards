@@ -180,7 +180,7 @@
      n'est valable que là où le titre est calé sur 1000px (page Cours). Ailleurs
      (ex. Compétences) le titre est à sa place naturelle et les boutons suivent.
      ==================================================================== */
-  var HERO_ACTIVE={ "empty":0, "page-introduction":1 };
+  var HERO_ACTIVE={ "formation-par-modules":0, "formation-par-comptences":1 };
   var HERO_BTN_CSS=
       "#pageContent .learnworlds-button.learnworlds-button-outline-accent1{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;padding:11px 26px !important;height:auto !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;color:var(--ps-text,#1c1f26) !important;box-shadow:0 1px 2px rgba(0,0,0,.04) !important;transition:all .15s ease !important;cursor:pointer !important;}"
     + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1 *{font-family:inherit !important;color:inherit !important;font-weight:inherit !important;}"
@@ -210,7 +210,12 @@
      si un script échoue).
      ⚠️ Efficace parce que ce fichier (petit, en cache) s'exécute avant que la
      grosse SPA de LearnWorlds ne peigne les cartes. ==================== */
-  var CLOAK_SLUGS=["empty","emptykk-clone-clone","fiches-secteur","fiches-secteur-clone","sentrainer"];
+  /* 🔴 MAJ 30/07 — les slugs de Cours et Compétences ont CHANGÉ : `empty` ->
+     `formation-par-modules`, `page-introduction` -> `formation-par-comptences`
+     (relevés dans le sitemap et vérifiés en direct ; `/page-introduction`
+     renvoie désormais une page d'erreur). Conséquence de l'ancien nom ici :
+     l'anti-flash ne s'appliquait plus du tout sur la page Cours. */
+  var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-secteur-clone","sentrainer"];
   var READY_SEL="#pageContent .ps-mcard,#pageContent .ps-cc,#pageContent .ps-ccab,#pageContent .ps-scard,#pageContent .ps-pfc";
   function cloak(){
     if(document.getElementById("ps-cloak")) return;
@@ -351,7 +356,7 @@
      bouton retour natif du player (« Retour à la page du cours ») pour revenir
      DIRECT à cette page principale, sans passer par la présentation. Marche sur
      TOUTES les pages sans script par page. Libellé selon le slug de la page. */
-  var RETURN_LABELS={empty:"Retour aux cours",sentrainer:"Retour à l'entraînement","emptykk-clone-clone":"Retour aux études de cas","fiches-secteur":"Retour aux fiches secteur","fiches-secteur-clone":"Retour aux fiches cabinet","page-introduction":"Retour aux compétences"};
+  var RETURN_LABELS={"formation-par-modules":"Retour aux cours",sentrainer:"Retour à l'entraînement","emptykk-clone-clone":"Retour aux études de cas","fiches-secteur":"Retour aux fiches secteur","fiches-secteur-clone":"Retour aux fiches cabinet","formation-par-comptences":"Retour aux compétences"};
   function returnLabel(){ var m=(((document.body&&document.body.className)||"")).match(/slug-([a-z0-9-]+)/); return (m&&RETURN_LABELS[m[1]])||"Retour"; }
   function playerFlag(){
     if(window.__psFlagOn) return; window.__psFlagOn=true;

@@ -279,7 +279,14 @@
     S+" .-search-box button{border:0 !important;box-shadow:none !important;background:transparent !important;}",
 
     "@media(max-width:1040px){"+S+" .ps-pf-courses > .lw-cols.multiple-rows{grid-template-columns:1fr 1fr !important;}}",
-    "@media(max-width:700px){"+S+" .ps-pf-courses > .lw-cols.multiple-rows{grid-template-columns:1fr !important;}}"
+    "@media(max-width:700px){"+S+" .ps-pf-courses > .lw-cols.multiple-rows{grid-template-columns:1fr !important;}}",
+
+    /* Catalogue de collecte (cf. cacherCatalogue) : sorti de l'écran, PAS
+       `display:none`. LearnWorlds construit ses cartes en JS et rien ne garantit
+       qu'il le fasse dans un bloc jamais affiché — hors écran, il est rendu
+       normalement et le collecteur peut lire les barres. Hauteur 1px pour ne pas
+       créer de barre de défilement. */
+    ".ps-pf-cat-off{position:absolute !important;left:-9999px !important;top:0 !important;width:1200px !important;height:1px !important;overflow:hidden !important;pointer-events:none !important;}"
   ].join("\n");
 
   /* Posée depuis build(), donc APRÈS le garde : le CSS est scopé `#pageContent`
@@ -289,6 +296,31 @@
     var st=document.getElementById("ps-profile-style");
     if(!st){ st=document.createElement("style"); st.id="ps-profile-style"; (document.head||document.documentElement).appendChild(st); }
     if(st.textContent!==CSS) st.textContent=CSS;
+  }
+
+  /* ---- Catalogue de COLLECTE, masqué (30/07) ------------------------------
+     🔴 À QUOI SERT L'ÉLÉMENT « Cours » AJOUTÉ SUR /profile : il n'est PAS là pour
+     être lu. Il existe pour que le collecteur de `tokens.js` voie TOUT le
+     catalogue en une seule visite — mesuré : **59 cours d'un coup**, contre 10 sur
+     la page Cours — et dépose donc la progression complète du membre. Sans lui, un
+     membre qui ne navigue pas voyait 8 tuiles sur 11 à « — ».
+     🔴 HORS ÉCRAN ET NON `display:none` : la largeur des barres est lue en style
+     INLINE, donc `display:none` suffirait en théorie — mais LearnWorlds construit
+     ses cartes en JS et rien ne garantit qu'il le fasse dans un bloc jamais
+     affiché. Hors écran, il est rendu normalement.
+     Masqué aussi aux lecteurs d'écran : 59 cartes annoncées après le tableau de
+     bord seraient une nuisance.
+     🔴 On ne touche JAMAIS la section du tableau de bord (test explicite).
+     Échappatoire : `window.PS_PROFILE_CATALOGUE_VISIBLE = true` le laisse visible. */
+  function cacherCatalogue(){
+    if(window.PS_PROFILE_CATALOGUE_VISIBLE) return;
+    document.querySelectorAll(S+" section").forEach(function(sec){
+      if(sec.classList.contains("ps-pf-cat-off")) return;          // déjà traité
+      if(!sec.querySelector(".lw-course-card")) return;            // rien à masquer
+      if(sec.querySelector(".ps-pf-board,.ps-pf-tiles,.ps-pf-hero")) return;
+      sec.classList.add("ps-pf-cat-off");
+      sec.setAttribute("aria-hidden","true");
+    });
   }
 
   /* ---- compteurs "Leçons : 8 # Quiz : 3", repris de course-cards.js ---- */
@@ -391,49 +423,55 @@
      Couleur = celle de la page (cf. PAGE_ACCENTS de tokens.js) pour que chaque
      tuile rappelle sa section. Ajouter/changer un domaine = 1 ligne ici.
      Clé = l'id du programme LearnWorlds (bundle id). */
+  /* 🔴 MAJ 30/07 — DEUX SLUGS ONT CHANGÉ CÔTÉ SITE, tous les liens ci-dessous
+     étaient donc morts ou faux : Cours `empty` -> `formation-par-modules`, et
+     Compétences `page-introduction` -> `formation-par-comptences`. Vérifié en
+     direct : `/page-introduction` renvoie une PAGE D'ERREUR, et la vraie page
+     Cours est `formation-par-modules` (`/courses` est une page « A SUPPRIMER »).
+     Les boutons « Continuer » des tuiles envoyaient donc l'étudiant dans le mur. */
   var PROG_PAGES={
-    "introduction-conseil-strategie":                    {url:"/empty",               col:"#507EC5"},
-    "module-de-formation-les-autres-types-de-conseil":   {url:"/empty",               col:"#507EC5"},
-    "introduction":                                      {url:"/page-introduction",   col:"#243B6B"},
-    "fit":                                               {url:"/page-introduction",   col:"#243B6B"},
-    "mathematiques":                                     {url:"/page-introduction",   col:"#243B6B"},
-    "etudes-de-cas":                                     {url:"/emptykk-clone-clone", col:"#6B7280"},
-    "etudes-de-cas2":                                    {url:"/emptykk-clone-clone", col:"#6B7280"},
-    "fiches-secteurs":                                   {url:"/fiches-secteur",      col:"#C9A227"},
-    "fiches-cabinet-and-tests-en-ligne":                 {url:"/fiches-secteur-clone",col:"#007260"},
-    "s-entrainer":                                       {url:"/sentrainer",          col:"#3887B4"}
+    "introduction-conseil-strategie":                    {url:"/formation-par-modules",    col:"#507EC5"},
+    "module-de-formation-les-autres-types-de-conseil":   {url:"/formation-par-modules",    col:"#507EC5"},
+    "introduction":                                      {url:"/formation-par-comptences", col:"#243B6B"},
+    "fit":                                               {url:"/formation-par-comptences", col:"#243B6B"},
+    "mathematiques":                                     {url:"/formation-par-comptences", col:"#243B6B"},
+    "etudes-de-cas":                                     {url:"/emptykk-clone-clone",      col:"#6B7280"},
+    "etudes-de-cas2":                                    {url:"/emptykk-clone-clone",      col:"#6B7280"},
+    "fiches-secteurs":                                   {url:"/fiches-secteur",           col:"#C9A227"},
+    "fiches-cabinet-and-tests-en-ligne":                 {url:"/fiches-secteur-clone",     col:"#007260"},
+    "s-entrainer":                                       {url:"/sentrainer",               col:"#3887B4"}
   };
   /* Domaine inconnu -> page « Nos formations », qui les liste tous. */
-  var PROG_FALLBACK={url:"/page-introduction", col:"#507EC5"};
+  var PROG_FALLBACK={url:"/formation-par-comptences", col:"#507EC5"};
 
   /* 🔴🔴 SECONDE CLÉ : LE NOM DU PROGRAMME (bug signalé le 29/07 sur un compte
      élève — les 12 parcours tombaient TOUS dans « Compétences »).
      Cause : `PROG_PAGES` est indexé par le slug du programme, qui n'est servi que
      par le Worker `/lp`. La source INSTANTANÉE `me.userLearningPrograms` donne,
      elle, des **id hexadécimaux** (`6a27ca91…`) qui ne matchent aucune clé —
-     donc repli sur `/page-introduction` pour tout le monde. Le compte admin ne
+     donc repli sur la page « Nos formations » pour tout le monde. Le compte admin ne
      le voyait pas : son `localStorage` gardait déjà la réponse du Worker.
      Parade : à défaut d'id connu, on apparie sur le NOM normalisé (minuscules,
      sans accents ni ponctuation), qui est disponible dans les TROIS sources.
      Ajouter un programme = 1 ligne ici (et non plus une par identifiant). */
   var PAGE_COL={
-    "/empty":               "#507EC5",
-    "/fiches-secteur-clone":"#007260",
-    "/fiches-secteur":      "#C9A227",
-    "/emptykk-clone-clone": "#6B7280",
-    "/page-introduction":   "#243B6B",
-    "/sentrainer":          "#3887B4"
+    "/formation-par-modules":    "#507EC5",
+    "/fiches-secteur-clone":     "#007260",
+    "/fiches-secteur":           "#C9A227",
+    "/emptykk-clone-clone":      "#6B7280",
+    "/formation-par-comptences": "#243B6B",
+    "/sentrainer":               "#3887B4"
   };
   var PROG_NOMS={
-    "conseilenstrategie":        "/empty",
-    "lesautrestypesdeconseil":   "/empty",
+    "conseilenstrategie":        "/formation-par-modules",
+    "lesautrestypesdeconseil":   "/formation-par-modules",
     "fichescabinettestsenligne": "/fiches-secteur-clone",
     "fichessecteurs":            "/fiches-secteur",
     "etudesdecas":               "/emptykk-clone-clone",
-    "businesssense":             "/page-introduction",
-    "fit":                       "/page-introduction",
-    "mathematiques":             "/page-introduction",
-    "webinarsprepastrat":        "/page-introduction",
+    "businesssense":             "/formation-par-comptences",
+    "fit":                       "/formation-par-comptences",
+    "mathematiques":             "/formation-par-comptences",
+    "webinarsprepastrat":        "/formation-par-comptences",
     "sentrainer":                "/sentrainer"
   };
   function normProg(s){
@@ -462,16 +500,16 @@
      page absente de ces tables tombe dans « Autres » (plus jamais de tuile
      perdue). Les pages sans aucun programme ne s'affichent pas du tout. */
   var PAGE_LABELS={
-    "/empty":                "Cours",
-    "/fiches-secteur-clone": "Fiches cabinet",
-    "/fiches-secteur":       "Fiches secteur",
-    "/emptykk-clone-clone":  "Études de cas",
-    "/page-introduction":    "Compétences",
-    "/sentrainer":           "S'entraîner"
+    "/formation-par-modules":    "Cours",
+    "/fiches-secteur-clone":     "Fiches cabinet",
+    "/fiches-secteur":           "Fiches secteur",
+    "/emptykk-clone-clone":      "Études de cas",
+    "/formation-par-comptences": "Compétences",
+    "/sentrainer":               "S'entraîner"
   };
   /* Ordre d'affichage voulu par Ziad : Cours, Cabinet, Secteur, Études de cas,
      puis le reste. */
-  var PAGE_ORDRE=["/empty","/fiches-secteur-clone","/fiches-secteur","/emptykk-clone-clone","/page-introduction","/sentrainer"];
+  var PAGE_ORDRE=["/formation-par-modules","/fiches-secteur-clone","/fiches-secteur","/emptykk-clone-clone","/formation-par-comptences","/sentrainer"];
   function rangPage(u){ var i=PAGE_ORDRE.indexOf(u); return i<0 ? 99 : i; }
   function labelPage(u){ return PAGE_LABELS[u] || "Autres"; }
 
@@ -1033,7 +1071,7 @@
   function build(){
     /* garde évalué ICI, pas au chargement : cf. l'avertissement en tête */
     if(!surLaPage()) return;
-    figtree(); styles(); marquer(); buildHero(); mountBoard();
+    figtree(); styles(); marquer(); cacherCatalogue(); buildHero(); mountBoard();
     document.querySelectorAll(S+" .ps-pf-courses .lw-course-card").forEach(function(card){
       if(card.dataset.psPf) return;
       var h=card.querySelector(".learnworlds-heading3"); if(!h) return;
