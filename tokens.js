@@ -958,6 +958,48 @@
     return n?out:null;
   }
 
+  /* Progression PAR PROGRAMME (30/07) — la trouvaille qui règle les tuiles vides.
+     🔴 Sur la page Compétences, LearnWorlds publie une barre par PROGRAMME
+     (`.lw-learning-program-card`), pas par cours : mesuré, 4 cartes portant chacune
+     une `.lw-course-card-progress-bar` à largeur inline, avec l'identifiant du
+     programme dans le lien (`learningProgramId`). Notre collecteur ne regardait que
+     les cartes de COURS et passait donc à côté.
+     🔴 POURQUOI C'EST MIEUX QU'UNE MOYENNE : c'est une valeur DIRECTE, qui n'exige
+     pas de retrouver chaque cours du programme — or 19 références de cours des
+     programmes de l'école ne correspondent à aucune carte du site, ce qui laissait
+     6 programmes à « — » pour toujours.
+     🔴 On l'émet sous LES DEUX identifiants : le lien porte l'id de 24 caractères
+     hexadécimaux, alors que `/bundles` côté API parle l'identifiant COURT.
+     `me.userLearningPrograms` donne la correspondance sans aucun appel réseau. */
+  function depLireProgrammes(u){
+    var cards=document.querySelectorAll(".lw-learning-program-card");
+    if(!cards.length) return null;
+    var court={};                                  // id 24-hexa -> identifiant court
+    var arr=(u && u.userLearningPrograms)||[];
+    for(var i=0;i<arr.length;i++){
+      if(arr[i] && arr[i].id && arr[i].titleId) court[String(arr[i].id)]=String(arr[i].titleId);
+    }
+    var out={}, n=0;
+    for(var j=0;j<cards.length;j++){
+      var bar=cards[j].querySelector(".lw-course-card-progress-bar");
+      if(!bar) continue;                           // pas de barre : on n'invente pas un 0 %
+      var w=(bar.style && bar.style.width)||"";
+      if(w.indexOf("%")<0) continue;
+      var p=parseFloat(w);
+      if(!isFinite(p)) continue;
+      p=Math.max(0,Math.min(100,Math.round(p)));
+      var a=cards[j].querySelector("a[href]");
+      var h=a?(a.getAttribute("href")||""):"";
+      var m=h.match(/learningProgramId=([^&]+)/)||h.match(/[?&]program=([^&]+)/);
+      if(!m) continue;                             // sans identifiant, la valeur est inutilisable
+      var id;
+      try{ id=decodeURIComponent(m[1]); }catch(e){ id=m[1]; }
+      out[id]=p; n++;
+      if(court[id]) out[court[id]]=p;              // même valeur sous l'identifiant court
+    }
+    return n?out:null;
+  }
+
   /* Programmes du membre : `me.userLearningPrograms`, disponible sans réseau et
      COMPLET quelle que soit la page.
      🔴 C'est LUI le signal d'inscription, pas la présence d'une barre : les barres
@@ -1042,21 +1084,29 @@
     var u=depMe();
     if(!u) return;                            // anonyme : rien à déposer
     var cours=depLire();
-    if(!cours) return;                        // page sans carte : on repassera
-    var slugs=Object.keys(cours).sort();
+    var progpct=depLireProgrammes(u);
+    /* 🔴 On accepte l'UN ou l'AUTRE. La page Compétences n'a AUCUNE carte de cours
+       (mesuré : 0 carte de cours, 4 cartes de programme) — exiger `cours` comme
+       avant y aurait bloqué le dépôt et c'est précisément la page qui porte la
+       donnée la plus utile. */
+    if(!cours && !progpct) return;             // page sans rien à lire : on repassera
+    var slugs=cours?Object.keys(cours).sort():[];
     var progs=depProgrammes(u);
     /* Signature = ce qu'on s'apprête à envoyer. 🔴 Sans elle, un membre qui
        navigue déclencherait un POST et une écriture KV par page — or KV plafonne
        à 1 écriture par seconde et par clé. On ne parle au Worker que quand la
        valeur a VRAIMENT changé — mais on RESTE capable de renvoyer plus tard dans
        la même page, quand le Site Builder a fini d'afficher ses cartes. */
-    var sig=slugs.map(function(s){ return s+":"+cours[s]; }).join(",")+"|"+progs.join(",");
+    var pcles=progpct?Object.keys(progpct).sort():[];
+    var sig=slugs.map(function(s){ return s+":"+cours[s]; }).join(",")
+          +"|"+progs.join(",")
+          +"|"+pcles.map(function(k){ return k+":"+progpct[k]; }).join(",");
     var vue=null;
     try{ vue=sessionStorage.getItem(DEP_SIG); }catch(e){}
     if(vue===sig) return;
     depEnVol=true;
     depSig=sig;
-    depCorps={ uid:String(u.id), cours:cours, programmes:progs };
+    depCorps={ uid:String(u.id), cours:cours||{}, programmes:progs, progpct:progpct||{} };
     depTurnstile();
   }
 
