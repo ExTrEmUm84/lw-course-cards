@@ -1028,6 +1028,7 @@
   function depEnvoyer(jeton){
     if(!depCorps){ depEnVol=false; return; }
     var envoye=depSig;
+    var nbProg=Object.keys(depCorps.progpct||{}).length;
     fetch(DEP_ENDPOINT,{
       method:"POST",
       headers:{ "Content-Type":"application/json", "X-Turnstile-Token":jeton },
@@ -1037,8 +1038,17 @@
       .then(function(j){
         /* 🔴 On ne mémorise la signature QUE si le Worker a bien répondu : sinon
            un échec réseau ferait sauter le dépôt jusqu'à la prochaine session,
-           et la progression serait perdue pour rien. */
-        if(j && j.ok){ try{ sessionStorage.setItem(DEP_SIG, envoye); }catch(e){} }
+           et la progression serait perdue pour rien.
+           🔴🔴 ET ON EXIGE UN ACCUSÉ DE RÉCEPTION DE CE QU'ON A ENVOYÉ (leçon du
+           30/07) : un Worker en retard d'une version répondait `ok:true` sans
+           écrire les valeurs par programme. Comme on mémorisait la signature sur
+           la seule foi de `ok`, le collecteur ne réessayait JAMAIS et la donnée
+           était perdue en silence. Si on a envoyé des valeurs de programme, la
+           réponse doit en compter au moins autant ; sinon on ne mémorise rien et
+           la prochaine visite retentera — le système se répare tout seul dès que
+           le Worker est à jour. */
+        var accuse = !!(j && j.ok) && (!nbProg || (typeof j.programmes==="number" && j.programmes>=nbProg));
+        if(accuse){ try{ sessionStorage.setItem(DEP_SIG, envoye); }catch(e){} }
       })
       .catch(function(){})
       .then(function(){ depEnVol=false; });
