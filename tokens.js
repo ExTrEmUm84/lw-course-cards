@@ -317,7 +317,23 @@
      bibliothèque injectée par LearnWorlds (plusieurs secondes plus tard).
      C'est ce qui permet de rediriger AVANT le rendu, sans flash de contenu
      français. Relevé en direct le 03/08 : `wglang`, `wg-translations`. */
+  /* 🔴🔴 NOTRE PROPRE CLÉ, ET ELLE PASSE EN PREMIER — bug attrapé EN PRODUCTION
+     le 03/08. J'écrivais la langue voulue dans `wglang`, et **Weglot la
+     réécrivait** en s'initialisant : le français est sa langue SOURCE, il ne
+     persiste pas ce choix et laissait donc « en » traîner. Symptôme mesuré :
+     on clique le drapeau FR, on arrive bien sur la page française… et le
+     chargement SUIVANT de cette même page renvoyait sur la page EN. La règle
+     « l'URL fait foi » était contredite par une valeur qui ne m'appartenait pas.
+     `psLang` n'est écrite que par nous (arrivée en `?ps-lang=`, clic sur un
+     drapeau, page jumelle) : Weglot ne peut pas la contredire.
+     Ordre : notre clé, puis Weglot s'il est prêt, puis `wglang` en dernier repli. */
+  var PS_LANG_KEY="psLang";
+  function memoriserLangue(l){
+    if(l!=="fr" && l!=="en") return;
+    try{ localStorage.setItem(PS_LANG_KEY, l); }catch(e){}
+  }
   function langueMemorisee(){
+    try{ var p=localStorage.getItem(PS_LANG_KEY); if(p) return p; }catch(e){}
     try{ if(window.Weglot && window.Weglot.initialized) return window.Weglot.getCurrentLang(); }catch(e){}
     try{ return localStorage.getItem("wglang")||""; }catch(e){ return ""; }
   }
@@ -333,7 +349,7 @@
     return m ? m[1] : "";
   })();
   if(LANG_FORCEE){
-    try{ localStorage.setItem("wglang", LANG_FORCEE); }catch(e){}
+    memoriserLangue(LANG_FORCEE);
     try{
       var propre=location.pathname+location.search.replace(/([?&])ps-lang=(fr|en)\b&?/,"$1").replace(/[?&]$/,"");
       history.replaceState(null,"",propre+location.hash);
@@ -359,6 +375,7 @@
      dise la langue mémorisée. Weglot arrive tard -> on retente. */
   (function forcerLangueDeLaPage(){
     if(!estPageEN()) return;
+    memoriserLangue("en");                        // la page EST anglaise : la mémoire suit l'URL
     var n=0, iv=setInterval(function(){
       var W=window.Weglot;
       if(W && W.initialized && typeof W.switchTo==="function"){
@@ -664,6 +681,7 @@
          Sans jumelle, comportement d'avant : Weglot traduit sur place. */
       function go(){
         if(!window.Weglot) return;
+        memoriserLangue(lang);                    // le choix du membre, avant toute navigation
         var cible=jumelle(lang);
         if(cible){ location.href="/"+cible+"?ps-lang="+lang; return; }
         try{ if(window.Weglot.getCurrentLang()!==lang) window.Weglot.switchTo(lang); }catch(_){}
