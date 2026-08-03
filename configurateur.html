@@ -88,6 +88,22 @@ button.primary:hover{background:#486798}
 .tab:hover{background:#252A3B}
 pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;max-height:230px;overflow:auto}
 .copy{margin:0 14px 14px;width:calc(100% - 28px)}
+/* ---- Onglets de configuration par page ------------------------------
+   Demande de Ziad : « fais des tabs, on aura plus de place ». La colonne de
+   gauche fait 340 px — six pages × quatre réglages n'y tenaient pas. Ce bloc
+   vit donc dans la zone large, avec un onglet par page. */
+.ptabs{display:flex;flex-wrap:wrap;gap:2px;background:#F2F4F8;border-bottom:1px solid #E7EAF0;padding:6px 6px 0;border-radius:14px 14px 0 0}
+.ptab{padding:9px 14px;border:0;background:none;border-radius:9px 9px 0 0;cursor:pointer;
+  font:700 12.5px Figtree,sans-serif;color:#8A90A2;transition:.15s;display:flex;align-items:center;gap:7px}
+.ptab:hover{background:#E9EDF4;color:#3A3F4D}
+.ptab.on{background:#fff;color:var(--ps-text);box-shadow:0 -1px 0 #E7EAF0 inset}
+/* Pastille de couleur de l'onglet : on voit d'un coup d'œil quelles pages ont
+   une couleur propre, sans avoir à ouvrir chaque onglet. */
+.ptab i{width:11px;height:11px;border-radius:50%;flex:none;border:1px solid rgba(0,0,0,.12);display:block}
+.pcfg{display:grid;grid-template-columns:repeat(auto-fit,minmax(270px,1fr));gap:18px}
+.pcfg .card{border:1px solid #E7EAF0;border-radius:12px;padding:15px 16px}
+.pcfg h4{margin:0 0 4px;font:800 11px Figtree,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#8A90A2}
+.pcfg .expl{font-size:11.5px;color:#9AA0B0;line-height:1.5;margin:0 0 12px}
 /* ================= L'APERÇU — maquette des vrais composants ========= */
 .stage h3{font:800 12px/1 Figtree,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#9AA0B0;margin:0 0 12px}
 .bloc{background:#fff;border-radius:14px;padding:26px;margin-bottom:20px;border:1px solid #E7EAF0}
@@ -200,10 +216,9 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     <div class="lien"><input type="checkbox" id="f1Link" checked><label for="f1Link" style="flex:none">Champ 1 suit la marque</label></div>
     <div id="fs"></div>
 
-    <h2>Couleur par page</h2>
-    <div class="note" style="margin:0 0 10px">Une seule couleur par page — le survol, la teinte et la lueur en sont déduits.
-      Décoche une page pour qu'elle reprenne le violet de la marque.</div>
-    <div id="pages"></div>
+    <h2>Par page</h2>
+    <div class="note" style="margin:0 0 10px">Les réglages page par page sont dans le grand bloc à onglets, à droite —
+      la colonne est trop étroite pour eux.</div>
 
     <h2>Vidéos de la home</h2>
     <div class="note" style="margin:0 0 10px">Colle simplement l'adresse Vimeo (le lien « Partager » convient).
@@ -258,6 +273,12 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       🔴 <strong>Ceci est une maquette, pas le vrai site.</strong> Les vraies pages sont sur un autre
       domaine : impossible de les prévisualiser ici. Les composants sont redessinés avec les mêmes
       tokens et les mêmes relations qu'en production — mais seul le site fait foi.
+    </div>
+
+    <h3>Configuration par page</h3>
+    <div class="bloc" style="padding:0">
+      <div class="ptabs" id="ptabs"></div>
+      <div id="pageCfg" style="padding:22px 26px 26px"></div>
     </div>
 
     <h3>Hero</h3>
@@ -463,82 +484,103 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
      couleur » (la page suit la marque) de « couleur choisie ». Un simple
      sélecteur ne peut PAS exprimer le premier cas — il vaut toujours quelque
      chose, et #000000 serait pris pour un choix. Décocher retire la ligne. */
+  /* 🔴🔴 UN ONGLET PAR PAGE (refait le 03/08, demande de Ziad : « fais des tabs,
+     on aura plus de place et ça fera une vraie page de configuration par page »).
+     Historique de ce bloc, parce qu'il dit ce qu'il ne faut pas refaire :
+       1re version — deux curseurs anonymes côte à côte dans la colonne de
+         340 px. Verdict : « c'est incompréhensible ». Il avait raison.
+       2e version — un réglage par ligne, aligné sur l'idiome du panneau. Lisible,
+         mais six pages × quatre réglages = une colonne interminable.
+       3e version — celle-ci : la configuration part dans la ZONE LARGE, un
+         onglet par page. On ne voit qu'une page à la fois, et chacune a la place
+         de ses réglages.
+     🔴 L'onglet porte une PASTILLE de la couleur de sa page : on voit d'un coup
+     d'œil lesquelles ont une couleur propre, sans ouvrir les six onglets. */
+  var pageActive=PAGES_LIB[0][0];
+
   function pagesUI(){
-    var box=document.getElementById("pages");
-    box.innerHTML="";
-    /* 🔴 UN RÉGLAGE PAR LIGNE, NOMMÉ ET CHIFFRÉ (refait le 03/08).
-       Première version : deux curseurs anonymes côte à côte sur la même ligne,
-       dans un panneau de 340 px — la valeur sortait du cadre et rien ne disait
-       ce que chacun réglait. Verdict de Ziad, capture à l'appui :
-       « c'est incompréhensible ». Il avait raison.
-       Le reste du panneau fait pourtant l'inverse depuis le début (« Cartes …
-       16px ») : un réglage par ligne, son nom à gauche, sa valeur à droite. On
-       s'aligne dessus au lieu d'inventer une mise en page à cet endroit.
-       🔴 Le slug ne s'affiche plus : « formation-par-modules » est du jargon et
-       cassait la largeur. Il reste en infobulle sur le nom de la page. */
-    function ligne(indent){
-      var d=document.createElement("div"); d.className="row";
-      if(indent) d.style.marginLeft="14px";
-      return d;
-    }
-    function etiquette(txt, doux){
-      var l=document.createElement("label"); l.textContent=txt;
-      if(doux) l.style.cssText="font-size:12.5px;color:#8A90A2";
-      return l;
-    }
+    var tabs=document.getElementById("ptabs");
+    if(!tabs) return;
+    tabs.innerHTML="";
     PAGES_LIB.forEach(function(p){
-      var slug=p[0], lib=p[1], val=S.pages[slug]||"";
-
-      /* --- la page, et sa couleur --- */
-      var d=ligne(false);
-      var lb=etiquette(lib); lb.style.fontWeight="700"; lb.title=slug;
-      var ck=document.createElement("input"); ck.type="checkbox"; ck.checked=!!val; ck.style.flex="none";
-      var lc=etiquette("couleur propre", true); lc.style.flex="none";
-      var c=document.createElement("input"); c.type="color"; c.value=val||"#507EC5"; c.disabled=!val;
-      ck.onchange=function(){
-        S.pages[slug]= ck.checked ? (c.value||"#507EC5") : "";
-        c.disabled=!ck.checked; sortie();
-      };
-      c.oninput=function(){ if(ck.checked){ S.pages[slug]=c.value; sortie(); } };
-      d.appendChild(lb); d.appendChild(lc); d.appendChild(ck); d.appendChild(c);
-      box.appendChild(d);
-
-      /* --- contour animé : présence, puis épaisseur, puis durée ---------------
-         🔴 Les curseurs restent DÉSACTIVÉS tant que le contour est éteint :
-         régler l'épaisseur d'un trait absent n'a aucun effet visible, et laisser
-         l'interface le suggérer fabrique un faux souvenir de réglage. */
-      var st=S.style[slug]||(S.style[slug]={contour:false,ep:4,duree:1.1});
-
-      var d1=ligne(true);
-      var ckL=document.createElement("input"); ckL.type="checkbox"; ckL.checked=!!st.contour; ckL.style.flex="none";
-      d1.appendChild(etiquette("Contour animé au survol", true));
-      d1.appendChild(ckL);
-      box.appendChild(d1);
-
-      var d2=ligne(true);
-      var ep=document.createElement("input"); ep.type="range"; ep.min=1; ep.max=10; ep.step=0.5; ep.value=st.ep;
-      var vEp=document.createElement("span"); vEp.className="val";
-      d2.appendChild(etiquette("Épaisseur", true)); d2.appendChild(ep); d2.appendChild(vEp);
-      box.appendChild(d2);
-
-      var d3=ligne(true); d3.style.marginBottom="14px";
-      var du=document.createElement("input"); du.type="range"; du.min=0.2; du.max=3; du.step=0.1; du.value=st.duree;
-      var vDu=document.createElement("span"); vDu.className="val";
-      d3.appendChild(etiquette("Durée du tracé", true)); d3.appendChild(du); d3.appendChild(vDu);
-      box.appendChild(d3);
-
-      function maj(){
-        vEp.textContent=st.ep+"px";
-        vDu.textContent=st.duree+"s";
-        ep.disabled=du.disabled=!st.contour;
-        var o=st.contour?"1":".45";
-        d2.style.opacity=o; d3.style.opacity=o;
-      }
-      ckL.onchange=function(){ st.contour=ckL.checked; maj(); sortie(); };
-      ep.oninput=function(){ st.ep=parseFloat(ep.value); maj(); sortie(); };
-      du.oninput=function(){ st.duree=parseFloat(du.value); maj(); sortie(); };
-      maj();
+      var b=document.createElement("button");
+      b.className="ptab"+(p[0]===pageActive?" on":"");
+      var i=document.createElement("i");
+      i.style.background=S.pages[p[0]]||"var(--ps-accent)";
+      b.appendChild(i);
+      b.appendChild(document.createTextNode(p[1]));
+      b.title=p[0];
+      b.onclick=function(){ pageActive=p[0]; pagesUI(); };
+      tabs.appendChild(b);
     });
+    pageCfgUI();
+  }
+
+  function pageCfgUI(){
+    var box=document.getElementById("pageCfg");
+    if(!box) return;
+    var slug=pageActive;
+    var val=S.pages[slug]||"";
+    var st=S.style[slug]||(S.style[slug]={contour:false,ep:4,duree:1.1});
+    box.innerHTML="";
+    var grille=document.createElement("div"); grille.className="pcfg";
+
+    /* ---- carte 1 : la couleur de la page ---- */
+    var c1=document.createElement("div"); c1.className="card";
+    c1.innerHTML='<h4>Couleur de la page</h4>'+
+      '<p class="expl">Une seule couleur : le survol, la teinte de fond et la lueur des cartes en sont déduits. '+
+      'Décochée, la page reprend la couleur de la marque.</p>';
+    var r1=document.createElement("div"); r1.className="row";
+    var ck=document.createElement("input"); ck.type="checkbox"; ck.checked=!!val; ck.style.flex="none";
+    var c=document.createElement("input"); c.type="color"; c.value=val||"#507EC5"; c.disabled=!val;
+    var lab=document.createElement("label"); lab.textContent="Couleur propre à cette page";
+    ck.onchange=function(){
+      S.pages[slug]= ck.checked ? (c.value||"#507EC5") : "";
+      c.disabled=!ck.checked; sortie(); pagesUI();
+    };
+    c.oninput=function(){ if(ck.checked){ S.pages[slug]=c.value; sortie(); pagesUI(); } };
+    r1.appendChild(lab); r1.appendChild(ck); r1.appendChild(c);
+    c1.appendChild(r1); grille.appendChild(c1);
+
+    /* ---- carte 2 : le contour animé ----
+       🔴 Les curseurs sont désactivés ET estompés quand le contour est éteint :
+       régler l'épaisseur d'un trait absent n'a aucun effet, et laisser
+       l'interface le suggérer fabrique un faux souvenir de réglage. */
+    var c2=document.createElement("div"); c2.className="card";
+    c2.innerHTML='<h4>Contour animé des cartes</h4>'+
+      '<p class="expl">Le liseré qui se dessine au survol d\'une carte. Il n\'existe aujourd\'hui que sur la page Cours&nbsp;: '+
+      'ailleurs il n\'a jamais été dessiné, donc vérifie le rendu sur la vraie page avant de le laisser en ligne.</p>';
+    var r2=document.createElement("div"); r2.className="row";
+    var ckL=document.createElement("input"); ckL.type="checkbox"; ckL.checked=!!st.contour; ckL.style.flex="none";
+    var lab2=document.createElement("label"); lab2.textContent="Afficher le contour au survol";
+    r2.appendChild(lab2); r2.appendChild(ckL); c2.appendChild(r2);
+
+    var r3=document.createElement("div"); r3.className="row";
+    var ep=document.createElement("input"); ep.type="range"; ep.min=1; ep.max=10; ep.step=0.5; ep.value=st.ep;
+    var vEp=document.createElement("span"); vEp.className="val";
+    var lab3=document.createElement("label"); lab3.textContent="Épaisseur du trait";
+    r3.appendChild(lab3); r3.appendChild(ep); r3.appendChild(vEp); c2.appendChild(r3);
+
+    var r4=document.createElement("div"); r4.className="row";
+    var du=document.createElement("input"); du.type="range"; du.min=0.2; du.max=3; du.step=0.1; du.value=st.duree;
+    var vDu=document.createElement("span"); vDu.className="val";
+    var lab4=document.createElement("label"); lab4.textContent="Durée du tracé";
+    r4.appendChild(lab4); r4.appendChild(du); r4.appendChild(vDu); c2.appendChild(r4);
+    grille.appendChild(c2);
+
+    function maj(){
+      vEp.textContent=st.ep+"px";
+      vDu.textContent=st.duree+"s";
+      ep.disabled=du.disabled=!st.contour;
+      var o=st.contour?"1":".45";
+      r3.style.opacity=o; r4.style.opacity=o;
+    }
+    ckL.onchange=function(){ st.contour=ckL.checked; maj(); sortie(); };
+    ep.oninput=function(){ st.ep=parseFloat(ep.value); maj(); sortie(); };
+    du.oninput=function(){ st.duree=parseFloat(du.value); maj(); sortie(); };
+    maj();
+
+    box.appendChild(grille);
   }
 
   /* --- réglages libres (URLs de vidéo) --- */
