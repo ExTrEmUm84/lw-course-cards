@@ -529,7 +529,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-e";
+  window.PS_TOKENS_V="2026-08-03-h";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-secteur-clone","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
