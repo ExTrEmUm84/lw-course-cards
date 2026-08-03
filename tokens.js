@@ -374,12 +374,22 @@
   /* L'URL FAIT FOI : sur une page EN, Weglot doit être en anglais, quoi qu'en
      dise la langue mémorisée. Weglot arrive tard -> on retente. */
   (function forcerLangueDeLaPage(){
-    if(!estPageEN()) return;
-    memoriserLangue("en");                        // la page EST anglaise : la mémoire suit l'URL
+    /* Deux cas, une seule mécanique :
+       - page jumelle EN -> l'anglais, toujours (l'URL fait foi) ;
+       - arrivée en `?ps-lang=` -> la langue demandée, y compris le retour au
+         FRANÇAIS depuis une page anglaise.
+       🔴 Le second cas n'est pas cosmétique : en cessant d'écrire dans `wglang`
+       (correctif ci-dessus), on ne disait PLUS RIEN à Weglot, qui restait donc
+       en anglais — la page française s'affichait « Modular Training ». Mesuré.
+       On passe par son API `switchTo`, la voie supportée, plutôt que par sa
+       clé de stockage dont il est propriétaire. */
+    var cible=estPageEN() ? "en" : LANG_FORCEE;
+    if(!cible) return;
+    memoriserLangue(cible);                       // la mémoire suit l'URL
     var n=0, iv=setInterval(function(){
       var W=window.Weglot;
       if(W && W.initialized && typeof W.switchTo==="function"){
-        try{ if(W.getCurrentLang()!=="en") W.switchTo("en"); }catch(e){}
+        try{ if(W.getCurrentLang()!==cible) W.switchTo(cible); }catch(e){}
         clearInterval(iv); return;
       }
       if(++n>50) clearInterval(iv);
