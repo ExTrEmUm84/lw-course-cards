@@ -275,7 +275,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     <div class="note" style="margin:0 0 18px;border-left-color:#507EC5">
       🔴 <strong>Ceci est une maquette, pas le vrai site.</strong> Les vraies pages sont sur un autre
       domaine : impossible de les prévisualiser ici. Les composants sont redessinés avec les mêmes
-      tokens et les mêmes relations qu'en production — mais seul le site fait foi.<br><strong id="cssReelEtat">…</strong>
+      tokens et les mêmes relations qu'en production — mais seul le site fait foi.<br><strong id="cssReelEtat">…</strong><br>Aperçu de la page : <strong id="apercuPageNom">…</strong>
     </div>
 
     <h3>Configuration par page</h3>
@@ -498,6 +498,60 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     if(el) el.textContent="feuilles réelles chargées : "+Object.keys(t).join(", ");
   }
 
+  /* ====================================================================
+     LA COULEUR DE LA PAGE SE VOIT DANS L'APERÇU
+     --------------------------------------------------------------------
+     Demande de Ziad : « rendre le changement de couleur visible sur le board,
+     par exemple sur le titre du hero ». Jusqu'ici, choisir une couleur dans
+     l'onglet d'une page ne changeait RIEN à l'écran : l'aperçu affichait
+     toujours l'accent global. Le réglage n'avait aucun retour visuel — on
+     publiait à l'aveugle.
+
+     🔴 LA DÉRIVATION EST RECOPIÉE À L'IDENTIQUE DE `tokens.js` (_deriver).
+     C'est la condition pour que l'aperçu ne mente pas : si les deux calculs
+     divergeaient d'un point de luminosité, l'aperçu montrerait une couleur que
+     le site ne produira jamais. Toute correction ici doit être portée là-bas, et
+     réciproquement.
+     🔴 Elle contient une correction de CONTRASTE : une couleur claire (le jaune
+     des Fiches secteur) est assombrie pour rester lisible en TEXTE, tandis que
+     la lueur des cartes garde la teinte VIVE d'origine. C'est ce qui fait qu'une
+     page « jaune » ne devient pas illisible.
+     🔴 Appliquée sur le conteneur de l'APERÇU seulement, pas sur :root : le
+     panneau de réglages doit garder les couleurs de la marque, sinon on ne sait
+     plus ce qu'on regarde. */
+  function _chan(hex){var h=hex.replace("#","");if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
+  function _lum(hex){var c=_chan(hex).map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2];}
+  function _contraste(hex){return 1.05/(_lum(hex)+0.05);}
+  function deriverPage(hex){
+    var t=hex2hsl(hex), accent=hex;
+    if(t[2]>55){ var L=t[2]; while(L>10 && _contraste(hsl2hex(t[0],t[1],L))<4) L-=1; accent=hsl2hex(t[0],t[1],L); }
+    var ta=hex2hsl(accent);
+    return { accent:accent, rgb:_chan(hex).join(","),
+             hover:hsl2hex(ta[0], Math.max(0,ta[1]*0.71), Math.max(0,ta[2]-10.4)),
+             tint:hsl2hex(t[0], 100, 96.5) };
+  }
+  function apercuPage(){
+    var st=document.getElementById("pageContent");
+    if(!st) return;
+    var hex=S.pages[pageActive];
+    var b=document.getElementById("apercuPageNom");
+    if(!hex){
+      ["--ps-accent","--ps-accent-rgb","--ps-accent-hover","--ps-accent-tint"].forEach(function(v){ st.style.removeProperty(v); });
+      if(b) b.textContent=libellePage(pageActive)+" — couleur de la marque";
+      return;
+    }
+    var d=deriverPage(hex);
+    st.style.setProperty("--ps-accent",d.accent);
+    st.style.setProperty("--ps-accent-rgb",d.rgb);
+    st.style.setProperty("--ps-accent-hover",d.hover);
+    st.style.setProperty("--ps-accent-tint",d.tint);
+    if(b) b.textContent=libellePage(pageActive)+" — couleur propre "+hex;
+  }
+  function libellePage(slug){
+    for(var i=0;i<PAGES_LIB.length;i++) if(PAGES_LIB[i][0]===slug) return PAGES_LIB[i][1];
+    return slug;
+  }
+
   /* --- construction des lignes de palette --- */
   function palette(hote, cle, nom){
     var box=document.getElementById(hote);
@@ -544,7 +598,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       b.appendChild(i);
       b.appendChild(document.createTextNode(p[1]));
       b.title=p[0];
-      b.onclick=function(){ pageActive=p[0]; pagesUI(); };
+      b.onclick=function(){ pageActive=p[0]; pagesUI(); apercuPage(); };
       tabs.appendChild(b);
     });
     pageCfgUI();
@@ -570,7 +624,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     var lab=document.createElement("label"); lab.textContent="Couleur propre à cette page";
     ck.onchange=function(){
       S.pages[slug]= ck.checked ? (c.value||"#507EC5") : "";
-      c.disabled=!ck.checked; sortie(); pagesUI();
+      c.disabled=!ck.checked; sortie(); pagesUI(); apercuPage();
     };
     c.oninput=function(){ if(ck.checked){ S.pages[slug]=c.value; sortie(); pagesUI(); } };
     r1.appendChild(lab); r1.appendChild(ck); r1.appendChild(c);
@@ -728,6 +782,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       R.setProperty("--ps-f"+(i+1), lienf?"var(--ps-accent)":S.f[i][0]);
       R.setProperty("--ps-f"+(i+1)+"-tint", lienf?"var(--ps-accent-tint)":S.f[i][1]);
     }
+    apercuPage();                          /* la couleur de la page choisie prime dans l'aperçu */
     document.getElementById("rCardV").textContent=S.rCard+"px";
     document.getElementById("rPillV").textContent=S.rPill+"px";
     document.getElementById("rBtnV").textContent=S.rBtn+"px";
