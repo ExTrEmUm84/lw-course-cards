@@ -184,7 +184,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
    Une maquette n'est pas la page : son role est de MONTRER le reglage, pas de
    reproduire l'interaction. Il reste anime — l'animation est rejouee a chaque
    changement (classe `ps-redraw`), ce qui rend la DUREE perceptible elle aussi. */
-.pv-card .pv-line rect{stroke-dashoffset:0}
+.pv-card .pv-line rect{stroke-dashoffset:0 !important}
 @keyframes ps-pv-draw{from{stroke-dashoffset:1.02}to{stroke-dashoffset:0}}
 .ps-redraw .pv-card .pv-line rect{animation:ps-pv-draw var(--ps-line-t,1.1s) ease}
 /* 🔴🔴 z-index:1 ET NON -1. Signale par Ziad : « le contour anime n'est pas
@@ -804,10 +804,18 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     c1.innerHTML='<h4>Couleur de la page</h4>'+
       '<p class="expl">Une seule couleur : le survol, la teinte de fond et la lueur des cartes en sont déduits. '+
       'Décochée, la page reprend la couleur de la marque.</p>';
+    /* 🔴 LA CASE PORTE SON PROPRE TEXTE. Signale par Ziad, capture a l'appui :
+       « c'est pas clair le petit truc a cocher a cote des couleurs ». Le libelle
+       etait a l'autre bout d'une ligne large, la case se retrouvait orpheline
+       entre du vide et un nuancier. On remet l'ordre naturel : case, puis son
+       texte, puis le nuancier a droite. Le texte est un <label for>, donc
+       cliquable — la cible passe de 13 px a toute la phrase. */
     var r1=document.createElement("div"); r1.className="row";
     var ck=document.createElement("input"); ck.type="checkbox"; ck.checked=!!val; ck.style.flex="none";
+    ck.id="ck-page-"+slug;
     var c=document.createElement("input"); c.type="color"; c.value=val||"#507EC5"; c.disabled=!val;
     var lab=document.createElement("label"); lab.textContent="Couleur propre à cette page";
+    lab.setAttribute("for",ck.id);
     /* 🔴🔴 NE PAS RECONSTRUIRE LE PANNEAU DEPUIS SON PROPRE SÉLECTEUR.
        Signalé par Ziad : « le changement de couleur ne change pas la couleur du
        titre ». Deux fautes sur la même ligne :
@@ -837,7 +845,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       if(!ck.checked) return;
       S.pages[slug]=c.value; sortie(); apercuPage(); majPastilleOnglet();
     };
-    r1.appendChild(lab); r1.appendChild(ck); r1.appendChild(c);
+    r1.appendChild(ck); r1.appendChild(lab); r1.appendChild(c);
     c1.appendChild(r1); grille.appendChild(c1);
 
     /* ---- carte 2 : le contour animé ----
@@ -850,8 +858,10 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       'ailleurs il n\'a jamais été dessiné, donc vérifie le rendu sur la vraie page avant de le laisser en ligne.</p>';
     var r2=document.createElement("div"); r2.className="row";
     var ckL=document.createElement("input"); ckL.type="checkbox"; ckL.checked=!!st.contour; ckL.style.flex="none";
-    var lab2=document.createElement("label"); lab2.textContent="Afficher le contour au survol";
-    r2.appendChild(lab2); r2.appendChild(ckL); c2.appendChild(r2);
+    ckL.id="ck-contour-"+slug;
+    var lab2=document.createElement("label"); lab2.textContent="Afficher le contour";
+    lab2.setAttribute("for",ckL.id);
+    r2.appendChild(ckL); r2.appendChild(lab2); c2.appendChild(r2);
 
     var r3=document.createElement("div"); r3.className="row";
     var ep=document.createElement("input"); ep.type="range"; ep.min=1; ep.max=10; ep.step=0.5; ep.value=st.ep;
@@ -874,10 +884,12 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
        une couleur sur une page qui suivait la sienne. */
     var r5=document.createElement("div"); r5.className="row";
     var ckC=document.createElement("input"); ckC.type="checkbox"; ckC.checked=!!st.couleur; ckC.style.flex="none";
+    ckC.id="ck-trait-"+slug;
     var cc=document.createElement("input"); cc.type="color"; cc.value=st.couleur||(S.pages[slug]||"#507EC5");
     cc.disabled=!st.couleur;
-    var lab5=document.createElement("label"); lab5.textContent="Couleur propre du trait";
-    r5.appendChild(lab5); r5.appendChild(ckC); r5.appendChild(cc); c2.appendChild(r5);
+    var lab5=document.createElement("label"); lab5.textContent="Couleur propre du trait (sinon celle de la page)";
+    lab5.setAttribute("for",ckC.id);
+    r5.appendChild(ckC); r5.appendChild(lab5); r5.appendChild(cc); c2.appendChild(r5);
     grille.appendChild(c2);
 
     function maj(){
