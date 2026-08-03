@@ -171,6 +171,36 @@ body.ps-verrou .ps-porte{display:grid}
 .pv-kpills span:nth-child(3){background:var(--ps-f4-tint);color:var(--ps-f4)}
 .pv-kpills span:nth-child(4){background:var(--ps-f3-tint);color:var(--ps-f3)}
 .pv-klink{font-size:15px;font-weight:700;color:var(--ps-accent);text-decoration:none}
+/* ---- Board du profil : maquette ------------------------------------
+   Mesures relevees sur /profile le 03/08 : bandeau #243B6B, medaille 62px,
+   barre 8px remplie en #7FA8DE, tuiles #F7F9FC rayon 13px, anneau 64px trait 6px,
+   bouton pilule 9x12 aux couleurs de LA PAGE visee. */
+.pv-bd{display:grid;gap:14px}
+.pv-bd-rank{display:flex;align-items:center;gap:18px;background:var(--ps-pf-rank,#243B6B);
+  border-radius:var(--ps-r-card);padding:20px 24px;color:#fff;font-family:var(--ps-font);flex-wrap:wrap}
+.pv-bd-med{width:62px;height:62px;border-radius:50%;background:rgba(255,255,255,.16);display:grid;place-items:center;flex:none}
+.pv-bd-med svg{width:28px;height:28px;fill:none;stroke:#fff;stroke-width:1.8}
+.pv-bd-rt{flex:1 1 220px;min-width:0}
+.pv-bd-rl{font:700 10.5px var(--ps-font);letter-spacing:.09em;opacity:.72;text-transform:uppercase}
+.pv-bd-rn{font:800 22px var(--ps-font);margin:2px 0 4px}
+.pv-bd-rm{font-size:13px;opacity:.82}
+.pv-bd-rp{text-align:right;font:800 30px var(--ps-font);line-height:1}
+.pv-bd-rp small{display:block;font:500 11.5px var(--ps-font);opacity:.7;margin-top:3px}
+.pv-bd-bar{flex:1 1 100%;height:var(--ps-pf-bar,8px);border-radius:999px;background:rgba(255,255,255,.18);overflow:hidden}
+.pv-bd-bar i{display:block;height:100%;width:18%;border-radius:999px;background:#7FA8DE}
+.pv-bd-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:14px}
+.pv-bd-t{background:#fff;border-radius:var(--ps-r-card);padding:18px;font-family:var(--ps-font)}
+.pv-bd-in{background:#F7F9FC;border-radius:13px;padding:16px 17px 15px}
+.pv-bd-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.pv-bd-ring{width:var(--ps-pf-ring,64px);height:var(--ps-pf-ring,64px);flex:none;position:relative;display:grid;place-items:center}
+.pv-bd-ring svg{position:absolute;inset:0;width:100%;height:100%;transform:rotate(-90deg)}
+.pv-bd-ring circle{fill:none;stroke-width:6}
+.pv-bd-ring .bg{stroke:#E7EBF2}
+.pv-bd-ring .fg{stroke-linecap:round}
+.pv-bd-pct{font:800 13px var(--ps-font);color:var(--ps-text);position:relative}
+.pv-bd-n{font:700 14.5px var(--ps-font);color:var(--ps-text)}
+.pv-bd-go{display:block;text-align:center;border-radius:var(--ps-r-pill);padding:9px 12px;
+  font:700 13px var(--ps-font);color:#fff;text-decoration:none}
 /* ================= L'APERÇU — maquette des vrais composants ========= */
 .stage h3{font:800 12px/1 Figtree,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#9AA0B0;margin:0 0 12px}
 .bloc{background:#fff;border-radius:14px;padding:26px;margin-bottom:20px;border:1px solid #E7EAF0}
@@ -296,7 +326,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-b</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-c</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -373,6 +403,23 @@ body.ps-verrou .ps-porte{display:grid}
     <div class="bloc" data-p="*" style="padding:0">
       <div class="ptabs" id="ptabs"></div>
       <div id="pageCfg" style="padding:22px 26px 26px"></div>
+    </div>
+
+    <h3 data-p="profile">Tableau de bord du membre <span style="text-transform:none;font-weight:600;color:#B4BAC8">— le bouton de chaque tuile prend la couleur de SA page</span></h3>
+    <div class="bloc" data-p="profile">
+      <div class="pv-bd">
+        <div class="pv-bd-rank">
+          <div class="pv-bd-med"><svg viewBox="0 0 24 24"><circle cx="12" cy="9" r="5"/><path d="M9 14l-2 7 5-3 5 3-2-7"/></svg></div>
+          <div class="pv-bd-rt">
+            <div class="pv-bd-rl">Votre grade</div>
+            <div class="pv-bd-rn">Analyste</div>
+            <div class="pv-bd-rm">Les bases sont posées, continuez sur cette lancée.</div>
+          </div>
+          <div class="pv-bd-rp">18&nbsp;%<small>global</small></div>
+          <div class="pv-bd-bar"><i></i></div>
+        </div>
+        <div class="pv-bd-tiles" id="bdTiles"></div>
+      </div>
     </div>
 
     <h3 data-p="*">Hero</h3>
@@ -1000,6 +1047,31 @@ body.ps-verrou .ps-porte{display:grid}
   }
 
   /* Les URLs de vidéo ne concernent que la home : leur place est dans son onglet. */
+  /* Les tuiles du board : une par page, avec l'anneau et le bouton A SA COULEUR.
+     C'est le point que Ziad voulait voir — le bouton d'une tuile prend la couleur
+     de la page vers laquelle elle mene, pas celle de la marque. */
+  var BD_DEMO=[["formation-par-modules","Cours",9],["fiches-cabinet","Fiches cabinet",4],
+               ["fiches-secteur","Fiches secteur",0],["emptykk-clone-clone","Études de cas",25]];
+  function boardUI(){
+    var box=document.getElementById("bdTiles");
+    if(!box) return;
+    box.innerHTML="";
+    BD_DEMO.forEach(function(p){
+      var col=S.pages[p[0]]||S.accent;
+      var t=document.createElement("div"); t.className="pv-bd-t";
+      var inn=document.createElement("div"); inn.className="pv-bd-in";
+      var C=2*Math.PI*28, off=C*(1-p[2]/100);
+      inn.innerHTML='<div class="pv-bd-top">'+
+        '<div class="pv-bd-ring"><svg viewBox="0 0 64 64">'+
+          '<circle class="bg" cx="32" cy="32" r="28"></circle>'+
+          '<circle class="fg" cx="32" cy="32" r="28" stroke="'+col+'" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"></circle>'+
+        '</svg><span class="pv-bd-pct">'+p[2]+'&nbsp;%</span></div>'+
+        '<div class="pv-bd-n">'+p[1]+'</div></div>'+
+        '<a class="pv-bd-go" href="#" style="background:'+col+'">'+(p[2]>0?"Continuer":"Commencer")+' →</a>';
+      t.appendChild(inn); box.appendChild(t);
+    });
+  }
+
   /* 🔴 Un curseur nomme et chiffre, au meme format que le reste du panneau. */
   function ligneCurseur(parent, lib, cle, min, max, pas, unite){
     var r=document.createElement("div"); r.className="row";
@@ -1125,6 +1197,7 @@ body.ps-verrou .ps-porte{display:grid}
       R.setProperty("--ps-f"+(i+1)+"-tint", lienf?"var(--ps-accent-tint)":S.f[i][1]);
     }
     apercuPage();                          /* la couleur de la page choisie prime dans l'aperçu */
+    boardUI();
     document.getElementById("rCardV").textContent=S.rCard+"px";
     document.getElementById("rPillV").textContent=S.rPill+"px";
     document.getElementById("rBtnV").textContent=S.rBtn+"px";

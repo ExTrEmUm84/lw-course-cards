@@ -459,14 +459,31 @@
      Parade : à défaut d'id connu, on apparie sur le NOM normalisé (minuscules,
      sans accents ni ponctuation), qui est disponible dans les TROIS sources.
      Ajouter un programme = 1 ligne ici (et non plus une par identifiant). */
-  var PAGE_COL={
+  /* 🔴🔴 UNE SEULE SOURCE DE COULEURS. Cette table etait ecrite en dur et
+     DESYNCHRONISEE de celle du site : elle disait encore #507EC5 pour Cours alors
+     que la page etait passee au rouge, et #C9A227 pour Fiches secteur au lieu du
+     jaune choisi. Les boutons du board affichaient donc des couleurs que plus
+     aucune page ne portait — deux verites pour la meme chose, exactement ce qu'on
+     passe la journee a supprimer ailleurs.
+     Elle lit desormais `PS_PAGE_ACCENTS`, publie par tokens.js : regler la couleur
+     d'une page dans le configurateur repeint son bouton ici, sans double saisie.
+     🔴 Les valeurs ci-dessous ne servent plus que de REPLI, pour les pages qui
+     n'ont pas de couleur propre (S'entrainer, Competences en portent une ici
+     depuis longtemps, il serait brutal de la leur retirer). */
+  var PAGE_COL_DEFAUT={
     "/formation-par-modules":    "#507EC5",
-    "/fiches-cabinet":     "#007260",
+    "/fiches-cabinet":           "#007260",
     "/fiches-secteur":           "#C9A227",
     "/emptykk-clone-clone":      "#6B7280",
     "/formation-par-comptences": "#243B6B",
     "/sentrainer":               "#3887B4"
   };
+  var PAGE_COL=(function(){
+    var t={}, pub=window.PS_PAGE_ACCENTS||{};
+    Object.keys(PAGE_COL_DEFAUT).forEach(function(u){ t[u]=PAGE_COL_DEFAUT[u]; });
+    Object.keys(pub).forEach(function(slug){ if(pub[slug]) t["/"+slug]=pub[slug]; });
+    return t;
+  })();
   var PROG_NOMS={
     "conseilenstrategie":        "/formation-par-modules",
     "lesautrestypesdeconseil":   "/formation-par-modules",

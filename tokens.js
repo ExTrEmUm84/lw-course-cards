@@ -492,6 +492,7 @@
   };
   var PAGES_FR={};
   Object.keys(PAGES_EN).forEach(function(fr){ PAGES_FR[PAGES_EN[fr]]=fr; });
+  window.PS_PAGE_ACCENTS=PAGE_ACCENTS;   /* lu par profile-page.js : une seule source de couleurs */
   window.PS_PAGES_EN=PAGES_EN;                  // lu par profile-page.js (boutons « Continuer »)
   window.PS_PAGES_FR=PAGES_FR;
 
@@ -621,7 +622,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-04-a";
+  window.PS_TOKENS_V="2026-08-04-b";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
