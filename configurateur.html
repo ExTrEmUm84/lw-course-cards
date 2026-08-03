@@ -177,7 +177,16 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   box-shadow:0 0 20px rgba(var(--ps-accent-rgb),.18);font-family:var(--ps-font);padding:0 22px 22px;
   transition:box-shadow .2s ease,transform .2s ease}
 .pv-card:hover{box-shadow:0 12px 30px rgba(var(--ps-accent-rgb),.30);transform:translateY(-3px)}
-.pv-card:hover .pv-line rect{stroke-dashoffset:0}
+/* 🔴🔴 DANS LA MAQUETTE, LE LISERE EST DESSINE EN PERMANENCE.
+   Signale par Ziad, deux fois : « le contour anime ne marche pas ». Il marchait —
+   mais il ne s'affiche qu'au SURVOL, et on ne peut pas survoler une carte tout en
+   glissant un curseur. En reglant l'epaisseur il ne voyait donc jamais rien.
+   Une maquette n'est pas la page : son role est de MONTRER le reglage, pas de
+   reproduire l'interaction. Il reste anime — l'animation est rejouee a chaque
+   changement (classe `ps-redraw`), ce qui rend la DUREE perceptible elle aussi. */
+.pv-card .pv-line rect{stroke-dashoffset:0}
+@keyframes ps-pv-draw{from{stroke-dashoffset:1.02}to{stroke-dashoffset:0}}
+.ps-redraw .pv-card .pv-line rect{animation:ps-pv-draw var(--ps-line-t,1.1s) ease}
 /* 🔴🔴 z-index:1 ET NON -1. Signale par Ziad : « le contour anime n'est pas
    visible sur le configurateur ». Il etait bien la, mais peint DERRIERE le fond
    blanc de la carte : `.pv-card` porte `isolation:isolate`, donc un z-index
@@ -366,7 +375,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       </div>
     </div>
 
-    <h3 data-p="formation-par-modules">Cartes de cours <span style="text-transform:none;font-weight:600;color:#B4BAC8">— survole pour voir le liseré et la lueur</span></h3>
+    <h3 data-p="formation-par-modules">Cartes de cours <span style="text-transform:none;font-weight:600;color:#B4BAC8">— liseré et lueur, affichés en permanence ici pour qu'on puisse les régler</span></h3>
     <div class="bloc" data-p="formation-par-modules" style="padding:0 4px">
       <div class="pv-rail"><div class="pv-car">‹</div>
         <div class="pv-card pv-c1">
@@ -678,8 +687,14 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
        change rien a l'ecran — le meme defaut que le selecteur de couleur. Contour
        eteint => on ne dessine pas le lisere du tout, comme sur le site. */
     var sl=S.style[pageActive]||{};
+    /* Relance de l'animation : retirer puis remettre la classe force le navigateur
+       a rejouer le trace. Le reflow intermediaire est indispensable, sans lui il
+       considere que rien n'a change. */
+    st.classList.remove("ps-redraw");
+    void st.offsetWidth;
     if(sl.contour){
       st.classList.remove("ps-noline");
+      st.classList.add("ps-redraw");
       st.style.setProperty("--ps-line-w",sl.ep);
       st.style.setProperty("--ps-line-t",sl.duree+"s");
       if(sl.couleur) st.style.setProperty("--ps-line-c",sl.couleur);
