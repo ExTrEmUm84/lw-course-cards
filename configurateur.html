@@ -201,6 +201,26 @@ body.ps-verrou .ps-porte{display:grid}
 .pv-bd-n{font:700 14.5px var(--ps-font);color:var(--ps-text)}
 .pv-bd-go{display:block;text-align:center;border-radius:var(--ps-r-pill);padding:9px 12px;
   font:700 13px var(--ps-font);color:#fff;text-decoration:none}
+/* ---- Annuaire : maquette des cartes membres -------------------------
+   Mesures reprises de annuaire.js : carte padding 20px rayon --ps-r-card,
+   avatar --ps-an-avatar en cercle, nom 16/700, ecole 14/600 en accent,
+   meta 13px, puces 12px sur teinte, bouton --ps-r-btn plein accent.
+   🔴 NOMS INVENTES. Les vraies cartes affichent des personnes reelles — elles
+   n'ont rien a faire dans une maquette. Ce sont des exemples, pas des membres. */
+.pv-an{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--ps-an-col,260px),1fr));gap:16px}
+.pv-an-c{display:flex;flex-direction:column;padding:20px;background:#fff;
+  border:1px solid var(--ps-border);border-radius:var(--ps-r-card);font-family:var(--ps-font)}
+.pv-an-av{width:var(--ps-an-avatar,56px);height:var(--ps-an-avatar,56px);border-radius:50%;
+  display:grid;place-items:center;font-weight:700;font-size:18px;letter-spacing:.5px;color:#fff;margin-bottom:14px}
+.pv-an-n{margin:0;font-size:16px;font-weight:700;color:var(--ps-text)}
+.pv-an-f{margin:3px 0 0;font-size:14px;font-weight:600;color:var(--ps-accent)}
+.pv-an-m{margin:8px 0 0;font-size:13px;color:var(--ps-text-soft)}
+.pv-an-ch{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}
+.pv-an-ch span{font-size:12px;padding:4px 10px;border-radius:var(--ps-r-pill);
+  background:var(--ps-accent-tint);color:var(--ps-accent-hover)}
+.pv-an-b{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;margin-top:16px;
+  padding:9px 15px;border-radius:var(--ps-r-btn);background:var(--ps-accent);color:#fff;
+  font-size:13.5px;font-weight:600;text-decoration:none}
 /* ================= L'APERÇU — maquette des vrais composants ========= */
 .stage h3{font:800 12px/1 Figtree,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#9AA0B0;margin:0 0 12px}
 .bloc{background:#fff;border-radius:14px;padding:26px;margin-bottom:20px;border:1px solid #E7EAF0}
@@ -326,7 +346,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-c</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-d</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -419,6 +439,36 @@ body.ps-verrou .ps-porte{display:grid}
           <div class="pv-bd-bar"><i></i></div>
         </div>
         <div class="pv-bd-tiles" id="bdTiles"></div>
+      </div>
+    </div>
+
+    <h3 data-p="annuaire-partenaire-de-cas">Cartes des membres <span style="text-transform:none;font-weight:600;color:#B4BAC8">— exemples inventés, pas de vrais membres</span></h3>
+    <div class="bloc" data-p="annuaire-partenaire-de-cas">
+      <div class="pv-an">
+        <div class="pv-an-c">
+          <div class="pv-an-av" style="background:#5B8DEF">AM</div>
+          <p class="pv-an-n">Amine Marchetti</p>
+          <p class="pv-an-f">ESSEC</p>
+          <p class="pv-an-m">Niveau Avancé · CDI Junior · Français</p>
+          <div class="pv-an-ch"><span>Étude de cas</span><span>Fit</span></div>
+          <a class="pv-an-b" href="#">Envoyer un email</a>
+        </div>
+        <div class="pv-an-c">
+          <div class="pv-an-av" style="background:#12A85F">CN</div>
+          <p class="pv-an-n">Claire Nguyen</p>
+          <p class="pv-an-f">ESCP</p>
+          <p class="pv-an-m">Niveau Débutant · Stage · Anglais</p>
+          <div class="pv-an-ch"><span>Market sizing</span></div>
+          <a class="pv-an-b" href="#">Envoyer un email</a>
+        </div>
+        <div class="pv-an-c">
+          <div class="pv-an-av" style="background:#D98500">YF</div>
+          <p class="pv-an-n">Yanis Ferreira</p>
+          <p class="pv-an-f">HEC</p>
+          <p class="pv-an-m">Niveau Confirmé · CDI Senior · Français</p>
+          <div class="pv-an-ch"><span>Business sense</span><span>Maths</span></div>
+          <a class="pv-an-b" href="#">Envoyer un email</a>
+        </div>
       </div>
     </div>
 
