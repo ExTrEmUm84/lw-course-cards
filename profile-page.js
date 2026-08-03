@@ -740,6 +740,7 @@
     return (u && u.id) ? (LP_STORE_BASE+":"+u.id) : null;
   }
   var lpData=null;        // [{name,pct}] une fois connu (mémoire locale ou Worker)
+  var lpPages=[];         // [{page,pct}] — la progression de chaque page du site
   var lpAsked=false;
   var lpTsEl=null;
   /* État du calcul de progression, pour ne JAMAIS laisser l'étudiant devant des
@@ -781,6 +782,7 @@
          lieu de les afficher. Sans ça, un correctif côté Worker reste invisible
          pour tous ceux qui ont déjà des valeurs en cache. */
       if(!j || j.v!==LP_STORE_V){ try{ localStorage.removeItem(cle); }catch(e){} return null; }
+      if(j.pages && j.pages.length && !lpPages.length) lpPages=j.pages;   // 1re peinture immédiate
       return (j.programs && j.programs.length) ? j.programs : null;
     }catch(e){ return null; }
   }
@@ -812,10 +814,15 @@
         lpEtat="ok";
         /* `page` = la page où une carte de ce parcours a été réellement vue
            (relevée par le collecteur). C'est elle qui décide de la section. */
+        /* 🔴 CE QU'ON AFFICHE DÉSORMAIS : une entrée par PAGE, avec le pourcentage
+           que la page a calculé elle-même (cf. `depLirePage` dans tokens.js). On
+           ne le recalcule pas — le recalculer est exactement ce qui donnait deux
+           nombres différents pour la même chose. */
+        lpPages=(j.pages||[]).filter(function(p){ return p && p.page && typeof p.pct==="number"; });
         var progs=j.programs.map(function(p){ return {id:p.id||"", name:domainLabel(p.name||""), raw:(p.name||""), pct:p.pct, courses:p.courses, page:p.page||null}; });
         lpData=progs;
         var cle=lpStoreKey();
-        if(cle){ try{ localStorage.setItem(cle, JSON.stringify({v:LP_STORE_V, t:Date.now(), programs:progs})); }catch(e){} }
+        if(cle){ try{ localStorage.setItem(cle, JSON.stringify({v:LP_STORE_V, t:Date.now(), programs:progs, pages:lpPages})); }catch(e){} }
         mountBoard();                       // repeint avec les vrais %
       })
       .catch(function(){ lpEtat="echec"; mountBoard(); });
@@ -1036,7 +1043,23 @@
        pas non plus peser dans le pourcentage global. */
     progs = progs.filter(function(p){ return !progExclu(p); });
     lpStart();                                     // rafraîchit (une seule fois)
-    if(!progs.length) return;                       // programmes pas encore rendus : réessai
+
+    /* 🔴🔴 MODE PAGE (03/08) — ce que Ziad veut lire ici : « le board du profil
+       affiche les progressions de toutes les pages, sur une seule page ». Dès
+       qu'on connaît le pourcentage d'au moins une page, on affiche UNE TUILE PAR
+       PAGE et rien d'autre, avec le chiffre que la page a calculé elle-même.
+       Les deux nombres sont donc identiques par construction — c'est tout l'objet
+       du changement, après deux jours où je faisais un second calcul concurrent.
+       Repli sur l'affichage par parcours tant qu'aucune page n'est connue (le
+       membre n'a encore visité aucune page depuis la mise en service). */
+    var modePage=lpPages.length>0;
+    if(modePage){
+      progs=lpPages.map(function(p){
+        return { id:"", name:labelPage(p.page), raw:labelPage(p.page), pct:p.pct, page:p.page };
+      }).filter(function(p){ return p.name && p.name!=="Autres"; })
+        .sort(function(a,b){ return rangPage(a.page)-rangPage(b.page); });
+    }
+    if(!progs.length) return;                       // rien à peindre : on réessaiera
     /* 🔴 La signature porte AUSSI la page : sans ça, un programme qui change de
        section (1 ligne dans PROG_PAGES) ne repeindrait pas le tableau. */
     var sig=lpEtat+"~"+progs.map(function(p){return progPage(p.id,p.name,p.raw,p.page).url+">"+p.name+"="+p.pct;}).join("|");
@@ -1074,14 +1097,19 @@
       grp.className="ps-pf-grp ps-pf-w"+Math.min(4, g.items.length);
       grp.style.setProperty("--c", g.col);
 
-      var head=document.createElement("div"); head.className="ps-pf-grp-h";
-      var ttl=document.createElement("span"); ttl.className="ps-pf-grp-t";
-      ttl.textContent=labelPage(u);
-      head.appendChild(ttl);
-      var cnt=document.createElement("span"); cnt.className="ps-pf-grp-n";
-      cnt.textContent=g.items.length+" parcours";   // « parcours » est invariable
-      head.appendChild(cnt);
-      grp.appendChild(head);
+      /* 🔴 En mode PAGE, pas d'en-tête de section : elle répéterait mot pour mot
+         le nom de l'unique tuile qu'elle contient (« Cours » au-dessus de
+         « Cours »). Ziad a demandé une tuile par page, rien d'autre. */
+      if(!modePage){
+        var head=document.createElement("div"); head.className="ps-pf-grp-h";
+        var ttl=document.createElement("span"); ttl.className="ps-pf-grp-t";
+        ttl.textContent=labelPage(u);
+        head.appendChild(ttl);
+        var cnt=document.createElement("span"); cnt.className="ps-pf-grp-n";
+        cnt.textContent=g.items.length+" parcours";   // « parcours » est invariable
+        head.appendChild(cnt);
+        grp.appendChild(head);
+      }
 
       var grille=document.createElement("div"); grille.className="ps-pf-grp-g";
       grp.appendChild(grille);

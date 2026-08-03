@@ -1007,6 +1007,42 @@
     return n?{pct:out, pages:pages}:null;
   }
 
+  /* ---- POURCENTAGE DE LA PAGE (03/08) --------------------------------------
+     🔴 CE QUE ZIAD VEUT, et que j'avais mal modélisé pendant deux jours : le board
+     de `/profile` doit afficher **la progression de chaque page**, rassemblée au
+     même endroit — pas un second calcul par parcours qui donne un autre nombre.
+     Donc on calcule ici, avec EXACTEMENT la règle de la tuile de page
+     (`mountKpi`) : moyenne sur TOUTES les cartes de cours affichées, une carte
+     sans barre comptant 0 au numérateur mais restant au dénominateur. Le profil
+     se contente ensuite d'afficher cette valeur → les deux nombres sont le même
+     par construction.
+     🔴 `/profile` est EXCLU : le catalogue qu'on y a caché contient ~58 cartes et
+     formerait une « page » fantôme qui écraserait toutes les autres.
+     🔴 Dédup par lien, comme `mountKpi` : une même fiche affichée deux fois ne
+     doit pas peser double. */
+  function depLirePage(){
+    if(/\/profile/.test(location.pathname)) return null;
+    var cards=document.querySelectorAll("#pageContent .lw-course-card");
+    if(!cards.length) return null;
+    var vus=Object.create(null), n=0;
+    for(var i=0;i<cards.length;i++){
+      if(cards[i].classList.contains("ps-lang-off")) continue;   // autre langue : hors calcul
+      var a=cards[i].querySelector("a.card-link[href], a[href]");
+      var cle=a?a.getAttribute("href"):null;
+      if(!cle || (cle in vus)) continue;
+      var bar=cards[i].querySelector(".lw-course-card-progress-bar");
+      var p=bar?parseInt(((bar.style&&bar.style.width)||"").replace("%",""),10):NaN;
+      vus[cle]=isNaN(p)?0:Math.max(0,Math.min(100,p));
+      n++;
+    }
+    if(!n) return null;
+    var total=0, k;
+    for(k in vus) total+=vus[k];
+    var o={};
+    o[location.pathname]=Math.round(total/n);
+    return {pct:o, cours:n};
+  }
+
   /* Programmes du membre : `me.userLearningPrograms`, disponible sans réseau et
      COMPLET quelle que soit la page.
      🔴 C'est LUI le signal d'inscription, pas la présence d'une barre : les barres
@@ -1104,11 +1140,13 @@
     var lu=depLireProgrammes(u);
     var progpct=lu?lu.pct:null;
     var progpage=lu?lu.pages:null;
+    var pageLue=depLirePage();
+    var pagepct=pageLue?pageLue.pct:null;
     /* 🔴 On accepte l'UN ou l'AUTRE. La page Compétences n'a AUCUNE carte de cours
        (mesuré : 0 carte de cours, 4 cartes de programme) — exiger `cours` comme
        avant y aurait bloqué le dépôt et c'est précisément la page qui porte la
        donnée la plus utile. */
-    if(!cours && !progpct) return;             // page sans rien à lire : on repassera
+    if(!cours && !progpct && !pagepct) return;  // page sans rien à lire : on repassera
     var slugs=cours?Object.keys(cours).sort():[];
     var progs=depProgrammes(u);
     /* Signature = ce qu'on s'apprête à envoyer. 🔴 Sans elle, un membre qui
@@ -1118,16 +1156,18 @@
        la même page, quand le Site Builder a fini d'afficher ses cartes. */
     var pcles=progpct?Object.keys(progpct).sort():[];
     var gcles=progpage?Object.keys(progpage).sort():[];
+    var acles=pagepct?Object.keys(pagepct).sort():[];
     var sig=slugs.map(function(s){ return s+":"+cours[s]; }).join(",")
           +"|"+progs.join(",")
           +"|"+pcles.map(function(k){ return k+":"+progpct[k]; }).join(",")
-          +"|"+gcles.map(function(k){ return k+">"+progpage[k]; }).join(",");
+          +"|"+gcles.map(function(k){ return k+">"+progpage[k]; }).join(",")
+          +"|"+acles.map(function(k){ return k+"="+pagepct[k]; }).join(",");
     var vue=null;
     try{ vue=sessionStorage.getItem(DEP_SIG); }catch(e){}
     if(vue===sig) return;
     depEnVol=true;
     depSig=sig;
-    depCorps={ uid:String(u.id), cours:cours||{}, programmes:progs, progpct:progpct||{}, progpage:progpage||{} };
+    depCorps={ uid:String(u.id), cours:cours||{}, programmes:progs, progpct:progpct||{}, progpage:progpage||{}, pagepct:pagepct||{} };
     depTurnstile();
   }
 
