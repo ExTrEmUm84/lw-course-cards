@@ -111,7 +111,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
    Mesures relevees sur /fiches-secteur le 03/08 : icone 140 px, bord blanc 4 px,
    remontee de -70 px, titre 21 px/800, lien 15 px, carte ~317x174. */
 .pv-sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:74px 4px 4px}
-.pv-scard{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
+.pv-scard{position:relative;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
   box-shadow:0 4px 18px rgba(15,23,42,.06);font-family:var(--ps-font);padding:0 20px 20px;text-align:left;
   transition:transform .18s ease,box-shadow .18s ease}
 .pv-scard:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(15,23,42,.10)}
@@ -132,7 +132,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
    reste bleu. On reproduit ce comportement plutot que de l'embellir : une
    maquette qui corrige la production ment autant qu'une maquette perimee. */
 .pv-cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:74px 4px 4px}
-.pv-ccard{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
+.pv-ccard{position:relative;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
   box-shadow:0 4px 18px rgba(15,23,42,.06);font-family:var(--ps-font);padding:0 20px 20px;text-align:left}
 .pv-clogo{width:140px;height:140px;border-radius:50%;margin:-70px auto 16px;border:4px solid #fff;
   /* 🔴 var() et non un hex en dur : j'avais cree le token --ps-cab-logo puis
@@ -147,7 +147,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
    Mesures relevees sur /emptykk-clone-clone : carte 488x155, AUCUNE ombre,
    filet de 38x3 px, titre 25 px/800, pastilles 12 px/600 en rayon plein. */
 .pv-kgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
-.pv-kcard{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
+.pv-kcard{position:relative;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
   font-family:var(--ps-font);padding:22px 24px}
 .pv-ktitle{font-size:25px;font-weight:800;color:var(--ps-text);margin:0 0 10px}
 .pv-ktitle b{color:var(--ps-accent);font-weight:800}
@@ -184,9 +184,14 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
    Une maquette n'est pas la page : son role est de MONTRER le reglage, pas de
    reproduire l'interaction. Il reste anime — l'animation est rejouee a chaque
    changement (classe `ps-redraw`), ce qui rend la DUREE perceptible elle aussi. */
-.pv-card .pv-line rect{stroke-dashoffset:0 !important}
+/* 🔴 PAS DE !important ICI. Il rendait bien le trait visible, mais une
+   declaration !important BAT LES ANIMATIONS CSS : le trace ne se jouait plus.
+   Signale par Ziad — « il ne s'anime pas ». La specificite suffit
+   (.pv-card .pv-line rect = 0,2,1 contre .pv-line rect = 0,1,1). */
+.pv-card .pv-line rect,.pv-lined .pv-line rect{stroke-dashoffset:0}
 @keyframes ps-pv-draw{from{stroke-dashoffset:1.02}to{stroke-dashoffset:0}}
-.ps-redraw .pv-card .pv-line rect{animation:ps-pv-draw var(--ps-line-t,1.1s) ease}
+.ps-redraw .pv-card .pv-line rect,
+.ps-redraw .pv-lined .pv-line rect{animation:ps-pv-draw var(--ps-line-t,1.1s) ease}
 /* 🔴🔴 z-index:1 ET NON -1. Signale par Ziad : « le contour anime n'est pas
    visible sur le configurateur ». Il etait bien la, mais peint DERRIERE le fond
    blanc de la carte : `.pv-card` porte `isolation:isolate`, donc un z-index
@@ -197,7 +202,12 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
    🔴 Et il ignorait les VARIABLES : epaisseur figee a 4, duree a .55s alors que
    la production est a 1.1s. Regler l'epaisseur ou la duree dans l'onglet ne
    pouvait donc rien changer a l'ecran. */
-.pv-line{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:1}
+/* 🔴 z-index:0 et non 1 : a 1 le lisere passait PAR-DESSUS l'illustration
+   ronde qui deborde en haut de la carte (signale par Ziad). A 0 il reste
+   au-dessus du fond de la carte — ce qui etait le probleme initial — mais
+   sous tout element qui se place explicitement plus haut. */
+.pv-line{position:absolute;inset:0;width:100%;height:100%;pointer-events:none;z-index:0}
+.pv-rond,.pv-sicon,.pv-clogo{position:relative;z-index:1}
 .ps-noline .pv-line{display:none}
 .pv-line rect{x:2px;y:2px;width:calc(100% - 4px);height:calc(100% - 4px);rx:calc(var(--ps-r-card) - 2px);
   fill:none;stroke:var(--ps-line-c,var(--ps-accent));stroke-width:var(--ps-line-w,4);
@@ -261,7 +271,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-m</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-n</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -411,17 +421,17 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     <h3 data-p="fiches-secteur">Fiches secteur <span style="text-transform:none;font-weight:600;color:#B4BAC8">— l'icône ronde prend les couleurs de la palette des champs</span></h3>
     <div class="bloc" data-p="fiches-secteur" style="padding:0 4px 4px">
       <div class="pv-sgrid">
-        <div class="pv-scard pv-s1">
+        <div class="pv-lined pv-scard pv-s1"><svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect pathLength="1"/></svg>
           <div class="pv-sicon"><svg viewBox="0 0 24 24"><path d="M10.5 20.5 3.5 13.5a5 5 0 0 1 7-7l7 7a5 5 0 0 1-7 7Z"/><path d="M7 10l7 7"/></svg></div>
           <p class="pv-stitle">Pharmaceutique</p>
           <a class="pv-slink" href="#">En savoir plus →</a>
         </div>
-        <div class="pv-scard pv-s2">
+        <div class="pv-lined pv-scard pv-s2"><svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect pathLength="1"/></svg>
           <div class="pv-sicon"><svg viewBox="0 0 24 24"><path d="M2 13l20-7-7 20-3-8-10-5Z"/></svg></div>
           <p class="pv-stitle">Aéronautique</p>
           <a class="pv-slink" href="#">En savoir plus →</a>
         </div>
-        <div class="pv-scard pv-s3">
+        <div class="pv-lined pv-scard pv-s3"><svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect pathLength="1"/></svg>
           <div class="pv-sicon"><svg viewBox="0 0 24 24"><path d="M4 15h16l-1.5-5H5.5L4 15Z"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/></svg></div>
           <p class="pv-stitle">Automobile</p>
           <a class="pv-slink" href="#">En savoir plus →</a>
@@ -432,15 +442,15 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     <h3 data-p="fiches-cabinet">Fiches cabinet <span style="text-transform:none;font-weight:600;color:#B4BAC8">— le rond des logos reste bleu, il ne suit pas la couleur de page</span></h3>
     <div class="bloc" data-p="fiches-cabinet" style="padding:0 4px 4px">
       <div class="pv-cgrid">
-        <div class="pv-ccard"><div class="pv-clogo">AD</div>
+        <div class="pv-lined pv-ccard"><svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect pathLength="1"/></svg><div class="pv-clogo">AD</div>
           <p class="pv-ctitle">Advancy</p>
           <p class="pv-cdesc">Fondé en 1999, Advancy est un cabinet de conseil en stratégie indépendant, reconnu pour son expertise en croissance…</p>
           <a class="pv-clink" href="#">En savoir plus →</a></div>
-        <div class="pv-ccard"><div class="pv-clogo">BC</div>
+        <div class="pv-lined pv-ccard"><svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect pathLength="1"/></svg><div class="pv-clogo">BC</div>
           <p class="pv-ctitle">BCG</p>
           <p class="pv-cdesc">Fondé en 1963, Boston Consulting Group est l'un des cabinets de conseil en stratégie les plus influents au monde…</p>
           <a class="pv-clink" href="#">En savoir plus →</a></div>
-        <div class="pv-ccard"><div class="pv-clogo">EY</div>
+        <div class="pv-lined pv-ccard"><svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect pathLength="1"/></svg><div class="pv-clogo">EY</div>
           <p class="pv-ctitle">EY Consulting</p>
           <p class="pv-cdesc">Fondé en 1989 avec la création de l'activité de conseil d'Ernst &amp; Young, EY Consulting est le cabinet…</p>
           <a class="pv-clink" href="#">En savoir plus →</a></div>
@@ -450,13 +460,13 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     <h3 data-p="emptykk-clone-clone">Études de cas <span style="text-transform:none;font-weight:600;color:#B4BAC8">— les pastilles de champs, en contexte</span></h3>
     <div class="bloc" data-p="emptykk-clone-clone">
       <div class="pv-kgrid">
-        <div class="pv-kcard">
+        <div class="pv-lined pv-kcard"><svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect pathLength="1"/></svg>
           <p class="pv-ktitle"><b>Bain</b><i>&times;</i>Assurance 2022</p>
           <div class="pv-krule"></div>
           <div class="pv-kpills"><span>2022</span><span>Assurance</span><span>Profit &amp; Loss</span><span>Débutant</span></div>
           <a class="pv-klink" href="#">En savoir plus →</a>
         </div>
-        <div class="pv-kcard">
+        <div class="pv-lined pv-kcard"><svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect pathLength="1"/></svg>
           <p class="pv-ktitle"><b>BCG</b><i>&times;</i>Transport / Livraison 2022</p>
           <div class="pv-krule"></div>
           <div class="pv-kpills"><span>2022</span><span>Transport</span><span>Market entry</span><span>Confirmé</span></div>
