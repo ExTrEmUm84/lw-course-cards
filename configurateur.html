@@ -291,7 +291,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-i</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-k</span></p>
     <!-- 🔴 TEXTE REFAIT (04/08) : il datait du temps où publier voulait dire
          « copier le bloc de code en bas et le coller dans tokens.js ». Ce bloc a été
          retiré le 03/08 et c'est le Worker qui écrit désormais — la phrase promettait
@@ -533,6 +533,61 @@ body.ps-verrou .ps-porte{display:grid}
               </div>
               <h3 class="ps-mtitle">Cas de marché et recommandation</h3>
               <a class="ps-mlink" href="#" onclick="return false">En savoir plus</a>
+            </div>
+            <svg class="ps-mline" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="100%" height="100%" rx="16" pathLength="1"/></svg>
+          </div>
+        </div>
+        <button class="ps-car-btn ps-car-prev" type="button" aria-label="Cartes précédentes"><svg viewBox="0 0 24 24"><path d="m15 5-7 7 7 7"/></svg></button>
+        <button class="ps-car-btn ps-car-next" type="button" aria-label="Cartes suivantes"><svg viewBox="0 0 24 24"><path d="m9 5 7 7-7 7"/></svg></button>
+      </div>
+    </div>
+
+    <h3 data-p="sentrainer">Cartes de S'entraîner <span style="text-transform:none;font-weight:600;color:#B4BAC8">— cartes « domaine » : pas de pastille de niveau, pas de compteurs (mesuré sur la vraie page)</span></h3>
+    <!-- 🔴🔴 CE BLOC EXISTE PARCE QUE J'AI FINI PAR ALLER MESURER. J'avais d'abord
+         montré ici les cartes de Cours en raisonnant « même script, donc mêmes
+         cartes » ; Ziad l'a relevé aussitôt. La page a été ouverte en anonyme le
+         04/08 (elle est publique) et voici ce qu'elle porte vraiment :
+         - 3 cours, titres « S'entraîner au Market Sizing / aux Mathématiques / aux
+           Minis Cas » — AUCUN ne commence par « Niveau N - » ⇒ `build()` en fait des
+           cartes DOMAINE : pas de pastille de niveau, donc pas de couleur par niveau.
+         - descriptions sans paire « Label : valeur » ⇒ `parseMeta()` ne trouve rien,
+           donc AUCUN compteur. `.ps-mhead` resterait vide : `build()` ne l'insère
+           alors pas du tout (`if(head.childNodes.length)`), et c'est pour ça qu'il
+           n'y en a pas ici non plus.
+         - chaque carte porte bien une image native LearnWorlds ; ce sont ses URLs
+           qui sont utilisées, pas nos illustrations de la page Cours.
+         🔴 Libellé « Commencer » sur les trois : un relevé du 30/07 donne 3 cartes
+         ET 3 barres pour un étudiant inscrit, mais AUCUN pourcentage connu. Plutôt
+         que d'inventer des chiffres, on montre l'état inscrit-mais-jamais-ouvert,
+         le seul qui ne demande aucune valeur. Les quatre états, eux, sont déjà
+         démontrés sur le bloc des cartes de cours.
+         🔴 3 cartes ⇒ le rail ne déborde pas ⇒ les flèches se masquent toutes
+         seules (`ps-car-off`), exactement comme en ligne (débordement mesuré à 0 px
+         sur cette page le 03/08). C'est la règle qui décide, pas moi. -->
+    <div class="bloc" data-p="sentrainer" style="padding:0 4px">
+      <div class="cards-grandpa" id="apercuEntrainer">
+        <div class="lw-cols multiple-rows">
+          <div class="col lw-course-card" data-ps-lvl="1">
+            <div class="learnworlds-image" style="background-image:url(https://api.eu-w3.learnworlds.com/imagefile//5e1cfde30f98aa6650cbc5a3bf9c8473.png?client_id=69b2ecbe6983ee7051b4f960&amp;width=400&amp;height=0)"></div>
+            <div class="ps-mcard">
+              <h3 class="ps-mtitle">S'entraîner au Market Sizing</h3>
+              <a class="ps-mlink" href="#" onclick="return false">Commencer</a>
+            </div>
+            <svg class="ps-mline" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="100%" height="100%" rx="16" pathLength="1"/></svg>
+          </div>
+          <div class="col lw-course-card" data-ps-lvl="1">
+            <div class="learnworlds-image" style="background-image:url(https://api.eu-w3.learnworlds.com/imagefile//4264ef8b30f345efb5d854f70e48982a.png?client_id=69b2ecbe6983ee7051b4f960&amp;width=400&amp;height=0)"></div>
+            <div class="ps-mcard">
+              <h3 class="ps-mtitle">S'entraîner aux Mathématiques</h3>
+              <a class="ps-mlink" href="#" onclick="return false">Commencer</a>
+            </div>
+            <svg class="ps-mline" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="100%" height="100%" rx="16" pathLength="1"/></svg>
+          </div>
+          <div class="col lw-course-card" data-ps-lvl="1">
+            <div class="learnworlds-image" style="background-image:url(https://api.eu-w3.learnworlds.com/imagefile//17459ddb6247a48907256d2c26486c4c.png?client_id=69b2ecbe6983ee7051b4f960&amp;width=400&amp;height=0)"></div>
+            <div class="ps-mcard">
+              <h3 class="ps-mtitle">S'entraîner aux Minis Cas</h3>
+              <a class="ps-mlink" href="#" onclick="return false">Commencer</a>
             </div>
             <svg class="ps-mline" preserveAspectRatio="none" aria-hidden="true"><rect x="0" y="0" width="100%" height="100%" rx="16" pathLength="1"/></svg>
           </div>
@@ -936,11 +991,11 @@ body.ps-verrou .ps-porte{display:grid}
       el.style.display=(l==="*"||l.split(" ").indexOf(pageActive)>=0)?"":"none";
     });
     cssReel();                               /* la feuille suit l'onglet : une page = une feuille */
-    /* 🔴 Le rail des cartes de cours vient peut-etre d'etre revele : tant qu'il
-       etait `display:none` ses largeurs valaient 0, donc « rien ne deborde » et
-       les deux fleches se seraient masquees toutes seules. On refait le calcul
-       une fois qu'il occupe sa place ET que la feuille est posee. */
-    if(carEtat) carEtat();
+    /* 🔴 Un rail vient peut-etre d'etre revele : tant qu'il etait `display:none` ses
+       largeurs valaient 0, donc « rien ne deborde » et les deux fleches se seraient
+       masquees toutes seules. On refait le calcul une fois qu'il occupe sa place ET
+       que la feuille est posee. */
+    carEtat();
   }
 
   /* ---- Les deux fleches du carrousel, cablees pour de vrai ------------------
@@ -952,9 +1007,13 @@ body.ps-verrou .ps-porte{display:grid}
      et on eteint celle qui est en bout de course.
      🔴 Sans ce cablage, elles seraient un decor inerte : afficher un controle qui
      ne repond pas, c'est le meme mensonge qu'une couleur qui ne s'applique pas. */
-  var carEtat=null;
-  function carrouselApercu(){
-    var wrap=document.getElementById("apercuCours");
+  /* 🔴 Une liste, pas un seul rail : Cours et S'entraîner ont chacun le leur, et
+     leurs etats sont independants (4 cartes qui debordent d'un cote, 3 qui tiennent
+     de l'autre — donc des fleches visibles ici et masquees la). */
+  var carEtats=[];
+  function carEtat(){ carEtats.forEach(function(f){ f(); }); }
+  function carrouselApercu(id){
+    var wrap=document.getElementById(id);
     if(!wrap) return;
     var rail=wrap.querySelector(".lw-cols.multiple-rows");
     var prev=wrap.querySelector(".ps-car-prev"), next=wrap.querySelector(".ps-car-next");
@@ -975,17 +1034,18 @@ body.ps-verrou .ps-porte{display:grid}
                  if(cible===null) cible=0; }
       rail.scrollTo({left:Math.max(0,Math.min(cible,max)),behavior:"smooth"});
     }
-    carEtat=function(){
+    var etat=function(){
       var max=rail.scrollWidth-rail.clientWidth;
       wrap.classList.toggle("ps-car-off",max<=2);
       prev.disabled=rail.scrollLeft<=2;
       next.disabled=rail.scrollLeft>=max-2;
     };
+    carEtats.push(etat);
     prev.onclick=function(e){ e.preventDefault(); aller(-1); };
     next.onclick=function(e){ e.preventDefault(); aller(1); };
-    rail.addEventListener("scroll",carEtat,{passive:true});
-    window.addEventListener("resize",carEtat);
-    carEtat();
+    rail.addEventListener("scroll",etat,{passive:true});
+    window.addEventListener("resize",etat);
+    etat();
   }
 
   function apercuPage(){
@@ -1102,7 +1162,19 @@ body.ps-verrou .ps-porte{display:grid}
       var b=document.createElement("button");
       b.className="ptab"+(p[0]===pageActive?" on":"");
       var i=document.createElement("i");
-      i.style.background=S.pages[p[0]]||"var(--ps-accent)";
+      /* 🔴🔴 `S.accent` ET NON `var(--ps-accent)`. Signalé par Ziad : sur l'onglet
+         Fiches secteur, les pastilles d'Accueil, S'entraîner, Compétences, Profil et
+         Annuaire viraient au JAUNE — elles annonçaient une couleur de page que ces
+         pages n'ont pas. Cause : ces onglets vivent DANS `#pageContent`, et
+         `apercuPage()` y pose `--ps-accent` à la couleur de la page affichée. Une
+         variable se résout là où l'élément se trouve : le repère de couleur lisait
+         donc l'aperçu au lieu de la marque.
+         C'est la fuite inverse de celles corrigées ce matin — la couleur de page qui
+         déborde sur les CONTRÔLES au lieu de rester dans l'aperçu. Un contrôle ne
+         doit lire aucune variable posée par la scène : on résout la valeur nous-mêmes.
+         🔴 Même correction dans `majPastilleOnglet()`, sinon la pastille redeviendrait
+         fausse au premier réglage de couleur. */
+      i.style.background=S.pages[p[0]]||S.accent;
       b.appendChild(i);
       b.appendChild(document.createTextNode(p[1]));
       b.title=p[0];
@@ -1155,7 +1227,7 @@ body.ps-verrou .ps-porte{display:grid}
       for(var i=0;i<PAGES_LIB.length && i<t.length;i++){
         if(PAGES_LIB[i][0]===slug){
           var pt=t[i].querySelector("i");
-          if(pt) pt.style.background=S.pages[slug]||"var(--ps-accent)";
+          if(pt) pt.style.background=S.pages[slug]||S.accent;   /* jamais var() : cf. pagesUI() */
         }
       }
     }
@@ -1831,7 +1903,8 @@ body.ps-verrou .ps-porte{display:grid}
 
   cssReel();
   pagesUI();
-  carrouselApercu();                       /* avant blocsPage : c'est lui qui pose `carEtat` */
+  carrouselApercu("apercuCours");          /* avant blocsPage : ils remplissent `carEtats` */
+  carrouselApercu("apercuEntrainer");
   blocsPage();                             /* construit aussi les palettes et les vidéos de l'onglet actif */
   champs();
   rendre();
