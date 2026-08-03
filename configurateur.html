@@ -81,6 +81,24 @@ button.primary{background:#507EC5;color:#fff;border-color:#507EC5}
 button.primary:hover{background:#486798}
 .note{font-size:11.5px;color:#8A90A2;line-height:1.5;margin-top:10px;padding:9px 10px;background:#F7F8FB;border-radius:7px;border-left:2px solid #DCE0E8}
 /* ---- Sortie ------------------------------------------------------- */
+/* ---- Rideau de connexion --------------------------------------------
+   🔴 C'EST UN RIDEAU, PAS UNE SERRURE. Cette page est servie par GitHub Pages,
+   de l'hebergement statique : n'importe qui peut telecharger le fichier, aucun
+   mot de passe ne peut s'interposer. Ce rideau masque l'INTERFACE a un curieux ;
+   il ne protege pas le fichier. Ce qui est reellement protege, c'est la capacite
+   de PUBLIER, verrouillee cote Worker — et cette page ne contient aucun secret :
+   le Client ID est public par nature, tout le reste vit dans le Worker.
+   Dit autrement : on ferme la porte du bureau, pas le coffre. Le coffre est
+   ailleurs et il est ferme. */
+body.ps-verrou .wrap{display:none}
+.ps-porte{display:none;min-height:100vh;place-items:center;padding:24px}
+body.ps-verrou .ps-porte{display:grid}
+.ps-porte-in{max-width:420px;background:#fff;border:1px solid #E7EAF0;border-radius:16px;
+  padding:30px 32px;box-shadow:0 10px 40px rgba(15,23,42,.08);text-align:left}
+.ps-porte-in h1{font-size:20px;margin:0 0 8px}
+.ps-porte-in p{font-size:13.5px;color:#676879;line-height:1.6;margin:0 0 18px}
+.ps-porte-in button{width:100%;padding:12px;font:700 14px Figtree,sans-serif}
+.ps-porte-err{font-size:12.5px;color:#8A2233;background:#FDECEF;border-radius:8px;padding:9px 11px;margin-top:14px;display:none}
 /* ---- Onglets de configuration par page ------------------------------
    Demande de Ziad : « fais des tabs, on aura plus de place ». La colonne de
    gauche fait 340 px — six pages × quatre réglages n'y tenaient pas. Ce bloc
@@ -263,13 +281,22 @@ button.primary:hover{background:#486798}
 @media(max-width:900px){.wrap{grid-template-columns:1fr}.panel{position:static;max-height:none;border-right:0;border-bottom:1px solid #E1E5EC}}
 </style>
 </head>
-<body>
+<body class="ps-verrou">
+<div class="ps-porte">
+  <div class="ps-porte-in">
+    <h1>Design system PrepaStrat</h1>
+    <p>Cet outil règle l'apparence du site&nbsp;: couleurs, palettes, contours, vidéos.
+       Connecte-toi avec ton compte GitHub pour y accéder.</p>
+    <button class="primary" id="porteBtn">Se connecter avec GitHub</button>
+    <div class="ps-porte-err" id="porteErr"></div>
+  </div>
+</div>
 <div class="wrap">
 
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-w</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-x</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -1230,25 +1257,36 @@ button.primary:hover{background:#486798}
     finally{ elPub.disabled=false; elPub.textContent=lib; majBouton(); }
   }
 
-  elPub.onclick=function(){
-    if(session()) return publier();
-    /* `state` : jeton anti-CSRF verifie au retour. Sans lui, un tiers pourrait
-       faire aboutir ici une connexion que l'utilisateur n'a pas demandee. */
+  /* Le rideau se leve des qu'une session existe. Meme fonction pour les deux
+     boutons : celui du rideau et celui du panneau lancent le meme flux, il ne
+     doit pas y avoir deux facons de se connecter qui puissent diverger. */
+  function verrou(){
+    document.body.classList.toggle("ps-verrou", !session());
+  }
+  function connexionGitHub(){
     var etat=Math.random().toString(36).slice(2)+Date.now().toString(36);
     try{ sessionStorage.setItem("psPubEtat",etat); }catch(e){}
     location.href="https://github.com/login/oauth/authorize?client_id="+encodeURIComponent(GH_CLIENT_ID)+
       "&redirect_uri="+encodeURIComponent(RETOUR)+"&state="+encodeURIComponent(etat);
+  }
+  document.getElementById("porteBtn").onclick=connexionGitHub;
+
+  elPub.onclick=function(){
+    if(session()) return publier();
+    /* `state` : jeton anti-CSRF verifie au retour. Sans lui, un tiers pourrait
+       faire aboutir ici une connexion que l'utilisateur n'a pas demandee. */
+    connexionGitHub();
   };
   elOut.onclick=function(){
     try{ sessionStorage.removeItem(CLE_SESS); sessionStorage.removeItem(CLE_QUI); }catch(e){}
-    majBouton(); dire("Session fermée.","");
+    majBouton(); verrou(); dire("Session fermée.","");
   };
 
   /* Retour de GitHub : on echange le code contre une session, puis on NETTOIE
      l'URL — un code d'autorisation n'a rien a faire dans un historique. */
   (async function retourOAuth(){
     var m=location.search.match(/[?&]code=([^&]+)/);
-    if(!m){ majBouton(); return; }
+    if(!m){ majBouton(); verrou(); return; }
     var etat=(location.search.match(/[?&]state=([^&]+)/)||[])[1];
     var attendu=""; try{ attendu=sessionStorage.getItem("psPubEtat")||""; }catch(e){}
     history.replaceState(null,"",location.pathname);
@@ -1263,8 +1301,15 @@ button.primary:hover{background:#486798}
          "</strong>, et la liste des comptes autorisés contient "+j.nbAutorises+" entrée(s)."):""));
       try{ sessionStorage.setItem(CLE_SESS,j.session); sessionStorage.setItem(CLE_QUI,j.login); }catch(e){}
       dire("Connecté en tant que <strong>"+String(j.login).replace(/[<>&]/g,"")+"</strong>. Tu peux publier.","ok");
-    }catch(e){ dire(String(e.message||e),"ko"); }
-    majBouton();
+    }catch(e){
+      /* 🔴 L'erreur s'affiche SUR le rideau : le panneau est masque, un message
+         pose derriere lui serait invisible — la personne verrait un bouton qui
+         « ne fait rien » sans savoir pourquoi. */
+      var pe=document.getElementById("porteErr");
+      if(pe){ pe.style.display="block"; pe.innerHTML=String(e.message||e); }
+      dire(String(e.message||e),"ko");
+    }
+    majBouton(); verrou();
   })();
 
   /* ====================================================================
