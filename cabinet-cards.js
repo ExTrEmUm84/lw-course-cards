@@ -374,6 +374,7 @@
   function build(){
     heroText();
     mountKpi();
+    mountFiltres();
     searchPlaceholder();
     document.querySelectorAll(S+" .cards-grandpa .lw-course-card").forEach(function(card){
       if(card.dataset.psC) return;
@@ -441,6 +442,98 @@
          dans tokens.js (playerFlag, site-wide) — plus besoin de le poser ici. */
       card.dataset.psC="1";                    // déclenche le masquage du natif
     });
+  }
+
+  /* ---- CATÉGORIES SORTIES EN PASTILLES (demande de Ziad, 03/08) -------------
+     🔴 POURQUOI ICI ET PAS DANS `filters.js` : ce fichier n'est chargé QUE sur la
+     page Cabinets. `filters.js`, lui, sert plusieurs pages — j'y avais mis ce code
+     et j'ai cassé les filtres de la page Études de cas, qui possède les mêmes
+     catégories dans son menu natif : mes pastilles s'y créaient et le menu natif
+     y était masqué. Choix de Ziad : l'isolation vient du fichier, pas d'une table
+     de pages — ainsi un renommage de page ou d'URL ne peut plus rien casser.
+
+     🔴 ON NE RÉIMPLÉMENTE PAS LE FILTRAGE : chaque pastille délègue au `li` natif.
+     Vérifié avant d'écrire : un clic dessus fait passer la page de 10 cartes à 1.
+     C'est LearnWorlds qui filtre, donc ça vaut aussi pour un ÉTUDIANT — un filtre
+     maison aurait dû lire les catégories via `/api/courses`, muet pour les
+     non-admins (mesuré le 03/08), et serait resté inerte chez lui. Elles ne sont
+     pas davantage dans le DOM : `.lw-tags` est vide sur toutes les cartes.
+
+     Ajouter/retirer une pastille = une ligne dans PASTILLES. « Cabinet » en est
+     volontairement absent : il porte 7 des 10 fiches, le proposer n'a pas d'intérêt. */
+  var PASTILLES=["Conseil en Stratégie","Conseil en Management","Conseil en Transformation Numérique"];
+
+  function normCat(s){ return (s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,""); }
+  function optionsCat(){ return [].slice.call(document.querySelectorAll(S+" .lw-filters .lw-topbar-submenu-item.filter")); }
+  function texteDe(el){ return (el.textContent||"").replace(/\s+/g," ").trim(); }
+
+  function styleFiltres(){
+    if(document.getElementById("ps-cabfiltres-style")) return;
+    var st=document.createElement("style"); st.id="ps-cabfiltres-style";
+    /* Vocabulaire des filtres du site : pilule 44px, bleu #3887B4 au survol.
+       🔴 Les filtres gardent leur bleu propre et NE suivent PAS l'accent de page
+       (vert sur Cabinets) — c'est le système d'accent séparé documenté le 17/07. */
+    st.textContent=
+      ".ps-cf{display:inline-flex !important;align-items:center !important;height:44px !important;"+
+        "padding:0 18px !important;margin:0 10px 10px 0 !important;border-radius:var(--ps-r-pill,999px) !important;"+
+        "border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;"+
+        "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;"+
+        "font-size:14px !important;font-weight:600 !important;color:#4B5563 !important;line-height:1 !important;"+
+        "-webkit-appearance:none !important;appearance:none !important;cursor:pointer !important;"+
+        "user-select:none !important;transition:all .15s ease !important;}"+
+      ".ps-cf:hover{border-color:#3887B4 !important;color:#3887B4 !important;background:#F3F9FC !important;}"+
+      ".ps-cf.ps-cf-on{border-color:#29457B !important;background:#29457B !important;color:#fff !important;}";
+    (document.head||document.documentElement).appendChild(st);
+  }
+
+  function mountFiltres(){
+    var wrap=document.querySelector(S+" .learnworlds-button-wrapper.lw-filters");
+    if(!wrap) return;
+    var opts=optionsCat();
+    if(!opts.length) return;                       // menu natif pas encore rendu : on réessaiera
+    var dispo=PASTILLES.filter(function(nom){
+      return opts.some(function(o){ return normCat(texteDe(o))===normCat(nom); });
+    });
+    /* 🔴 Rien à construire ⇒ on ne touche À RIEN. C'est la leçon du jour : ne
+       jamais masquer un élément natif sur la seule foi d'avoir trouvé son
+       conteneur, sinon on retire des filtres sans rien mettre à la place. */
+    if(!dispo.length) return;
+    styleFiltres();
+
+    var row=wrap.querySelector(".ps-cf-row");
+    var sig=dispo.join("|");
+    if(row && row.dataset.psSig===sig) return;     // rien de neuf : pas de repeinture
+    if(!row){ row=document.createElement("span"); row.className="ps-cf-row"; wrap.appendChild(row); }
+    row.dataset.psSig=sig;
+    row.textContent="";
+
+    dispo.forEach(function(nom){
+      var b=document.createElement("button");
+      b.type="button"; b.className="ps-cf"; b.textContent=nom;
+      b.setAttribute("aria-pressed","false");
+      b.addEventListener("click", function(){
+        var actif=b.classList.contains("ps-cf-on");
+        [].slice.call(row.querySelectorAll(".ps-cf")).forEach(function(x){
+          x.classList.remove("ps-cf-on"); x.setAttribute("aria-pressed","false");
+        });
+        if(actif){
+          /* 2e clic = on retire le filtre. Le bouton natif « tout » est le seul
+             chemin fiable : recliquer l'option ne la désélectionne pas toujours. */
+          var tout=wrap.querySelector(".learnworlds-button.filter.text-only");
+          if(tout) tout.click();
+          return;
+        }
+        var o=optionsCat().filter(function(x){ return normCat(texteDe(x))===normCat(nom); })[0];
+        if(o) o.click();
+        b.classList.add("ps-cf-on"); b.setAttribute("aria-pressed","true");
+      });
+      row.appendChild(b);
+    });
+
+    /* Le menu natif ferait doublon — masqué SEULEMENT maintenant que les
+       pastilles existent réellement. */
+    var menu=wrap.querySelector(".lw-filter-option.with-submenu");
+    if(menu) menu.style.setProperty("display","none","important");
   }
 
   var scheduled=false;
