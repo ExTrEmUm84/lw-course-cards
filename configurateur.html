@@ -577,7 +577,8 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     var hex=S.pages[pageActive];
     var b=document.getElementById("apercuPageNom");
     if(!hex){
-      ["--ps-accent","--ps-accent-rgb","--ps-accent-hover","--ps-accent-tint"].forEach(function(v){ st.style.removeProperty(v); });
+      ["--ps-accent","--ps-accent-rgb","--ps-accent-hover","--ps-accent-tint",
+       "--ps-f1","--ps-f1-tint","--ps-lvl1","--ps-lvl1-tint"].forEach(function(v){ st.style.removeProperty(v); });
       if(b) b.textContent=libellePage(pageActive)+" — couleur de la marque";
       return;
     }
@@ -586,6 +587,21 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     st.style.setProperty("--ps-accent-rgb",d.rgb);
     st.style.setProperty("--ps-accent-hover",d.hover);
     st.style.setProperty("--ps-accent-tint",d.tint);
+    /* 🔴🔴 IL FAUT AUSSI REPOSER LES TOKENS QUI SUIVENT LA MARQUE. Piège mesuré
+       le 03/08 : `--ps-f1:var(--ps-accent)` est déclaré sur `:root`, donc il y est
+       résolu (#507EC5) et descend en valeur FIGÉE. Une surcouche posée plus bas,
+       ici sur `#pageContent`, ne peut plus l'atteindre : l'icône des fiches
+       secteur restait bleue alors que la page était réglée en jaune.
+       🔴 Sur le vrai site, rien de tel : `accentPage()` de tokens.js écrit sur
+       `:root` lui aussi, donc la chaîne se recompose. C'était donc un mensonge de
+       l'APERÇU, pas un bug du site — exactement le genre d'écart qui rend une
+       maquette dangereuse.
+       On ne repose que ce qui est effectivement LIÉ à la marque : si Ziad a
+       décoché « suit la marque », sa couleur choisie doit rester. */
+    if(S.f1Link){   st.style.setProperty("--ps-f1",d.accent);  st.style.setProperty("--ps-f1-tint",d.tint); }
+    else        {   st.style.removeProperty("--ps-f1");        st.style.removeProperty("--ps-f1-tint"); }
+    if(S.lvl1Link){ st.style.setProperty("--ps-lvl1",d.hover); st.style.setProperty("--ps-lvl1-tint",d.tint); }
+    else          { st.style.removeProperty("--ps-lvl1");      st.style.removeProperty("--ps-lvl1-tint"); }
     if(b) b.textContent=libellePage(pageActive)+" — couleur propre "+hex;
   }
   function libellePage(slug){
