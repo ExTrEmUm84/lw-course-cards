@@ -346,7 +346,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-d</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-e</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -1143,7 +1143,7 @@ body.ps-verrou .ps-porte{display:grid}
     var d=document.createElement("div"); d.className="card";
     d.innerHTML='<h4>Cartes des membres</h4><p class="expl">La couleur habille les pastilles de filtre '+
       '(École, Niveau, Recherche, Langue), le nom d\'école sous chaque membre et le bouton «&nbsp;Envoyer un email&nbsp;». '+
-      '<strong>Pas d\'aperçu ici</strong>&nbsp;: les cartes affichent de vraies personnes, elles n\'ont rien à faire dans une maquette.</p>';
+      'L\'aperçu ci-dessous montre des membres <strong>inventés</strong>&nbsp;: les vraies cartes affichent des personnes réelles, elles n\'ont rien à faire dans une maquette.</p>';
     ligneCurseur(d,"Taille de l\'avatar","anAvatar",40,96,2,"px");
     ligneCurseur(d,"Largeur mini d\'une carte","anCol",200,400,10,"px");
     return d;
@@ -1153,7 +1153,7 @@ body.ps-verrou .ps-porte{display:grid}
     var d=document.createElement("div"); d.className="card";
     d.innerHTML='<h4>Tableau de bord du membre</h4><p class="expl">La couleur habille le bandeau de grade, '+
       'les anneaux de progression et les boutons «&nbsp;Continuer&nbsp;». '+
-      '<strong>Pas d\'aperçu ici</strong>&nbsp;: le tableau dépend des données du membre connecté, il faut le regarder sur le site.</p>';
+      'L\'aperçu ci-dessous reproduit sa forme&nbsp;; les chiffres sont des exemples&nbsp;: le vrai tableau dépend des données du membre connecté.</p>';
     ligneCurseur(d,"Diamètre des anneaux","pfRing",40,120,2,"px");
     ligneCurseur(d,"Épaisseur des barres","pfBar",4,20,1,"px");
     return d;
