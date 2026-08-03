@@ -137,7 +137,15 @@
     ".ps-kpi-txt{flex:1 1 auto !important;min-width:0 !important;}",
     "@media(max-width:900px){"+S+" .ps-herotop{flex-direction:column !important;gap:20px !important;}"+S+" .ps-herotop > .ps-kpi{flex:0 0 auto !important;width:100% !important;max-width:352px !important;}}",
 
-    ".ps-tw{display:inline-block !important;text-align:left !important;color:#deb125 !important;white-space:nowrap !important;}",
+    /* 🔴 SUIT LE TOKEN, PLUS UN OR ECRIT EN DUR. `#deb125` etait fige ici : il
+       ne bougeait ni avec la marque ni avec la couleur de page, et Ziad ne
+       pouvait pas le regler depuis le configurateur — c'etait un TROISIEME or
+       sur cette page, a cote du lisere et du lien. Meme famille que les replis
+       violets corriges ce matin : une couleur ecrite en dur perime en silence.
+       ⚠️ Le titre devient donc un peu plus fonce : c'est `--ps-accent`, la
+       version corrigee pour rester LISIBLE en texte. Le lisere, lui, garde la
+       teinte vive — il est decoratif, pas lu. */
+    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#507EC5) !important;white-space:nowrap !important;}",
     ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:#deb125 !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
     "@keyframes ps-blink{50%{opacity:0}}",
 
