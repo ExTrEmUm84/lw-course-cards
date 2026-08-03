@@ -215,6 +215,39 @@
      (relevés dans le sitemap et vérifiés en direct ; `/page-introduction`
      renvoie désormais une page d'erreur). Conséquence de l'ancien nom ici :
      l'anti-flash ne s'appliquait plus du tout sur la page Cours. */
+  /* ====================================================================
+     PASTILLE DE FILTRE — DÉFINITION UNIQUE, SITE-WIDE (03/08)
+     --------------------------------------------------------------------
+     🔴 POURQUOI ICI : chaque page a sa PROPRE logique de filtrage (champs lus
+     dans les descriptions sur Cas, catégories LearnWorlds sur Cabinets), mais
+     l'APPARENCE doit être la même partout. Elle était définie deux fois, avec
+     deux états actifs différents — bleu clair dans `filters.js`, bleu foncé plein
+     dans `cabinet-cards.js` — et ça se voyait en passant d'une page à l'autre.
+     Le style vit donc ici, dans le fichier chargé sur tout le site ; les fichiers
+     de page ne gardent que leur logique et se contentent d'appliquer `.ps-cf`.
+     🔴 Les filtres gardent leur bleu propre (#3887B4 survol, #29457B actif) et NE
+     suivent PAS l'accent de page : c'est le système d'accent séparé du 17/07.
+     ==================================================================== */
+  function styleFiltrePastille(){
+    if(document.getElementById("ps-pastille-style")) return;
+    var st=document.createElement("style"); st.id="ps-pastille-style";
+    st.textContent=
+      ".ps-cf{display:inline-flex !important;align-items:center !important;height:44px !important;"+
+        "padding:0 18px !important;margin:0 10px 10px 0 !important;border-radius:var(--ps-r-pill,999px) !important;"+
+        "border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;"+
+        "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;"+
+        "font-size:14px !important;font-weight:600 !important;color:#4B5563 !important;line-height:1 !important;"+
+        "-webkit-appearance:none !important;appearance:none !important;cursor:pointer !important;"+
+        "user-select:none !important;transition:all .15s ease !important;}"+
+      ".ps-cf:hover{border-color:#3887B4 !important;color:#3887B4 !important;background:#F3F9FC !important;}"+
+      /* État actif ALIGNÉ sur `.ps-ff` de filters.js : bordure et texte bleus sur
+         fond très clair. C'est la référence, puisque c'est ce que voient déjà les
+         étudiants sur la page Cas. */
+      ".ps-cf.ps-cf-on{border-color:#3887B4 !important;background:#F3F9FC !important;color:#3887B4 !important;}";
+    (document.head||document.documentElement).appendChild(st);
+  }
+  window.PS_FILTRE_STYLE=styleFiltrePastille;   // les scripts de page l'appellent
+
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-secteur-clone","sentrainer"];
   var READY_SEL="#pageContent .ps-mcard,#pageContent .ps-cc,#pageContent .ps-ccab,#pageContent .ps-scard,#pageContent .ps-pfc";
   function cloak(){

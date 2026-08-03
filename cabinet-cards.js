@@ -467,23 +467,14 @@
   function optionsCat(){ return [].slice.call(document.querySelectorAll(S+" .lw-filters .lw-topbar-submenu-item.filter")); }
   function texteDe(el){ return (el.textContent||"").replace(/\s+/g," ").trim(); }
 
+  /* 🔴 AUCUN STYLE DE PASTILLE ICI (03/08). Il était défini en double — ici en
+     bleu foncé plein, dans `filters.js` en bleu clair — et l'état actif changeait
+     donc d'aspect selon la page. La définition unique vit maintenant dans
+     `tokens.js`, chargé sur tout le site : ce fichier ne garde que la LOGIQUE de
+     filtrage, propre à cette page. Repli si tokens.js n'a pas encore tourné : la
+     pastille reste un bouton nu mais cliquable, jamais invisible. */
   function styleFiltres(){
-    if(document.getElementById("ps-cabfiltres-style")) return;
-    var st=document.createElement("style"); st.id="ps-cabfiltres-style";
-    /* Vocabulaire des filtres du site : pilule 44px, bleu #3887B4 au survol.
-       🔴 Les filtres gardent leur bleu propre et NE suivent PAS l'accent de page
-       (vert sur Cabinets) — c'est le système d'accent séparé documenté le 17/07. */
-    st.textContent=
-      ".ps-cf{display:inline-flex !important;align-items:center !important;height:44px !important;"+
-        "padding:0 18px !important;margin:0 10px 10px 0 !important;border-radius:var(--ps-r-pill,999px) !important;"+
-        "border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;"+
-        "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;"+
-        "font-size:14px !important;font-weight:600 !important;color:#4B5563 !important;line-height:1 !important;"+
-        "-webkit-appearance:none !important;appearance:none !important;cursor:pointer !important;"+
-        "user-select:none !important;transition:all .15s ease !important;}"+
-      ".ps-cf:hover{border-color:#3887B4 !important;color:#3887B4 !important;background:#F3F9FC !important;}"+
-      ".ps-cf.ps-cf-on{border-color:#29457B !important;background:#29457B !important;color:#fff !important;}";
-    (document.head||document.documentElement).appendChild(st);
+    if(typeof window.PS_FILTRE_STYLE==="function") window.PS_FILTRE_STYLE();
   }
 
   function mountFiltres(){
