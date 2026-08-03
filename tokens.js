@@ -62,6 +62,7 @@
     "--ps-text-soft:#676879",
     "--ps-surface-soft:#F7F8FB",
     "--ps-border:#E6E9EF",
+    "--ps-cab-logo:#507EC5",
     "--ps-font:Figtree,-apple-system,Segoe UI,Roboto,sans-serif",
     "--ps-r-card:16px",
     "--ps-r-pill:999px",
@@ -88,7 +89,6 @@
     "--ps-f4-tint:#FFF3E0",
     "--ps-f5:#A25DDC",
     "--ps-f5-tint:#F3EAFB",
-    "--ps-cab-logo:#507EC5",
     "--ps-f6:#0073EA",
     "--ps-f6-tint:#E6F1FD"
 /* <<< FIN TOKENS */
@@ -154,9 +154,10 @@
      faire dans le contenu. */
 /* >>> DEBUT PAGES — réécrit par le configurateur, ne rien ajouter ici */
   var PAGE_ACCENTS={
+    "formation-par-modules":"#d31226",
+    "fiches-cabinet":"#007260",
     "fiches-secteur":"#fad54a",
-    "emptykk-clone-clone":"#6b7280",
-    "fiches-cabinet":"#007260"
+    "emptykk-clone-clone":"#6b7280"
   };
   var PAGE_STYLE={
     "formation-par-modules":{"contour":1,"ep":4,"duree":1.1}
