@@ -519,6 +519,13 @@
     var dispo=CATS.filter(function(nom){
       return opts.some(function(o){ return normCat(nameOf(o))===normCat(nom); });
     });
+    /* 🔴🔴 SORTIE IMMÉDIATE SI AUCUNE DE NOS CATÉGORIES N'EST SUR CETTE PAGE.
+       Bug commis le 03/08 : la suite masquait le menu natif SANS vérifier qu'on
+       avait créé quelque chose. Sur la page Études de cas — où aucune des trois
+       catégories n'existe — les filtres existants ont donc disparu, sans rien en
+       remplacement. Ce fichier est chargé sur PLUSIEURS pages : tout ce qu'il
+       modifie doit être conditionné à ce qu'il a réellement construit. */
+    if(!dispo.length) return;
     var row=wrap.querySelector(".ps-ffcat");
     var sig=dispo.join("|");
     if(row && row.dataset.psSig===sig) return;     // rien de neuf : on ne repeint pas
