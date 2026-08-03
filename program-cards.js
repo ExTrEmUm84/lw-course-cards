@@ -87,7 +87,7 @@
     ".ps-kpi-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:500 !important;color:var(--ps-text-soft,#676879) !important;margin-top:2px !important;}",
     ".ps-kpi-bar{height:7px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
     ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#507EC5) !important;transition:width .6s ease !important;}",
-    ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:#F1F1FF !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+    ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:var(--ps-accent-tint,#edf4ff) !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
     /* SVG et non police d'icône : un glyphe se ferait écraser par un font-family. */
     ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#507EC5) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     "@media(max-width:900px){"+S+" .ps-herotop{flex-direction:column !important;gap:20px !important;}"+S+" .ps-herotop > .ps-kpi{flex:0 0 auto !important;width:100% !important;max-width:352px !important;}}",
@@ -100,11 +100,11 @@
     PROG+" .lw-learning-program-card-descr{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;}",
 
     /* Pastille « N Leçons » : bleu natif #3887B4 -> violet teinté. */
-    PROG+" .lw-tag{background:var(--ps-accent-tint,#EDEDFF) !important;color:var(--ps-accent,#507EC5) !important;border-radius:var(--ps-r-pill,999px) !important;padding:5px 11px !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:700 !important;}",
+    PROG+" .lw-tag{background:var(--ps-accent-tint,#edf4ff) !important;color:var(--ps-accent,#507EC5) !important;border-radius:var(--ps-r-pill,999px) !important;padding:5px 11px !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:700 !important;}",
 
     /* Bouton « Continuer » : vert LearnWorlds #009E78 -> violet de la charte. */
     PROG+" button.learnworlds-button{background:var(--ps-accent,#507EC5) !important;color:#fff !important;border-radius:var(--ps-r-btn,10px) !important;border:0 !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-weight:700 !important;transition:background .18s ease !important;}",
-    PROG+" button.learnworlds-button:hover{background:var(--ps-accent-hover,#4B4BE0) !important;}",
+    PROG+" button.learnworlds-button:hover{background:var(--ps-accent-hover,#486798) !important;}",
 
     /* Progression : remplissage bleu marine #203866 -> violet. */
     PROG+" .lw-course-card-progress{background:#EDEDF2 !important;border-radius:var(--ps-r-pill,999px) !important;overflow:hidden !important;}",

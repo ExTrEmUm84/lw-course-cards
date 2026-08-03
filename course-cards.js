@@ -76,7 +76,7 @@
     ".ps-mtitle{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:25px !important;line-height:1.25 !important;font-weight:700 !important;color:#323338 !important;margin:0 0 auto !important;}",
     ".ps-mlink{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:26px !important;color:var(--ps-accent,#507EC5) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-mlink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
-    ".ps-mlink:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
+    ".ps-mlink:hover{color:var(--ps-accent-hover,#486798) !important;}",
     ".ps-mlink:hover::after{transform:translateX(5px) !important;}",
     /* Cours terminé : "Terminé" est un ÉTAT, pas une action — la flèche qui
        pousse en avant n'a plus de sens, on met une coche. Le lien reste
@@ -90,8 +90,8 @@
     /* Couleur par NIVEAU, et non par position : les chevrons intercalés entre
        les cartes décalent nth-child et le cycle sautait (vérifié : Niveau 4
        récupérait la couleur du Niveau 1). data-ps-lvl est posé dans build(). */
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='1'] .ps-mtag{background:var(--ps-lvl1-tint,#EDEDFF) !important;color:var(--ps-lvl1,#4B4BE0) !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='1'] .ps-mprog-bar{background:var(--ps-lvl1,#4B4BE0) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='1'] .ps-mtag{background:var(--ps-lvl1-tint,#edf4ff) !important;color:var(--ps-lvl1,#486798) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='1'] .ps-mprog-bar{background:var(--ps-lvl1,#486798) !important;}",
     "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='2'] .ps-mtag{background:var(--ps-lvl2-tint,#E6F9F0) !important;color:var(--ps-lvl2,#12A85F) !important;}",
     "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='2'] .ps-mprog-bar{background:var(--ps-lvl2,#12A85F) !important;}",
     "#pageContent .lw-cols > .col.lw-course-card[data-ps-lvl='3'] .ps-mtag{background:var(--ps-lvl3-tint,#E1F7EC) !important;color:var(--ps-lvl3,#009257) !important;}",
@@ -338,7 +338,7 @@
     ".ps-kpi{position:absolute !important;top:0 !important;right:0 !important;width:352px !important;display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;padding:20px 22px !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 14px rgba(15,23,42,.05) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
     ".ps-kpi-num{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
     ".ps-kpi-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:500 !important;color:var(--ps-text-soft,#676879) !important;margin-top:2px !important;}",
-    ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:#F1F1FF !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+    ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:var(--ps-accent-tint,#edf4ff) !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
     /* ⚠️ SVG et non police d'icône : un glyphe de police se ferait écraser par
        tout `font-family` posé plus haut. (Cf. les pictos des tuiles du profil,
        cassés par un `*{font-family}`.) */

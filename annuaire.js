@@ -160,8 +160,8 @@
     R + ".psa-chips{display:flex;gap:6px;flex-wrap:wrap;}",
     R + ".psa-chip{font-size:12px;padding:4px 10px;" +
       "border-radius:var(--ps-r-pill,999px);" +
-      "background:var(--ps-accent-tint,#EDEDFF);" +
-      "color:var(--ps-accent-hover,#4B4BE0);}",
+      "background:var(--ps-accent-tint,#edf4ff);" +
+      "color:var(--ps-accent-hover,#486798);}",
     R + ".psa-chip-btn{font-family:inherit;border:0;cursor:pointer;" +
       "transition:background .15s ease,color .15s ease;}",
     R + ".psa-chip-btn:hover{background:var(--ps-accent,#507EC5);color:#fff;}",
@@ -181,7 +181,7 @@
       "border-radius:var(--ps-r-btn,10px);background:var(--ps-accent,#507EC5) !important;color:#fff !important;" +
       "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);" +
       "font-size:13.5px;font-weight:600;text-decoration:none !important;transition:background .15s ease;}",
-    R + ".psa-contact:hover{background:var(--ps-accent-hover,#4B4BE0) !important;color:#fff !important;}",
+    R + ".psa-contact:hover{background:var(--ps-accent-hover,#486798) !important;color:#fff !important;}",
     R + ".psa-contact:focus-visible{outline:2px solid var(--ps-accent,#507EC5);outline-offset:2px;}",
     R + ".psa-links{display:flex;gap:14px;}",
     /* Mêmes <a>, même écrasement LW : on force la couleur violette. */

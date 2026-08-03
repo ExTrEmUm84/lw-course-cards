@@ -126,7 +126,7 @@
        occupe déjà la propriété. */
     ".ps-cab-link{position:relative !important;z-index:2 !important;display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:auto !important;padding-top:18px !important;color:var(--ps-accent,#507EC5) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-cab-link::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
-    ".ps-cab-link:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
+    ".ps-cab-link:hover{color:var(--ps-accent-hover,#486798) !important;}",
     ".ps-cab-link:hover::after{transform:translateX(5px) !important;}",
 
     /* ================= TITRES (hero) — porté de case-cards.js ============== */
@@ -148,7 +148,7 @@
     ".ps-kpi{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;padding:20px 22px !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 14px rgba(15,23,42,.05) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
     ".ps-kpi-num{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
     ".ps-kpi-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:500 !important;color:var(--ps-text-soft,#676879) !important;margin-top:2px !important;}",
-    ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:#F1F1FF !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+    ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:var(--ps-accent-tint,#edf4ff) !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
     ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#507EC5) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-kpi-bar{height:7px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
     ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#507EC5) !important;transition:width .6s ease !important;}",

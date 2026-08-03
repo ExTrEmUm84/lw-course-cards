@@ -301,10 +301,10 @@
   var HERO_BTN_CSS=
       "#pageContent .learnworlds-button.learnworlds-button-outline-accent1{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;padding:11px 26px !important;height:auto !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;color:var(--ps-text,#1c1f26) !important;box-shadow:0 1px 2px rgba(0,0,0,.04) !important;transition:all .15s ease !important;cursor:pointer !important;}"
     + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1 *{font-family:inherit !important;color:inherit !important;font-weight:inherit !important;}"
-    + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1:hover{border-color:var(--ps-accent,#507EC5) !important;color:var(--ps-accent,#507EC5) !important;background:var(--ps-accent-tint,#EDEDFF) !important;}"
+    + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1:hover{border-color:var(--ps-accent,#507EC5) !important;color:var(--ps-accent,#507EC5) !important;background:var(--ps-accent-tint,#edf4ff) !important;}"
     + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active{background:var(--ps-accent,#507EC5) !important;border-color:var(--ps-accent,#507EC5) !important;color:#fff !important;}"
     + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active *{color:#fff !important;}"
-    + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active:hover{background:var(--ps-accent-hover,#4B4BE0) !important;border-color:var(--ps-accent-hover,#4B4BE0) !important;color:#fff !important;}";
+    + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1.ps-hb-active:hover{background:var(--ps-accent-hover,#486798) !important;border-color:var(--ps-accent-hover,#486798) !important;color:#fff !important;}";
 
   function heroBtns(){
     var st=document.getElementById("ps-hero-btn");
@@ -540,7 +540,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-j";
+  window.PS_TOKENS_V="2026-08-03-k";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug

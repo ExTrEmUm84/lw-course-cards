@@ -55,7 +55,7 @@
     S+" img.user-image{border-radius:50% !important;border:3px solid #fff !important;box-shadow:0 6px 20px rgba(15,23,42,.10) !important;}",
     /* le bouton "Edit profile" prend le CTA violet du site */
     S+" .ps-pf-head button.learnworlds-button,"+S+" button.learnworlds-button.ps-pf-edit{background:var(--ps-accent,#507EC5) !important;border:0 !important;border-radius:var(--ps-r-pill,999px) !important;padding:11px 22px !important;color:#fff !important;"+FT+"font-size:15px !important;font-weight:600 !important;box-shadow:none !important;cursor:pointer !important;transition:background .18s ease !important;}",
-    S+" button.learnworlds-button.ps-pf-edit:hover{background:var(--ps-accent-hover,#4B4BE0) !important;}",
+    S+" button.learnworlds-button.ps-pf-edit:hover{background:var(--ps-accent-hover,#486798) !important;}",
 
     /* ============ 2) RÉSUMÉ : titre + tuiles ============ */
     /* le H1 est sur le bandeau bleu -> il reste blanc, on ne touche qu'à la typo */
@@ -228,11 +228,11 @@
        (Même leçon que le `height:100%` de sector-cards.js.) */
     ".ps-pfc{display:flex !important;flex-direction:column !important;flex:1 1 auto !important;padding:24px !important;}",
     ".ps-pfc-head{display:flex !important;flex-direction:row !important;flex-wrap:wrap !important;align-items:center !important;gap:8px !important;margin-bottom:16px !important;}",
-    ".ps-pfc-tag{display:inline-flex !important;align-items:center !important;padding:5px 13px !important;border-radius:var(--ps-r-pill,999px) !important;"+FT+"font-size:14px !important;font-weight:800 !important;line-height:1.2 !important;background:var(--ps-accent-tint,#EDEDFF) !important;color:var(--ps-accent-hover,#4B4BE0) !important;}",
+    ".ps-pfc-tag{display:inline-flex !important;align-items:center !important;padding:5px 13px !important;border-radius:var(--ps-r-pill,999px) !important;"+FT+"font-size:14px !important;font-weight:800 !important;line-height:1.2 !important;background:var(--ps-accent-tint,#edf4ff) !important;color:var(--ps-accent-hover,#486798) !important;}",
     /* 🔴 couleur par NIVEAU (data-ps-lvl), JAMAIS par nth-child : sur la page
        Cours, les chevrons intercalés décalaient les positions et le cycle
        sautait. Même principe ici par cohérence. */
-    ".ps-pfc-tag[data-ps-lvl='1']{background:var(--ps-accent-tint,#EDEDFF) !important;color:var(--ps-accent-hover,#4B4BE0) !important;}",
+    ".ps-pfc-tag[data-ps-lvl='1']{background:var(--ps-accent-tint,#edf4ff) !important;color:var(--ps-accent-hover,#486798) !important;}",
     ".ps-pfc-tag[data-ps-lvl='2']{background:#E3F8EE !important;color:#00A063 !important;}",
     ".ps-pfc-tag[data-ps-lvl='3']{background:#FFF3E0 !important;color:#C77700 !important;}",
     ".ps-pfc-tag[data-ps-lvl='4']{background:#FDECEF !important;color:#D22B45 !important;}",
@@ -248,7 +248,7 @@
     ".ps-pfc-prog-bar{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#507EC5) !important;}",
     ".ps-pfc-link{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:14px !important;color:var(--ps-accent,#507EC5) !important;"+FT+"font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-pfc-link::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
-    ".ps-pfc-link:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
+    ".ps-pfc-link:hover{color:var(--ps-accent-hover,#486798) !important;}",
     ".ps-pfc-link:hover::after{transform:translateX(5px) !important;}",
     ".ps-pfc-link.ps-done{color:#00A063 !important;}",
     ".ps-pfc-link.ps-done::after{content:\"\\2713\" !important;}",
@@ -264,7 +264,7 @@
     S+" .lw-learning-program-card-descr{"+FT+"font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;}",
     /* le bouton bleu natif -> CTA violet du site */
     S+" .lw-learning-program-card button.learnworlds-button,"+S+" .lw-learning-program-card a.learnworlds-button{background:var(--ps-accent,#507EC5) !important;border:0 !important;border-radius:var(--ps-r-pill,999px) !important;"+FT+"font-size:15px !important;font-weight:600 !important;color:#fff !important;box-shadow:none !important;transition:background .18s ease !important;}",
-    S+" .lw-learning-program-card button.learnworlds-button:hover,"+S+" .lw-learning-program-card a.learnworlds-button:hover{background:var(--ps-accent-hover,#4B4BE0) !important;}",
+    S+" .lw-learning-program-card button.learnworlds-button:hover,"+S+" .lw-learning-program-card a.learnworlds-button:hover{background:var(--ps-accent-hover,#486798) !important;}",
 
     /* ============ 6) barres de filtres ============ */
     /* Ces filtres sont des STATUTS (En cours / Terminé / …), pas des
