@@ -1065,14 +1065,55 @@
     });
     return _regl;
   }
-  /* Accepte aussi bien une URL de player qu'un lien Vimeo « public » : les deux
-     se collent dans le builder, autant les accepter tous les deux. */
   function psReglage(cle, repli){
     var v=lireReglages()[String(cle).toLowerCase()];
-    if(!v) return repli;
-    var m=v.match(/^https?:\/\/(?:www\.)?vimeo\.com\/(\d+)(?:\?(.*))?$/i);
-    if(m) v="https://player.vimeo.com/video/"+m[1]+(m[2]?("?"+m[2]):"");
-    return v;
+    return v || repli;
+  }
+
+  /* ====================================================================
+     UN LIEN COLLÉ TEL QUEL SUFFIT — la configuration est du CODE
+     --------------------------------------------------------------------
+     Demande de Ziad : « je veux juste coller un lien de vidéo sans la config
+     dans le lien ». C'est la bonne façon de séparer les rôles : lui fournit
+     QUELLE vidéo, le code décide COMMENT elle se comporte (fond muet en boucle,
+     lecture au clic, etc.). Il n'a donc jamais à retenir `background=1`.
+
+     Formes acceptées, parce que ce sont celles que Vimeo donne réellement :
+       910833393                                  (l'identifiant seul)
+       https://vimeo.com/910833393
+       https://vimeo.com/910833393/94064c722b     ← bouton « Partager » d'une
+                                                    vidéo NON RÉPERTORIÉE
+       https://vimeo.com/910833393?h=94064c722b
+       https://player.vimeo.com/video/910833393?h=94064c722b
+     🔴 LE JETON `h` EST VITAL : la vidéo de Ziad est non répertoriée. Le perdre
+     redonne « Cette vidéo n'existe pas » — la panne d'origine que ce fichier
+     corrigeait. La forme `/<id>/<jeton>` le cache dans le CHEMIN, pas dans la
+     requête : sans ce cas, un lien copié depuis Vimeo casserait la home.
+     🔴 On n'écrase JAMAIS un paramètre déjà présent : si Ziad met son propre
+     `muted=0`, il gagne. Le code complète, il ne corrige pas.
+     Toute URL non-Vimeo est laissée telle quelle (repli honnête). */
+  var PS_VIDEO_MODES={
+    fond:   {background:"1", autopause:"0", muted:"1", loop:"1"},
+    hero:   {badge:"0", autopause:"0", title:"0", byline:"0", portrait:"0"},
+    modale: {autoplay:"1", title:"0", byline:"0", portrait:"0"}
+  };
+  function psVideo(cle, mode, repli){
+    var v=psReglage(cle, null);
+    if(!v) return repli;                            // rien de collé : on ne touche à rien
+    v=String(v).trim();
+    var id="", req="";
+    var m;
+    if((m=v.match(/^(\d{6,})$/)))                                   { id=m[1]; }
+    else if((m=v.match(/^https?:\/\/(?:www\.)?vimeo\.com\/(\d+)\/([0-9a-z]+)/i))) { id=m[1]; req="h="+m[2]; }
+    else if((m=v.match(/^https?:\/\/(?:www\.)?vimeo\.com\/(\d+)(?:\?(.*))?$/i)))  { id=m[1]; req=m[2]||""; }
+    else if((m=v.match(/^https?:\/\/player\.vimeo\.com\/video\/(\d+)(?:\?(.*))?$/i))) { id=m[1]; req=m[2]||""; }
+    else return v;                                  // pas du Vimeo : on n'invente rien
+    var params=PS_VIDEO_MODES[mode]||{};
+    Object.keys(params).forEach(function(k){
+      if(new RegExp("(^|&)"+k+"=").test(req)) return;              // déjà fourni : il gagne
+      req+=(req?"&":"")+k+"="+params[k];
+    });
+    return "https://player.vimeo.com/video/"+id+(req?("?"+req):"");
   }
 
   /* Vidéo du hero : le template a un iframe Vimeo avec un ID mort (« Cette vidéo
@@ -1084,7 +1125,7 @@
     if(!hero || hero.classList.contains("ps-hero-bg")) return;   // mode vidéo-fond : géré par heroVideoBg
     var ifr=hero.querySelector(".learnworlds-video-iframe iframe, .learnworlds-video-iframe-wrapper iframe, iframe");
     if(!ifr || ifr.getAttribute("data-ps-vid")) return;
-    ifr.setAttribute("src",psReglage("lien_video",HERO_VIDEO));
+    ifr.setAttribute("src",psVideo("lien_video","hero",HERO_VIDEO));
     ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture; clipboard-write");
     ifr.setAttribute("allowfullscreen","");
     ifr.setAttribute("data-ps-vid","1");
@@ -1097,12 +1138,9 @@
     var ov=document.createElement("div"); ov.className="ps-hero-modal";
     var inner=document.createElement("div"); inner.className="ps-hero-modal-inner";
     var ifr=document.createElement("iframe");
-    /* Même vidéo que le hero, mais lancée toute seule. 🔴 On AJOUTE `autoplay`
-       au lieu de le supposer : si Ziad colle une URL sans ce paramètre, la
-       modale s'ouvrirait sur une vidéo à l'arrêt. */
-    var src=psReglage("lien_video","https://player.vimeo.com/video/910833393?h=94064c722b&title=0&byline=0&portrait=0");
-    if(!/[?&]autoplay=/.test(src)) src+=(src.indexOf("?")<0?"?":"&")+"autoplay=1";
-    ifr.src=src;
+    /* Même vidéo que le hero, mais lancée toute seule : c'est le mode `modale`
+       qui pose `autoplay`, pas l'URL collée par Ziad. */
+    ifr.src=psVideo("lien_video","modale","https://player.vimeo.com/video/910833393?h=94064c722b&autoplay=1&title=0&byline=0&portrait=0");
     ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture");
     ifr.setAttribute("allowfullscreen","");
     inner.appendChild(ifr);
@@ -1126,13 +1164,9 @@
     hero.classList.add("ps-hero-bg");
     var wrap=document.createElement("div"); wrap.className="ps-hero-vwrap";
     var ifr=document.createElement("iframe");
-    /* 🔴 `background=1` (autoplay muet, en boucle, sans contrôles) est ce qui
-       fait la vidéo de FOND : on l'ajoute si l'URL fournie ne l'a pas, sinon un
-       lien Vimeo ordinaire collé dans le builder afficherait les contrôles et ne
-       démarrerait pas tout seul. */
-    var bg=psReglage("lien_video_background",HERO_BG_VIDEO);
-    if(!/[?&]background=/.test(bg)) bg+=(bg.indexOf("?")<0?"?":"&")+"background=1&autopause=0&muted=1";
-    ifr.src=bg;
+    /* Mode `fond` : c'est LUI qui pose `background=1` (autoplay muet, en boucle,
+       sans contrôles). Ziad colle une adresse, rien d'autre. */
+    ifr.src=psVideo("lien_video_background","fond",HERO_BG_VIDEO);
     ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture");
     ifr.setAttribute("frameborder","0");
     ifr.setAttribute("title","Vidéo de fond");
