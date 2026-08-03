@@ -728,11 +728,21 @@
   (function(){
     liensMenuJumeles();
     if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", liensMenuJumeles);
+    /* 🔴🔴 `setTimeout` ET NON `requestAnimationFrame` — mesuré le 03/08.
+       rAF ne se déclenche JAMAIS tant que l'onglet est en arrière-plan
+       (`document.visibilityState==="hidden"`) : le navigateur ne peint pas, donc
+       il n'appelle pas. Vérifié en direct — un rAF posé dans un onglet caché
+       n'avait toujours pas tourné plusieurs secondes après. L'observateur voyait
+       bien les mutations, mais notre fonction n'était jamais rappelée.
+       Réécrire un `href` n'est PAS une tâche de rendu : elle ne doit pas dépendre
+       du fait que la page soit peinte. Cas réels concernés : un lien ouvert dans
+       un nouvel onglet en arrière-plan (Cmd+clic), un onglet restauré au
+       démarrage. */
     var enAttente=false;
     function planifier(){
       if(enAttente) return;
       enAttente=true;
-      requestAnimationFrame(function(){ enAttente=false; liensMenuJumeles(); });
+      setTimeout(function(){ enAttente=false; liensMenuJumeles(); }, 50);
     }
     try{ new MutationObserver(planifier).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
     var n=0, iv=setInterval(function(){
