@@ -252,16 +252,27 @@
     if(document.getElementById("ps-line-css")) return;
     var st=document.createElement("style"); st.id="ps-line-css";
     st.textContent=
-      ".ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;"+
-        "pointer-events:none !important;z-index:1 !important;}"+
-      ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;"+
+      /* 🔴🔴 TOUT EST SCOPÉ À `.ps-line-hote`, la classe que CE code pose sur les
+         cartes qu'il prend en charge. Régression signalée par Ziad : la règle
+         était écrite sur `.ps-mline` tout court, avec `!important`. Or la page
+         Cours a SON PROPRE liseré, défini dans `course-cards.js` avec
+         `z-index:-1` pour passer SOUS l'illustration ronde — mon `!important` le
+         battait, et le trait remontait par-dessus les images.
+         Deux fichiers qui stylent le même élément, c'est un conflit garanti : ce
+         code ne doit toucher QUE les cartes qu'il a lui-même équipées, et laisser
+         `course-cards.js` maître chez lui.
+         🔴 `z-index:0` et non 1, même pour nos propres cartes : au-dessus du fond,
+         sous tout élément qui se place explicitement plus haut. */
+      ".ps-line-hote > .ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;"+
+        "pointer-events:none !important;z-index:0 !important;}"+
+      ".ps-line-hote > .ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;"+
         "rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-line-c,var(--ps-accent,#507EC5)) !important;"+
         "stroke-width:var(--ps-line-w,4) !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;"+
         "transition:stroke-dashoffset var(--ps-line-t,1.1s) ease !important;}"+
-      "[class*='ps-']:hover > .ps-mline rect{stroke-dashoffset:0 !important;}"+
+      ".ps-line-hote:hover > .ps-mline rect{stroke-dashoffset:0 !important;}"+
       /* Le liseré déborde de la carte si elle rogne son contenu. */
       ".ps-line-hote{position:relative !important;overflow:visible !important;}"+
-      "@media(prefers-reduced-motion:reduce){.ps-mline rect{transition:none !important;}}";
+      "@media(prefers-reduced-motion:reduce){.ps-line-hote > .ps-mline rect{transition:none !important;}}";
     (document.head||document.documentElement).appendChild(st);
   }
   var LINE_SEL=".ps-ccab,.ps-scard,.ps-cc,.ps-pfc";   /* cartes des pages AUTRES que Cours */
@@ -546,7 +557,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-l";
+  window.PS_TOKENS_V="2026-08-03-r";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
