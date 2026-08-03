@@ -276,7 +276,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-o</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-p</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -335,28 +335,17 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     <div class="note" id="howto"></div>
 
     <h2>Publier sur le site</h2>
-    <div class="note" style="border-left-color:#E2445C;background:#FDECEF;color:#8A2233">
-      ⚠️ <strong>À lire une fois.</strong> Ce dépôt n'héberge pas que des couleurs : il contient
-      <strong>le JavaScript que ton site charge sur toutes les pages</strong>. Un jeton qui fuite
-      permettrait donc d'injecter du code chez tes visiteurs. Crée-le
-      <strong>« fine-grained », limité au seul dépôt <code>lw-course-cards</code></strong>,
-      permission <strong>Contents : Read and write</strong>, avec une expiration.
-      Il reste dans <em>ton</em> navigateur (rien n'est envoyé ailleurs) et se révoque en un clic
-      sur GitHub.
+    <div class="note" style="border-left-color:#00C875;background:#E9FBF2;color:#0B6B43">
+      ✅ <strong>Aucune clé à saisir.</strong> Tu te connectes avec ton compte GitHub — il sert
+      uniquement à prouver qui tu es. C'est le serveur PrepaStrat qui écrit sur le site, après avoir
+      vérifié chaque valeur. Il n'accepte que des couleurs, des nombres et des adresses de vidéo :
+      <strong>aucun code ne peut passer par ici</strong>.
     </div>
-    <div class="row" style="margin-top:9px">
-      <input type="password" id="tok" placeholder="Jeton GitHub (github_pat_…)" autocomplete="off">
-    </div>
-    <div class="btns" style="margin-top:8px">
-      <button class="primary" id="pub" style="flex:1">Publier sur le site</button>
-      <button id="forget" title="Efface le jeton de ce navigateur">Oublier</button>
+    <div class="btns" style="margin-top:9px">
+      <button class="primary" id="pub" style="flex:1">Se connecter avec GitHub</button>
+      <button id="forget" title="Ferme la session sur ce navigateur" style="display:none">Déconnexion</button>
     </div>
     <div class="note" id="pubStatus" style="display:none"></div>
-    <div class="note">
-      <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">Créer un jeton fine-grained →</a><br>
-      Repository access : <em>Only select repositories</em> → <code>lw-course-cards</code>.<br>
-      Permissions : <em>Repository permissions</em> → <strong>Contents</strong> → <em>Read and write</em>.
-    </div>
   </div>
 
   <!-- ================= APERÇU ================= -->
@@ -1185,39 +1174,27 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   };
 
   /* ================= PUBLIER ==========================================
-     Commite `tokens.js` via l'API GitHub, en ne remplaçant QUE le bloc entre
-     les marqueurs — tout le reste du fichier (les commentaires, qui sont la
-     mémoire du projet) est préservé à l'octet près.
-     🔴 Le jeton ne sort JAMAIS d'ici : il va de ce navigateur à api.github.com,
-     rien d'autre. Stocké en localStorage sur extremum84.github.io. */
-  var OWNER="ExTrEmUm84", REPO="lw-course-cards", PATH="tokens.js";
-  var API="https://api.github.com/repos/"+OWNER+"/"+REPO+"/contents/"+PATH;
-  var CLE="ps-gh-token";
-  /* Les marqueurs. Doivent correspondre EXACTEMENT à ceux de tokens.js —
-     les renommer d'un côté sans l'autre casse la publication. */
-  var RE=/(\/\* >>> DEBUT TOKENS[^\n]*\n)([\s\S]*?)(\n\/\* <<< FIN TOKENS \*\/)/;
-  /* Second bloc, même mécanique : couleurs par page + réglages libres.
-     🔴 Il est traité SÉPARÉMENT et non fusionné avec le premier : les tokens
-     sont des lignes de variables CSS, celui-ci est du JavaScript. Les mélanger
-     obligerait le générateur à savoir de quel type est chaque ligne. */
-  var RE_PAGES=/(\/\* >>> DEBUT PAGES[^\n]*\n)([\s\S]*?)(\n\/\* <<< FIN PAGES \*\/)/;
+     🔴🔴 PLUS AUCUNE CLE GITHUB DANS CE NAVIGATEUR. Avant, il fallait coller ici
+     un jeton avec droit d'ecriture sur TOUT le depot — or ce depot sert le
+     JavaScript charge sur toutes les pages du site : ce jeton pouvait donc
+     injecter du code chez les visiteurs, et il dormait en localStorage sur une
+     origine PARTAGEE avec le depot `cv-studio` du meme compte.
+     Desormais GitHub sert UNIQUEMENT a prouver l'identite, et c'est le Worker qui
+     ecrit, avec sa propre cle, apres avoir valide chaque valeur.
+     🔴 On envoie des VALEURS STRUCTUREES, jamais du texte de fichier. Le Worker
+     reconstruit lui-meme le contenu : c'est ce qui rend l'injection impossible.
+     Assembler le bloc ici puis le faire recopier la-bas aurait annule tout le
+     benefice de l'operation. */
+  var GH_CLIENT_ID="Ov23liD1XiByivXxiWhy";
+  var API_PS="https://annuaire-prepastrat.ziedbencheikh.workers.dev";
+  var RETOUR=location.origin+location.pathname;
+  /* sessionStorage et non localStorage : la session meurt avec l'onglet. Sur un
+     poste partage, refermer la fenetre suffit a fermer l'acces. */
+  var CLE_SESS="psPubSession", CLE_QUI="psPubLogin";
 
-  /* btoa() ne gère que le latin-1 : tokens.js contient des accents et des
-     emojis, il faut passer par les octets UTF-8 sinon le fichier est corrompu. */
-  function b64(str){
-    var o=new TextEncoder().encode(str), s="";
-    o.forEach(function(b){ s+=String.fromCharCode(b); });
-    return btoa(s);
-  }
-  function deb64(x){
-    var bin=atob(String(x).replace(/\s/g,""));
-    var o=Uint8Array.from(bin, function(c){ return c.charCodeAt(0); });
-    return new TextDecoder().decode(o);
-  }
-
-  var elTok=document.getElementById("tok"), elPub=document.getElementById("pub"),
+  var elPub=document.getElementById("pub"), elOut=document.getElementById("forget"),
       elSt=document.getElementById("pubStatus");
-  try{ elTok.value=localStorage.getItem(CLE)||""; }catch(e){}
+
   function dire(msg, type){
     elSt.style.display="block";
     elSt.style.borderLeftColor = type==="ko" ? "#E2445C" : type==="ok" ? "#00C875" : "#DCE0E8";
@@ -1225,76 +1202,90 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     elSt.style.color           = type==="ko" ? "#8A2233" : type==="ok" ? "#0B6B43" : "#8A90A2";
     elSt.innerHTML=msg;
   }
-  document.getElementById("forget").onclick=function(){
-    try{ localStorage.removeItem(CLE); }catch(e){}
-    elTok.value=""; dire("Jeton effacé de ce navigateur. Pense à le révoquer sur GitHub s'il ne sert plus.","");
-  };
+  function session(){ try{ return sessionStorage.getItem(CLE_SESS)||""; }catch(e){ return ""; } }
+  function majBouton(){
+    if(session()){ elPub.textContent="Publier sur le site"; elOut.style.display=""; }
+    else { elPub.textContent="Se connecter avec GitHub"; elOut.style.display="none"; }
+  }
 
-  elPub.onclick=async function(){
-    var t=elTok.value.trim();
-    if(!t){ dire("Colle d'abord ton jeton GitHub.","ko"); return; }
-    elPub.disabled=true; var libelle=elPub.textContent; elPub.textContent="Publication…";
-    try{
-      var H={Authorization:"Bearer "+t, Accept:"application/vnd.github+json", "X-GitHub-Api-Version":"2022-11-28"};
+  /* URLs de video normalisees ICI, avant l'envoi : le Worker n'accepte que la
+     forme `player.vimeo.com`. Coller le lien « Partager » de Vimeo doit marcher —
+     c'est celui qu'on a sous la main, pas l'adresse du player. */
+  function vimeoNormalise(v){
+    v=String(v||"").trim(); if(!v) return "";
+    var m;
+    if((m=v.match(/^https?:\/\/(?:www\.)?vimeo\.com\/(\d+)\/([0-9a-z]+)/i))) return "https://player.vimeo.com/video/"+m[1]+"?h="+m[2];
+    if((m=v.match(/^https?:\/\/(?:www\.)?vimeo\.com\/(\d+)(?:\?(.*))?$/i)))  return "https://player.vimeo.com/video/"+m[1]+(m[2]?("?"+m[2]):"");
+    if((m=v.match(/^(\d{6,})$/)))                                            return "https://player.vimeo.com/video/"+m[1];
+    return v;
+  }
 
-      dire("Lecture de <code>tokens.js</code>…","");
-      var g=await fetch(API+"?ref=main&t="+Date.now(),{headers:H, cache:"no-store"});
-      if(g.status===401) throw new Error("Jeton refusé (401). Il est peut-être expiré ou mal copié.");
-      if(g.status===403) throw new Error("Accès refusé (403). Le jeton n'a pas la permission <strong>Contents: Read and write</strong> sur ce dépôt.");
-      if(g.status===404) throw new Error("Introuvable (404). Le jeton ne donne probablement pas accès au dépôt <code>"+REPO+"</code>.");
-      if(!g.ok) throw new Error("Lecture impossible ("+g.status+").");
-      var meta=await g.json();
-      var actuel=deb64(meta.content);
-
-      if(!RE.test(actuel)) throw new Error("Les marqueurs <code>DEBUT/FIN TOKENS</code> sont introuvables dans tokens.js. Quelqu'un les a renommés — je ne touche à rien.");
-      /* 🔴 On vérifie les DEUX marqueurs AVANT d'écrire quoi que ce soit : une
-         publication qui ne remplacerait qu'un bloc sur deux laisserait le
-         fichier à moitié à jour, et l'écart passerait inaperçu. */
-      if(!RE_PAGES.test(actuel)) throw new Error("Les marqueurs <code>DEBUT/FIN PAGES</code> sont introuvables dans tokens.js. Je ne touche à rien.");
-
-      var bloc=lignes().map(function(p){ return '    "'+p[0]+':'+p[1]+'"'; }).join(",\n");
-      var neuf=actuel.replace(RE, function(_,a,__,c){ return a+bloc+c; });
-      var blocP=blocPages();
-      neuf=neuf.replace(RE_PAGES, function(_,a,__,c){ return a+blocP+c; });
-
-      if(neuf===actuel){ dire("Rien à publier : le site a déjà exactement ces valeurs.","ok"); return; }
-
-      dire("Envoi du commit…","");
-      var p=await fetch(API,{method:"PUT",headers:H,body:JSON.stringify({
-        message:"Design system : tokens mis a jour depuis le configurateur",
-        content:b64(neuf), sha:meta.sha, branch:"main"
-      })});
-      if(p.status===409) throw new Error("Conflit (409) : le fichier a changé entre-temps. Recharge la page et republie.");
-      if(!p.ok){ var e=await p.text(); throw new Error("Commit refusé ("+p.status+"). "+e.slice(0,120)); }
-
-      dire("Commit passé ✓ — GitHub Pages redéploie, j'attends la mise en ligne…","");
-
-      /* On ne dit "en ligne" qu'après l'avoir VÉRIFIÉ : Pages met 1 à 2 min, et
-         annoncer trop tôt ferait croire à un bug quand le site n'a pas bougé. */
-      var cible=lignes().find(function(p){ return p[0]==="--ps-accent"; })[1];
-      var vu=false;
-      for(var i=0;i<24 && !vu;i++){
-        await new Promise(function(r){ setTimeout(r,5000); });
-        try{
-          var v=await fetch("https://extremum84.github.io/lw-course-cards/tokens.js?cb="+Date.now(),{cache:"reload"});
-          var txt=await v.text();
-          if(txt.indexOf('"--ps-accent:'+cible+'"')>-1) vu=true;
-        }catch(e){}
-        if(!vu) dire("Commit passé ✓ — Pages redéploie… ("+((i+1)*5)+"s)","");
+  function chargeUtile(){
+    var accents={}, styles={};
+    PAGES_LIB.forEach(function(p){
+      if(S.pages[p[0]]) accents[p[0]]=S.pages[p[0]];
+      var st=S.style[p[0]];
+      if(st && st.contour){
+        styles[p[0]]={ep:st.ep, duree:st.duree};
+        if(st.couleur) styles[p[0]].couleur=st.couleur;
       }
-      if(vu) dire("<strong>En ligne ✓</strong> Recharge une page de ton site pour la voir.<br>"
-        +"⚠️ Ton navigateur garde les fichiers en cache ~10 min : fais un rechargement forcé "
-        +"(<kbd>Cmd+Maj+R</kbd>) si tu ne vois rien.","ok");
-      else dire("Commit passé ✓, mais Pages n'a pas encore servi la nouvelle version après 2 min. "
-        +"Ça finit presque toujours par arriver — réessaie de recharger dans quelques minutes.","");
+    });
+    return { tokens:lignes(), pages:{ accents:accents, styles:styles, reglages:{
+      lien_video:vimeoNormalise(S.reglages.lien_video),
+      lien_video_background:vimeoNormalise(S.reglages.lien_video_background) } } };
+  }
 
-      try{ localStorage.setItem(CLE,t); }catch(e){}
-    }catch(err){
-      dire("<strong>Échec.</strong> "+(err&&err.message?err.message:err),"ko");
-    }finally{
-      elPub.disabled=false; elPub.textContent=libelle;
-    }
+  async function publier(){
+    elPub.disabled=true; var lib=elPub.textContent; elPub.textContent="Publication…";
+    try{
+      dire("Envoi au serveur…","");
+      var r=await fetch(API_PS+"/publier",{ method:"POST",
+        headers:{ "Content-Type":"application/json", "X-PS-Session":session() },
+        body:JSON.stringify(chargeUtile()) });
+      var j=await r.json().catch(function(){ return {}; });
+      if(r.status===401){ try{ sessionStorage.removeItem(CLE_SESS); }catch(e){} majBouton();
+        throw new Error("Session expirée — reconnecte-toi."); }
+      if(!r.ok) throw new Error(j.error||("Refusé ("+r.status+")"));
+      if(j.inchange) dire("Rien à publier : le site a déjà exactement ces valeurs.","ok");
+      else dire("Publié ✓ — en ligne dans 1 à 2 minutes, le temps que GitHub Pages redéploie.","ok");
+    }catch(e){ dire(String(e.message||e),"ko"); }
+    finally{ elPub.disabled=false; elPub.textContent=lib; majBouton(); }
+  }
+
+  elPub.onclick=function(){
+    if(session()) return publier();
+    /* `state` : jeton anti-CSRF verifie au retour. Sans lui, un tiers pourrait
+       faire aboutir ici une connexion que l'utilisateur n'a pas demandee. */
+    var etat=Math.random().toString(36).slice(2)+Date.now().toString(36);
+    try{ sessionStorage.setItem("psPubEtat",etat); }catch(e){}
+    location.href="https://github.com/login/oauth/authorize?client_id="+encodeURIComponent(GH_CLIENT_ID)+
+      "&redirect_uri="+encodeURIComponent(RETOUR)+"&state="+encodeURIComponent(etat);
   };
+  elOut.onclick=function(){
+    try{ sessionStorage.removeItem(CLE_SESS); sessionStorage.removeItem(CLE_QUI); }catch(e){}
+    majBouton(); dire("Session fermée.","");
+  };
+
+  /* Retour de GitHub : on echange le code contre une session, puis on NETTOIE
+     l'URL — un code d'autorisation n'a rien a faire dans un historique. */
+  (async function retourOAuth(){
+    var m=location.search.match(/[?&]code=([^&]+)/);
+    if(!m){ majBouton(); return; }
+    var etat=(location.search.match(/[?&]state=([^&]+)/)||[])[1];
+    var attendu=""; try{ attendu=sessionStorage.getItem("psPubEtat")||""; }catch(e){}
+    history.replaceState(null,"",location.pathname);
+    if(!etat || decodeURIComponent(etat)!==attendu){ dire("Connexion abandonnée (jeton d'état invalide).","ko"); majBouton(); return; }
+    dire("Vérification du compte…","");
+    try{
+      var r=await fetch(API_PS+"/auth",{ method:"POST", headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({code:decodeURIComponent(m[1])}) });
+      var j=await r.json().catch(function(){ return {}; });
+      if(!r.ok||!j.ok) throw new Error(j.error||"connexion refusée");
+      try{ sessionStorage.setItem(CLE_SESS,j.session); sessionStorage.setItem(CLE_QUI,j.login); }catch(e){}
+      dire("Connecté en tant que <strong>"+String(j.login).replace(/[<>&]/g,"")+"</strong>. Tu peux publier.","ok");
+    }catch(e){ dire(String(e.message||e),"ko"); }
+    majBouton();
+  })();
 
   cssReel();
   pagesUI();
