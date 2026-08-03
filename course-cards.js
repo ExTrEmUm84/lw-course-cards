@@ -209,7 +209,7 @@
        tokens.js). Les replis `4` et `1.1s` sont EXACTEMENT les valeurs qui
        étaient en dur ici — si tokens.js ne charge pas, cette page garde son
        liseré d'origine, au pixel près. */
-    ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-line-c,var(--ps-accent,#507EC5)) !important;stroke-width:var(--ps-line-w,4) !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset var(--ps-line-t,1.1s) ease !important;}",
+    ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-line-c,rgb(var(--ps-accent-rgb,80,126,197))) !important;stroke-width:var(--ps-line-w,4) !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset var(--ps-line-t,1.1s) ease !important;}",
     "#pageContent .cards-grandpa .lw-course-card:hover .ps-mline rect{stroke-dashoffset:0 !important;}",
     "@media(prefers-reduced-motion:reduce){.ps-mline rect{transition:none !important;}}",
 

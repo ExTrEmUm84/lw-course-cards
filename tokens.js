@@ -269,6 +269,14 @@
      Leur carte peut porter un `overflow:hidden` qui le rognerait, ou un fond qui
      le masque. À vérifier page par page AU MOMENT de l'activer — d'où le fait
      qu'il soit livré éteint. */
+  /* 🔴🔴 LE TRAIT PREND LA COULEUR VIVE, PAS L'ACCENT ASSOMBRI. Signale par
+     Ziad : sur Fiches secteur le lisere sortait en or fonce (#987904) alors
+     qu'il avait choisi #fad54a. `--ps-accent` est DELIBEREMENT assombri pour
+     rester lisible en TEXTE (regle de contraste du 24/07) — mais un lisere
+     n'est pas du texte, c'est un trait decoratif. Il prend donc la couleur
+     VIVE, celle que Ziad a reellement choisie, comme le fait deja la lueur
+     des cartes via ce meme `--ps-accent-rgb`.
+     Une couleur propre de trait, si elle est reglee, reste prioritaire. */
   function contourStyle(){
     if(document.getElementById("ps-line-css")) return;
     var st=document.createElement("style"); st.id="ps-line-css";
@@ -287,7 +295,7 @@
       ".ps-line-hote > .ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;"+
         "pointer-events:none !important;z-index:0 !important;}"+
       ".ps-line-hote > .ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;"+
-        "rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-line-c,var(--ps-accent,#507EC5)) !important;"+
+        "rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-line-c,rgb(var(--ps-accent-rgb,80,126,197))) !important;"+
         "stroke-width:var(--ps-line-w,4) !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;"+
         "transition:stroke-dashoffset var(--ps-line-t,1.1s) ease !important;}"+
       ".ps-line-hote:hover > .ps-mline rect{stroke-dashoffset:0 !important;}"+
@@ -599,7 +607,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-x";
+  window.PS_TOKENS_V="2026-08-03-y";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
