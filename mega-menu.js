@@ -66,22 +66,24 @@
   var NAV=" nav.lw-topbar-menu ";           // scope desktop
   var CSS=[
     /* ---------- pictos + libellés (desktop ET tiroir mobile) ---------- */
-    /* 🔴🔴 UNE SEULE COULEUR : CELLE DE LA PAGE (demande de Ziad, 04/08).
-       Les pictos cyclaient sur six teintes selon leur POSITION
-       (`nth-child(6n+N)`, table `C`) : seul le premier suivait l'accent, les cinq
-       autres étaient des couleurs figées, écrites en dur ici. D'où l'impression
-       que « les couleurs changent tout le temps » — elles changeaient en effet à
-       chaque menu et à chaque rang, sans rien signifier. Un picto de navigation
-       n'est pas une pastille de champ : il ne code aucune information, donc sa
-       couleur n'a rien à distinguer.
-       `--ps-accent` est reposé par page sur `:root` par `accentPage()` de
-       tokens.js ⇒ le menu prend la couleur de la page où l'on se trouve, et suit
-       automatiquement ce qui est réglé dans le configurateur.
+    /* 🔴🔴 CHAQUE PICTO PORTE LA COULEUR DE LA PAGE QU'IL VISE (Ziad, 04/08).
+       Historique en deux temps, parce que je me suis trompé de cible au premier :
+       1. Les pictos cyclaient sur six teintes selon leur POSITION
+          (`nth-child(6n+N)`) : une seule suivait l'accent, les cinq autres étaient
+          figées en dur. D'où « les couleurs changent tout le temps » — elles
+          changeaient en effet à chaque menu et à chaque rang, sans rien signifier.
+       2. Je les ai d'abord toutes alignées sur la couleur de la page COURANTE.
+          Ziad : « je veux qu'elles gardent la couleur de leurs pages
+          respectives ». C'est mieux, et ça donne au menu une vraie information :
+          le picto annonce la couleur de la page où l'on va.
+       La couleur est donc posée par `couleurLien()`, à partir de `PS_PAGE_ACCENTS`
+       — la MÊME table qui colore les pages, donc rien à tenir à jour ici.
+       Cette règle-ci reste le défaut : une page sans couleur propre (Blog, Profil,
+       Bootcamp…) prend l'accent de la marque.
        ⚠️ Réserve assumée, cohérente avec la décision du 03/08 (« plus aucun
-       assombrissement ») : sur une page à teinte CLAIRE — le jaune des fiches
-       secteur — le glyphe blanc sur ce fond est peu lisible. C'est visible et ça
-       se corrige en changeant la couleur, plutôt que d'être compensé dans le dos
-       de celui qui la choisit. */
+       assombrissement ») : sur une teinte CLAIRE — le jaune des fiches secteur —
+       le glyphe blanc est peu lisible. C'est visible, donc corrigeable en changeant
+       la couleur, plutôt que compensé dans le dos de celui qui la choisit. */
     ".ps-mm-ic{background:var(--ps-accent,#507EC5) !important;border-radius:11px !important;flex:none !important;display:flex !important;align-items:center !important;justify-content:center !important;color:#fff !important;}",
     ".ps-mm-ic svg{stroke:#fff !important;fill:none !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-mm-t{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-weight:600 !important;color:var(--ps-text,#1c1f26) !important;line-height:1.3 !important;}",
@@ -186,6 +188,48 @@
     ul.closest("nav.lw-topbar-menu").style.setProperty("--ps-mm-gap",gap+"px");
   }
 
+  /* ====================================================================
+     LA COULEUR D'UN PICTO = CELLE DE LA PAGE QU'IL VISE
+     --------------------------------------------------------------------
+     Source unique : `PS_PAGE_ACCENTS`, la table que `tokens.js` utilise déjà pour
+     colorer les pages elles-mêmes. Rien n'est recopié ici : régler la couleur de
+     Cours dans le configurateur repeint son picto du menu, sans autre geste.
+     🔴 Les pages JUMELLES passent par `PS_PAGES_FR` : le lien « Formations » du
+     menu pointe sur `/formation-par-modules-clone-en` (mesuré), qui n'existe pas
+     dans la table. Sans cette résolution, la version anglaise du menu perdrait
+     toutes ses couleurs — la même dualité que celle corrigée le 03/08 côté pages.
+     🔴 Rien trouvé (page sans couleur propre, lien vers un cours, `/signout`) :
+     on ne pose RIEN, et la règle CSS de `.ps-mm-ic` fait retomber sur l'accent de
+     la marque. Un repli en dur ici aurait figé une couleur de plus. */
+  function couleurLien(link){
+    var acc=window.PS_PAGE_ACCENTS;
+    if(!acc) return "";                       /* tokens.js absent : repli CSS */
+    var slug="";
+    try{ slug=new URL(link.getAttribute("href")||"",location.href).pathname.replace(/^\/+|\/+$/g,""); }
+    catch(e){ return ""; }
+    if(!slug) return "";
+    var fr=window.PS_PAGES_FR;
+    if(fr && fr[slug]) slug=fr[slug];         /* jumelle EN -> réglages de sa page FR */
+    return acc[slug]||"";
+  }
+  /* 🔴 Passe SÉPARÉE de la construction, et rejouée à chaque `build()`. La
+     construction est gardée par `data-ps-mm` (on ne réécrit pas le contenu d'un
+     lien déjà fait) ; si la couleur vivait là, un `tokens.js` chargé APRÈS
+     `mega-menu.js` n'aurait jamais repeint les pictos — l'ordre des deux balises
+     dans le code du site n'est pas de notre ressort. Idempotent et sans effet de
+     bord : on repose la même valeur.
+     🔴 `important` obligatoire : la règle `.ps-mm-ic` du fichier porte
+     `background:… !important`, qu'un style inline ordinaire ne bat pas. */
+  function couleurs(){
+    document.querySelectorAll(".lw-topbar-submenu-item > .lw-topbar-option-link").forEach(function(link){
+      var ic=link.querySelector(".ps-mm-ic");
+      if(!ic) return;
+      var c=couleurLien(link);
+      if(c) ic.style.setProperty("background",c,"important");
+      else  ic.style.removeProperty("background");
+    });
+  }
+
   function build(){
     measureGap();
     document.querySelectorAll(".lw-topbar-submenu-item > .lw-topbar-option-link").forEach(function(link){
@@ -199,6 +243,7 @@
                    + '<span class="ps-mm-t">'+label+'</span>';
       link.dataset.psMm="1";
     });
+    couleurs();                 /* après la construction : les pictos existent */
     /* panneaux sans aucune entrée réelle : ne pas afficher de boîte vide */
     document.querySelectorAll(".lw-topbar-submenu").forEach(function(s){
       s.classList.toggle("ps-mm-empty", s.querySelectorAll(".lw-topbar-submenu-item:not(.ps-mm-hide)").length===0);
