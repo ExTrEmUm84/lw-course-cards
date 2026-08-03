@@ -1023,7 +1023,30 @@
   function depLirePage(){
     if(/\/profile/.test(location.pathname)) return null;
     var cards=document.querySelectorAll("#pageContent .lw-course-card");
-    if(!cards.length) return null;
+    /* 🔴 La page Compétences n'a AUCUNE carte de cours : elle n'affiche que des
+       PROGRAMMES, et sa propre tuile moyenne ces programmes (cf. mountKpi de
+       program-cards.js, qui déduplique par titre). Sans ce repli, cette page ne
+       déposait rien et restait à 0 % sur le profil alors qu'elle affiche sa
+       propre valeur. On reproduit donc sa règle, pas une autre. */
+    if(!cards.length){
+      var pc=document.querySelectorAll("#pageContent .lw-learning-program-card");
+      if(!pc.length) return null;
+      var vusP=Object.create(null), m=0;
+      for(var q=0;q<pc.length;q++){
+        var h=pc[q].querySelector(".learnworlds-heading3")||pc[q].querySelector("[class*='heading']");
+        var t=h?(h.textContent||"").replace(/\s+/g," ").trim():"";
+        if(!t || (t in vusP)) continue;             // dédup par titre, comme la tuile
+        var bp=pc[q].querySelector(".lw-course-card-progress-bar");
+        var vp=bp?parseInt(((bp.style&&bp.style.width)||"").replace("%",""),10):NaN;
+        vusP[t]=isNaN(vp)?0:Math.max(0,Math.min(100,vp));
+        m++;
+      }
+      if(!m) return null;
+      var tp=0, kp;
+      for(kp in vusP) tp+=vusP[kp];
+      var op={}; op[location.pathname]=Math.round(tp/m);
+      return {pct:op, cours:m};
+    }
     var vus=Object.create(null), n=0;
     for(var i=0;i<cards.length;i++){
       if(cards[i].classList.contains("ps-lang-off")) continue;   // autre langue : hors calcul
