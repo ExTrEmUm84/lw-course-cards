@@ -346,7 +346,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-e</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-f</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -627,7 +627,7 @@ body.ps-verrou .ps-porte{display:grid}
     text:"#1c1f26", textSoft:"#676879", border:"#E6E9EF", surfaceSoft:"#F7F8FB",
     font:"Figtree,-apple-system,Segoe UI,Roboto,sans-serif",
     rCard:16, rPill:999, rBtn:10, deriv:true, cabLogo:"#507EC5",
-    anAvatar:56, anCol:260, pfRing:64, pfBar:8,
+    anAvatar:56, anCol:260, pfRing:64, pfBar:8, anBtn:"", pfBtn:"",
     /* Niveau 1 et champ 1 SUIVENT la marque (cases cochées) : ces deux valeurs ne
        servent que si Ziad décoche le lien. Elles doivent donc valoir ce que le
        lien produirait, sinon décocher changerait la couleur sans qu'il l'ait
@@ -1122,6 +1122,21 @@ body.ps-verrou .ps-porte{display:grid}
     });
   }
 
+  /* Une couleur FACULTATIVE : decochee, l'element herite. Meme motif que la
+     couleur propre du trait — c'est le seul moyen d'exprimer « laisse suivre »,
+     qu'un simple nuancier ne peut pas dire puisqu'il vaut toujours quelque chose. */
+  function ligneCouleurFac(parent, lib, cle, aide){
+    var r=document.createElement("div"); r.className="row";
+    var ck=document.createElement("input"); ck.type="checkbox"; ck.checked=!!S[cle]; ck.style.flex="none";
+    ck.id="ck-"+cle;
+    var l=document.createElement("label"); l.textContent=lib; l.setAttribute("for",ck.id);
+    var c=document.createElement("input"); c.type="color"; c.value=S[cle]||S.accent; c.disabled=!S[cle];
+    ck.onchange=function(){ S[cle]= ck.checked ? (c.value||S.accent) : ""; c.disabled=!ck.checked; rendre(); sortie(); };
+    c.oninput=function(){ if(ck.checked){ S[cle]=c.value; rendre(); sortie(); } };
+    r.appendChild(ck); r.appendChild(l); r.appendChild(c); parent.appendChild(r);
+    if(aide){ var p=document.createElement("p"); p.className="expl"; p.style.margin="4px 0 0"; p.innerHTML=aide; parent.appendChild(p); }
+  }
+
   /* 🔴 Un curseur nomme et chiffre, au meme format que le reste du panneau. */
   function ligneCurseur(parent, lib, cle, min, max, pas, unite){
     var r=document.createElement("div"); r.className="row";
@@ -1144,6 +1159,8 @@ body.ps-verrou .ps-porte{display:grid}
     d.innerHTML='<h4>Cartes des membres</h4><p class="expl">La couleur habille les pastilles de filtre '+
       '(École, Niveau, Recherche, Langue), le nom d\'école sous chaque membre et le bouton «&nbsp;Envoyer un email&nbsp;». '+
       'L\'aperçu ci-dessous montre des membres <strong>inventés</strong>&nbsp;: les vraies cartes affichent des personnes réelles, elles n\'ont rien à faire dans une maquette.</p>';
+    ligneCouleurFac(d,"Couleur propre du bouton « Envoyer un email »","anBtn",
+      "Décochée, il prend la couleur de la page Annuaire.");
     ligneCurseur(d,"Taille de l\'avatar","anAvatar",40,96,2,"px");
     ligneCurseur(d,"Largeur mini d\'une carte","anCol",200,400,10,"px");
     return d;
@@ -1154,6 +1171,9 @@ body.ps-verrou .ps-porte{display:grid}
     d.innerHTML='<h4>Tableau de bord du membre</h4><p class="expl">La couleur habille le bandeau de grade, '+
       'les anneaux de progression et les boutons «&nbsp;Continuer&nbsp;». '+
       'L\'aperçu ci-dessous reproduit sa forme&nbsp;; les chiffres sont des exemples&nbsp;: le vrai tableau dépend des données du membre connecté.</p>';
+    ligneCouleurFac(d,"Couleur propre des boutons de tuile","pfBtn",
+      "Décochée, <strong>chaque bouton prend la couleur de SA page</strong> — celle réglée dans l\'onglet de cette page. "+
+      "La cocher impose une seule couleur à toutes les tuiles.");
     ligneCurseur(d,"Diamètre des anneaux","pfRing",40,120,2,"px");
     ligneCurseur(d,"Épaisseur des barres","pfBar",4,20,1,"px");
     return d;
@@ -1234,6 +1254,8 @@ body.ps-verrou .ps-porte{display:grid}
     R.setProperty("--ps-an-col",S.anCol+"px");
     R.setProperty("--ps-pf-ring",S.pfRing+"px");
     R.setProperty("--ps-pf-bar",S.pfBar+"px");
+    if(S.pfBtn) R.setProperty("--ps-pf-btn",S.pfBtn); else R.removeProperty("--ps-pf-btn");
+    if(S.anBtn) R.setProperty("--ps-an-btn",S.anBtn); else R.removeProperty("--ps-an-btn");
     R.setProperty("--ps-font",S.font);
     R.setProperty("--ps-r-card",S.rCard+"px");
     R.setProperty("--ps-r-pill",S.rPill+"px");
@@ -1270,6 +1292,12 @@ body.ps-verrou .ps-porte{display:grid}
     L.push(["--ps-an-col",S.anCol+"px"]);
     L.push(["--ps-pf-ring",S.pfRing+"px"]);
     L.push(["--ps-pf-bar",S.pfBar+"px"]);
+    /* 🔴 Emis SEULEMENT si une couleur propre est choisie. Sinon le bouton doit
+       heriter — de la couleur de SA page pour les tuiles du board, de la couleur
+       de la page annuaire pour le bouton contact. Ecrire une valeur par defaut
+       figerait cet heritage et casserait la source unique. */
+    if(S.pfBtn) L.push(["--ps-pf-btn",S.pfBtn]);
+    if(S.anBtn) L.push(["--ps-an-btn",S.anBtn]);
     L.push(["--ps-font",S.font]);
     L.push(["--ps-r-card",S.rCard+"px"]);
     L.push(["--ps-r-pill",S.rPill+"px"]);
@@ -1547,6 +1575,8 @@ body.ps-verrou .ps-porte{display:grid}
           else if(nom==="--ps-an-col")    S.anCol=parseInt(val,10);
           else if(nom==="--ps-pf-ring")   S.pfRing=parseInt(val,10);
           else if(nom==="--ps-pf-bar")    S.pfBar=parseInt(val,10);
+          else if(nom==="--ps-pf-btn")    S.pfBtn=val;
+          else if(nom==="--ps-an-btn")    S.anBtn=val;
           else { var p=nom.match(/^--ps-(lvl|f)([1-6])(-tint)?$/);
                  if(p && val.indexOf("var(")<0) S[p[1]==="lvl"?"lvl":"f"][+p[2]-1][p[3]?1:0]=val; }
         });

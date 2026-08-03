@@ -107,7 +107,7 @@
     S+" .ps-pf-grp{text-align:left !important;background:#fff !important;border-radius:var(--ps-r-card,16px) !important;padding:18px 20px 20px !important;box-shadow:0 4px 16px rgba(15,23,42,.07) !important;animation:psPfUp .55s ease both !important;}",
     S+" .ps-pf-grp-h{display:flex !important;align-items:center !important;gap:10px !important;margin:0 0 14px !important;}",
     /* trait vertical à la couleur de la page : repère de section */
-    S+" .ps-pf-grp-h::before{content:'' !important;flex:none !important;width:4px !important;height:18px !important;border-radius:3px !important;background:var(--c,#507EC5) !important;}",
+    S+" .ps-pf-grp-h::before{content:'' !important;flex:none !important;width:4px !important;height:18px !important;border-radius:3px !important;background:var(--ps-pf-btn,var(--c,#507EC5)) !important;}",
     S+" .ps-pf-grp-t{"+FT+"font-size:14px !important;font-weight:800 !important;letter-spacing:.05em !important;text-transform:uppercase !important;color:#243B6B !important;}",
     S+" .ps-pf-grp-n{"+FT+"font-size:12px !important;font-weight:600 !important;color:#8A93A5 !important;margin-left:auto !important;white-space:nowrap !important;}",
     /* auto-fit ici est SANS DANGER : la carte est déjà dimensionnée sur son

@@ -178,7 +178,7 @@
        Sans !important, le texte du bouton virait gris foncé souligné sur fond
        violet — illisible. Vérifié sur la page réelle le 2026-07-17. */
     R + ".psa-contact{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;" +
-      "border-radius:var(--ps-r-btn,10px);background:var(--ps-accent,#507EC5) !important;color:#fff !important;" +
+      "border-radius:var(--ps-r-btn,10px);background:var(--ps-an-btn,var(--ps-accent,#507EC5)) !important;color:#fff !important;" +
       "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);" +
       "font-size:13.5px;font-weight:600;text-decoration:none !important;transition:background .15s ease;}",
     R + ".psa-contact:hover{background:var(--ps-accent-hover,#486798) !important;color:#fff !important;}",
