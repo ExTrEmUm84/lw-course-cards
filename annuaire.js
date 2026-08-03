@@ -134,16 +134,16 @@
     R + ".psa-count{margin:0 0 20px;color:var(--ps-text-soft,#676879);font-size:14px;}",
 
     /* Grille */
-    R + ".psa-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px;}",
+    R + ".psa-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(var(--ps-an-col,260px),1fr));gap:16px;}",
 
     /* Carte */
     R + ".psa-card{display:flex;flex-direction:column;padding:20px;background:#fff;" +
       "border:1px solid var(--ps-border,#E6E9EF);" +
       "border-radius:var(--ps-r-card,16px);" +
       "transition:box-shadow .18s ease,transform .18s ease;}",
-    R + ".psa-card:hover{box-shadow:0 6px 20px rgba(var(--ps-accent-rgb,97,97,255),.14);transform:translateY(-2px);}",
+    R + ".psa-card:hover{box-shadow:0 6px 20px rgba(var(--ps-accent-rgb,80,126,197),.14);transform:translateY(-2px);}",
 
-    R + ".psa-avatar{width:56px;height:56px;border-radius:50%;display:grid;place-items:center;" +
+    R + ".psa-avatar{width:var(--ps-an-avatar,56px);height:var(--ps-an-avatar,56px);border-radius:50%;display:grid;place-items:center;" +
       "font-weight:700;font-size:18px;letter-spacing:.5px;color:#fff;margin-bottom:14px;" +
       "object-fit:cover;flex:none;}",
 

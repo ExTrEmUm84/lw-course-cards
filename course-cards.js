@@ -39,7 +39,7 @@
        Un `display:… !important` en feuille de style écrase cet inline -> les
        filtres restent visibles malgré la désactivation. Ici : alignement seul. */
     "#pageContent .lw-cols.with-filters{max-width:1000px !important;margin:0 auto !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
-    "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 0 20px rgba(var(--ps-accent-rgb,97,97,255),.18) !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card{width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 0 20px rgba(var(--ps-accent-rgb,80,126,197),.18) !important;overflow:hidden !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
     /* 🔴 LA LUEUR VIOLETTE (choix de Ziad le 17/07) EST INDISSOCIABLE DU PADDING
        HORIZONTAL DU RAIL (`padding:90px 24px 26px`, sa règle plus bas). Le rail
        porte `overflow-x:auto` : avec le padding horizontal à 0 qu'il avait, la
@@ -52,7 +52,7 @@
        bord à 350) et toujours alignées sur le hero, lui aussi calé sur 1000px.
        ⚠️ Ne pas toucher à l'un des trois (padding / max-width / rayon de la
        lueur) sans les autres. */
-    "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(var(--ps-accent-rgb,97,97,255),.30) !important;transform:translateY(-3px) !important;}",
+    "#pageContent .lw-cols > .col.lw-course-card:hover{box-shadow:0 12px 30px rgba(var(--ps-accent-rgb,80,126,197),.30) !important;transform:translateY(-3px) !important;}",
     /* On masque le natif SAUF l'illustration : LearnWorlds la pose en
        `background-image` sur un `div.learnworlds-image`, PREMIER enfant de la
        carte (pas une balise <img>) — inutile donc d'aller relire son URL, il

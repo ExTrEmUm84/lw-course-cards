@@ -154,7 +154,7 @@
     S+" .ps-pf-bt{background:#F7F9FC !important;border:1px solid #EDF1F7 !important;border-radius:13px !important;padding:16px 17px 15px !important;display:flex !important;flex-direction:column !important;gap:13px !important;transition:transform .2s ease, box-shadow .2s ease, background .2s ease !important;}",
     S+" .ps-pf-bt:hover{transform:translateY(-2px) !important;background:#fff !important;box-shadow:0 10px 24px rgba(15,23,42,.10) !important;}",
     S+" .ps-pf-bt-top{display:flex !important;align-items:center !important;gap:13px !important;}",
-    S+" .ps-pf-ring{width:64px !important;height:64px !important;flex:none !important;position:relative !important;}",
+    S+" .ps-pf-ring{width:var(--ps-pf-ring,64px) !important;height:var(--ps-pf-ring,64px) !important;flex:none !important;position:relative !important;}",
     S+" .ps-pf-ring svg{transform:rotate(-90deg) !important;display:block !important;}",
     /* l'anneau s'anime en dessinant son tracé (stroke-dashoffset) */
     S+" .ps-pf-ring .ps-pf-arc{transition:stroke-dashoffset 1.1s cubic-bezier(.4,0,.2,1) !important;}",
@@ -244,7 +244,7 @@
     ".ps-pfc-prog-head{display:flex !important;align-items:baseline !important;justify-content:space-between !important;margin-top:18px !important;margin-bottom:7px !important;}",
     ".ps-pfc-prog-pct{"+FT+"font-size:13px !important;font-weight:700 !important;color:#243B6B !important;}",
     ".ps-pfc-prog-lbl{"+FT+"font-size:12px !important;font-weight:500 !important;color:#8A93A5 !important;}",
-    ".ps-pfc-prog{height:8px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;}",
+    ".ps-pfc-prog{height:var(--ps-pf-bar,8px) !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;}",
     ".ps-pfc-prog-bar{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#507EC5) !important;}",
     ".ps-pfc-link{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:14px !important;color:var(--ps-accent,#507EC5) !important;"+FT+"font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-pfc-link::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",

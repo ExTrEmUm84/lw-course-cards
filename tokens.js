@@ -63,6 +63,10 @@
     "--ps-surface-soft:#F7F8FB",
     "--ps-border:#E6E9EF",
     "--ps-cab-logo:#507EC5",
+    "--ps-an-avatar:56px",
+    "--ps-an-col:260px",
+    "--ps-pf-ring:64px",
+    "--ps-pf-bar:8px",
     "--ps-font:Figtree,-apple-system,Segoe UI,Roboto,sans-serif",
     "--ps-r-card:16px",
     "--ps-r-pill:999px",
@@ -617,7 +621,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-z";
+  window.PS_TOKENS_V="2026-08-04-a";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug

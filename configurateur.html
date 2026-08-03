@@ -296,7 +296,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-a</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-b</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -530,6 +530,7 @@ body.ps-verrou .ps-porte{display:grid}
     text:"#1c1f26", textSoft:"#676879", border:"#E6E9EF", surfaceSoft:"#F7F8FB",
     font:"Figtree,-apple-system,Segoe UI,Roboto,sans-serif",
     rCard:16, rPill:999, rBtn:10, deriv:true, cabLogo:"#507EC5",
+    anAvatar:56, anCol:260, pfRing:64, pfBar:8,
     /* Niveau 1 et champ 1 SUIVENT la marque (cases cochées) : ces deux valeurs ne
        servent que si Ziad décoche le lien. Elles doivent donc valoir ce que le
        lien produirait, sinon décocher changerait la couleur sans qu'il l'ait
@@ -999,6 +1000,43 @@ body.ps-verrou .ps-porte{display:grid}
   }
 
   /* Les URLs de vidéo ne concernent que la home : leur place est dans son onglet. */
+  /* 🔴 Un curseur nomme et chiffre, au meme format que le reste du panneau. */
+  function ligneCurseur(parent, lib, cle, min, max, pas, unite){
+    var r=document.createElement("div"); r.className="row";
+    var l=document.createElement("label"); l.textContent=lib;
+    var i=document.createElement("input"); i.type="range"; i.min=min; i.max=max; i.step=pas; i.value=S[cle];
+    var v=document.createElement("span"); v.className="val"; v.textContent=S[cle]+unite;
+    i.oninput=function(){ S[cle]=parseFloat(i.value); v.textContent=S[cle]+unite; rendre(); sortie(); };
+    r.appendChild(l); r.appendChild(i); r.appendChild(v); parent.appendChild(r);
+  }
+
+  /* 🔴🔴 CES DEUX FONCTIONS MANQUAIENT. Leurs APPELS avaient bien ete ajoutes,
+     pas leurs definitions — deux de mes insertions avaient echoue en silence.
+     Resultat : ouvrir l'onglet Profil ou Annuaire levait une ReferenceError et
+     la carte ne se construisait pas. Ziad l'a vu comme « il n'y a rien sur profil
+     et annuaire » ; ce n'etait pas un manque de reglages, c'etait une panne.
+     Lecon : verifier qu'un remplacement a REELLEMENT eu lieu, pas seulement que
+     le script s'est termine sans erreur. Un `assert` aurait coute une ligne. */
+  function carteAnnuaire(){
+    var d=document.createElement("div"); d.className="card";
+    d.innerHTML='<h4>Cartes des membres</h4><p class="expl">La couleur habille les pastilles de filtre '+
+      '(École, Niveau, Recherche, Langue), le nom d\'école sous chaque membre et le bouton «&nbsp;Envoyer un email&nbsp;». '+
+      '<strong>Pas d\'aperçu ici</strong>&nbsp;: les cartes affichent de vraies personnes, elles n\'ont rien à faire dans une maquette.</p>';
+    ligneCurseur(d,"Taille de l\'avatar","anAvatar",40,96,2,"px");
+    ligneCurseur(d,"Largeur mini d\'une carte","anCol",200,400,10,"px");
+    return d;
+  }
+
+  function carteProfil(){
+    var d=document.createElement("div"); d.className="card";
+    d.innerHTML='<h4>Tableau de bord du membre</h4><p class="expl">La couleur habille le bandeau de grade, '+
+      'les anneaux de progression et les boutons «&nbsp;Continuer&nbsp;». '+
+      '<strong>Pas d\'aperçu ici</strong>&nbsp;: le tableau dépend des données du membre connecté, il faut le regarder sur le site.</p>';
+    ligneCurseur(d,"Diamètre des anneaux","pfRing",40,120,2,"px");
+    ligneCurseur(d,"Épaisseur des barres","pfBar",4,20,1,"px");
+    return d;
+  }
+
   function carteVideos(){
     var d=document.createElement("div"); d.className="card";
     d.innerHTML='<h4>Vidéos du hero</h4><p class="expl">Colle simplement l\'adresse Vimeo — le lien « Partager » convient. '+
@@ -1070,6 +1108,10 @@ body.ps-verrou .ps-porte{display:grid}
     R.setProperty("--ps-border",S.border);
     R.setProperty("--ps-surface-soft",S.surfaceSoft);
     R.setProperty("--ps-cab-logo",S.cabLogo);
+    R.setProperty("--ps-an-avatar",S.anAvatar+"px");
+    R.setProperty("--ps-an-col",S.anCol+"px");
+    R.setProperty("--ps-pf-ring",S.pfRing+"px");
+    R.setProperty("--ps-pf-bar",S.pfBar+"px");
     R.setProperty("--ps-font",S.font);
     R.setProperty("--ps-r-card",S.rCard+"px");
     R.setProperty("--ps-r-pill",S.rPill+"px");
@@ -1101,6 +1143,10 @@ body.ps-verrou .ps-porte{display:grid}
     L.push(["--ps-surface-soft",S.surfaceSoft]);
     L.push(["--ps-border",S.border]);
     L.push(["--ps-cab-logo",S.cabLogo]);
+    L.push(["--ps-an-avatar",S.anAvatar+"px"]);
+    L.push(["--ps-an-col",S.anCol+"px"]);
+    L.push(["--ps-pf-ring",S.pfRing+"px"]);
+    L.push(["--ps-pf-bar",S.pfBar+"px"]);
     L.push(["--ps-font",S.font]);
     L.push(["--ps-r-card",S.rCard+"px"]);
     L.push(["--ps-r-pill",S.rPill+"px"]);
@@ -1374,6 +1420,10 @@ body.ps-verrou .ps-porte{display:grid}
           else if(nom==="--ps-r-card") S.rCard=parseInt(val,10);
           else if(nom==="--ps-r-pill") S.rPill=parseInt(val,10);
           else if(nom==="--ps-r-btn")  S.rBtn=parseInt(val,10);
+          else if(nom==="--ps-an-avatar") S.anAvatar=parseInt(val,10);
+          else if(nom==="--ps-an-col")    S.anCol=parseInt(val,10);
+          else if(nom==="--ps-pf-ring")   S.pfRing=parseInt(val,10);
+          else if(nom==="--ps-pf-bar")    S.pfBar=parseInt(val,10);
           else { var p=nom.match(/^--ps-(lvl|f)([1-6])(-tint)?$/);
                  if(p && val.indexOf("var(")<0) S[p[1]==="lvl"?"lvl":"f"][+p[2]-1][p[3]?1:0]=val; }
         });
