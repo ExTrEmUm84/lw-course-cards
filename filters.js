@@ -115,6 +115,12 @@
       ".ps-ff:hover{border-color:#3887B4 !important;color:#3887B4 !important;background:#F3F9FC !important;}",
       /* sélecteur actif : même bleu que le reste de la barre */
       ".ps-ff.ps-ff-on{border-color:#3887B4 !important;background:#F3F9FC !important;color:#3887B4 !important;}",
+      /* Pastilles de CATÉGORIE sorties du menu natif (cf. mountCatPills). Même
+         vocabulaire que `.ps-ff` ; on neutralise seulement l'habillage par défaut
+         du <button>, et l'état actif est plein pour le distinguer d'un survol. */
+      ".ps-ffcat{display:inline-flex !important;flex-wrap:wrap !important;gap:10px !important;vertical-align:middle !important;}",
+      ".ps-ff.ps-ff-cat{-webkit-appearance:none !important;appearance:none !important;margin-right:0 !important;line-height:1 !important;}",
+      ".ps-ff.ps-ff-cat.ps-ff-on{border-color:#29457B !important;background:#29457B !important;color:#fff !important;}",
       ".ps-ff-cur{font-weight:700 !important;}",
       ".ps-ff-arrow{width:9px !important;height:9px !important;border-right:2px solid currentColor !important;border-bottom:2px solid currentColor !important;transform:rotate(45deg) translateY(-2px) !important;transition:transform .18s ease !important;}",
       ".ps-ff.ps-ff-open .ps-ff-arrow{transform:rotate(-135deg) translateY(2px) !important;}",
@@ -488,7 +494,72 @@
     });
   }
 
+  /* ---- Catégories LearnWorlds sorties en PASTILLES (demande de Ziad, 03/08) ---
+     🔴 Les pastilles `.ps-ff` ci-dessus sont construites à partir des CHAMPS lus
+     dans les descriptions des cartes (Année, Type, Difficulté de la page Cas).
+     Les CATÉGORIES LearnWorlds, elles, ne sont nulle part dans les cartes :
+     `.lw-tags` est vide, et `/api/courses` — seul endroit qui les porte — ne
+     répond rien à un étudiant (mesuré le 03/08). Elles n'existent côté page que
+     dans le menu natif « categories ».
+     ⇒ On ne les recalcule pas : on SORT les options voulues du menu natif en
+     pastilles, et un clic délègue au `li` natif. Vérifié avant d'écrire : cliquer
+     une option fait passer la page de 10 cartes à 1. C'est LearnWorlds qui
+     filtre, donc ça marche aussi pour un étudiant.
+     Ajouter/retirer une pastille = une ligne ici. Une catégorie absente du menu
+     de la page est simplement ignorée. */
+  var CATS=["Conseil en Stratégie","Conseil en Management","Conseil en Transformation Numérique"];
+  function normCat(s){ return String(s||"").toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g,"").replace(/[^a-z0-9]/g,""); }
+  function optionsCat(){ return [].slice.call(document.querySelectorAll("#pageContent .lw-filters .lw-topbar-submenu-item.filter")); }
+
+  function mountCatPills(){
+    var wrap=document.querySelector("#pageContent .learnworlds-button-wrapper.lw-filters");
+    if(!wrap) return;
+    var opts=optionsCat();
+    if(!opts.length) return;                       // menu natif pas encore rendu
+    var dispo=CATS.filter(function(nom){
+      return opts.some(function(o){ return normCat(nameOf(o))===normCat(nom); });
+    });
+    var row=wrap.querySelector(".ps-ffcat");
+    var sig=dispo.join("|");
+    if(row && row.dataset.psSig===sig) return;     // rien de neuf : on ne repeint pas
+    if(!row){ row=document.createElement("span"); row.className="ps-ffcat"; wrap.appendChild(row); }
+    row.dataset.psSig=sig;
+    row.textContent="";
+    dispo.forEach(function(nom){
+      var b=document.createElement("button");
+      b.type="button"; b.className="ps-ff ps-ff-cat"; b.textContent=nom;
+      b.setAttribute("aria-pressed","false");
+      b.addEventListener("click", function(){
+        var actif=b.classList.contains("ps-ff-on");
+        [].slice.call(row.querySelectorAll(".ps-ff-cat")).forEach(function(x){
+          x.classList.remove("ps-ff-on"); x.setAttribute("aria-pressed","false");
+        });
+        if(actif){
+          /* 2e clic = on enlève le filtre. Le bouton natif « tout » est le seul
+             chemin fiable : recliquer l'option ne la désélectionne pas toujours. */
+          var tout=wrap.querySelector(".learnworlds-button.filter.text-only");
+          if(tout) tout.click();
+          return;
+        }
+        var o=optionsCat().filter(function(x){ return normCat(nameOf(x))===normCat(nom); })[0];
+        if(o) o.click();
+        b.classList.add("ps-ff-on"); b.setAttribute("aria-pressed","true");
+      });
+      row.appendChild(b);
+    });
+    /* le menu natif ferait doublon une fois ses options sorties */
+    var menu=wrap.querySelector(".lw-filter-option.with-submenu");
+    if(menu) menu.style.setProperty("display","none","important");
+  }
+
   function run(){
+    ensureStyle();
+    mountCatPills();
+    /* 🔴 `inProduct` ne sert QU'À masquer les catégories vides (il identifie le
+       programme pour compter les cours par tag). Il n'existe pas sur toutes les
+       pages — sur Cabinets il est absent, et l'ancien code sortait ICI, donc
+       AUCUN filtre n'était habillé ni sorti en pastille. Le reste du fichier n'en
+       a pas besoin : on ne renonce plus qu'au scan des catégories vides. */
     if(inProduct===null){ inProduct=findInProduct(); if(!inProduct){ inProduct=null; return; } }
     if(!cacheLoaded){
       cacheLoaded=true;
