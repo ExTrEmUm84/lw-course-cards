@@ -734,7 +734,7 @@
      et comme elle s'affiche avant la réponse du Worker (et reste seule si Turnstile
      échoue), rien ne la remplaçait jamais. Même piège que le cache côté Worker.
      v2 = suppression de l'heuristique « statut completed = 100 % ». */
-  var LP_STORE_V=2;
+  var LP_STORE_V=3;
   function lpStoreKey(){
     var u=meUser();
     return (u && u.id) ? (LP_STORE_BASE+":"+u.id) : null;
