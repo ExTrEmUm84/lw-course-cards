@@ -276,7 +276,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-q</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-s</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -1289,11 +1289,93 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     majBouton();
   })();
 
+  /* ====================================================================
+     LE CONFIGURATEUR PART DE L'ETAT REELLEMENT PUBLIE
+     --------------------------------------------------------------------
+     🔴🔴 Signale par Ziad : apres avoir publie la page Cours en rouge, rouvrir
+     l'outil le montrait toujours en bleu. Ce n'etait pas un simple defaut
+     d'affichage : l'outil demarrait sur des valeurs ECRITES EN DUR, sans jamais
+     lire ce que le site porte vraiment. Consequence — PrepaStrat ouvre le
+     configurateur, publie une modification quelconque, et ECRASE au passage tout
+     ce qui avait ete regle avant, sans que rien ne le signale.
+     Un outil d'edition doit charger ce qu'il edite. Celui-ci ne le faisait pas.
+
+     🔴 Repli sur les valeurs en dur si la lecture echoue (Pages indisponible,
+     fichier en cours de deploiement) : mieux vaut demarrer sur des valeurs
+     connues que sur un ecran vide. Mais on le DIT, sinon on retombe exactement
+     dans le piege qu'on vient de corriger.
+     🔴 `cb=` pour contourner le cache de GitHub Pages (10 minutes) : sans lui,
+     l'outil pourrait relire l'etat d'avant sa propre publication. */
+  var TOK_MAP={ "--ps-accent":"accent","--ps-accent-hover":"accentHover","--ps-accent-tint":"accentTint",
+    "--ps-text":"text","--ps-text-soft":"textSoft","--ps-border":"border","--ps-surface-soft":"surfaceSoft",
+    "--ps-font":"font","--ps-cab-logo":"cabLogo" };
+
+  async function chargerEtatPublie(){
+    var t;
+    try{
+      var r=await fetch("tokens.js?cb="+Date.now(),{cache:"no-store"});
+      if(!r.ok) throw new Error(r.status);
+      t=await r.text();
+    }catch(e){
+      dire("Impossible de lire les réglages actuels du site — l'outil affiche ses valeurs par défaut. "+
+           "<strong>Ne publie pas</strong> sans avoir rechargé, tu écraserais les réglages en place.","ko");
+      return;
+    }
+    try{
+      var mt=t.match(/>>> DEBUT TOKENS[^\n]*\n([\s\S]*?)\n\/\* <<< FIN TOKENS/);
+      if(mt){
+        var vus={};
+        mt[1].split("\n").forEach(function(l){
+          var m=l.match(/"(--ps-[a-z0-9-]+):([^"]*)"/); if(!m) return;
+          var nom=m[1], val=m[2]; vus[nom]=val;
+          if(TOK_MAP[nom]) S[TOK_MAP[nom]]=val;
+          else if(nom==="--ps-r-card") S.rCard=parseInt(val,10);
+          else if(nom==="--ps-r-pill") S.rPill=parseInt(val,10);
+          else if(nom==="--ps-r-btn")  S.rBtn=parseInt(val,10);
+          else { var p=nom.match(/^--ps-(lvl|f)([1-6])(-tint)?$/);
+                 if(p && val.indexOf("var(")<0) S[p[1]==="lvl"?"lvl":"f"][+p[2]-1][p[3]?1:0]=val; }
+        });
+        /* « suit la marque » se DEDUIT du fichier : la valeur y est `var(--ps-accent…)`
+           quand le lien est actif. Le relire evite de le perdre a chaque aller-retour. */
+        S.lvl1Link = (vus["--ps-lvl1"]||"").indexOf("var(")===0;
+        S.f1Link   = (vus["--ps-f1"]||"").indexOf("var(")===0;
+      }
+      var mp=t.match(/>>> DEBUT PAGES[^\n]*\n([\s\S]*?)\n\/\* <<< FIN PAGES/);
+      if(mp){
+        var lire=function(nom){ var m=mp[1].match(new RegExp("var "+nom+"=(\\{[\\s\\S]*?\\});"));
+          try{ return m?JSON.parse(m[1]):{}; }catch(e){ return {}; } };
+        var acc=lire("PAGE_ACCENTS"), sty=lire("PAGE_STYLE"), reg=lire("REGLAGES");
+        PAGES_LIB.forEach(function(pp){
+          S.pages[pp[0]]=acc[pp[0]]||"";
+          var o=sty[pp[0]];
+          S.style[pp[0]]= o ? {contour:true, ep:Number(o.ep), duree:Number(o.duree), couleur:o.couleur||""}
+                            : {contour:false, ep:4, duree:1.1, couleur:""};
+        });
+        S.reglages.lien_video=reg.lien_video||"";
+        S.reglages.lien_video_background=reg.lien_video_background||"";
+      }
+      /* on remet l'interface en accord avec l'etat relu */
+      ["accent","accentHover","accentTint","text","textSoft","border","surfaceSoft"].forEach(function(k){
+        var el=document.getElementById(k); if(el) el.value=S[k];
+      });
+      var f=document.getElementById("rCard"); if(f) f.value=S.rCard;
+      f=document.getElementById("rPill");     if(f) f.value=S.rPill;
+      f=document.getElementById("rBtn");      if(f) f.value=S.rBtn;
+      f=document.getElementById("fontTxt");   if(f) f.value=S.font;
+      pagesUI(); rendre();
+      dire("Réglages actuels du site chargés.","ok");
+    }catch(e){
+      dire("Les réglages du site sont illisibles — l'outil affiche ses valeurs par défaut. "+
+           "<strong>Ne publie pas</strong> avant qu'on ait regardé.","ko");
+    }
+  }
+
   cssReel();
   pagesUI();
   blocsPage();                             /* construit aussi les palettes et les vidéos de l'onglet actif */
   champs();
   rendre();
+  chargerEtatPublie();
 })();
 </script>
 </body>
