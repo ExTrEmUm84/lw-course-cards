@@ -273,6 +273,16 @@
       ".ps-line-hote:hover > .ps-mline rect{stroke-dashoffset:0 !important;}"+
       /* Le liseré déborde de la carte si elle rogne son contenu. */
       ".ps-line-hote{position:relative !important;overflow:visible !important;}"+
+      /* 🔴🔴 LE CONTENU PASSE AU-DESSUS DU TRAIT. Signalé par Ziad : le liseré
+         recouvrait les illustrations rondes qui débordent en haut des cartes.
+         Cause : un élément POSITIONNÉ (le SVG) peint au-dessus du contenu non
+         positionné, quel que soit son rang dans le DOM — l'insérer en premier
+         enfant ne suffit donc pas.
+         🔴 On remonte le CONTENU plutôt que d'enfoncer le trait : à `z-index:-1`
+         il passerait derrière le fond blanc de la carte, qui est porté par
+         l'hôte lui-même, et redeviendrait invisible. C'est le piège inverse,
+         déjà rencontré ce matin. */
+      ".ps-line-hote > *:not(.ps-mline){position:relative !important;z-index:1 !important;}"+
       "@media(prefers-reduced-motion:reduce){.ps-line-hote > .ps-mline rect{transition:none !important;}}";
     (document.head||document.documentElement).appendChild(st);
   }
@@ -569,7 +579,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-u";
+  window.PS_TOKENS_V="2026-08-03-w";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
