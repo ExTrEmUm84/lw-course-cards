@@ -124,6 +124,39 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
 .pv-s1 .pv-sicon{background:var(--ps-f1-tint)} .pv-s1 .pv-sicon svg{stroke:var(--ps-f1)} .pv-s1 .pv-slink{color:var(--ps-f1)}
 .pv-s2 .pv-sicon{background:var(--ps-f2-tint)} .pv-s2 .pv-sicon svg{stroke:var(--ps-f2)} .pv-s2 .pv-slink{color:var(--ps-f2)}
 .pv-s3 .pv-sicon{background:var(--ps-f3-tint)} .pv-s3 .pv-sicon svg{stroke:var(--ps-f3)} .pv-s3 .pv-slink{color:var(--ps-f3)}
+/* ---- Fiches cabinet -------------------------------------------------
+   Mesures relevees sur /fiches-cabinet le 03/08 : rond 140 px, bord blanc 4 px,
+   remontee -70 px, titre 25 px/800, description 14 px, carte ~317x280.
+   🔴 Le rond est en #507EC5 ECRIT EN DUR dans cabinet-cards.js : il ne suit PAS
+   la couleur de la page. Verifie sur la vraie page — la page est verte, le rond
+   reste bleu. On reproduit ce comportement plutot que de l'embellir : une
+   maquette qui corrige la production ment autant qu'une maquette perimee. */
+.pv-cgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:74px 4px 4px}
+.pv-ccard{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
+  box-shadow:0 4px 18px rgba(15,23,42,.06);font-family:var(--ps-font);padding:0 20px 20px;text-align:left}
+.pv-clogo{width:140px;height:140px;border-radius:50%;margin:-70px auto 16px;border:4px solid #fff;
+  background:#507EC5;box-shadow:0 6px 18px rgba(15,23,42,.12);display:grid;place-items:center;
+  font:800 42px var(--ps-font);color:#fff;letter-spacing:.5px}
+.pv-ctitle{font-size:25px;font-weight:800;color:var(--ps-text);margin:0 0 8px}
+.pv-cdesc{font-size:14px;color:var(--ps-text-soft);line-height:1.55;margin:0 0 12px}
+.pv-clink{font-size:15px;font-weight:700;color:var(--ps-accent);text-decoration:none}
+/* ---- Etudes de cas --------------------------------------------------
+   Mesures relevees sur /emptykk-clone-clone : carte 488x155, AUCUNE ombre,
+   filet de 38x3 px, titre 25 px/800, pastilles 12 px/600 en rayon plein. */
+.pv-kgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:16px}
+.pv-kcard{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
+  font-family:var(--ps-font);padding:22px 24px}
+.pv-ktitle{font-size:25px;font-weight:800;color:var(--ps-text);margin:0 0 10px}
+.pv-ktitle b{color:var(--ps-accent);font-weight:800}
+.pv-ktitle i{color:var(--ps-border);font-style:normal;margin:0 4px}
+.pv-krule{width:38px;height:3px;background:var(--ps-accent);border-radius:2px;margin:0 0 14px}
+.pv-kpills{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:14px}
+.pv-kpills span{font:600 12px var(--ps-font);padding:4px 11px;border-radius:var(--ps-r-pill)}
+.pv-kpills span:nth-child(1){background:var(--ps-f6-tint);color:var(--ps-f6)}
+.pv-kpills span:nth-child(2){background:var(--ps-f2-tint);color:var(--ps-f2)}
+.pv-kpills span:nth-child(3){background:var(--ps-f4-tint);color:var(--ps-f4)}
+.pv-kpills span:nth-child(4){background:var(--ps-f3-tint);color:var(--ps-f3)}
+.pv-klink{font-size:15px;font-weight:700;color:var(--ps-accent);text-decoration:none}
 /* ================= L'APERÇU — maquette des vrais composants ========= */
 .stage h3{font:800 12px/1 Figtree,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#9AA0B0;margin:0 0 12px}
 .bloc{background:#fff;border-radius:14px;padding:26px;margin-bottom:20px;border:1px solid #E7EAF0}
@@ -367,6 +400,42 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
           <div class="pv-sicon"><svg viewBox="0 0 24 24"><path d="M4 15h16l-1.5-5H5.5L4 15Z"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/></svg></div>
           <p class="pv-stitle">Automobile</p>
           <a class="pv-slink" href="#">En savoir plus →</a>
+        </div>
+      </div>
+    </div>
+
+    <h3>Fiches cabinet <span style="text-transform:none;font-weight:600;color:#B4BAC8">— le rond des logos reste bleu, il ne suit pas la couleur de page</span></h3>
+    <div class="bloc" style="padding:0 4px 4px">
+      <div class="pv-cgrid">
+        <div class="pv-ccard"><div class="pv-clogo">AD</div>
+          <p class="pv-ctitle">Advancy</p>
+          <p class="pv-cdesc">Fondé en 1999, Advancy est un cabinet de conseil en stratégie indépendant, reconnu pour son expertise en croissance…</p>
+          <a class="pv-clink" href="#">En savoir plus →</a></div>
+        <div class="pv-ccard"><div class="pv-clogo">BC</div>
+          <p class="pv-ctitle">BCG</p>
+          <p class="pv-cdesc">Fondé en 1963, Boston Consulting Group est l'un des cabinets de conseil en stratégie les plus influents au monde…</p>
+          <a class="pv-clink" href="#">En savoir plus →</a></div>
+        <div class="pv-ccard"><div class="pv-clogo">EY</div>
+          <p class="pv-ctitle">EY Consulting</p>
+          <p class="pv-cdesc">Fondé en 1989 avec la création de l'activité de conseil d'Ernst &amp; Young, EY Consulting est le cabinet…</p>
+          <a class="pv-clink" href="#">En savoir plus →</a></div>
+      </div>
+    </div>
+
+    <h3>Études de cas <span style="text-transform:none;font-weight:600;color:#B4BAC8">— les pastilles de champs, en contexte</span></h3>
+    <div class="bloc">
+      <div class="pv-kgrid">
+        <div class="pv-kcard">
+          <p class="pv-ktitle"><b>Bain</b><i>&times;</i>Assurance 2022</p>
+          <div class="pv-krule"></div>
+          <div class="pv-kpills"><span>2022</span><span>Assurance</span><span>Profit &amp; Loss</span><span>Débutant</span></div>
+          <a class="pv-klink" href="#">En savoir plus →</a>
+        </div>
+        <div class="pv-kcard">
+          <p class="pv-ktitle"><b>BCG</b><i>&times;</i>Transport / Livraison 2022</p>
+          <div class="pv-krule"></div>
+          <div class="pv-kpills"><span>2022</span><span>Transport</span><span>Market entry</span><span>Confirmé</span></div>
+          <a class="pv-klink" href="#">En savoir plus →</a>
         </div>
       </div>
     </div>
