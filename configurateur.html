@@ -30,10 +30,10 @@
 <style>
 /* ---- Les tokens : c'est CE bloc que le configurateur pilote ---------- */
 :root{
-  --ps-accent:#6161FF;
-  --ps-accent-rgb:97,97,255;
-  --ps-accent-hover:#4B4BE0;
-  --ps-accent-tint:#EDEDFF;
+  --ps-accent:#507EC5;
+  --ps-accent-rgb:80,126,197;
+  --ps-accent-hover:#486798;
+  --ps-accent-tint:#edf4ff;
   --ps-text:#1c1f26;
   --ps-text-soft:#676879;
   --ps-surface-soft:#F7F8FB;
@@ -69,16 +69,16 @@ h2{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;
 .row label{flex:1;font-size:13px;color:#3A3F4D}
 .row code{font-size:10.5px;color:#9AA0B0;font-family:ui-monospace,Menlo,monospace}
 input[type=color]{width:34px;height:26px;padding:0;border:1px solid #DCE0E8;border-radius:6px;background:#fff;cursor:pointer;flex:none}
-input[type=range]{flex:1;accent-color:#6161FF}
+input[type=range]{flex:1;accent-color:#507EC5}
 input[type=text],input[type=password],select{width:100%;padding:7px 9px;border:1px solid #DCE0E8;border-radius:7px;font:13px Figtree,sans-serif;background:#fff}
 .val{font-size:11.5px;color:#676879;min-width:40px;text-align:right;font-family:ui-monospace,Menlo,monospace}
 .lien{display:flex;align-items:center;gap:6px;font-size:11.5px;color:#8A90A2;margin:-2px 0 9px 0}
-.lien input{accent-color:#6161FF}
+.lien input{accent-color:#507EC5}
 .btns{display:flex;gap:8px;margin-top:18px}
 button{font:600 13px Figtree,sans-serif;padding:9px 13px;border-radius:8px;border:1px solid #DCE0E8;background:#fff;cursor:pointer;transition:.15s}
 button:hover{background:#F5F7FB}
-button.primary{background:#6161FF;color:#fff;border-color:#6161FF}
-button.primary:hover{background:#4B4BE0}
+button.primary{background:#507EC5;color:#fff;border-color:#507EC5}
+button.primary:hover{background:#486798}
 .note{font-size:11.5px;color:#8A90A2;line-height:1.5;margin-top:10px;padding:9px 10px;background:#F7F8FB;border-radius:7px;border-left:2px solid #DCE0E8}
 /* ---- Sortie ------------------------------------------------------- */
 .out{margin-top:22px;background:#151823;border-radius:12px;overflow:hidden}
@@ -159,10 +159,10 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
     <h2>Marque</h2>
-    <div class="row"><label>Violet principal</label><code>--ps-accent</code><input type="color" id="accent"></div>
-    <div class="lien"><input type="checkbox" id="deriv" checked><label for="deriv" style="flex:none">déduire le survol et la teinte du violet principal</label></div>
-    <div class="row"><label>Violet au survol</label><code>-hover</code><input type="color" id="accentHover"></div>
-    <div class="row"><label>Violet teinté (fonds)</label><code>-tint</code><input type="color" id="accentTint"></div>
+    <div class="row"><label>Couleur principale</label><code>--ps-accent</code><input type="color" id="accent"></div>
+    <div class="lien"><input type="checkbox" id="deriv" checked><label for="deriv" style="flex:none">déduire le survol et la teinte de la couleur principale</label></div>
+    <div class="row"><label>Couleur au survol</label><code>-hover</code><input type="color" id="accentHover"></div>
+    <div class="row"><label>Couleur teintée (fonds)</label><code>-tint</code><input type="color" id="accentTint"></div>
 
     <h2>Texte, bords, surfaces</h2>
     <div class="row"><label>Texte fort (titres)</label><code>--ps-text</code><input type="color" id="text"></div>
@@ -254,7 +254,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
 
   <!-- ================= APERÇU ================= -->
   <div class="stage">
-    <div class="note" style="margin:0 0 18px;border-left-color:#6161FF">
+    <div class="note" style="margin:0 0 18px;border-left-color:#507EC5">
       🔴 <strong>Ceci est une maquette, pas le vrai site.</strong> Les vraies pages sont sur un autre
       domaine : impossible de les prévisualiser ici. Les composants sont redessinés avec les mêmes
       tokens et les mêmes relations qu'en production — mais seul le site fait foi.
@@ -336,13 +336,25 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   "use strict";
   /* Les valeurs d'origine = celles de tokens.js. Elles servent AUSSI de
      référence pour n'émettre que ce qui a VRAIMENT changé. */
+  /* 🔴 CES VALEURS SONT CELLES DU SITE EN LIGNE, pas un jeu de départ arbitraire.
+     Signalé par Ziad le 03/08 : le configurateur affichait encore l'ancien violet
+     `#507EC5` alors que la marque est passée au bleu `#507EC5` depuis un moment.
+     Conséquence concrète : « Tout réinitialiser » ne remettait pas le site dans
+     son état — il le repeignait en violet. Un défaut périmé n'est pas un détail
+     d'affichage, c'est un bouton qui ment.
+     ⇒ Toute publication d'une nouvelle marque doit être reportée ici. Les valeurs
+     de référence sont celles du bloc TOKENS de `tokens.js`. */
   var DEF={
-    accent:"#6161FF", accentHover:"#4B4BE0", accentTint:"#EDEDFF",
+    accent:"#507EC5", accentHover:"#486798", accentTint:"#edf4ff",
     text:"#1c1f26", textSoft:"#676879", border:"#E6E9EF", surfaceSoft:"#F7F8FB",
     font:"Figtree,-apple-system,Segoe UI,Roboto,sans-serif",
     rCard:16, rPill:999, rBtn:10, deriv:true,
-    lvl:[["#4B4BE0","#EDEDFF"],["#12A85F","#E6F9F0"],["#009257","#E1F7EC"],["#D22B45","#FDECEF"],["#D98500","#FFF3E0"],["#8A45C9","#F3EAFB"]],
-    f:[["#6161FF","#EDEDFF"],["#00C875","#E3F8EE"],["#E2445C","#FDECEF"],["#FDAB3D","#FFF3E0"],["#A25DDC","#F3EAFB"],["#0073EA","#E6F1FD"]],
+    /* Niveau 1 et champ 1 SUIVENT la marque (cases cochées) : ces deux valeurs ne
+       servent que si Ziad décoche le lien. Elles doivent donc valoir ce que le
+       lien produirait, sinon décocher changerait la couleur sans qu'il l'ait
+       demandé. */
+    lvl:[["#486798","#edf4ff"],["#12A85F","#E6F9F0"],["#009257","#E1F7EC"],["#D22B45","#FDECEF"],["#D98500","#FFF3E0"],["#8A45C9","#F3EAFB"]],
+    f:[["#507EC5","#edf4ff"],["#00C875","#E3F8EE"],["#E2445C","#FDECEF"],["#FDAB3D","#FFF3E0"],["#A25DDC","#F3EAFB"],["#0073EA","#E6F1FD"]],
     lvl1Link:true, f1Link:true,
     /* Couleur dominante par page + réglages libres. Clé = slug LearnWorlds
        (la classe `slug-…` posée sur le <body>). Vide = la page reprend l'accent
@@ -407,10 +419,14 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     if(!S.deriv) return;
     var t=hex2hsl(S.accent);
     /* Coefficients RELEVÉS sur le couple d'origine, pour que la déduction
-       reproduise le goût maison plutôt qu'une règle inventée :
+       reproduise le goût maison plutôt qu'une règle inventée. Le couple de
+       référence est l'ANCIEN violet de la marque — c'est de lui que viennent les
+       chiffres, et ça reste vrai même si la marque est passée au bleu depuis :
          #6161FF (H240 S100 L69) -> #4B4BE0 = S ×0,71 · L −10,4
                                  -> #EDEDFF = S 100 · L 96,5
-       Vérifié : depuis #6161FF, on retombe sur #4b4bdf et #ededff. */
+       🔴 Ne pas « moderniser » ces hex : ils ne sont pas la couleur courante, ils
+       sont la MESURE qui a produit les coefficients. (Une substitution globale
+       violet→bleu les a écrasés le 03/08, rendant le commentaire faux.) */
     S.accentHover=hsl2hex(t[0], Math.max(0,t[1]*0.71), Math.max(0,t[2]-10.4));
     S.accentTint =hsl2hex(t[0], 100, 96.5);
     document.getElementById("accentHover").value=S.accentHover;
