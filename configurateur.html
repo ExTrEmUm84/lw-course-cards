@@ -81,13 +81,6 @@ button.primary{background:#507EC5;color:#fff;border-color:#507EC5}
 button.primary:hover{background:#486798}
 .note{font-size:11.5px;color:#8A90A2;line-height:1.5;margin-top:10px;padding:9px 10px;background:#F7F8FB;border-radius:7px;border-left:2px solid #DCE0E8}
 /* ---- Sortie ------------------------------------------------------- */
-.out{margin-top:22px;background:#151823;border-radius:12px;overflow:hidden}
-.tabs{display:flex;background:#1E2231}
-.tab{flex:1;padding:9px;font:600 12px Figtree,sans-serif;color:#9AA3BD;background:none;border:0;border-radius:0;cursor:pointer}
-.tab.on{background:#151823;color:#fff}
-.tab:hover{background:#252A3B}
-pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,monospace;white-space:pre-wrap;word-break:break-all;max-height:230px;overflow:auto}
-.copy{margin:0 14px 14px;width:calc(100% - 28px)}
 /* ---- Onglets de configuration par page ------------------------------
    Demande de Ziad : « fais des tabs, on aura plus de place ». La colonne de
    gauche fait 340 px — six pages × quatre réglages n'y tenaient pas. Ce bloc
@@ -276,7 +269,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-s</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-t</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -322,17 +315,6 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       <button id="reset">Tout réinitialiser</button>
       <button id="rand">Surprends-moi</button>
     </div>
-
-    <!-- ---- Sortie ---- -->
-    <div class="out">
-      <div class="tabs">
-        <button class="tab on" data-t="tok">Pour <code style="color:inherit">tokens.js</code></button>
-        <button class="tab" data-t="css">Test rapide</button>
-      </div>
-      <pre id="code"></pre>
-      <button class="primary copy" id="copy">Copier</button>
-    </div>
-    <div class="note" id="howto"></div>
 
     <h2>Publier sur le site</h2>
     <div class="note" style="border-left-color:#00C875;background:#E9FBF2;color:#0B6B43">
@@ -1083,24 +1065,22 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     }
     return L;
   }
-  var onglet="tok";
+  /* 🔴 LE BLOC « code a copier » A ETE RETIRE (03/08). Il datait du temps ou
+     publier voulait dire : copier ce texte, le coller dans tokens.js, pousser.
+     Le bouton Publier fait tout, et l'outil s'adresse maintenant a PrepaStrat,
+     qui n'a acces ni au fichier ni au code du site — cette zone ne pouvait que
+     les egarer.
+     L'onglet « Test rapide » proposait en plus de coller du CSS directement dans
+     le site pour previsualiser : deux sources de verite qui finissent par
+     diverger, un probleme deja consigne dans les notes du projet. Retire aussi.
+     `sortie()` reste appelee partout ou un reglage change ; elle sert desormais a
+     signaler qu'il y a quelque chose a publier. */
+  var modifie=false;
   function sortie(){
-    var L=lignes(), t;
-    if(onglet==="tok"){
-      /* 🔴 Les DEUX blocs, pas seulement les tokens. « Publier » ecrit les deux
-         depuis le debut ; l'apercu n'en montrait qu'un, donc Ziad ne pouvait pas
-         relire ce qu'il s'appretait a envoyer pour les couleurs de page, les
-         contours et les videos. Un apercu partiel est pire qu'aucun apercu : il
-         laisse croire qu'on a tout vu. */
-      t="/* >>> DEBUT TOKENS */\n"+
-        L.map(function(p){ return '    "'+p[0]+':'+p[1]+'"'; }).join(",\n")+
-        "\n/* <<< FIN TOKENS */\n\n/* >>> DEBUT PAGES */\n"+blocPages()+"\n/* <<< FIN PAGES */";
-      document.getElementById("howto").innerHTML="<strong>Le propre :</strong> le bouton <em>Publier</em> plus bas ecrit ces <strong>deux</strong> blocs dans <code>tokens.js</code> tout seul. Ce qui est montre ici est exactement ce qui sera envoye.";
-    }else{
-      t="<style>\n:root{\n"+L.map(function(p){ return "  "+p[0]+":"+p[1]+";"; }).join("\n")+"\n}\n</style>";
-      document.getElementById("howto").innerHTML="<strong>Le rapide :</strong> colle ça dans le Code du SITE <em>après</em> la balise <code>tokens.js</code>, pour voir le rendu sur le vrai site sans déployer. ⚠️ À ne pas laisser en place : <code>tokens.js</code> ne serait plus la source de vérité et les deux finiraient par diverger.";
-    }
-    document.getElementById("code").textContent=t;
+    if(modifie) return;
+    modifie=true;
+    var b=document.getElementById("pub");
+    if(b && !/Se connecter/.test(b.textContent)) b.textContent="Publier sur le site •";
   }
 
   /* --- branchements --- */
@@ -1133,18 +1113,10 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
      l'onglet de leur page et ne sont créées qu'à son ouverture. Elles branchent
      leur propre `onchange` — un `getElementById` au chargement trouverait null. */
 
-  document.querySelectorAll(".tab").forEach(function(b){
-    b.onclick=function(){
-      document.querySelectorAll(".tab").forEach(function(x){x.classList.remove("on");});
-      b.classList.add("on"); onglet=b.dataset.t; sortie();
-    };
-  });
-  document.getElementById("copy").onclick=function(){
-    var b=this;
-    navigator.clipboard.writeText(document.getElementById("code").textContent).then(function(){
-      b.textContent="Copié ✓"; setTimeout(function(){ b.textContent="Copier"; },1400);
-    },function(){ b.textContent="Copie refusée — sélectionne le texte"; });
-  };
+  /* Les gestionnaires des onglets de sortie et du bouton « Copier » ont ete
+     retires avec eux : `getElementById("copy")` aurait renvoye null et casse
+     tout le script a partir de cette ligne. Supprimer un element sans supprimer
+     le code qui le cherche, c'est la panne classique. */
   document.getElementById("reset").onclick=function(){
     S=JSON.parse(JSON.stringify(DEF));
     document.getElementById("accent").value=S.accent;
