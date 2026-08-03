@@ -1052,13 +1052,20 @@
        du changement, après deux jours où je faisais un second calcul concurrent.
        Repli sur l'affichage par parcours tant qu'aucune page n'est connue (le
        membre n'a encore visité aucune page depuis la mise en service). */
-    var modePage=lpPages.length>0;
-    if(modePage){
-      progs=lpPages.map(function(p){
-        return { id:"", name:labelPage(p.page), raw:labelPage(p.page), pct:p.pct, page:p.page };
-      }).filter(function(p){ return p.name && p.name!=="Autres"; })
-        .sort(function(a,b){ return rangPage(a.page)-rangPage(b.page); });
-    }
+    /* 🔴 TOUTES LES PAGES SONT AFFICHÉES, y compris à 0 % (demande de Ziad,
+       03/08) : « ça pousse les étudiants à commencer les autres modules ». La
+       liste vient donc de PAGE_ORDRE — les pages du site — et NON des pages déjà
+       déposées. Sinon une page jamais visitée n'aurait aucune tuile, et l'étudiant
+       n'aurait justement aucune raison d'y aller.
+       Une page dont on ne connaît pas encore le pourcentage s'affiche à 0 : c'est
+       le cas d'un étudiant qui n'y est jamais allé, donc où il n'a rien fait. */
+    var modePage=true;
+    var connu={};
+    lpPages.forEach(function(p){ connu[p.page]=p.pct; });
+    progs=PAGE_ORDRE.map(function(u){
+      return { id:"", name:labelPage(u), raw:labelPage(u), page:u,
+               pct:(typeof connu[u]==="number" ? connu[u] : 0) };
+    }).filter(function(p){ return p.name && p.name!=="Autres"; });
     if(!progs.length) return;                       // rien à peindre : on réessaiera
     /* 🔴 La signature porte AUSSI la page : sans ça, un programme qui change de
        section (1 ligne dans PROG_PAGES) ne repeindrait pas le tableau. */
