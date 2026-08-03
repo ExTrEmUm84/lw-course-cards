@@ -212,6 +212,11 @@
       var v=[];
       if(sty.ep!=null)    v.push("--ps-line-w:"+sty.ep);
       if(sty.duree!=null) v.push("--ps-line-t:"+sty.duree+"s");
+      /* 🔴 Couleur du trait FACULTATIVE. Absente = le liseré suit l'accent de la
+         page, ce qu'il a toujours fait. On ne la pose que si Ziad l'a choisie :
+         sans ça, une page sans réglage se retrouverait figée sur une couleur au
+         lieu de suivre la sienne. */
+      if(sty.couleur)     v.push("--ps-line-c:"+sty.couleur);
       if(v.length) css+=":root{"+v.join(";")+";}";
     }
     if(!css){ if(st) st.textContent=""; return; }                 /* page non réglée -> valeurs globales */
@@ -249,7 +254,7 @@
       ".ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;"+
         "pointer-events:none !important;z-index:1 !important;}"+
       ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;"+
-        "rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-accent,#507EC5) !important;"+
+        "rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-line-c,var(--ps-accent,#507EC5)) !important;"+
         "stroke-width:var(--ps-line-w,4) !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;"+
         "transition:stroke-dashoffset var(--ps-line-t,1.1s) ease !important;}"+
       "[class*='ps-']:hover > .ps-mline rect{stroke-dashoffset:0 !important;}"+
@@ -540,7 +545,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-k";
+  window.PS_TOKENS_V="2026-08-03-l";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug

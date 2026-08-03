@@ -135,7 +135,10 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
 .pv-ccard{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
   box-shadow:0 4px 18px rgba(15,23,42,.06);font-family:var(--ps-font);padding:0 20px 20px;text-align:left}
 .pv-clogo{width:140px;height:140px;border-radius:50%;margin:-70px auto 16px;border:4px solid #fff;
-  background:#507EC5;box-shadow:0 6px 18px rgba(15,23,42,.12);display:grid;place-items:center;
+  /* 🔴 var() et non un hex en dur : j'avais cree le token --ps-cab-logo puis
+     ecrit la maquette avec la valeur litterale. Le selecteur ne pouvait donc
+     rien repeindre — un token ne sert a rien si l'apercu ne le lit pas. */
+  background:var(--ps-cab-logo,#507EC5);box-shadow:0 6px 18px rgba(15,23,42,.12);display:grid;place-items:center;
   font:800 42px var(--ps-font);color:#fff;letter-spacing:.5px}
 .pv-ctitle{font-size:25px;font-weight:800;color:var(--ps-text);margin:0 0 8px}
 .pv-cdesc{font-size:14px;color:var(--ps-text-soft);line-height:1.55;margin:0 0 12px}
@@ -509,13 +512,13 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
        ces valeurs exactes : le défaut reproduit donc le site tel qu'il est, il
        ne le modifie pas. Les autres pages sont livrées ÉTEINTES (demande de
        Ziad : « rajoute-le partout mais ne l'active pas »). */
-    style:{"home":{contour:false,ep:4,duree:1.1},
-           "formation-par-modules":{contour:true,ep:4,duree:1.1},
-           "sentrainer":{contour:false,ep:4,duree:1.1},
-           "fiches-cabinet":{contour:false,ep:4,duree:1.1},
-           "fiches-secteur":{contour:false,ep:4,duree:1.1},
-           "emptykk-clone-clone":{contour:false,ep:4,duree:1.1},
-           "formation-par-comptences":{contour:false,ep:4,duree:1.1}}
+    style:{"home":{contour:false,ep:4,duree:1.1,couleur:""},
+           "formation-par-modules":{contour:true,ep:4,duree:1.1,couleur:""},
+           "sentrainer":{contour:false,ep:4,duree:1.1,couleur:""},
+           "fiches-cabinet":{contour:false,ep:4,duree:1.1,couleur:""},
+           "fiches-secteur":{contour:false,ep:4,duree:1.1,couleur:""},
+           "emptykk-clone-clone":{contour:false,ep:4,duree:1.1,couleur:""},
+           "formation-par-comptences":{contour:false,ep:4,duree:1.1,couleur:""}}
   };
   /* 🔴 Les LIBELLÉS vivent ici et non dans tokens.js : le bloc y est réécrit par
      ce fichier, donc tout commentaire posé entre les marqueurs serait effacé à la
@@ -751,7 +754,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     if(!box) return;
     var slug=pageActive;
     var val=S.pages[slug]||"";
-    var st=S.style[slug]||(S.style[slug]={contour:false,ep:4,duree:1.1});
+    var st=S.style[slug]||(S.style[slug]={contour:false,ep:4,duree:1.1,couleur:""});
     box.innerHTML="";
     var grille=document.createElement("div"); grille.className="pcfg";
 
@@ -820,15 +823,33 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     var vDu=document.createElement("span"); vDu.className="val";
     var lab4=document.createElement("label"); lab4.textContent="Durée du tracé";
     r4.appendChild(lab4); r4.appendChild(du); r4.appendChild(vDu); c2.appendChild(r4);
+
+    /* 🔴 COULEUR DU TRAIT — question de Ziad : « le contour prend quelle couleur
+       et pourquoi je ne peux pas le modifier ? ». Il prenait `--ps-accent`, donc
+       la couleur de la page, et je n'avais exposé QUE l'épaisseur et la durée.
+       C'était un manque, pas un choix.
+       Par défaut il continue de SUIVRE la page : décoché = aucune valeur écrite,
+       le liseré hérite comme avant. Sans cette réserve, poser un réglage figerait
+       une couleur sur une page qui suivait la sienne. */
+    var r5=document.createElement("div"); r5.className="row";
+    var ckC=document.createElement("input"); ckC.type="checkbox"; ckC.checked=!!st.couleur; ckC.style.flex="none";
+    var cc=document.createElement("input"); cc.type="color"; cc.value=st.couleur||(S.pages[slug]||"#507EC5");
+    cc.disabled=!st.couleur;
+    var lab5=document.createElement("label"); lab5.textContent="Couleur propre du trait";
+    r5.appendChild(lab5); r5.appendChild(ckC); r5.appendChild(cc); c2.appendChild(r5);
     grille.appendChild(c2);
 
     function maj(){
       vEp.textContent=st.ep+"px";
       vDu.textContent=st.duree+"s";
       ep.disabled=du.disabled=!st.contour;
+      ckC.disabled=!st.contour;
+      cc.disabled=(!st.contour || !ckC.checked);
       var o=st.contour?"1":".45";
-      r3.style.opacity=o; r4.style.opacity=o;
+      r3.style.opacity=o; r4.style.opacity=o; r5.style.opacity=o;
     }
+    ckC.onchange=function(){ st.couleur= ckC.checked ? (cc.value||"#507EC5") : ""; maj(); sortie(); };
+    cc.oninput=function(){ if(ckC.checked){ st.couleur=cc.value; sortie(); } };
     ckL.onchange=function(){ st.contour=ckL.checked; maj(); sortie(); };
     ep.oninput=function(){ st.ep=parseFloat(ep.value); maj(); sortie(); };
     du.oninput=function(){ st.duree=parseFloat(du.value); maj(); sortie(); };
@@ -925,7 +946,8 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     l.push("  var PAGE_STYLE={");
     l.push(PAGES_LIB.filter(function(p){ var s=S.style[p[0]]; return s && s.contour; })
       .map(function(p){ var s=S.style[p[0]];
-        return '    "'+p[0]+'":{"contour":1,"ep":'+s.ep+',"duree":'+s.duree+'}'; }).join(",\n"));
+        return '    "'+p[0]+'":{"contour":1,"ep":'+s.ep+',"duree":'+s.duree+
+               (s.couleur?(',"couleur":"'+s.couleur+'"'):"")+'}'; }).join(",\n"));
     l.push("  };");
     l.push("  var REGLAGES={");
     l.push(REGL_LIB.map(function(r){
