@@ -753,8 +753,15 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   function sortie(){
     var L=lignes(), t;
     if(onglet==="tok"){
-      t=L.map(function(p){ return '    "'+p[0]+':'+p[1]+'"'; }).join(",\n");
-      document.getElementById("howto").innerHTML="<strong>Le propre :</strong> remplace le contenu du tableau <code>TOKENS</code> dans <code>tokens.js</code> par ce bloc, puis <code>git push</code>. En ligne 1–2 min après. C'est la source de vérité — à privilégier.";
+      /* 🔴 Les DEUX blocs, pas seulement les tokens. « Publier » ecrit les deux
+         depuis le debut ; l'apercu n'en montrait qu'un, donc Ziad ne pouvait pas
+         relire ce qu'il s'appretait a envoyer pour les couleurs de page, les
+         contours et les videos. Un apercu partiel est pire qu'aucun apercu : il
+         laisse croire qu'on a tout vu. */
+      t="/* >>> DEBUT TOKENS */\n"+
+        L.map(function(p){ return '    "'+p[0]+':'+p[1]+'"'; }).join(",\n")+
+        "\n/* <<< FIN TOKENS */\n\n/* >>> DEBUT PAGES */\n"+blocPages()+"\n/* <<< FIN PAGES */";
+      document.getElementById("howto").innerHTML="<strong>Le propre :</strong> le bouton <em>Publier</em> plus bas ecrit ces <strong>deux</strong> blocs dans <code>tokens.js</code> tout seul. Ce qui est montre ici est exactement ce qui sera envoye.";
     }else{
       t="<style>\n:root{\n"+L.map(function(p){ return "  "+p[0]+":"+p[1]+";"; }).join("\n")+"\n}\n</style>";
       document.getElementById("howto").innerHTML="<strong>Le rapide :</strong> colle ça dans le Code du SITE <em>après</em> la balise <code>tokens.js</code>, pour voir le rendu sur le vrai site sans déployer. ⚠️ À ne pas laisser en place : <code>tokens.js</code> ne serait plus la source de vérité et les deux finiraient par diverger.";
