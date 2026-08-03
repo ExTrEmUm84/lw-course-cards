@@ -63,7 +63,7 @@
     return "def";
   }
 
-  var C=["var(--ps-accent,#6161FF)","#00C875","#E2445C","#FDAB3D","#A25DDC","#0073EA"];
+  var C=["var(--ps-accent,#507EC5)","#00C875","#E2445C","#FDAB3D","#A25DDC","#0073EA"];
   var NAV=" nav.lw-topbar-menu ";           // scope desktop
   var CSS=[
     /* ---------- pictos + libellés (desktop ET tiroir mobile) ---------- */
@@ -100,7 +100,7 @@
 
     /* ---------- barre de nav : typo moderne ---------- */
     NAV+".lw-topbar-option-link-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;letter-spacing:-.01em !important;color:var(--ps-text,#1c1f26) !important;transition:color .15s ease !important;}",
-    NAV+".lw-topbar-option:hover > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:var(--ps-accent,#6161FF) !important;}",
+    NAV+".lw-topbar-option:hover > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:var(--ps-accent,#507EC5) !important;}",
     NAV+".lw-topbar-option > .lw-topbar-option-link svg{transition:transform .2s ease !important;}",
     /* le chevron ne pivote plus au survol : il indique l'état OUVERT, et
        l'ouverture se fait maintenant au clic (cf. .ps-mm-on plus bas) */
@@ -141,7 +141,7 @@
     NAV+".ps-mm-ic svg{width:21px !important;height:21px !important;}",
     NAV+".ps-mm-t{font-size:14px !important;white-space:nowrap !important;}",
     /* item de la barre dont le panneau est ouvert : on le marque, comme Boks */
-    NAV+"li.lw-topbar-option.ps-mm-on > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:var(--ps-accent,#6161FF) !important;}",
+    NAV+"li.lw-topbar-option.ps-mm-on > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:var(--ps-accent,#507EC5) !important;}",
     NAV+"li.lw-topbar-option.ps-mm-on > .lw-topbar-option-link svg{transform:rotate(180deg) !important;}",
     /* sous 900px la bande deviendrait illisible sur une ligne : on la scrolle */
     "@media(max-width:900px){"+NAV+".lw-topbar-submenu.js-submenu-list{justify-content:flex-start !important;overflow-x:auto !important;gap:28px !important;}}"

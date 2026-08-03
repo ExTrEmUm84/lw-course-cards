@@ -20,7 +20,10 @@
    - panneau du programme : #F7F8FB, bord #E6E9EF, radius 16 ;
    - en-tête : titre + description en Figtree, et surtout la DÉBRANDISATION
      LearnWorlds -> bouton vert #009E78 et barre bleu marine #203866 et pastille
-     bleue #3887B4 passent tous au violet #6161FF de la charte ;
+     bleue #3887B4 passent tous à la couleur de marque (`--ps-accent`) ;
+     🔴 Ce commentaire nommait « le violet #6161FF » — la marque est passée au
+     bleu #507EC5 depuis, et la description était devenue fausse. Ne plus nommer
+     la teinte ici : c'est le token qui fait foi, lui ne périme pas ;
    - cartes enfants (.lw-course-card-item) : coquille commune (blanc, bord
      #E6E9EF, radius 16, survol qui soulève), comme `sector-cards.js`.
 
@@ -62,10 +65,10 @@
        Filet de sécurité à 2,5s plus bas — sinon un titre sans "#" resterait
        invisible pour toujours. */
     S+" h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    S+" h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#6161FF) !important;text-align:left !important;}",
+    S+" h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#507EC5) !important;text-align:left !important;}",
     S+" .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;}",
-    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#6161FF) !important;white-space:nowrap !important;}",
-    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#6161FF) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
+    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#507EC5) !important;white-space:nowrap !important;}",
+    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#507EC5) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
     "@keyframes ps-blink{50%{opacity:0}}",
     "@media(max-width:820px){"+S+" h1.learnworlds-heading{font-size:36px !important;}"+S+" h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}}",
 
@@ -83,10 +86,10 @@
     ".ps-kpi-num{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
     ".ps-kpi-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:500 !important;color:var(--ps-text-soft,#676879) !important;margin-top:2px !important;}",
     ".ps-kpi-bar{height:7px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
-    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#6161FF) !important;transition:width .6s ease !important;}",
+    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#507EC5) !important;transition:width .6s ease !important;}",
     ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:#F1F1FF !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
     /* SVG et non police d'icône : un glyphe se ferait écraser par un font-family. */
-    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#507EC5) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     "@media(max-width:900px){"+S+" .ps-herotop{flex-direction:column !important;gap:20px !important;}"+S+" .ps-herotop > .ps-kpi{flex:0 0 auto !important;width:100% !important;max-width:352px !important;}}",
 
     /* ---- panneau du programme ---------------------------------------- */
@@ -97,15 +100,15 @@
     PROG+" .lw-learning-program-card-descr{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;}",
 
     /* Pastille « N Leçons » : bleu natif #3887B4 -> violet teinté. */
-    PROG+" .lw-tag{background:var(--ps-accent-tint,#EDEDFF) !important;color:var(--ps-accent,#6161FF) !important;border-radius:var(--ps-r-pill,999px) !important;padding:5px 11px !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:700 !important;}",
+    PROG+" .lw-tag{background:var(--ps-accent-tint,#EDEDFF) !important;color:var(--ps-accent,#507EC5) !important;border-radius:var(--ps-r-pill,999px) !important;padding:5px 11px !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:700 !important;}",
 
     /* Bouton « Continuer » : vert LearnWorlds #009E78 -> violet de la charte. */
-    PROG+" button.learnworlds-button{background:var(--ps-accent,#6161FF) !important;color:#fff !important;border-radius:var(--ps-r-btn,10px) !important;border:0 !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-weight:700 !important;transition:background .18s ease !important;}",
+    PROG+" button.learnworlds-button{background:var(--ps-accent,#507EC5) !important;color:#fff !important;border-radius:var(--ps-r-btn,10px) !important;border:0 !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-weight:700 !important;transition:background .18s ease !important;}",
     PROG+" button.learnworlds-button:hover{background:var(--ps-accent-hover,#4B4BE0) !important;}",
 
     /* Progression : remplissage bleu marine #203866 -> violet. */
     PROG+" .lw-course-card-progress{background:#EDEDF2 !important;border-radius:var(--ps-r-pill,999px) !important;overflow:hidden !important;}",
-    PROG+" .lw-course-card-progress-bar{background:var(--ps-accent,#6161FF) !important;border-radius:var(--ps-r-pill,999px) !important;}",
+    PROG+" .lw-course-card-progress-bar{background:var(--ps-accent,#507EC5) !important;border-radius:var(--ps-r-pill,999px) !important;}",
     PROG+" .learnworlds-overline-text{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;color:var(--ps-text-soft,#676879) !important;font-weight:600 !important;}",
 
     /* ---- cartes enfants : la coquille commune ------------------------- */

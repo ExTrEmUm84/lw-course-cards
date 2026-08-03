@@ -136,10 +136,10 @@
     B+"#courses-programs .account-table-row .account-table-cell{flex-wrap:wrap !important;}",
     B+"#courses-programs .ps-acc-prog{flex:0 0 100% !important;width:100% !important;max-width:520px !important;margin:9px 0 2px !important;}",
     B+"#courses-programs .ps-acc-prog-head{display:flex !important;align-items:baseline !important;gap:5px !important;margin-bottom:5px !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
-    B+"#courses-programs .ps-acc-prog-pct{font-size:12.5px !important;font-weight:800 !important;color:var(--ps-accent,#6161FF) !important;letter-spacing:-.01em !important;}",
+    B+"#courses-programs .ps-acc-prog-pct{font-size:12.5px !important;font-weight:800 !important;color:var(--ps-accent,#507EC5) !important;letter-spacing:-.01em !important;}",
     B+"#courses-programs .ps-acc-prog-lbl{font-size:12px !important;font-weight:600 !important;color:#8A93A5 !important;}",
     B+"#courses-programs .ps-acc-prog-track{width:auto !important;height:6px !important;border-radius:999px !important;background:var(--ps-accent-tint,#EDEDFF) !important;overflow:hidden !important;}",
-    B+"#courses-programs .ps-acc-prog-fill{height:100% !important;border-radius:999px !important;background:var(--ps-accent,#6161FF) !important;width:0;transition:width .6s ease !important;}",
+    B+"#courses-programs .ps-acc-prog-fill{height:100% !important;border-radius:999px !important;background:var(--ps-accent,#507EC5) !important;width:0;transition:width .6s ease !important;}",
     B+"#courses-programs .ps-acc-prog[data-done='1'] .ps-acc-prog-pct{color:#15A46A !important;}",
     B+"#courses-programs .ps-acc-prog[data-done='1'] .ps-acc-prog-fill{background:#15A46A !important;}"
   ].join("\n");

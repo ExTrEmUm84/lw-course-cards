@@ -54,7 +54,7 @@
     /* ============ 1) EN-TÊTE : avatar + nom + bouton ============ */
     S+" img.user-image{border-radius:50% !important;border:3px solid #fff !important;box-shadow:0 6px 20px rgba(15,23,42,.10) !important;}",
     /* le bouton "Edit profile" prend le CTA violet du site */
-    S+" .ps-pf-head button.learnworlds-button,"+S+" button.learnworlds-button.ps-pf-edit{background:var(--ps-accent,#6161FF) !important;border:0 !important;border-radius:var(--ps-r-pill,999px) !important;padding:11px 22px !important;color:#fff !important;"+FT+"font-size:15px !important;font-weight:600 !important;box-shadow:none !important;cursor:pointer !important;transition:background .18s ease !important;}",
+    S+" .ps-pf-head button.learnworlds-button,"+S+" button.learnworlds-button.ps-pf-edit{background:var(--ps-accent,#507EC5) !important;border:0 !important;border-radius:var(--ps-r-pill,999px) !important;padding:11px 22px !important;color:#fff !important;"+FT+"font-size:15px !important;font-weight:600 !important;box-shadow:none !important;cursor:pointer !important;transition:background .18s ease !important;}",
     S+" button.learnworlds-button.ps-pf-edit:hover{background:var(--ps-accent-hover,#4B4BE0) !important;}",
 
     /* ============ 2) RÉSUMÉ : titre + tuiles ============ */
@@ -245,8 +245,8 @@
     ".ps-pfc-prog-pct{"+FT+"font-size:13px !important;font-weight:700 !important;color:#243B6B !important;}",
     ".ps-pfc-prog-lbl{"+FT+"font-size:12px !important;font-weight:500 !important;color:#8A93A5 !important;}",
     ".ps-pfc-prog{height:8px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;}",
-    ".ps-pfc-prog-bar{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#6161FF) !important;}",
-    ".ps-pfc-link{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:14px !important;color:var(--ps-accent,#6161FF) !important;"+FT+"font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
+    ".ps-pfc-prog-bar{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#507EC5) !important;}",
+    ".ps-pfc-link{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:14px !important;color:var(--ps-accent,#507EC5) !important;"+FT+"font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-pfc-link::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-pfc-link:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-pfc-link:hover::after{transform:translateX(5px) !important;}",
@@ -263,7 +263,7 @@
     S+" .lw-learning-program-card .learnworlds-heading3{"+FT+"font-size:20px !important;font-weight:800 !important;letter-spacing:-.015em !important;color:#243B6B !important;}",
     S+" .lw-learning-program-card-descr{"+FT+"font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;}",
     /* le bouton bleu natif -> CTA violet du site */
-    S+" .lw-learning-program-card button.learnworlds-button,"+S+" .lw-learning-program-card a.learnworlds-button{background:var(--ps-accent,#6161FF) !important;border:0 !important;border-radius:var(--ps-r-pill,999px) !important;"+FT+"font-size:15px !important;font-weight:600 !important;color:#fff !important;box-shadow:none !important;transition:background .18s ease !important;}",
+    S+" .lw-learning-program-card button.learnworlds-button,"+S+" .lw-learning-program-card a.learnworlds-button{background:var(--ps-accent,#507EC5) !important;border:0 !important;border-radius:var(--ps-r-pill,999px) !important;"+FT+"font-size:15px !important;font-weight:600 !important;color:#fff !important;box-shadow:none !important;transition:background .18s ease !important;}",
     S+" .lw-learning-program-card button.learnworlds-button:hover,"+S+" .lw-learning-program-card a.learnworlds-button:hover{background:var(--ps-accent-hover,#4B4BE0) !important;}",
 
     /* ============ 6) barres de filtres ============ */
@@ -273,7 +273,7 @@
        ⚠️ Jamais de `display` sur ces sélecteurs : LW masque les filtres
        désactivés par un `display:none` INLINE qu'un `!important` écraserait. */
     S+" .learnworlds-button.filter.text-only{display:inline-flex !important;align-items:center !important;height:40px !important;padding:0 16px !important;margin-right:8px !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;color:#4B5563 !important;"+FT+"font-size:14px !important;font-weight:600 !important;cursor:pointer !important;transition:all .15s ease !important;}",
-    S+" .learnworlds-button.filter.text-only:hover{border-color:var(--ps-accent,#6161FF) !important;color:var(--ps-accent,#6161FF) !important;background:#F3F1FF !important;}",
+    S+" .learnworlds-button.filter.text-only:hover{border-color:var(--ps-accent,#507EC5) !important;color:var(--ps-accent,#507EC5) !important;background:#F3F1FF !important;}",
     S+" .-search-box{display:inline-flex !important;align-items:center !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;border-radius:12px !important;background:#fff !important;overflow:hidden !important;height:44px !important;}",
     S+" .-search-box input{border:0 !important;box-shadow:none !important;"+FT+"font-size:15px !important;background:transparent !important;}",
     S+" .-search-box button{border:0 !important;box-shadow:none !important;background:transparent !important;}",

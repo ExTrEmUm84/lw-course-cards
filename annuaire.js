@@ -148,7 +148,7 @@
       "object-fit:cover;flex:none;}",
 
     R + ".psa-name{margin:0;font-size:16px;font-weight:700;color:var(--ps-text,#1c1f26);}",
-    R + ".psa-filiere{margin:3px 0 0;font-size:14px;font-weight:600;color:var(--ps-accent,#6161FF);}",
+    R + ".psa-filiere{margin:3px 0 0;font-size:14px;font-weight:600;color:var(--ps-accent,#507EC5);}",
     R + ".psa-meta{margin:8px 0 0;font-size:13px;color:var(--ps-text-soft,#676879);}",
     R + ".psa-bio{margin:12px 0 0;font-size:13.5px;color:var(--ps-text-soft,#676879);" +
       "display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;}",
@@ -164,8 +164,8 @@
       "color:var(--ps-accent-hover,#4B4BE0);}",
     R + ".psa-chip-btn{font-family:inherit;border:0;cursor:pointer;" +
       "transition:background .15s ease,color .15s ease;}",
-    R + ".psa-chip-btn:hover{background:var(--ps-accent,#6161FF);color:#fff;}",
-    R + ".psa-chip-btn:focus-visible{outline:2px solid var(--ps-accent,#6161FF);outline-offset:2px;}",
+    R + ".psa-chip-btn:hover{background:var(--ps-accent,#507EC5);color:#fff;}",
+    R + ".psa-chip-btn:focus-visible{outline:2px solid var(--ps-accent,#507EC5);outline-offset:2px;}",
 
     /* Pied de carte : collé en bas, action principale (bouton) au-dessus des
        liens secondaires. Le margin-top:auto vit ici, plus sur .psa-links. */
@@ -178,14 +178,14 @@
        Sans !important, le texte du bouton virait gris foncé souligné sur fond
        violet — illisible. Vérifié sur la page réelle le 2026-07-17. */
     R + ".psa-contact{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;" +
-      "border-radius:var(--ps-r-btn,10px);background:var(--ps-accent,#6161FF) !important;color:#fff !important;" +
+      "border-radius:var(--ps-r-btn,10px);background:var(--ps-accent,#507EC5) !important;color:#fff !important;" +
       "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);" +
       "font-size:13.5px;font-weight:600;text-decoration:none !important;transition:background .15s ease;}",
     R + ".psa-contact:hover{background:var(--ps-accent-hover,#4B4BE0) !important;color:#fff !important;}",
-    R + ".psa-contact:focus-visible{outline:2px solid var(--ps-accent,#6161FF);outline-offset:2px;}",
+    R + ".psa-contact:focus-visible{outline:2px solid var(--ps-accent,#507EC5);outline-offset:2px;}",
     R + ".psa-links{display:flex;gap:14px;}",
     /* Mêmes <a>, même écrasement LW : on force la couleur violette. */
-    R + ".psa-link{font-size:13px;font-weight:600;color:var(--ps-accent,#6161FF) !important;text-decoration:none !important;}",
+    R + ".psa-link{font-size:13px;font-weight:600;color:var(--ps-accent,#507EC5) !important;text-decoration:none !important;}",
     R + ".psa-link:hover{text-decoration:underline !important;}",
 
     /* États */
@@ -213,14 +213,14 @@
        Filet de sécurité à 2,5s dans hero(), sinon un titre sans "#" resterait
        invisible pour toujours. */
     "#pageContent h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#6161FF) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#507EC5) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     /* `.learnworlds-main-text` existe aussi dans le pied de page : on ne stylise
        que la description marquée en JS (cf. hero), jamais la classe nue. */
     "#pageContent .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
     /* Machine à écrire : le slot réserve la largeur de la phrase la plus longue
        pour que le titre ne tremble pas à chaque lettre. */
-    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#6161FF) !important;white-space:nowrap !important;}",
-    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#6161FF) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
+    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#507EC5) !important;white-space:nowrap !important;}",
+    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#507EC5) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
     "@keyframes ps-blink{50%{opacity:0}}",
     "@media(max-width:820px){#pageContent h1.learnworlds-heading{font-size:36px !important;}#pageContent h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}#pageContent .ps-desc{padding-right:0 !important;}}",
   ].join("\n");

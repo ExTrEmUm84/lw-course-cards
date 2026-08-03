@@ -77,14 +77,14 @@
     /* description bornée à 3 lignes : les cartes gardent la même hauteur */
     ".ps-sdesc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;line-height:1.6 !important;color:var(--ps-text-soft,#676879) !important;margin:0 0 auto !important;display:-webkit-box !important;-webkit-line-clamp:3 !important;-webkit-box-orient:vertical !important;overflow:hidden !important;}",
     /* même CTA que partout ailleurs */
-    ".ps-slink{position:relative !important;z-index:2 !important;display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
+    ".ps-slink{position:relative !important;z-index:2 !important;display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:var(--ps-accent,#507EC5) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-slink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-slink:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-slink:hover::after{transform:translateX(5px) !important;}",
     /* Cycle de couleurs : une seule teinte par carte, déclinée en 2 valeurs —
        `color` porte le picto (trait plein + aplat via currentColor), et le
        bandeau reprend la MÊME teinte en clair. Le cercle, lui, reste blanc. */
-    CYCLE(1, "var(--ps-f1,#6161FF)", "var(--ps-f1-tint,#EDEDFF)"),
+    CYCLE(1, "var(--ps-f1,#507EC5)", "var(--ps-f1-tint,#EDEDFF)"),
     CYCLE(2, "var(--ps-f2,#00C875)", "var(--ps-f2-tint,#E3F8EE)"),
     CYCLE(3, "var(--ps-f3,#E2445C)", "var(--ps-f3-tint,#FDECEF)"),
     CYCLE(4, "var(--ps-f4,#FDAB3D)", "var(--ps-f4-tint,#FFF3E0)"),
@@ -110,7 +110,7 @@
        `visibility` et non `display` : la place reste réservée. Filet de
        sécurité à 2,5s, sinon un titre sans "#" resterait invisible. */
     S+" h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    S+" h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#6161FF) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    S+" h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#507EC5) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     S+" .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
     /* ─── Tuile de progression EN HAUT (portée de course-cards.js) ───
        mountKpi() enveloppe le H1 + la tuile dans `.ps-herotop`. Moyenne de la
@@ -123,9 +123,9 @@
     ".ps-kpi-num{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
     ".ps-kpi-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:500 !important;color:var(--ps-text-soft,#676879) !important;margin-top:2px !important;}",
     ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:#F1F1FF !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
-    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#507EC5) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-kpi-bar{height:7px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
-    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#6161FF) !important;transition:width .6s ease !important;}",
+    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#507EC5) !important;transition:width .6s ease !important;}",
     ".ps-kpi-txt{flex:1 1 auto !important;min-width:0 !important;}",
     "@media(max-width:900px){"+S+" .ps-herotop{flex-direction:column !important;gap:20px !important;}"+S+" .ps-herotop > .ps-kpi{flex:0 0 auto !important;width:100% !important;max-width:352px !important;}}",
 

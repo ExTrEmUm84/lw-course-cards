@@ -74,7 +74,7 @@
     ".ps-mprog-bar{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;transition:width .4s ease !important;}",
     ".ps-mprog-txt{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:600 !important;color:var(--ps-text-soft,#676879) !important;margin-top:7px !important;}",
     ".ps-mtitle{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:25px !important;line-height:1.25 !important;font-weight:700 !important;color:#323338 !important;margin:0 0 auto !important;}",
-    ".ps-mlink{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:26px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
+    ".ps-mlink{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:26px !important;color:var(--ps-accent,#507EC5) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-mlink::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-mlink:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-mlink:hover::after{transform:translateX(5px) !important;}",
@@ -209,7 +209,7 @@
        tokens.js). Les replis `4` et `1.1s` sont EXACTEMENT les valeurs qui
        étaient en dur ici — si tokens.js ne charge pas, cette page garde son
        liseré d'origine, au pixel près. */
-    ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:var(--ps-line-w,4) !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset var(--ps-line-t,1.1s) ease !important;}",
+    ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-accent,#507EC5) !important;stroke-width:var(--ps-line-w,4) !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;transition:stroke-dashoffset var(--ps-line-t,1.1s) ease !important;}",
     "#pageContent .cards-grandpa .lw-course-card:hover .ps-mline rect{stroke-dashoffset:0 !important;}",
     "@media(prefers-reduced-motion:reduce){.ps-mline rect{transition:none !important;}}",
 
@@ -278,7 +278,7 @@
        heroText() pose data-ps-tw dès qu'il voit le titre, même s'il n'y a pas de
        "#" à animer — et un filet de sécurité le révèle après 2,5s au pire. */
     "#pageContent h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#6161FF) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#507EC5) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     /* .learnworlds-main-text existe AUSSI dans chaque carte : on ne stylise que
        la description marquée en JS (cf. heroText), jamais la classe nue.
        padding-right : garde une longueur de ligne lisible (~620px) tout en
@@ -291,7 +291,7 @@
     /* ─── Séparateur entre le titre animé (H1) et le sous-titre (H2) ───
        Petit trait à la couleur d'accent de la page (bleu, jaune, rouge…), via
        ::before pour ne rien ajouter au DOM. Aligné à gauche sur le titre. */
-    "#pageContent h2.learnworlds-subheading::before{content:\"\" !important;display:block !important;width:60px !important;height:4px !important;border-radius:2px !important;background:var(--ps-accent,#6161FF) !important;margin:0 0 24px 0 !important;}",
+    "#pageContent h2.learnworlds-subheading::before{content:\"\" !important;display:block !important;width:60px !important;height:4px !important;border-radius:2px !important;background:var(--ps-accent,#507EC5) !important;margin:0 0 24px 0 !important;}",
     /* H2 SANS TITRE : LearnWorlds pose quand même un sous-titre vide -> le trait
        séparateur flottait tout seul (signalé par Ziad le 22/07). On masque le
        trait et on écrase toute hauteur/marge du H2 vide. `emptyHeadings()` pose
@@ -342,17 +342,17 @@
     /* ⚠️ SVG et non police d'icône : un glyphe de police se ferait écraser par
        tout `font-family` posé plus haut. (Cf. les pictos des tuiles du profil,
        cassés par un `*{font-family}`.) */
-    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#507EC5) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-kpi-bar{height:7px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
-    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#6161FF) !important;transition:width .6s ease !important;}",
+    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#507EC5) !important;transition:width .6s ease !important;}",
     ".ps-kpi-txt{flex:1 1 auto !important;min-width:0 !important;}",
     /* sous 1100px la place à droite disparaît : la tuile repasse dans le flux */
     "@media(max-width:1100px){.ps-kpi{position:static !important;width:auto !important;max-width:352px !important;margin-top:20px !important;}#pageContent .ps-desc{padding-right:0 !important;}}",
 
     /* machine à écrire : le slot réserve la largeur de la phrase la plus longue
        pour que le titre centré ne tremble pas à chaque lettre */
-    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#6161FF) !important;white-space:nowrap !important;}",
-    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#6161FF) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
+    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#507EC5) !important;white-space:nowrap !important;}",
+    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#507EC5) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
     "@keyframes ps-blink{50%{opacity:0}}",
     "@media(max-width:820px){#pageContent h1.learnworlds-heading{font-size:36px !important;}#pageContent h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}#pageContent .ps-desc{padding-right:0 !important;}}"
   ].join("\n");

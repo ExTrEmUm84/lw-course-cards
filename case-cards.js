@@ -48,7 +48,7 @@
     ".ps-cc{display:flex !important;flex-direction:column !important;padding:26px !important;min-height:0 !important;}",
     /* Court filet d'accent sous le titre — même esprit que le séparateur des
        sous-titres du site (suit `--ps-accent` = couleur de la page). */
-    ".ps-cc-rule{flex:0 0 auto !important;width:38px !important;height:3px !important;border-radius:2px !important;background:var(--ps-accent,#6161FF) !important;margin:14px 0 18px 0 !important;}",
+    ".ps-cc-rule{flex:0 0 auto !important;width:38px !important;height:3px !important;border-radius:2px !important;background:var(--ps-accent,#507EC5) !important;margin:14px 0 18px 0 !important;}",
     /* En-tête : picto + titre sur une ligne.
        `align-items:flex-start` et non `center` : sur un titre qui passe sur 2
        lignes, un centrage ferait descendre le picto au milieu du bloc au lieu
@@ -73,7 +73,7 @@
        le cabinet en bleu marine, le client dans l'accent de la page, un ✕ discret
        au milieu (le « - FR » de langue est retiré côté JS, cf. caseTitle()). */
     ".ps-cc-cab{color:#243B6B !important;}",
-    ".ps-cc-cli{color:var(--ps-accent,#6161FF) !important;}",
+    ".ps-cc-cli{color:var(--ps-accent,#507EC5) !important;}",
     ".ps-cc-x{display:inline-block !important;margin:0 .32em !important;font-size:.62em !important;font-weight:700 !important;color:#B4BCCB !important;vertical-align:.12em !important;}",
     ".ps-cc-pills{display:flex !important;flex-wrap:wrap !important;gap:7px !important;margin-bottom:auto !important;}",
     ".ps-pill{display:inline-flex !important;align-items:center !important;gap:5px !important;padding:4px 11px !important;border-radius:var(--ps-r-pill,999px) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:12px !important;font-weight:600 !important;line-height:1.1 !important;background:#EEF1F6 !important;color:#4B5563 !important;}",
@@ -89,7 +89,7 @@
     ".ps-diff-deb{background:#E6F9F0 !important;color:#12A85F !important;}",
     ".ps-diff-int{background:#FFF3E0 !important;color:#D98500 !important;}",
     ".ps-diff-adv{background:#FDECEF !important;color:#D22B45 !important;}",
-    ".ps-cc-link{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:var(--ps-accent,#6161FF) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
+    ".ps-cc-link{display:inline-flex !important;align-items:center !important;gap:8px !important;align-self:flex-start !important;margin-top:18px !important;color:var(--ps-accent,#507EC5) !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;text-decoration:none !important;transition:color .18s ease !important;}",
     ".ps-cc-link::after{content:\"\\2192\" !important;font-size:17px !important;font-weight:700 !important;line-height:1 !important;transition:transform .18s ease !important;}",
     ".ps-cc-link:hover{color:var(--ps-accent-hover,#4B4BE0) !important;}",
     ".ps-cc-link:hover::after{transform:translateX(5px) !important;}",
@@ -114,7 +114,7 @@
        Filet de sécurité à 2,5s plus bas, sinon un titre sans "#" resterait
        invisible pour toujours. */
     "#pageContent h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#6161FF) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#507EC5) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     /* .learnworlds-main-text existe AUSSI dans chaque carte ET dans le bouton des
        catégories du filtre : on ne stylise que la description marquée en JS
        (cf. heroText), jamais la classe nue. */
@@ -134,15 +134,15 @@
     ".ps-kpi-num{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.1 !important;color:#243B6B !important;}",
     ".ps-kpi-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:14px !important;font-weight:500 !important;color:var(--ps-text-soft,#676879) !important;margin-top:2px !important;}",
     ".ps-kpi-ic{flex:0 0 auto !important;width:56px !important;height:56px !important;border-radius:50% !important;background:#F1F1FF !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
-    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#6161FF) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    ".ps-kpi-ic svg{width:28px !important;height:28px !important;fill:none !important;stroke:var(--ps-accent,#507EC5) !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-kpi-bar{height:7px !important;border-radius:var(--ps-r-pill,999px) !important;background:#EEF1F6 !important;overflow:hidden !important;margin-top:10px !important;width:100% !important;}",
-    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#6161FF) !important;transition:width .6s ease !important;}",
+    ".ps-kpi-bar-in{height:100% !important;border-radius:var(--ps-r-pill,999px) !important;background:var(--ps-accent,#507EC5) !important;transition:width .6s ease !important;}",
     ".ps-kpi-txt{flex:1 1 auto !important;min-width:0 !important;}",
     "@media(max-width:900px){#pageContent .ps-herotop{flex-direction:column !important;gap:20px !important;}#pageContent .ps-herotop > .ps-kpi{flex:0 0 auto !important;width:100% !important;max-width:352px !important;}}",
     /* machine à écrire : le slot réserve la largeur de la phrase la plus longue
        pour que le titre ne tremble pas à chaque lettre */
-    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#6161FF) !important;white-space:nowrap !important;}",
-    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#6161FF) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
+    ".ps-tw{display:inline-block !important;text-align:left !important;color:var(--ps-accent,#507EC5) !important;white-space:nowrap !important;}",
+    ".ps-tw-cur{display:inline-block !important;width:3px !important;height:.86em !important;background:var(--ps-accent,#507EC5) !important;margin-left:5px !important;vertical-align:-.06em !important;border-radius:2px !important;animation:ps-blink 1.05s steps(1) infinite !important;}",
     "@keyframes ps-blink{50%{opacity:0}}",
     "@media(max-width:820px){#pageContent .cards-grandpa > .lw-cols.multiple-rows{grid-template-columns:1fr !important;}#pageContent h1.learnworlds-heading{font-size:36px !important;}#pageContent h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}#pageContent .ps-desc{padding-right:0 !important;}}"
   ].join("\n");

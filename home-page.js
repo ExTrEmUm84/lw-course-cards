@@ -840,7 +840,7 @@
        • les couleurs et les icônes SVG, qui sont du design, pas du contenu ;
        • les « chips » des deux cartes profils.
 
-     🔴 RÈGLE DE SÉCURITÉ, la même que les replis `var(--ps-accent,#6161FF)` de
+     🔴 RÈGLE DE SÉCURITÉ, la même que les replis `var(--ps-accent,#507EC5)` de
      tokens.js : si la lecture ne donne RIEN (élément renommé, déplacé, vidé
      dans le builder), on retombe sur les tables ci-dessus **au lieu d'afficher
      une section vide**. Un lecteur qui ne sait pas ne doit jamais effacer.
