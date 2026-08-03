@@ -764,11 +764,35 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     var ck=document.createElement("input"); ck.type="checkbox"; ck.checked=!!val; ck.style.flex="none";
     var c=document.createElement("input"); c.type="color"; c.value=val||"#507EC5"; c.disabled=!val;
     var lab=document.createElement("label"); lab.textContent="Couleur propre à cette page";
+    /* 🔴🔴 NE PAS RECONSTRUIRE LE PANNEAU DEPUIS SON PROPRE SÉLECTEUR.
+       Signalé par Ziad : « le changement de couleur ne change pas la couleur du
+       titre ». Deux fautes sur la même ligne :
+       1. `pagesUI()` reconstruit tout le bloc — donc le sélecteur de couleur que
+          Ziad est en train de manipuler est DÉTRUIT et remplacé au premier
+          événement. Les suivants partent dans un élément détaché : la couleur ne
+          bougeait plus, et le glissement était sans effet.
+       2. `apercuPage()` n'était même pas appelé ici, alors que c'est lui qui
+          repeint le hero et les cartes.
+       On met donc à jour l'ÉTAT, l'APERÇU et la seule pastille de l'onglet — rien
+       d'autre. Un contrôle ne doit jamais se reconstruire lui-même pendant qu'on
+       s'en sert. */
+    function majPastilleOnglet(){
+      var t=document.querySelectorAll("#ptabs .ptab");
+      for(var i=0;i<PAGES_LIB.length && i<t.length;i++){
+        if(PAGES_LIB[i][0]===slug){
+          var pt=t[i].querySelector("i");
+          if(pt) pt.style.background=S.pages[slug]||"var(--ps-accent)";
+        }
+      }
+    }
     ck.onchange=function(){
       S.pages[slug]= ck.checked ? (c.value||"#507EC5") : "";
-      c.disabled=!ck.checked; sortie(); pagesUI(); apercuPage();
+      c.disabled=!ck.checked; sortie(); apercuPage(); majPastilleOnglet();
     };
-    c.oninput=function(){ if(ck.checked){ S.pages[slug]=c.value; sortie(); pagesUI(); } };
+    c.oninput=function(){
+      if(!ck.checked) return;
+      S.pages[slug]=c.value; sortie(); apercuPage(); majPastilleOnglet();
+    };
     r1.appendChild(lab); r1.appendChild(ck); r1.appendChild(c);
     c1.appendChild(r1); grille.appendChild(c1);
 
