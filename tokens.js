@@ -283,7 +283,14 @@
     if(!sty || !sty.contour) return;                  /* éteint : on ne touche à rien */
     contourStyle();
     var NS="http://www.w3.org/2000/svg";
-    document.querySelectorAll(LINE_SEL).forEach(function(c){
+    document.querySelectorAll(LINE_SEL).forEach(function(inner){
+      /* 🔴🔴 LE LISERÉ VA SUR LA CARTE, PAS SUR SON CONTENU. Mesuré sur
+         /fiches-secteur : `.ps-scard` fait 315x86 alors que la carte visible
+         (`.lw-course-card`) fait 317x174 — le trait faisait donc le tour du bloc
+         de texte, au milieu de la carte. Il était bien là, il entourait le mauvais
+         élément. `course-cards.js` vise l'hôte depuis le début ; ce code visait le
+         conteneur intérieur parce que c'est lui que le sélecteur trouve. */
+      var c=inner.closest(".lw-course-card")||inner;
       if(c.querySelector(":scope > .ps-mline")) return;            /* déjà posé (ou posé par sa page) */
       c.classList.add("ps-line-hote");
       var s=document.createElementNS(NS,"svg");
@@ -294,7 +301,11 @@
       r.setAttribute("x","0"); r.setAttribute("y","0");
       r.setAttribute("width","100%"); r.setAttribute("height","100%");
       r.setAttribute("rx","16"); r.setAttribute("pathLength","1");
-      s.appendChild(r); c.appendChild(s);
+      /* 🔴 Insérer EN PREMIER et non en dernier : sans z-index explicite, un frère
+         placé après passe au-dessus. Ajouté à la fin, le trait serait repassé
+         par-dessus l'illustration ronde — exactement la régression signalée ce
+         matin sur la page Cours, qu'il serait absurde de reproduire ici. */
+      s.appendChild(r); c.insertBefore(s, c.firstChild);
     });
   }
 
@@ -558,7 +569,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-r";
+  window.PS_TOKENS_V="2026-08-03-u";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
