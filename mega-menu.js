@@ -63,11 +63,26 @@
     return "def";
   }
 
-  var C=["var(--ps-accent,#507EC5)","#00C875","#E2445C","#FDAB3D","#A25DDC","#0073EA"];
   var NAV=" nav.lw-topbar-menu ";           // scope desktop
   var CSS=[
     /* ---------- pictos + libellés (desktop ET tiroir mobile) ---------- */
-    ".ps-mm-ic{border-radius:11px !important;flex:none !important;display:flex !important;align-items:center !important;justify-content:center !important;color:#fff !important;}",
+    /* 🔴🔴 UNE SEULE COULEUR : CELLE DE LA PAGE (demande de Ziad, 04/08).
+       Les pictos cyclaient sur six teintes selon leur POSITION
+       (`nth-child(6n+N)`, table `C`) : seul le premier suivait l'accent, les cinq
+       autres étaient des couleurs figées, écrites en dur ici. D'où l'impression
+       que « les couleurs changent tout le temps » — elles changeaient en effet à
+       chaque menu et à chaque rang, sans rien signifier. Un picto de navigation
+       n'est pas une pastille de champ : il ne code aucune information, donc sa
+       couleur n'a rien à distinguer.
+       `--ps-accent` est reposé par page sur `:root` par `accentPage()` de
+       tokens.js ⇒ le menu prend la couleur de la page où l'on se trouve, et suit
+       automatiquement ce qui est réglé dans le configurateur.
+       ⚠️ Réserve assumée, cohérente avec la décision du 03/08 (« plus aucun
+       assombrissement ») : sur une page à teinte CLAIRE — le jaune des fiches
+       secteur — le glyphe blanc sur ce fond est peu lisible. C'est visible et ça
+       se corrige en changeant la couleur, plutôt que d'être compensé dans le dos
+       de celui qui la choisit. */
+    ".ps-mm-ic{background:var(--ps-accent,#507EC5) !important;border-radius:11px !important;flex:none !important;display:flex !important;align-items:center !important;justify-content:center !important;color:#fff !important;}",
     ".ps-mm-ic svg{stroke:#fff !important;fill:none !important;stroke-width:2 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
     ".ps-mm-t{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-weight:600 !important;color:var(--ps-text,#1c1f26) !important;line-height:1.3 !important;}",
     /* tiroir mobile : on garde la ligne picto + libellé */
@@ -146,7 +161,8 @@
     /* sous 900px la bande deviendrait illisible sur une ligne : on la scrolle */
     "@media(max-width:900px){"+NAV+".lw-topbar-submenu.js-submenu-list{justify-content:flex-start !important;overflow-x:auto !important;gap:28px !important;}}"
   ];
-  C.forEach(function(c,i){ CSS.push(".lw-topbar-submenu-item:nth-child(6n+"+(i+1)+") .ps-mm-ic{background:"+c+" !important;}"); });
+  /* (le cycle de six couleurs par `nth-child` vivait ici : supprimé le 04/08,
+     la couleur est posée une seule fois sur `.ps-mm-ic`, plus haut) */
   var st=document.getElementById("ps-megamenu-style");
   if(!st){ st=document.createElement("style"); st.id="ps-megamenu-style"; document.head.appendChild(st); }
   st.textContent=CSS.join("\n");
