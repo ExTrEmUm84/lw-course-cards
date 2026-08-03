@@ -160,7 +160,8 @@
     "emptykk-clone-clone":"#6b7280"
   };
   var PAGE_STYLE={
-    "formation-par-modules":{"contour":1,"ep":4,"duree":1.1}
+    "formation-par-modules":{"contour":1,"ep":4,"duree":1.1},
+    "fiches-secteur":{"contour":1,"ep":4,"duree":1.1}
   };
   var REGLAGES={
     "lien_video":"",
