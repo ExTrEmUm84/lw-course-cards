@@ -714,13 +714,27 @@
     }, 400);
   })();
 
-  /* Le menu natif est rendu tôt, mais `mega-menu.js` le retouche : on repasse
-     quelques fois, et à chaque changement de langue. `data-ps-jumelle` évite de
-     retraiter un lien déjà réécrit, donc repasser ne coûte rien. */
+  /* 🔴 OBSERVATEUR, PAS DES RELANCES À HEURE FIXE — corrigé après un test en
+     production. Avec des relances (300/900/2000/4000 ms), le lien du menu
+     restait parfois en français : mesuré sur la page EN, `data-ps-jumelle` sur
+     ZÉRO lien alors que la logique était juste (langue « en », 1 candidat, lien
+     interne). Le menu est simplement (re)peint APRÈS la dernière relance —
+     LearnWorlds hydrate sa barre, puis `mega-menu.js` la retouche. Une course
+     que des délais fixes ne peuvent pas gagner de façon fiable.
+     🔴 Observateur PERMANENT : le menu peut être repeint à tout moment (ouverture
+     d'un sous-menu, retour arrière). `data-ps-jumelle` rend le repassage
+     gratuit, et on n'observe que `childList` — nos écritures sont des
+     ATTRIBUTS, donc aucune boucle possible. */
   (function(){
     liensMenuJumeles();
-    [300,900,2000,4000].forEach(function(d){ setTimeout(liensMenuJumeles,d); });
     if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", liensMenuJumeles);
+    var enAttente=false;
+    function planifier(){
+      if(enAttente) return;
+      enAttente=true;
+      requestAnimationFrame(function(){ enAttente=false; liensMenuJumeles(); });
+    }
+    try{ new MutationObserver(planifier).observe(document.documentElement,{childList:true,subtree:true}); }catch(e){}
     var n=0, iv=setInterval(function(){
       try{
         if(window.Weglot && window.Weglot.on){ window.Weglot.on("languageChanged", liensMenuJumeles); clearInterval(iv); return; }
