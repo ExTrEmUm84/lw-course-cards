@@ -822,6 +822,112 @@
   ];
   var PF_CALLOUT="Votre cabinet idéal vous correspond-il vraiment ? On répond à toutes vos questions pendant la formation.";
 
+  /* ====================================================================
+     LIRE LE CONTENU DU BUILDER AU LIEU DE LE RECOPIER (03/08)
+     --------------------------------------------------------------------
+     🔴 LE PROBLÈME, constaté par Ziad puis mesuré sur la home en production :
+     il modifie un texte dans le Site Builder et **rien ne bouge**. Cause : on
+     MASQUE le contenu natif (`ps-home-hide`) et on affiche une copie écrite en
+     dur dans ce fichier. Écart relevé le 03/08, en français :
+       builder « Top-20 / Cursus Data / Cabinets TEST » + une 6e ligne
+       « Cabinets de Conseil en Management : Sia Partners, Wavestone… »
+       code    « Top-6 / Data / IT », et la 6e ligne inexistante.
+     Ses modifications étaient donc invisibles depuis un moment.
+
+     ⇒ Les textes viennent désormais du DOM natif. Ce qui n'est PAS extractible
+     garde sa valeur en dur, et c'est assumé :
+       • les % du donut (le graphique natif ne s'extrait pas, cf. plus haut) ;
+       • les couleurs et les icônes SVG, qui sont du design, pas du contenu ;
+       • les « chips » des deux cartes profils.
+
+     🔴 RÈGLE DE SÉCURITÉ, la même que les replis `var(--ps-accent,#6161FF)` de
+     tokens.js : si la lecture ne donne RIEN (élément renommé, déplacé, vidé
+     dans le builder), on retombe sur les tables ci-dessus **au lieu d'afficher
+     une section vide**. Un lecteur qui ne sait pas ne doit jamais effacer.
+     ==================================================================== */
+  function psTxt(e){ return e ? (e.textContent||"").replace(/\s+/g," ").trim() : ""; }
+
+  /* 🔴 LE MOTIF EST LE `<strong>`, PAS LA PUCE. Première version : je lisais les
+     `<li>`, et je ne trouvais que 6 tiers sur 8 — **MBB et Top-6 auraient disparu
+     de la home**, parce que Ziad les a écrits en paragraphe et non en puce.
+     Relevé de la structure réelle : les HUIT tiers, dans la liste comme hors
+     d'elle, ont exactement la même forme — un `<strong>` qui porte le nom, suivi
+     d'un `<span>` qui porte les cabinets. C'est donc ÇA le motif stable, et il
+     ne dépend pas de la façon dont le texte est mis en page.
+     Leçon : lire la structure réelle avant d'écrire l'analyseur. La première
+     version marchait « à 75 % », ce qui est la pire des situations — elle aurait
+     silencieusement effacé deux lignes. */
+  function lireTiers(sec){
+    var out=[];
+    [].slice.call(sec.querySelectorAll("li")).forEach(function(li){
+      var s=psTxt(li);
+      var m=s.match(/^(.{2,45}?)\s*:\s*(.+)$/);
+      if(!m) return;
+      var firms=m[2].split(",").map(function(f){
+        return f.replace(/[.…\s]+$/,"").trim();       // « … » et « .... » de fin de liste
+      }).filter(function(f){ return f && f!=="…"; });
+      if(!firms.length) return;
+      out.push({tier:m[1].trim(), firms:firms});
+    });
+    if(!out.length) return null;
+    /* 🔴🔴 GARDE-FOU : SI DES TIERS VIVENT HORS DE LA LISTE, ON NE LIT RIEN.
+       Mesuré sur la home le 03/08 : 6 tiers en puces, mais **MBB et Top-6 en
+       paragraphes**, dans un balisage où le texte des lignes suivantes est
+       recollé au précédent (« …Roland Berger, KearneyNous vous préparons… »).
+       Deux analyseurs successifs s'y sont cassé les dents, le second allant
+       jusqu'à transformer « McKinsey & Company » en « Mc ». Plutôt que de
+       deviner, on constate : un tier hors liste = lecture incomplète = on garde
+       la table de repli, et RIEN ne disparaît de la home.
+       ✅ Cette règle se débloque TOUTE SEULE : le jour où les lignes hors liste
+       passent en puces, le compteur tombe à zéro et la lecture prend le relais,
+       sans une ligne de code à changer.
+       Un tier hors liste = un `<strong>` court (un nom, pas une phrase) suivi
+       d'un voisin qui contient des virgules. */
+    var ul=sec.querySelector("ul,ol");
+    var dehors=[].slice.call(sec.querySelectorAll("strong,b")).filter(function(s){
+      if(ul && ul.contains(s)) return false;
+      var l=psTxt(s);
+      if(!l || l.length>45 || /[.?!]/.test(l)) return false;
+      return psTxt(s.nextElementSibling).indexOf(",")>=0;
+    }).length;
+    if(dehors) return null;
+    return out;
+  }
+
+  /* Les deux cartes profils sont des accordéons dont le texte commence par leur
+     propre titre. 🔴 Le builder en rend plusieurs, dont des VIDES et des
+     DOUBLONS (mesuré : 5 accordéons pour 2 profils réels) — d'où la
+     déduplication par titre et le rejet des descriptions vides. */
+  function lireProfils(sec){
+    var vus={}, out=[];
+    [].slice.call(sec.querySelectorAll("[class*=accordion],[class*=toggle]")).forEach(function(a){
+      var titre=psTxt(a.querySelector("h4,.learnworlds-heading4"));
+      if(!titre || vus[titre]) return;
+      var tout=psTxt(a);
+      var desc=(tout.indexOf(titre)===0) ? tout.slice(titre.length).trim() : tout;
+      if(!desc) return;
+      vus[titre]=1;
+      out.push({title:titre, desc:desc});
+    });
+    return out.length ? out : null;
+  }
+
+  /* Titre et accroche du bloc de droite : on part de la LISTE (l'ancre la plus
+     fiable) et on remonte à sa carte, plutôt que de compter les `h4` de la
+     section — leur nombre change dès que Ziad ajoute un bloc. */
+  function lireBlocDroite(sec){
+    var ul=sec.querySelector("ul,ol");
+    if(!ul) return null;
+    var carte=ul.closest(".box-shadow-round-light,.radius-15,.lw-cols")||sec;
+    var titre=psTxt(carte.querySelector("h4,.learnworlds-heading4"));
+    var accroche="";
+    [].slice.call(carte.querySelectorAll("p")).forEach(function(p){
+      var s=psTxt(p);
+      if(!accroche && s && s!==titre && s.length>25) accroche=s;
+    });
+    return {titre:titre, accroche:accroche};
+  }
+
   var SVGNS="http://www.w3.org/2000/svg";
   function makeDonut(segs){
     var C=2*Math.PI*45, total=0; segs.forEach(function(s){ total+=s.value; }); if(!total) total=1;
@@ -847,6 +953,19 @@
   function buildProfils(){
     var sec=document.querySelector(H+" .ps-home-profils");
     if(!sec || sec.querySelector(".ps-pf2")) return;
+
+    /* 🔴 LECTURE AVANT CONSTRUCTION, et repli sur les tables si ça ne donne
+       rien. C'est ici que le contenu du builder entre dans la section. */
+    var tiers=lireTiers(sec)||PF_TIERS;
+    var lus=lireProfils(sec);
+    var cartesProfils=(lus && lus.length>=2)
+      ? [{title:lus[0].title, icon:PF_JUNIORS.icon, chips:PF_JUNIORS.chips, desc:lus[0].desc},
+         {title:lus[1].title, icon:PF_EXPERT.icon,  chips:PF_EXPERT.chips,  desc:lus[1].desc}]
+      : [PF_JUNIORS, PF_EXPERT];
+    var droite=lireBlocDroite(sec)||{};
+    var titreDroite=droite.titre||"À quels cabinets nous préparons-vous ?";
+    var callout=droite.accroche||PF_CALLOUT;
+
     var pf2=document.createElement("div"); pf2.className="ps-pf2";
     /* ---- gauche : donut + 2 cartes profils ---- */
     var left=document.createElement("div"); left.className="ps-pf2-left";
@@ -861,7 +980,7 @@
       it.appendChild(dot); it.appendChild(lb); it.appendChild(v); leg.appendChild(it);
     });
     dc.appendChild(leg); left.appendChild(dc);
-    [PF_JUNIORS,PF_EXPERT].forEach(function(p,i){
+    cartesProfils.forEach(function(p,i){
       var card=document.createElement("div"); card.className="ps-pfcard ps-pf-rise"; card.style.transitionDelay=((i+1)*0.1)+"s";
       var h=document.createElement("div"); h.className="ps-pfcard-h";
       var ic=document.createElement("span"); ic.className="ps-pfcard-ic"; ic.innerHTML=p.icon;   // SVG statique
@@ -876,15 +995,15 @@
     pf2.appendChild(left);
     /* ---- droite : tiers cabinets ---- */
     var right=document.createElement("div"); right.className="ps-pf2-right ps-pf-rise"; right.style.transitionDelay="0.15s";
-    var rt=document.createElement("div"); rt.className="ps-pf2-right-t"; rt.textContent="À quels cabinets nous préparons-vous ?"; right.appendChild(rt);
-    PF_TIERS.forEach(function(tr){
+    var rt=document.createElement("div"); rt.className="ps-pf2-right-t"; rt.textContent=titreDroite; right.appendChild(rt);
+    tiers.forEach(function(tr){
       var row=document.createElement("div"); row.className="ps-tier";
       var b=document.createElement("span"); b.className="ps-tierbadge"; b.textContent=tr.tier;
       var fw=document.createElement("div"); fw.className="ps-tier-firms";
       tr.firms.forEach(function(f){ var ch=document.createElement("span"); ch.className="ps-chip"; ch.textContent=f; fw.appendChild(ch); });
       row.appendChild(b); row.appendChild(fw); right.appendChild(row);
     });
-    var co=document.createElement("div"); co.className="ps-pf-callout"; co.textContent=PF_CALLOUT; right.appendChild(co);
+    var co=document.createElement("div"); co.className="ps-pf-callout"; co.textContent=callout; right.appendChild(co);
     pf2.appendChild(right);
     /* ---- insertion + masquage du natif (pie + accordéons + liste) ---- */
     var nativeCards=sec.querySelectorAll(".box-shadow-round-light, .radius-15");
