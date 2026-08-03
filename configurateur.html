@@ -296,7 +296,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-z</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-a</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -540,7 +540,7 @@ body.ps-verrou .ps-porte{display:grid}
     /* Couleur dominante par page + réglages libres. Clé = slug LearnWorlds
        (la classe `slug-…` posée sur le <body>). Vide = la page reprend l'accent
        de la marque. */
-    pages:{"home":"","profile":"","fiches-secteur":"#fad54a","emptykk-clone-clone":"#6b7280","fiches-cabinet":"#007260",
+    pages:{"home":"","profile":"","annuaire-partenaire-de-cas":"","fiches-secteur":"#fad54a","emptykk-clone-clone":"#6b7280","fiches-cabinet":"#007260",
            "formation-par-modules":"","sentrainer":"","formation-par-comptences":""},
     reglages:{"lien_video":"","lien_video_background":""},
     /* Contour animé par page. 🔴 SEULE la page Cours en a un aujourd'hui, avec
@@ -549,6 +549,7 @@ body.ps-verrou .ps-porte{display:grid}
        Ziad : « rajoute-le partout mais ne l'active pas »). */
     style:{"home":{contour:false,ep:4,duree:1.1,couleur:""},
            "profile":{contour:false,ep:4,duree:1.1,couleur:""},
+           "annuaire-partenaire-de-cas":{contour:false,ep:4,duree:1.1,couleur:""},
            "formation-par-modules":{contour:true,ep:4,duree:1.1,couleur:""},
            "sentrainer":{contour:false,ep:4,duree:1.1,couleur:""},
            "fiches-cabinet":{contour:false,ep:4,duree:1.1,couleur:""},
@@ -571,8 +572,15 @@ body.ps-verrou .ps-porte{display:grid}
        PAS dans les tables du board (PAGE_ORDRE) : ce n'est pas une page de
        catalogue, c'est la page du membre. Son apercu ne montre que la
        configuration — le board n'est pas reproduit dans la maquette. */
-    ["profile",                 "Profil"]
+    ["profile",                 "Profil"],
+    ["annuaire-partenaire-de-cas","Annuaire"]
   ];
+  /* 🔴 SEULES CES PAGES ONT DES CARTES QUE LE CONTOUR SAIT ATTEINDRE. Ailleurs
+     — home, profil, annuaire — le reglage existait et ne produisait RIEN : une
+     case a cocher qui ne fait rien est pire qu'une case absente, elle fait croire
+     que le reglage a ete pris en compte. */
+  var PAGES_A_CARTES=["formation-par-modules","sentrainer","fiches-cabinet",
+                      "fiches-secteur","emptykk-clone-clone"];
   var REGL_LIB=[
     ["lien_video",            "Vidéo du hero (lecture au clic)"],
     ["lien_video_background", "Vidéo de fond du hero"]
@@ -873,6 +881,7 @@ body.ps-verrou .ps-porte{display:grid}
        🔴 Les curseurs sont désactivés ET estompés quand le contour est éteint :
        régler l'épaisseur d'un trait absent n'a aucun effet, et laisser
        l'interface le suggérer fabrique un faux souvenir de réglage. */
+    var aDesCartes=PAGES_A_CARTES.indexOf(slug)>=0;
     var c2=document.createElement("div"); c2.className="card";
     c2.innerHTML='<h4>Contour animé des cartes</h4>'+
       '<p class="expl"><strong>Il ne s\'affiche qu\'au survol d\'une carte</strong> — au repos, la carte est nue. '+
@@ -917,7 +926,8 @@ body.ps-verrou .ps-porte{display:grid}
     var lab5=document.createElement("label"); lab5.textContent="Couleur propre du trait (sinon celle de la page)";
     lab5.setAttribute("for",ckC.id);
     r5.appendChild(ckC); r5.appendChild(lab5); r5.appendChild(cc); c2.appendChild(r5);
-    grille.appendChild(c2);
+    if(aDesCartes) grille.appendChild(c2);
+    else { st.contour=false; }        /* pas de cartes ici : on n'ecrit rien */
 
     function maj(){
       vEp.textContent=st.ep+"px";
@@ -947,6 +957,7 @@ body.ps-verrou .ps-porte{display:grid}
       "fs","f1Link","Champ 1 suit la marque"));
     if(slug==="fiches-cabinet") grille.appendChild(carteLogoCabinet());
     if(slug==="profile") grille.appendChild(carteProfil());
+    if(slug==="annuaire-partenaire-de-cas") grille.appendChild(carteAnnuaire());
     if(slug==="home") grille.appendChild(carteVideos());
 
     box.appendChild(grille);
