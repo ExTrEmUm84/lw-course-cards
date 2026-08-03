@@ -276,7 +276,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-p</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-q</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -1280,7 +1280,9 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       var r=await fetch(API_PS+"/auth",{ method:"POST", headers:{"Content-Type":"application/json"},
         body:JSON.stringify({code:decodeURIComponent(m[1])}) });
       var j=await r.json().catch(function(){ return {}; });
-      if(!r.ok||!j.ok) throw new Error(j.error||"connexion refusée");
+      if(!r.ok||!j.ok) throw new Error((j.error||"connexion refusée")+
+        (j.loginRecu?(" — GitHub te reconnaît comme <strong>"+String(j.loginRecu).replace(/[<>&]/g,"")+
+         "</strong>, et la liste des comptes autorisés contient "+j.nbAutorises+" entrée(s)."):""));
       try{ sessionStorage.setItem(CLE_SESS,j.session); sessionStorage.setItem(CLE_QUI,j.login); }catch(e){}
       dire("Connecté en tant que <strong>"+String(j.login).replace(/[<>&]/g,"")+"</strong>. Tu peux publier.","ok");
     }catch(e){ dire(String(e.message||e),"ko"); }
