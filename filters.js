@@ -180,7 +180,7 @@
   /* ================= RENOMMAGE DU FILTRE "categories" =====================
      PARAMÉTRABLE PAR PAGE — le libellé dépend de ce que les catégories
      désignent là où le script tourne : "Secteurs" sur la page Cas, mais ce
-     serait FAUX sur /fiches-secteur-clone (fiches cabinet). D'où un réglage
+     serait FAUX sur /fiches-cabinet (fiches cabinet). D'où un réglage
      par page, posé AVANT le chargement du script :
          <script>window.PS_CAT_LABEL="Secteurs";</script>
          <script src=".../filters.js"></script>

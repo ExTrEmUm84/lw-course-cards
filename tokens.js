@@ -134,8 +134,18 @@
 
      Mémo des couleurs, hors du bloc pour survivre aux publications :
        fiches-secteur = Secteurs (jaune) · emptykk-clone-clone = Études de cas
-       (gris) · fiches-secteur-clone = Cabinets (vert, choix du 24/07, était
+       (gris) · fiches-cabinet = Cabinets (vert, choix du 24/07, était
        rouge #c51d4a).
+
+     🔴🔴 SLUG RENOMMÉ LE 03/08 : `fiches-secteur-clone` -> `fiches-cabinet`.
+     Trouvé en allant mesurer la page pour la maquette : elle renvoyait **404**,
+     et la page servie sous son nouveau nom s'affichait en BLEU DE MARQUE — elle
+     avait perdu son vert, puisque cette table est indexée par slug.
+     17 références mises à jour dans 6 fichiers, dont un lien du PIED DE PAGE
+     présent sur tout le site et qui menait donc à une 404 pour tout le monde.
+     C'est la troisième fois en une semaine qu'un renommage de page casse des
+     références en silence (deux slugs le 30/07). **Un slug qui change ne
+     prévient personne : à chaque renommage, chercher le slug dans tout le dépôt.**
 
      `REGLAGES` porte les valeurs libres (URLs de vidéo…). 🔴 Il vit ICI plutôt
      que dans un bloc de texte de la home : Ziad en avait posé un sur la page,
@@ -145,7 +155,7 @@
   var PAGE_ACCENTS={
     "fiches-secteur":"#fad54a",
     "emptykk-clone-clone":"#6b7280",
-    "fiches-secteur-clone":"#007260"
+    "fiches-cabinet":"#007260"
   };
   var PAGE_STYLE={
     "formation-par-modules":{"contour":1,"ep":4,"duree":1.1}
@@ -529,9 +539,9 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-h";
+  window.PS_TOKENS_V="2026-08-03-i";
 
-  var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-secteur-clone","sentrainer"];
+  var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
      différent (`…-clone-en`), donc `body.slug-…` ne matchait pas et le flash
      de cartes non stylées revenait. Dérivé de la table, jamais écrit à la main. */
@@ -572,9 +582,9 @@
      player DU cours qu'on vient d'ouvrir (slug === courseid), on REMPLACE ce
      bouton natif : (1) on réécrit son libellé, (2) on intercepte son clic
      (phase CAPTURE, avant le handler natif) pour rediriger vers l'origine
-     (ex. /fiches-secteur-clone) au lieu de la présentation. Batch auto.
+     (ex. /fiches-cabinet) au lieu de la présentation. Batch auto.
      🔴 Le player ne se peint PAS en onglet caché (SPA) ; validé en direct,
-     onglet au 1er plan : clic natif -> /fiches-secteur-clone. Placement/label
+     onglet au 1er plan : clic natif -> /fiches-cabinet. Placement/label
      ajustables ici. */
   function playerReturn(){
     var r; try{ r=JSON.parse(sessionStorage.getItem("psPlayerReturn")||"null"); }catch(e){ return null; }
@@ -676,7 +686,7 @@
      bouton retour natif du player (« Retour à la page du cours ») pour revenir
      DIRECT à cette page principale, sans passer par la présentation. Marche sur
      TOUTES les pages sans script par page. Libellé selon le slug de la page. */
-  var RETURN_LABELS={"formation-par-modules":"Retour aux cours",sentrainer:"Retour à l'entraînement","emptykk-clone-clone":"Retour aux études de cas","fiches-secteur":"Retour aux fiches secteur","fiches-secteur-clone":"Retour aux fiches cabinet","formation-par-comptences":"Retour aux compétences"};
+  var RETURN_LABELS={"formation-par-modules":"Retour aux cours",sentrainer:"Retour à l'entraînement","emptykk-clone-clone":"Retour aux études de cas","fiches-secteur":"Retour aux fiches secteur","fiches-cabinet":"Retour aux fiches cabinet","formation-par-comptences":"Retour aux compétences"};
   function returnLabel(){ var m=(((document.body&&document.body.className)||"")).match(/slug-([a-z0-9-]+)/); return (m&&RETURN_LABELS[m[1]])||"Retour"; }
   function playerFlag(){
     if(window.__psFlagOn) return; window.__psFlagOn=true;

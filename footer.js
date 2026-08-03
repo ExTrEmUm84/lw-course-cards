@@ -31,7 +31,7 @@
       ["Cours","/course/"],
       ["Études de cas","/emptykk-clone-clone"],
       ["Secteurs","/fiches-secteur"],
-      ["Cabinets","/fiches-secteur-clone"],
+      ["Cabinets","/fiches-cabinet"],
       ["S'entraîner","/sentrainer"]
     ]},
     { title:"Le site", links:[

@@ -438,7 +438,7 @@
     "etudes-de-cas":                                     {url:"/emptykk-clone-clone",      col:"#6B7280"},
     "etudes-de-cas2":                                    {url:"/emptykk-clone-clone",      col:"#6B7280"},
     "fiches-secteurs":                                   {url:"/fiches-secteur",           col:"#C9A227"},
-    "fiches-cabinet-and-tests-en-ligne":                 {url:"/fiches-secteur-clone",     col:"#007260"},
+    "fiches-cabinet-and-tests-en-ligne":                 {url:"/fiches-cabinet",     col:"#007260"},
     "s-entrainer":                                       {url:"/sentrainer",               col:"#3887B4"}
   };
   /* 🔴 PARCOURS INCONNU : AUCUNE page, donc section « Autres » (30/07).
@@ -461,7 +461,7 @@
      Ajouter un programme = 1 ligne ici (et non plus une par identifiant). */
   var PAGE_COL={
     "/formation-par-modules":    "#507EC5",
-    "/fiches-secteur-clone":     "#007260",
+    "/fiches-cabinet":     "#007260",
     "/fiches-secteur":           "#C9A227",
     "/emptykk-clone-clone":      "#6B7280",
     "/formation-par-comptences": "#243B6B",
@@ -470,7 +470,7 @@
   var PROG_NOMS={
     "conseilenstrategie":        "/formation-par-modules",
     "lesautrestypesdeconseil":   "/formation-par-modules",
-    "fichescabinettestsenligne": "/fiches-secteur-clone",
+    "fichescabinettestsenligne": "/fiches-cabinet",
     "fichessecteurs":            "/fiches-secteur",
     "etudesdecas":               "/emptykk-clone-clone",
     "businesssense":             "/formation-par-comptences",
@@ -568,7 +568,7 @@
      perdue). Les pages sans aucun programme ne s'affichent pas du tout. */
   var PAGE_LABELS={
     "/formation-par-modules":    "Cours",
-    "/fiches-secteur-clone":     "Fiches cabinet",
+    "/fiches-cabinet":     "Fiches cabinet",
     "/fiches-secteur":           "Fiches secteur",
     "/emptykk-clone-clone":      "Études de cas",
     "/formation-par-comptences": "Compétences",
@@ -576,7 +576,7 @@
   };
   /* Ordre d'affichage voulu par Ziad : Cours, Cabinet, Secteur, Études de cas,
      puis le reste. */
-  var PAGE_ORDRE=["/formation-par-modules","/fiches-secteur-clone","/fiches-secteur","/emptykk-clone-clone","/formation-par-comptences","/sentrainer"];
+  var PAGE_ORDRE=["/formation-par-modules","/fiches-cabinet","/fiches-secteur","/emptykk-clone-clone","/formation-par-comptences","/sentrainer"];
   function rangPage(u){ var i=PAGE_ORDRE.indexOf(u); return i<0 ? 99 : i; }
   function labelPage(u){ return PAGE_LABELS[u] || "Autres"; }
 

@@ -1,5 +1,5 @@
 /* ============================================================
-   Cartes "Fiches cabinet" + hero — page /fiches-secteur-clone
+   Cartes "Fiches cabinet" + hero — page /fiches-cabinet
    ------------------------------------------------------------
    À charger dans le Code personnalisé de la PAGE :
      <script src="https://extremum84.github.io/lw-course-cards/cabinet-cards.js"></script>
