@@ -1019,6 +1019,62 @@
     } else { pf2.classList.add("ps-in"); }
   }
 
+  /* ====================================================================
+     BLOC DE RÉGLAGES DU BUILDER — « #clé : valeur »
+     --------------------------------------------------------------------
+     Ziad a posé sur la home un bloc de texte contenant :
+         #lien_video_background :
+         #lien_video :
+     C'est la bonne façon de faire, et bien plus solide que d'analyser de la
+     prose : la clé est EXPLICITE, elle ne dépend d'aucune mise en page.
+     Toute clé future marche sans une ligne de code ici — il suffit de lire
+     `psReglage("ma_cle")` là où on en a besoin.
+
+     🔴 Les lignes sont séparées par des `<br>`, donc `textContent` les COLLE
+     (« #lien_video_background :#lien_video : », mesuré). On découpe donc sur les
+     `<br>` et non sur le texte : une URL contenant un « # » (fragment) serait
+     sinon tronquée par une découpe naïve sur ce caractère.
+     🔴 Le bloc est MASQUÉ : mesuré le 03/08, il s'affichait en clair sur la home
+     pour les visiteurs. C'est de la configuration, pas du contenu.
+     🔴 Une valeur vide ⇒ on garde la valeur d'origine. Ziad a créé les deux clés
+     sans les remplir : sans cette règle, la home perdait ses vidéos.
+     ==================================================================== */
+  var _regl=null;
+  function lireReglages(){
+    if(_regl) return _regl;
+    _regl={};
+    var blocs=[].slice.call(document.querySelectorAll(H+" .learnworlds-main-text, "+H+" .lw-widget-in"));
+    blocs.forEach(function(b){
+      if((b.textContent||"").indexOf("#")<0) return;
+      /* reconstruction ligne par ligne : chaque `<br>` termine une ligne */
+      var lignes=[], cur="";
+      [].slice.call(b.childNodes).forEach(function(n){
+        if(n.nodeType===1 && n.tagName==="BR"){ lignes.push(cur); cur=""; return; }
+        cur+=(n.textContent||"");
+      });
+      lignes.push(cur);
+      var trouve=false;
+      lignes.forEach(function(l){
+        var m=l.replace(/\s+/g," ").trim().match(/^#([a-z0-9_-]+)\s*:\s*(.*)$/i);
+        if(!m) return;
+        trouve=true;
+        var v=(m[2]||"").trim();
+        if(v) _regl[m[1].toLowerCase()]=v;          // vide = on ne surcharge pas
+      });
+      if(trouve) b.classList.add("ps-home-hide");   // configuration : jamais à l'écran
+    });
+    return _regl;
+  }
+  /* Accepte aussi bien une URL de player qu'un lien Vimeo « public » : les deux
+     se collent dans le builder, autant les accepter tous les deux. */
+  function psReglage(cle, repli){
+    var v=lireReglages()[String(cle).toLowerCase()];
+    if(!v) return repli;
+    var m=v.match(/^https?:\/\/(?:www\.)?vimeo\.com\/(\d+)(?:\?(.*))?$/i);
+    if(m) v="https://player.vimeo.com/video/"+m[1]+(m[2]?("?"+m[2]):"");
+    return v;
+  }
+
   /* Vidéo du hero : le template a un iframe Vimeo avec un ID mort (« Cette vidéo
      n'existe pas »). On remplace la source par la vraie vidéo (demande Ziad).
      Posé UNE fois (garde `data-ps-vid`) pour ne pas recharger la vidéo à chaque build. */
@@ -1028,7 +1084,7 @@
     if(!hero || hero.classList.contains("ps-hero-bg")) return;   // mode vidéo-fond : géré par heroVideoBg
     var ifr=hero.querySelector(".learnworlds-video-iframe iframe, .learnworlds-video-iframe-wrapper iframe, iframe");
     if(!ifr || ifr.getAttribute("data-ps-vid")) return;
-    ifr.setAttribute("src",HERO_VIDEO);
+    ifr.setAttribute("src",psReglage("lien_video",HERO_VIDEO));
     ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture; clipboard-write");
     ifr.setAttribute("allowfullscreen","");
     ifr.setAttribute("data-ps-vid","1");
@@ -1041,7 +1097,12 @@
     var ov=document.createElement("div"); ov.className="ps-hero-modal";
     var inner=document.createElement("div"); inner.className="ps-hero-modal-inner";
     var ifr=document.createElement("iframe");
-    ifr.src="https://player.vimeo.com/video/910833393?h=94064c722b&autoplay=1&title=0&byline=0&portrait=0";
+    /* Même vidéo que le hero, mais lancée toute seule. 🔴 On AJOUTE `autoplay`
+       au lieu de le supposer : si Ziad colle une URL sans ce paramètre, la
+       modale s'ouvrirait sur une vidéo à l'arrêt. */
+    var src=psReglage("lien_video","https://player.vimeo.com/video/910833393?h=94064c722b&title=0&byline=0&portrait=0");
+    if(!/[?&]autoplay=/.test(src)) src+=(src.indexOf("?")<0?"?":"&")+"autoplay=1";
+    ifr.src=src;
     ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture");
     ifr.setAttribute("allowfullscreen","");
     inner.appendChild(ifr);
@@ -1065,7 +1126,13 @@
     hero.classList.add("ps-hero-bg");
     var wrap=document.createElement("div"); wrap.className="ps-hero-vwrap";
     var ifr=document.createElement("iframe");
-    ifr.src=HERO_BG_VIDEO;
+    /* 🔴 `background=1` (autoplay muet, en boucle, sans contrôles) est ce qui
+       fait la vidéo de FOND : on l'ajoute si l'URL fournie ne l'a pas, sinon un
+       lien Vimeo ordinaire collé dans le builder afficherait les contrôles et ne
+       démarrerait pas tout seul. */
+    var bg=psReglage("lien_video_background",HERO_BG_VIDEO);
+    if(!/[?&]background=/.test(bg)) bg+=(bg.indexOf("?")<0?"?":"&")+"background=1&autopause=0&muted=1";
+    ifr.src=bg;
     ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture");
     ifr.setAttribute("frameborder","0");
     ifr.setAttribute("title","Vidéo de fond");
