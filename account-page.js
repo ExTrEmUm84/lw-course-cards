@@ -141,7 +141,20 @@
     B+"#courses-programs .ps-acc-prog-track{width:auto !important;height:6px !important;border-radius:999px !important;background:var(--ps-accent-tint,#edf4ff) !important;overflow:hidden !important;}",
     B+"#courses-programs .ps-acc-prog-fill{height:100% !important;border-radius:999px !important;background:var(--ps-accent,#507EC5) !important;width:0;transition:width .6s ease !important;}",
     B+"#courses-programs .ps-acc-prog[data-done='1'] .ps-acc-prog-pct{color:#15A46A !important;}",
-    B+"#courses-programs .ps-acc-prog[data-done='1'] .ps-acc-prog-fill{background:#15A46A !important;}"
+    B+"#courses-programs .ps-acc-prog[data-done='1'] .ps-acc-prog-fill{background:#15A46A !important;}",
+
+    /* --- ACCÈS FINANCÉ PAR L'ÉCOLE (bandeau dans « Paiements ») ---
+       Bandeau sobre, pas une réclame : c'est une INFORMATION de compte. Fond en
+       teinte d'accent, liseré à gauche, picto diplôme. */
+    B+".ps-acc-ecole{display:flex !important;align-items:flex-start !important;gap:14px !important;background:var(--ps-accent-tint,#EDF4FF) !important;border-left:4px solid var(--ps-accent,#507EC5) !important;border-radius:12px !important;padding:16px 18px !important;margin:0 0 18px !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;}",
+    B+".ps-acc-ecole-ic{flex:none !important;width:38px !important;height:38px !important;border-radius:50% !important;background:var(--ps-accent,#507EC5) !important;display:flex !important;align-items:center !important;justify-content:center !important;}",
+    B+".ps-acc-ecole-ic svg{width:20px !important;height:20px !important;fill:none !important;stroke:#fff !important;stroke-width:1.9 !important;stroke-linecap:round !important;stroke-linejoin:round !important;}",
+    B+".ps-acc-ecole-t{font-size:15.5px !important;font-weight:800 !important;color:#243B6B !important;letter-spacing:-.01em !important;margin-bottom:3px !important;}",
+    B+".ps-acc-ecole-s{font-size:14px !important;line-height:1.55 !important;color:#4B5563 !important;}",
+    B+".ps-acc-ecole-s strong{font-weight:700 !important;color:#243B6B !important;}",
+    /* Historique vide masqué UNIQUEMENT quand l'école prend en charge : la classe
+       n'est posée qu'après avoir vérifié qu'il n'y a AUCUNE ligne réelle. */
+    B+"#payments.ps-acc-paye-ecole .account-payments-view{display:none !important;}"
   ].join("\n");
 
   function styles(){
@@ -341,9 +354,74 @@
     })();
   }
 
+  /* ====================================================================
+     ACCÈS FINANCÉ PAR L'ÉCOLE — bandeau dans la section « Paiements »
+     --------------------------------------------------------------------
+     Demande de Ziad (04/08). Sans lui, un étudiant dont l'école paie ouvre
+     « Paiements » et lit « Vous n'avez pas encore effectué de paiement » — une
+     phrase exacte, mais qui invite surtout à se demander si l'on aurait dû.
+     🔴 AUCUNE DONNÉE RECOPIÉE : l'école reconnue vient de `window.PS_PARTENAIRE`,
+     posé par `tokens.js` à partir de la table `PARTENAIRES` (tag d'automatisation
+     sur le domaine e-mail, repli sur le domaine). Ajouter une école reste UNE
+     entrée dans cette table, ici comme sur la home.
+     🔴 `tokens.js` peut être chargé APRÈS nous : on relit `PS_PARTENAIRE` à chaque
+     passage de `run()` (relances 200/600/1200/2500 ms), jamais une seule fois.
+     🔴 Pas d'école reconnue -> on RETIRE ce qu'on aurait posé et on ré-affiche
+     l'historique. Un membre peut changer de statut entre deux passages ; laisser
+     un bandeau périmé serait pire que ne rien afficher. */
+  var ICONE_ECOLE='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4 2 9l10 5 10-5-10-5Z"/><path d="M6 12v4c0 1.7 2.7 3 6 3s6-1.3 6-3v-4"/></svg>';
+
+  /* 🔴 « Vide » se prouve, il ne se suppose pas : on ne masque l'historique que
+     si la vue ne contient AUCUN élément qui ressemble à une ligne de paiement.
+     Un test sur le TEXTE (« vous n'avez pas encore… ») aurait été piégeux : la
+     phrase est traduite par Weglot dès qu'on passe en anglais. Au moindre doute
+     on n'enlève rien — masquer un vrai historique de paiements serait grave. */
+  function historiqueVide(vue){
+    if(!vue) return false;
+    return !vue.querySelector("table, .account-table, .account-table-row, [class*='row'], [class*='item'], [class*='invoice'], [class*='receipt']");
+  }
+
+  function blocEcole(){
+    var sec=document.getElementById("payments");
+    if(!sec) return;
+    var ec=window.PS_PARTENAIRE, nom=ec && ec.nom;
+    var pose=sec.querySelector(":scope > .ps-acc-ecole");
+    if(!nom){
+      if(pose) pose.remove();
+      sec.classList.remove("ps-acc-paye-ecole");
+      return;
+    }
+    if(pose){
+      if(pose.getAttribute("data-ps-ecole")===nom) return;   // déjà à jour
+      pose.remove();
+    }
+    var box=document.createElement("div");
+    box.className="ps-acc-ecole";
+    box.setAttribute("data-ps-ecole",nom);
+    var ic=document.createElement("div"); ic.className="ps-acc-ecole-ic"; ic.innerHTML=ICONE_ECOLE;
+    var txt=document.createElement("div");
+    var t=document.createElement("div"); t.className="ps-acc-ecole-t";
+    /* Le titre est le libellé que Ziad a écrit dans la table (`pastille`) : le
+       mot à mot commercial lui appartient, il se change là-bas, pas ici. */
+    t.textContent=ec.pastille || "Accès offert par votre école";
+    var s=document.createElement("div"); s.className="ps-acc-ecole-s";
+    /* textContent + <strong> séparé : le nom vient d'une table, mais on ne
+       construit jamais du HTML par concaténation dans ce dépôt. */
+    s.appendChild(document.createTextNode("Votre accès à PrepaStrat est pris en charge par "));
+    var b=document.createElement("strong"); b.textContent=nom; s.appendChild(b);
+    s.appendChild(document.createTextNode(". Vous n'avez rien à régler."));
+    txt.appendChild(t); txt.appendChild(s);
+    box.appendChild(ic); box.appendChild(txt);
+    var head=sec.querySelector(":scope > .account-section-header");
+    if(head && head.nextSibling) sec.insertBefore(box, head.nextSibling);
+    else sec.appendChild(box);
+    /* l'historique ne disparaît que s'il est réellement vide (cf. historiqueVide) */
+    sec.classList.toggle("ps-acc-paye-ecole", historiqueVide(sec.querySelector(".account-payments-view")));
+  }
+
   function run(){
     if(!surLaPage()) return;
-    figtree(); styles(); spy();
+    figtree(); styles(); spy(); blocEcole();
     /* progression() n'est PLUS appelée : la section « Cours et programmes » est
        masquée (cf. CSS), donc inutile d'aller chercher l'avancement via le
        Worker/Turnstile. Le code de progression est conservé plus haut au cas où
