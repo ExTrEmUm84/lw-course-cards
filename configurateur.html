@@ -104,6 +104,26 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
 .pcfg .card{border:1px solid #E7EAF0;border-radius:12px;padding:15px 16px}
 .pcfg h4{margin:0 0 4px;font:800 11px Figtree,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#8A90A2}
 .pcfg .expl{font-size:11.5px;color:#9AA0B0;line-height:1.5;margin:0 0 12px}
+/* ---- Fiches secteur : la carte a icone ronde ------------------------
+   🔴 Ce bloc MANQUAIT a la maquette, alors que c'est le plus gros usage de la
+   palette des champs : sur la vraie page, `--ps-f1..6` colore les grandes
+   icones rondes des cartes, pas seulement des pastilles a plat.
+   Mesures relevees sur /fiches-secteur le 03/08 : icone 140 px, bord blanc 4 px,
+   remontee de -70 px, titre 21 px/800, lien 15 px, carte ~317x174. */
+.pv-sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;padding:74px 4px 4px}
+.pv-scard{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
+  box-shadow:0 4px 18px rgba(15,23,42,.06);font-family:var(--ps-font);padding:0 20px 20px;text-align:left;
+  transition:transform .18s ease,box-shadow .18s ease}
+.pv-scard:hover{transform:translateY(-3px);box-shadow:0 12px 30px rgba(15,23,42,.10)}
+.pv-sicon{width:140px;height:140px;border-radius:50%;margin:-70px auto 16px;border:4px solid #fff;
+  display:grid;place-items:center}
+.pv-sicon svg{width:56px;height:56px;fill:none;stroke-width:1.5;stroke-linecap:round;stroke-linejoin:round}
+.pv-stitle{font-size:21px;font-weight:800;color:var(--ps-text);margin:0 0 10px;line-height:1.25}
+.pv-slink{font-size:15px;font-weight:700;text-decoration:none}
+/* le cycle des 6 couleurs de champs, exactement comme sector-cards.js */
+.pv-s1 .pv-sicon{background:var(--ps-f1-tint)} .pv-s1 .pv-sicon svg{stroke:var(--ps-f1)} .pv-s1 .pv-slink{color:var(--ps-f1)}
+.pv-s2 .pv-sicon{background:var(--ps-f2-tint)} .pv-s2 .pv-sicon svg{stroke:var(--ps-f2)} .pv-s2 .pv-slink{color:var(--ps-f2)}
+.pv-s3 .pv-sicon{background:var(--ps-f3-tint)} .pv-s3 .pv-sicon svg{stroke:var(--ps-f3)} .pv-s3 .pv-slink{color:var(--ps-f3)}
 /* ================= L'APERÇU — maquette des vrais composants ========= */
 .stage h3{font:800 12px/1 Figtree,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#9AA0B0;margin:0 0 12px}
 .bloc{background:#fff;border-radius:14px;padding:26px;margin-bottom:20px;border:1px solid #E7EAF0}
@@ -327,6 +347,27 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
           <a class="pv-cta" href="#">Commencer →</a>
         </div>
         <div class="pv-car">›</div>
+      </div>
+    </div>
+
+    <h3>Fiches secteur <span style="text-transform:none;font-weight:600;color:#B4BAC8">— l'icône ronde prend les couleurs de la palette des champs</span></h3>
+    <div class="bloc" style="padding:0 4px 4px">
+      <div class="pv-sgrid">
+        <div class="pv-scard pv-s1">
+          <div class="pv-sicon"><svg viewBox="0 0 24 24"><path d="M10.5 20.5 3.5 13.5a5 5 0 0 1 7-7l7 7a5 5 0 0 1-7 7Z"/><path d="M7 10l7 7"/></svg></div>
+          <p class="pv-stitle">Pharmaceutique</p>
+          <a class="pv-slink" href="#">En savoir plus →</a>
+        </div>
+        <div class="pv-scard pv-s2">
+          <div class="pv-sicon"><svg viewBox="0 0 24 24"><path d="M2 13l20-7-7 20-3-8-10-5Z"/></svg></div>
+          <p class="pv-stitle">Aéronautique</p>
+          <a class="pv-slink" href="#">En savoir plus →</a>
+        </div>
+        <div class="pv-scard pv-s3">
+          <div class="pv-sicon"><svg viewBox="0 0 24 24"><path d="M4 15h16l-1.5-5H5.5L4 15Z"/><circle cx="7.5" cy="17" r="1.6"/><circle cx="16.5" cy="17" r="1.6"/></svg></div>
+          <p class="pv-stitle">Automobile</p>
+          <a class="pv-slink" href="#">En savoir plus →</a>
+        </div>
       </div>
     </div>
 
