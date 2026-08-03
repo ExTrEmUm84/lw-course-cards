@@ -190,17 +190,37 @@
     };
   }
 
+  /* 🔴🔴 REPLI SUR L'URL, ET C'EST LUI QUI COMPTE. Ziad : « quand je charge la
+     page Cours le contenu arrive en bleu puis passe au rouge, c'est visible ».
+     Cause : ce script est charge dans l'EN-TETE du site, donc `document.body`
+     n'existe pas encore quand il s'execute. La fonction rendait "" , la couleur
+     de page n'etait pas posee, et le bleu global s'affichait — puis le rouge
+     arrivait au DOMContentLoaded. Un clignotement de marque a chaque chargement.
+     `location.pathname` est disponible IMMEDIATEMENT : on peut donc poser la
+     bonne couleur avant le moindre pixel. La classe du body reste prioritaire
+     quand elle existe (LearnWorlds fait foi sur son propre slug), l'URL ne sert
+     que tant qu'elle manque. */
   function slugPage(){
-    if(!document.body) return "";
-    var m=document.body.className.match(/slug-([a-z0-9-]+)/i);
-    return m ? m[1] : "";
+    var b=document.body;
+    var m=b && b.className.match(/slug-([a-z0-9-]+)/i);
+    if(m) return m[1];
+    return (location.pathname||"").split("/").filter(Boolean).pop()||"";
   }
 
   function accentPage(){
-    if(!document.body) return;                                    /* body pas encore là (script en <head>) */
-    var slug=slugPage();
-    var hex=slug ? PAGE_ACCENTS[slug] : null;
-    var sty=(slug && PAGE_STYLE[slug]) || null;
+    var slug=slugPage();                    /* plus de dependance au <body> : cf. slugPage */
+    /* 🔴🔴 UNE PAGE JUMELLE HERITE DES REGLAGES DE SA PAGE FRANCAISE. Question de
+       Ziad : « la page en anglais est restee en bleu, c'est normal ? ». Non — et
+       c'est la limite que j'avais signalee en construisant les jumelles sans la
+       traiter : ces tables sont indexees par SLUG, et la page EN a le sien.
+       Elle n'heritait donc ni de la couleur, ni du contour.
+       Une jumelle est la MEME page dans une autre langue : elle doit avoir la
+       meme apparence. On remonte donc a la page FR (`PAGES_FR`) pour lire les
+       reglages. Consequence voulue : regler la couleur de Cours la regle aussi
+       pour sa version anglaise, sans double saisie et sans risque de divergence. */
+    var base=(slug && PAGES_FR[slug]) || slug;
+    var hex=base ? PAGE_ACCENTS[base] : null;
+    var sty=(base && PAGE_STYLE[base]) || null;
     var st=document.getElementById("ps-tokens-page");
     var css="";
     if(hex){
@@ -579,7 +599,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-w";
+  window.PS_TOKENS_V="2026-08-03-x";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
