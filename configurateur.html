@@ -208,23 +208,9 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     <div class="row"><label>Pastilles</label><input type="range" id="rPill" min="0" max="999" step="1"><span class="val" id="rPillV"></span></div>
     <div class="row"><label>Boutons</label><input type="range" id="rBtn" min="0" max="28" step="1"><span class="val" id="rBtnV"></span></div>
 
-    <h2>Palette — niveaux (page Cours)</h2>
-    <div class="lien"><input type="checkbox" id="lvl1Link" checked><label for="lvl1Link" style="flex:none">Niveau 1 suit la marque</label></div>
-    <div id="lvls"></div>
-
-    <h2>Palette — pastilles de champs</h2>
-    <div class="lien"><input type="checkbox" id="f1Link" checked><label for="f1Link" style="flex:none">Champ 1 suit la marque</label></div>
-    <div id="fs"></div>
-
-    <h2>Par page</h2>
-    <div class="note" style="margin:0 0 10px">Les réglages page par page sont dans le grand bloc à onglets, à droite —
-      la colonne est trop étroite pour eux.</div>
-
-    <h2>Vidéos de la home</h2>
-    <div class="note" style="margin:0 0 10px">Colle simplement l'adresse Vimeo (le lien « Partager » convient).
-      Le muet, la boucle et la lecture automatique sont gérés par le code — rien à ajouter dans le lien.
-      Laisse vide pour garder la vidéo actuelle.</div>
-    <div id="reglages"></div>
+    <div class="note" style="margin:16px 0 0">Tout ce qui ne vaut que pour <strong>une</strong> page — sa couleur, ses
+      palettes, ses vidéos — est dans le bloc à onglets, à droite. Cette colonne ne garde que ce qui s'applique
+      à <strong>tout le site</strong>.</div>
 
     <div class="btns">
       <button id="reset">Tout réinitialiser</button>
@@ -380,14 +366,15 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     /* Couleur dominante par page + réglages libres. Clé = slug LearnWorlds
        (la classe `slug-…` posée sur le <body>). Vide = la page reprend l'accent
        de la marque. */
-    pages:{"fiches-secteur":"#fad54a","emptykk-clone-clone":"#6b7280","fiches-secteur-clone":"#007260",
+    pages:{"home":"","fiches-secteur":"#fad54a","emptykk-clone-clone":"#6b7280","fiches-secteur-clone":"#007260",
            "formation-par-modules":"","sentrainer":"","formation-par-comptences":""},
     reglages:{"lien_video":"","lien_video_background":""},
     /* Contour animé par page. 🔴 SEULE la page Cours en a un aujourd'hui, avec
        ces valeurs exactes : le défaut reproduit donc le site tel qu'il est, il
        ne le modifie pas. Les autres pages sont livrées ÉTEINTES (demande de
        Ziad : « rajoute-le partout mais ne l'active pas »). */
-    style:{"formation-par-modules":{contour:true,ep:4,duree:1.1},
+    style:{"home":{contour:false,ep:4,duree:1.1},
+           "formation-par-modules":{contour:true,ep:4,duree:1.1},
            "sentrainer":{contour:false,ep:4,duree:1.1},
            "fiches-secteur-clone":{contour:false,ep:4,duree:1.1},
            "fiches-secteur":{contour:false,ep:4,duree:1.1},
@@ -398,6 +385,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
      ce fichier, donc tout commentaire posé entre les marqueurs serait effacé à la
      publication suivante. L'ordre de cette liste est celui de l'écran. */
   var PAGES_LIB=[
+    ["home",                    "Accueil"],
     ["formation-par-modules",   "Cours"],
     ["sentrainer",              "S'entraîner"],
     ["fiches-secteur-clone",    "Fiches cabinet"],
@@ -580,7 +568,47 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     du.oninput=function(){ st.duree=parseFloat(du.value); maj(); sortie(); };
     maj();
 
+    /* ---- cartes SPÉCIFIQUES à cette page ------------------------------------
+       🔴 Demande de Ziad : « ne laisser dans la colonne que les réglages
+       généraux ». Ces trois blocs y étaient, alors qu'ils ne concernent qu'une
+       page — la palette des niveaux s'intitulait littéralement « (page Cours) ».
+       Ils vivent donc dans l'onglet de leur page. */
+    if(slug==="formation-par-modules") grille.appendChild(cartePalette("lvl","Palette des niveaux",
+      "Pastille « Niveau N » et barre de progression des cartes de cours.","lvls","lvl1Link","Niveau 1 suit la marque"));
+    if(slug==="fiches-secteur" || slug==="emptykk-clone-clone") grille.appendChild(cartePalette("f","Pastilles de champs",
+      "Les champs lus dans les descriptions (Année, Type, Difficulté…). ⚠️ Palette PARTAGÉE entre Fiches secteur et Études de cas : la modifier ici la change aussi là-bas.",
+      "fs","f1Link","Champ 1 suit la marque"));
+    if(slug==="home") grille.appendChild(carteVideos());
+
     box.appendChild(grille);
+  }
+
+  /* Une palette (6 couleurs pleines + 6 teintes) présentée dans l'onglet de la
+     page qui l'utilise. 🔴 La case « suit la marque » est recréée ici avec son
+     id d'origine : le reste du code la lit par `getElementById`, et la casser
+     aurait fait sauter le lien entre la marque et la première pastille. */
+  function cartePalette(cle, titre, expl, hote, idLien, libLien){
+    var d=document.createElement("div"); d.className="card";
+    d.innerHTML='<h4>'+titre+'</h4><p class="expl">'+expl+'</p>';
+    var l=document.createElement("div"); l.className="lien";
+    var ck=document.createElement("input"); ck.type="checkbox"; ck.id=idLien; ck.checked=!!S[idLien];
+    var lb=document.createElement("label"); lb.setAttribute("for",idLien); lb.style.flex="none"; lb.textContent=libLien;
+    ck.onchange=function(){ S[idLien]=ck.checked; rendre(); };
+    l.appendChild(ck); l.appendChild(lb); d.appendChild(l);
+    var box=document.createElement("div"); box.id=hote; d.appendChild(box);
+    setTimeout(function(){ palette(hote, cle, cle==="lvl"?"Niveau":"Champ"); },0);
+    return d;
+  }
+
+  /* Les URLs de vidéo ne concernent que la home : leur place est dans son onglet. */
+  function carteVideos(){
+    var d=document.createElement("div"); d.className="card";
+    d.innerHTML='<h4>Vidéos du hero</h4><p class="expl">Colle simplement l\'adresse Vimeo — le lien « Partager » convient. '+
+      'Le muet, la boucle et la lecture automatique sont posés par le code, rien à ajouter dans le lien. '+
+      'Vide = on garde la vidéo actuelle.</p>';
+    var box=document.createElement("div"); box.id="reglages"; d.appendChild(box);
+    setTimeout(reglagesUI,0);
+    return d;
   }
 
   /* --- réglages libres (URLs de vidéo) --- */
@@ -726,8 +754,9 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     S.font=fontSel.value; fontTxt.value=S.font; rendre();
   };
   fontTxt.oninput=function(){ S.font=fontTxt.value||DEF.font; rendre(); };
-  document.getElementById("lvl1Link").onchange=function(){ S.lvl1Link=this.checked; rendre(); };
-  document.getElementById("f1Link").onchange=function(){ S.f1Link=this.checked; rendre(); };
+  /* 🔴 Plus de handler ici : les cases « suit la marque » vivent maintenant dans
+     l'onglet de leur page et ne sont créées qu'à son ouverture. Elles branchent
+     leur propre `onchange` — un `getElementById` au chargement trouverait null. */
 
   document.querySelectorAll(".tab").forEach(function(b){
     b.onclick=function(){
@@ -754,10 +783,9 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     document.getElementById("rPill").value=S.rPill;
     document.getElementById("rBtn").value=S.rBtn;
     fontSel.selectedIndex=0; fontTxt.value=S.font;
-    document.getElementById("lvl1Link").checked=true;
-    document.getElementById("f1Link").checked=true;
+    S.lvl1Link=true; S.f1Link=true;      /* les cases seront recréées à l'état voulu */
     document.getElementById("deriv").checked=true;
-    palette("lvls","lvl","Niveau"); palette("fs","f","Champ"); pagesUI(); reglagesUI(); rendre();
+    pagesUI(); rendre();                 /* pagesUI reconstruit palettes et vidéos */
   };
   /* tire une teinte au hasard et laisse `deduire()` fabriquer le reste, pour
      que le bouton produise exactement ce que produirait un choix à la main */
@@ -881,10 +909,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     }
   };
 
-  palette("lvls","lvl","Niveau");
-  palette("fs","f","Champ");
-  pagesUI();
-  reglagesUI();
+  pagesUI();                             /* construit aussi les palettes et les vidéos de l'onglet actif */
   champs();
   rendre();
 })();
