@@ -208,7 +208,7 @@
      faire dans le contenu. */
 /* >>> DEBUT PAGES — réécrit par le configurateur, ne rien ajouter ici */
   var PAGE_ACCENTS={
-    "formation-par-modules":"#d31226",
+    "formation-par-modules":"#12d380",
     "fiches-cabinet":"#007260",
     "fiches-secteur":"#fad54a",
     "emptykk-clone-clone":"#6b7280"
