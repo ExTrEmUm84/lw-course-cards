@@ -84,7 +84,15 @@
     S+" .cards-grandpa > .lw-cols > .col.lw-course-card{position:relative !important;cursor:pointer !important;width:auto !important;max-width:none !important;flex:none !important;margin:0 !important;padding:0 !important;background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;box-shadow:0 4px 18px rgba(15,23,42,.06) !important;overflow:visible !important;display:flex !important;flex-direction:column !important;isolation:isolate !important;transition:box-shadow .2s ease, transform .2s ease !important;}",
     S+" .cards-grandpa > .lw-cols > .col.lw-course-card:hover{box-shadow:0 14px 34px rgba(0,0,0,.10) !important;transform:translateY(-3px) !important;}",
     /* badge + lien-calque = enfants DIRECTS de la carte -> exclus du masquage */
-    S+" .lw-course-card[data-ps-c] > *:not(.ps-ccab):not(.ps-cab-logo):not(.ps-cab-cover){display:none !important;}",
+    /* 🔴 `:not(.ps-mline)` AJOUTE LE 03/08. Cette regle masque tous les enfants
+       de la carte sauf ceux que ce script construit — elle a ete ecrite avant
+       que le lisere puisse arriver ici. Resultat : `tokens.js` injectait bien
+       le SVG, au bon endroit et a la bonne taille, et cette ligne le mettait
+       en `display:none`. Mesure : SVG 0x0, display none, alors que
+       stroke-dashoffset valait bien 0 au survol — tout etait juste sauf
+       qu'il etait masque. `course-cards.js` l'excluait deja ; pas les autres.
+       ⚠️ Toute nouvelle classe injectee de l'exterieur devra etre ajoutee ici. */
+    S+" .lw-course-card[data-ps-c] > *:not(.ps-ccab):not(.ps-cab-logo):not(.ps-cab-cover):not(.ps-mline){display:none !important;}",
     /* lien-calque : couvre toute la carte, transparent, sous le CTA (z-index) */
     ".ps-cab-cover{position:absolute !important;inset:0 !important;z-index:1 !important;border-radius:var(--ps-r-card,16px) !important;background:transparent !important;text-decoration:none !important;}",
 
