@@ -269,7 +269,7 @@ button.primary:hover{background:#486798}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-t</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-v</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -841,12 +841,18 @@ button.primary:hover{background:#486798}
        l'interface le suggérer fabrique un faux souvenir de réglage. */
     var c2=document.createElement("div"); c2.className="card";
     c2.innerHTML='<h4>Contour animé des cartes</h4>'+
-      '<p class="expl">Le liseré qui se dessine au survol d\'une carte. Il n\'existe aujourd\'hui que sur la page Cours&nbsp;: '+
-      'ailleurs il n\'a jamais été dessiné, donc vérifie le rendu sur la vraie page avant de le laisser en ligne.</p>';
+      '<p class="expl"><strong>Il ne s\'affiche qu\'au survol d\'une carte</strong> — au repos, la carte est nue. '+
+      'C\'est volontaire&nbsp;: un liseré permanent sur chaque carte alourdirait la page. '+
+      'L\'aperçu ci-dessous le montre en permanence pour que tu puisses le régler.</p>';
     var r2=document.createElement("div"); r2.className="row";
     var ckL=document.createElement("input"); ckL.type="checkbox"; ckL.checked=!!st.contour; ckL.style.flex="none";
     ckL.id="ck-contour-"+slug;
-    var lab2=document.createElement("label"); lab2.textContent="Afficher le contour";
+    /* 🔴 « au survol » RETABLI dans le libelle. Je l'avais retire en raccourcissant
+       les textes, et le reglage promettait donc plus qu'il ne fait : Ziad a active
+       le contour sur Fiches secteur puis signale « ca marche pas » — il etait bien
+       la, mais invisible tant qu'on ne survole pas une carte. Un libelle qui omet
+       la condition d'affichage decrit une fonctionnalite qui n'existe pas. */
+    var lab2=document.createElement("label"); lab2.textContent="Afficher le contour au survol";
     lab2.setAttribute("for",ckL.id);
     r2.appendChild(ckL); r2.appendChild(lab2); c2.appendChild(r2);
 
