@@ -52,6 +52,56 @@
 (function(){
   "use strict";
 
+  /* ====================================================================
+     LE LISERÉ DES AUTRES PAGES — SA FEUILLE, PUBLIÉE AU CONFIGURATEUR
+     --------------------------------------------------------------------
+     Ce texte était enfermé dans `contourStyle()`, tout en bas. Il remonte ici
+     pour une seule raison : l'aperçu du configurateur doit pouvoir l'afficher
+     SANS en garder une copie. Chaque script de cartes publie déjà le sien dans
+     `window.PS_CSS` derrière le drapeau `PS_CSS_ONLY` ; c'était le seul liseré
+     qui manquait à l'appel, et l'aperçu le redessinait donc de mémoire — une
+     copie de plus à tenir à jour, c'est-à-dire une divergence de plus en attente.
+     🔴 `PS_CSS_ONLY` EST POSÉ PAR LE CONFIGURATEUR, JAMAIS PAR LE SITE. Sur une
+     page LearnWorlds le drapeau est absent : on publie, puis on continue
+     normalement. Dans le configurateur on publie et on SORT immédiatement — rien
+     de ce fichier ne s'exécute, pas un token sur `:root`, pas un badge d'en-tête.
+
+     🔴🔴 TOUT EST SCOPÉ À `.ps-line-hote`, la classe que ce code pose sur les
+     cartes qu'il prend en charge. Régression signalée par Ziad : la règle
+     était écrite sur `.ps-mline` tout court, avec `!important`. Or la page
+     Cours a SON PROPRE liseré, défini dans `course-cards.js` avec
+     `z-index:-1` pour passer SOUS l'illustration ronde — mon `!important` le
+     battait, et le trait remontait par-dessus les images.
+     Deux fichiers qui stylent le même élément, c'est un conflit garanti : ce
+     code ne doit toucher QUE les cartes qu'il a lui-même équipées, et laisser
+     `course-cards.js` maître chez lui.
+     🔴 `z-index:0` et non 1, même pour nos propres cartes : au-dessus du fond,
+     sous tout élément qui se place explicitement plus haut. */
+  var LINE_CSS=
+      ".ps-line-hote > .ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;"+
+        "pointer-events:none !important;z-index:0 !important;}"+
+      ".ps-line-hote > .ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;"+
+        "rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-line-c,rgb(var(--ps-accent-rgb,80,126,197))) !important;"+
+        "stroke-width:var(--ps-line-w,4) !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;"+
+        "transition:stroke-dashoffset var(--ps-line-t,1.1s) ease !important;}"+
+      ".ps-line-hote:hover > .ps-mline rect{stroke-dashoffset:0 !important;}"+
+      /* Le liseré déborde de la carte si elle rogne son contenu. */
+      ".ps-line-hote{position:relative !important;overflow:visible !important;}"+
+      /* 🔴🔴 LE CONTENU PASSE AU-DESSUS DU TRAIT. Signalé par Ziad : le liseré
+         recouvrait les illustrations rondes qui débordent en haut des cartes.
+         Cause : un élément POSITIONNÉ (le SVG) peint au-dessus du contenu non
+         positionné, quel que soit son rang dans le DOM — l'insérer en premier
+         enfant ne suffit donc pas.
+         🔴 On remonte le CONTENU plutôt que d'enfoncer le trait : à `z-index:-1`
+         il passerait derrière le fond blanc de la carte, qui est porté par
+         l'hôte lui-même, et redeviendrait invisible. C'est le piège inverse,
+         déjà rencontré ce matin. */
+      ".ps-line-hote > *:not(.ps-mline){position:relative !important;z-index:1 !important;}"+
+      "@media(prefers-reduced-motion:reduce){.ps-line-hote > .ps-mline rect{transition:none !important;}}";
+  window.PS_CSS=window.PS_CSS||{};
+  window.PS_CSS.contour=LINE_CSS;
+  if(window.PS_CSS_ONLY) return;
+
   var VALEURS=[
 /* >>> DEBUT TOKENS — réécrit par le configurateur, ne rien ajouter ici */
     "--ps-accent:#507EC5",
@@ -291,41 +341,13 @@
      VIVE, celle que Ziad a reellement choisie, comme le fait deja la lueur
      des cartes via ce meme `--ps-accent-rgb`.
      Une couleur propre de trait, si elle est reglee, reste prioritaire. */
+  /* 🔴 Le texte de cette feuille vit tout en haut du fichier (`LINE_CSS`), pour
+     pouvoir être PUBLIÉ au configurateur avant tout effet de bord. La règle et son
+     commentaire sont là-bas ; ici, on ne fait que la poser. */
   function contourStyle(){
     if(document.getElementById("ps-line-css")) return;
     var st=document.createElement("style"); st.id="ps-line-css";
-    st.textContent=
-      /* 🔴🔴 TOUT EST SCOPÉ À `.ps-line-hote`, la classe que CE code pose sur les
-         cartes qu'il prend en charge. Régression signalée par Ziad : la règle
-         était écrite sur `.ps-mline` tout court, avec `!important`. Or la page
-         Cours a SON PROPRE liseré, défini dans `course-cards.js` avec
-         `z-index:-1` pour passer SOUS l'illustration ronde — mon `!important` le
-         battait, et le trait remontait par-dessus les images.
-         Deux fichiers qui stylent le même élément, c'est un conflit garanti : ce
-         code ne doit toucher QUE les cartes qu'il a lui-même équipées, et laisser
-         `course-cards.js` maître chez lui.
-         🔴 `z-index:0` et non 1, même pour nos propres cartes : au-dessus du fond,
-         sous tout élément qui se place explicitement plus haut. */
-      ".ps-line-hote > .ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;"+
-        "pointer-events:none !important;z-index:0 !important;}"+
-      ".ps-line-hote > .ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;"+
-        "rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-line-c,rgb(var(--ps-accent-rgb,80,126,197))) !important;"+
-        "stroke-width:var(--ps-line-w,4) !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;"+
-        "transition:stroke-dashoffset var(--ps-line-t,1.1s) ease !important;}"+
-      ".ps-line-hote:hover > .ps-mline rect{stroke-dashoffset:0 !important;}"+
-      /* Le liseré déborde de la carte si elle rogne son contenu. */
-      ".ps-line-hote{position:relative !important;overflow:visible !important;}"+
-      /* 🔴🔴 LE CONTENU PASSE AU-DESSUS DU TRAIT. Signalé par Ziad : le liseré
-         recouvrait les illustrations rondes qui débordent en haut des cartes.
-         Cause : un élément POSITIONNÉ (le SVG) peint au-dessus du contenu non
-         positionné, quel que soit son rang dans le DOM — l'insérer en premier
-         enfant ne suffit donc pas.
-         🔴 On remonte le CONTENU plutôt que d'enfoncer le trait : à `z-index:-1`
-         il passerait derrière le fond blanc de la carte, qui est porté par
-         l'hôte lui-même, et redeviendrait invisible. C'est le piège inverse,
-         déjà rencontré ce matin. */
-      ".ps-line-hote > *:not(.ps-mline){position:relative !important;z-index:1 !important;}"+
-      "@media(prefers-reduced-motion:reduce){.ps-line-hote > .ps-mline rect{transition:none !important;}}";
+    st.textContent=LINE_CSS;
     (document.head||document.documentElement).appendChild(st);
   }
   var LINE_SEL=".ps-ccab,.ps-scard,.ps-cc,.ps-pfc";   /* cartes des pages AUTRES que Cours */
