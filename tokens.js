@@ -248,7 +248,150 @@
   }
   window.PS_FILTRE_STYLE=styleFiltrePastille;   // les scripts de page l'appellent
 
+  /* ====================================================================
+     PAGES JUMELLES FR / EN — LA LANGUE EST PORTÉE PAR LA PAGE
+     --------------------------------------------------------------------
+     🔴🔴 POURQUOI CE CHANGEMENT (03/08, décision de Ziad). Jusqu'ici la langue
+     se jouait CARTE PAR CARTE : on masquait celles de l'autre langue (voir plus
+     bas `langCourses`). Deux raisons de fond ont fait tomber ce modèle :
+
+     1. IL NE MARCHAIT PAS POUR UN ÉTUDIANT. La source des tags est
+        `/api/courses`, qui renvoie **0 cours** à un non-admin (mesuré le 30/07
+        sur le compte ESSEC). Le filtre retombait sur le suffixe « - EN » du
+        titre, or Ziad marque l'anglais par un TAG. Les cours anglais restaient
+        donc visibles chez l'étudiant, et masqués seulement chez l'admin.
+     2. IL NE PASSE PAS À L'ÉCHELLE. À ~200 cours par langue, porter les deux
+        versions sur la même page voudrait dire les TÉLÉCHARGER toutes les deux.
+        Mesuré le 03/08 sur `/profile` : les cartes sont rendues CÔTÉ SERVEUR
+        (une seule requête réseau au chargement), un seul élément en a posé
+        **55 d'un coup**, et celles qui sont en `display:none` sont quand même
+        **dans le DOM et dans les 427 Ko de HTML**. Masquer en CSS n'économise
+        RIEN. La pagination `lw-load-more` existe mais ne plafonne pas le
+        premier écran, et l'élément « programmes » n'en a même pas.
+
+     ⇒ La langue devient une propriété de la PAGE : une page FR sourcée sur le
+     programme FR, sa jumelle EN sourcée sur le programme EN. LearnWorlds ne
+     charge que ce qu'on lui demande.
+
+     🔴 POURQUOI PAS UN FILTRE NATIF (option écartée) : le menu de filtres LW
+     n'offre que « tout / mon / pas encore inscrit / nouveau / populaire /
+     gratuit / certificat » (+ les catégories sur certaines pages). **Aucun
+     filtre par programme ni par langue** — vérifié sur Cours et sur
+     Compétences. Il n'existe donc aucun moyen de faire changer de programme à
+     un élément sans changer de page.
+
+     🔴 RÈGLE : L'URL FAIT FOI, pas le cookie. Arriver sur une page EN force
+     Weglot en anglais. Ça rend les liens partagés et les favoris corrects, et
+     surtout ça rend la boucle de redirection IMPOSSIBLE (voir `ps-lang` plus
+     bas). Une page SANS jumelle garde le comportement d'avant : Weglot traduit
+     sur place et la langue mémorisée s'applique.
+
+     AJOUTER UNE PAGE TRADUITE = UNE LIGNE DANS `PAGES_EN`. C'est le seul
+     endroit à toucher : l'anti-flash, le board et les liens du menu en dérivent.
+     ==================================================================== */
+  var PAGES_EN={
+    "formation-par-modules":"formation-par-modules-clone-en"
+  };
+  var PAGES_FR={};
+  Object.keys(PAGES_EN).forEach(function(fr){ PAGES_FR[PAGES_EN[fr]]=fr; });
+  window.PS_PAGES_EN=PAGES_EN;                  // lu par profile-page.js (boutons « Continuer »)
+  window.PS_PAGES_FR=PAGES_FR;
+
+  /* 🔴 Le slug vient de `body.slug-<slug>` (posé par LearnWorlds), avec repli
+     sur l'URL : ce fichier peut tourner AVANT que `<body>` n'existe. */
+  function slugCourant(){
+    var b=document.body;
+    var m=b && (b.className||"").match(/(?:^|\s)slug-([a-z0-9-]+)/i);
+    if(m) return m[1];
+    return (location.pathname||"").split("/").filter(Boolean).pop()||"";
+  }
+  function estPageEN(){ return !!PAGES_FR[slugCourant()]; }
+  function jumelle(lang){
+    var s=slugCourant();
+    return (lang==="en") ? (PAGES_EN[s]||null) : (PAGES_FR[s]||null);
+  }
+  window.PS_EST_PAGE_EN=estPageEN;
+
+  /* Langue mémorisée par Weglot. 🔴 `localStorage.wglang` est lisible TOUT DE
+     SUITE, alors que `Weglot.getCurrentLang()` n'existe qu'une fois la
+     bibliothèque injectée par LearnWorlds (plusieurs secondes plus tard).
+     C'est ce qui permet de rediriger AVANT le rendu, sans flash de contenu
+     français. Relevé en direct le 03/08 : `wglang`, `wg-translations`. */
+  function langueMemorisee(){
+    try{ if(window.Weglot && window.Weglot.initialized) return window.Weglot.getCurrentLang(); }catch(e){}
+    try{ return localStorage.getItem("wglang")||""; }catch(e){ return ""; }
+  }
+
+  /* 🔴🔴 `?ps-lang=` REND LA BOUCLE IMPOSSIBLE. Sans lui : sur la page EN on
+     clique le drapeau FR -> on part sur la page FR -> la langue mémorisée est
+     encore « en » -> le filet ci-dessous renverrait sur la page EN, et ainsi de
+     suite. Le paramètre dit « cette navigation est VOULUE, cette langue fait
+     foi » ; il est appliqué puis retiré de l'URL pour ne pas rester dans les
+     favoris. */
+  var LANG_FORCEE=(function(){
+    var m=(location.search||"").match(/[?&]ps-lang=(fr|en)\b/);
+    return m ? m[1] : "";
+  })();
+  if(LANG_FORCEE){
+    try{ localStorage.setItem("wglang", LANG_FORCEE); }catch(e){}
+    try{
+      var propre=location.pathname+location.search.replace(/([?&])ps-lang=(fr|en)\b&?/,"$1").replace(/[?&]$/,"");
+      history.replaceState(null,"",propre+location.hash);
+    }catch(e){}
+  }
+
+  /* FILET DE SÉCURITÉ — un lien externe, un favori ou un vieux lien peut poser
+     un anglophone sur la page FRANÇAISE. On l'envoie sur la jumelle.
+     🔴 Exécuté au chargement du script, donc avant le rendu des cartes : pas de
+     contenu français affiché puis remplacé.
+     🔴 Ne se déclenche JAMAIS depuis une page EN (`estPageEN`), ni quand la
+     langue vient d'être forcée : les deux verrous de la boucle. */
+  (function redirigerVersJumelle(){
+    if(LANG_FORCEE) return;
+    if(estPageEN()) return;
+    if(langueMemorisee()!=="en") return;
+    var cible=PAGES_EN[slugCourant()];
+    if(!cible) return;                            // pas de version anglaise : on reste, c'est voulu
+    location.replace("/"+cible);                  // `replace` : pas d'entrée parasite dans l'historique
+  })();
+
+  /* L'URL FAIT FOI : sur une page EN, Weglot doit être en anglais, quoi qu'en
+     dise la langue mémorisée. Weglot arrive tard -> on retente. */
+  (function forcerLangueDeLaPage(){
+    if(!estPageEN()) return;
+    var n=0, iv=setInterval(function(){
+      var W=window.Weglot;
+      if(W && W.initialized && typeof W.switchTo==="function"){
+        try{ if(W.getCurrentLang()!=="en") W.switchTo("en"); }catch(e){}
+        clearInterval(iv); return;
+      }
+      if(++n>50) clearInterval(iv);
+    }, 400);
+  })();
+
+  /* LIENS DU MENU — en anglais, ils pointent vers les jumelles.
+     🔴 Sans ça l'étudiant devrait recliquer le drapeau à CHAQUE page (question
+     de Ziad, 03/08). Une page sans jumelle garde son lien français : mieux vaut
+     du contenu français qu'une 404. */
+  function liensMenuJumeles(){
+    if(langueMemorisee()!=="en") return;
+    document.querySelectorAll("nav.lw-topbar-menu a[href], .lw-topbar-mobile a[href]").forEach(function(a){
+      if(a.dataset.psJumelle) return;             // déjà traité
+      var h=a.getAttribute("href")||"";
+      if(/^(https?:)?\/\//.test(h) && h.indexOf(location.host)<0) return;   // lien externe
+      var seg=h.split("?")[0].split("#")[0].split("/").filter(Boolean).pop()||"";
+      var cible=PAGES_EN[seg];
+      if(!cible) return;
+      a.setAttribute("href","/"+cible);
+      a.dataset.psJumelle="1";
+    });
+  }
+
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-secteur-clone","sentrainer"];
+  /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
+     différent (`…-clone-en`), donc `body.slug-…` ne matchait pas et le flash
+     de cartes non stylées revenait. Dérivé de la table, jamais écrit à la main. */
+  CLOAK_SLUGS=CLOAK_SLUGS.concat(CLOAK_SLUGS.map(function(s){ return PAGES_EN[s]; }).filter(Boolean));
   var READY_SEL="#pageContent .ps-mcard,#pageContent .ps-cc,#pageContent .ps-ccab,#pageContent .ps-scard,#pageContent .ps-pfc";
   function cloak(){
     if(document.getElementById("ps-cloak")) return;
@@ -512,8 +655,17 @@
       span.style.cssText="display:inline-flex;align-items:center;cursor:pointer;";
       while(a.firstChild) span.appendChild(a.firstChild);
       a.parentNode.replaceChild(span, a);
+      /* 🔴🔴 LE DRAPEAU NAVIGUE quand la page a une jumelle (03/08). Weglot
+         traduit les TEXTES ; il ne peut pas faire changer de programme à un
+         élément LearnWorlds, dont les cartes arrivent déjà écrites dans le HTML
+         du serveur. Charger l'autre programme = charger l'autre page.
+         `?ps-lang=` dit à la page d'arrivée que cette langue est VOULUE — c'est
+         ce qui empêche le filet de sécurité de nous renvoyer d'où l'on vient.
+         Sans jumelle, comportement d'avant : Weglot traduit sur place. */
       function go(){
         if(!window.Weglot) return;
+        var cible=jumelle(lang);
+        if(cible){ location.href="/"+cible+"?ps-lang="+lang; return; }
         try{ if(window.Weglot.getCurrentLang()!==lang) window.Weglot.switchTo(lang); }catch(_){}
         setTimeout(flagActive, 60);
       }
@@ -531,6 +683,21 @@
     if(weglotFlags()) return;
     var n=0, iv=setInterval(function(){
       if(weglotFlags() || ++n>50) clearInterval(iv);
+    }, 400);
+  })();
+
+  /* Le menu natif est rendu tôt, mais `mega-menu.js` le retouche : on repasse
+     quelques fois, et à chaque changement de langue. `data-ps-jumelle` évite de
+     retraiter un lien déjà réécrit, donc repasser ne coûte rien. */
+  (function(){
+    liensMenuJumeles();
+    [300,900,2000,4000].forEach(function(d){ setTimeout(liensMenuJumeles,d); });
+    if(document.readyState==="loading") document.addEventListener("DOMContentLoaded", liensMenuJumeles);
+    var n=0, iv=setInterval(function(){
+      try{
+        if(window.Weglot && window.Weglot.on){ window.Weglot.on("languageChanged", liensMenuJumeles); clearInterval(iv); return; }
+      }catch(e){ clearInterval(iv); return; }
+      if(++n>50) clearInterval(iv);
     }, 400);
   })();
 
@@ -606,6 +773,19 @@
 
   var _langBound=false;
   function langCourses(evLang){
+    /* 🔴🔴 SUR UNE PAGE JUMELLE, ON NE FILTRE PLUS RIEN (03/08).
+       C'est LA correction du test de Ziad : sa page EN affichait
+       « Level #1 » et « Level #2 » MASQUÉES et 5 cartes françaises visibles —
+       l'exact inverse du but. Cause : ce filtre se fie à Weglot, qui était
+       encore en français, et il ignorait que la page EST la page anglaise. Sur
+       une page jumelle, le contenu affiché est décidé par la SOURCE de
+       l'élément, côté Site Builder : le code n'a plus rien à masquer.
+       ⚠️ Conséquence assumée : si un bloc de la page EN est resté sourcé sur du
+       contenu français, il s'affiche. C'est voulu — le code ne doit pas
+       maquiller une source mal réglée, il doit la rendre VISIBLE.
+       Ce filtre reste actif sur les pages SANS jumelle, où il est encore le
+       seul garde-fou. Il disparaîtra quand toutes les pages auront la leur. */
+    if(estPageEN()) return;
     var W=window.Weglot;
     /* 🔴 Abonnement fait ICI et pas au chargement : Weglot est injecté par
        LearnWorlds APRÈS nous, donc un `Weglot.on(...)` en haut de fichier ne

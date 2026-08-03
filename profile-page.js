@@ -536,6 +536,23 @@
     return PROG_FALLBACK;
   }
 
+  /* 🔴 « Continuer » doit mener à la page de LA LANGUE COURANTE (03/08). Sinon
+     un étudiant anglophone repart de son profil vers la page française.
+     La table des jumelles vit dans `tokens.js` (`PS_PAGES_EN`) : un seul endroit
+     à tenir à jour pour tout le site. Une page sans jumelle garde son URL.
+     🔴 Appliqué UNIQUEMENT au lien sortant, jamais à la clé de regroupement :
+     les sections du board doivent rester les mêmes dans les deux langues, sinon
+     une même page se dédoublerait en deux sections selon la langue. */
+  function urlLangue(u){
+    var t=window.PS_PAGES_EN;
+    if(!t || !u) return u;
+    var lang=""; try{ lang=window.Weglot.getCurrentLang(); }catch(e){}
+    if(!lang){ try{ lang=localStorage.getItem("wglang")||""; }catch(e){} }
+    if(lang!=="en") return u;
+    var cible=t[u.replace(/^\//,"")];
+    return cible ? "/"+cible : u;
+  }
+
   /* ---- Regroupement du tableau PAR PAGE DU SITE (demande de Ziad, 29/07) ----
      Avant : une liste plate de 10 tuiles, une par programme LearnWorlds — le
      membre ne voyait pas à quelle PAGE du site chaque progression correspondait.
@@ -1169,7 +1186,7 @@
       tile.appendChild(top);
 
       var go=document.createElement("a");
-      go.className="ps-pf-go"; go.href=conf.url;
+      go.className="ps-pf-go"; go.href=urlLangue(conf.url);
       go.textContent=(known && val>0) ? "Continuer" : "Commencer";
       tile.appendChild(go);
 
