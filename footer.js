@@ -22,29 +22,67 @@
   var LOGO="https://lwfiles.mycourse.app/69b2ecbe6983ee7051b4f960-public/0d0f4e0215a7a098f74d6133d5f524b7.png";
   var TAGLINE="La méthode complète pour réussir vos entretiens en conseil en stratégie.";
 
-  /* Colonnes de liens. Un href égal à "signin"/"signup" = déclenche la modale
-     native LearnWorlds (pas de page /signin, c'est un formulaire). "#" = lien
-     légal provisoire (les pages CGV / Mentions / Confidentialité n'existent pas
-     encore -> à câbler quand elles seront créées). */
-  var COLS=[
-    { title:"Formation", links:[
-      ["Cours","/course/"],
+  /* ====================================================================
+     DEUX PIEDS DE PAGE : CONNECTÉ ET VISITEUR (demande de Ziad, 04/08)
+     --------------------------------------------------------------------
+     Un visiteur non connecté ne doit PAS voir les liens de formation. La raison
+     est mesurée : les pages catalogue s'affichent bien pour lui, mais **aucun
+     script de page ne lui est servi** (relevé le 04/08 : il reçoit `tokens.js`,
+     `mega-menu.js`, `footer.js`, `account-page.js` — c'est-à-dire le code du
+     SITE — et rien d'autre). Ces liens le menaient donc vers des pages LearnWorlds
+     brutes, sans notre design. Un pied de page qui envoie le prospect sur la seule
+     version laide du site travaille contre nous.
+     Il ne garde donc que ce qui a du sens avant inscription : l'accueil, le blog,
+     les pages légales, et la porte d'entrée (connexion / inscription).
+     🔴 Le signal est `me` (global LearnWorlds du membre connecté), le même que
+     celui du co-branding dans `tokens.js` : il n'existe PAS pour un anonyme.
+     Aucun appel réseau, aucune dépendance à une classe de `<body>`.
+
+     Un href "signin"/"signup" déclenche la modale native LearnWorlds (il n'y a pas
+     de page /signin, c'est un formulaire). */
+  function connecte(){
+    try{ return typeof me!=="undefined" && !!me && !!me.id; }catch(e){ return false; }
+  }
+
+  /* 🔴 LIENS LÉGAUX RÉELS, RELEVÉS DANS `/sitemap.xml` LE 04/08. Ils pointaient
+     tous les trois sur `#` — des ancres mortes, pour tout le monde. Les pages
+     existent pourtant : ce sont les pages système de LearnWorlds `/terms`,
+     `/privacy` et `/cookies` (vérifiées à 200).
+     🔴 « À propos » est SUPPRIMÉ : il pointait sur `/about`, qui renvoie **404**.
+     Aucune page « à propos » n'existe dans le sitemap (91 URLs balayées) — ce
+     n'était pas un mauvais slug, la page n'existe pas. À remettre le jour où elle
+     sera créée, pas avant. */
+  var COL_FORMATION={ title:"Formation", links:[
+      ["Cours","/formation-par-modules"],
       ["Études de cas","/emptykk-clone-clone"],
       ["Secteurs","/fiches-secteur"],
       ["Cabinets","/fiches-cabinet"],
       ["S'entraîner","/sentrainer"]
-    ]},
+    ]};
+  var COL_LEGAL={ title:"Légal", links:[
+      ["Conditions générales","/terms"],
+      ["Confidentialité","/privacy"],
+      ["Cookies","/cookies"]
+    ]};
+  var COLS_MEMBRE=[
+    COL_FORMATION,
     { title:"Le site", links:[
       ["Accueil","/home"],
-      ["À propos","/about"],
-      ["Connexion","signin"],
-      ["Inscription","signup"]
+      ["Blog","/blog"],
+      ["Mon compte","/account"]
     ]},
-    { title:"Légal", links:[
-      ["CGV","#"],
-      ["Mentions légales","#"],
-      ["Confidentialité","#"]
-    ]}
+    COL_LEGAL
+  ];
+  var COLS_VISITEUR=[
+    { title:"Le site", links:[
+      ["Accueil","/home"],
+      ["Blog","/blog"]
+    ]},
+    { title:"Rejoindre", links:[
+      ["Créer un compte","signup"],
+      ["Connexion","signin"]
+    ]},
+    COL_LEGAL
   ];
 
   /* Réseaux. Instagram + LinkedIn = vrais comptes PrepaStrat.
@@ -73,7 +111,7 @@
     ".ps-footer{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;max-width:1180px !important;margin:0 auto !important;padding:56px 24px 0 !important;box-sizing:border-box !important;text-align:left !important;}",
     ".ps-footer *{box-sizing:border-box !important;}",
     /* grille : marque (large) + 3 colonnes de liens */
-    ".ps-footer-top{display:grid !important;grid-template-columns:1.6fr 1fr 1fr 1fr !important;gap:40px !important;align-items:start !important;}",
+    ".ps-footer-top{display:grid !important;grid-template-columns:1.6fr repeat(var(--ps-footer-cols,3),1fr) !important;gap:40px !important;align-items:start !important;}",
 
     /* --- colonne marque --- */
     ".ps-footer-brand{max-width:300px !important;}",
@@ -128,7 +166,17 @@
     ensureStyle();
     var sec=document.querySelector(".lw-footer.footer5") || document.querySelector(".lw-footer");
     if(!sec) return;
-    if(sec.querySelector(".ps-footer")) return;   // déjà construit
+    /* 🔴 ON RECONSTRUIT SI LE PUBLIC A CHANGÉ. `me` peut ne pas être encore posé
+       au premier passage (l'observer nous rappelle ensuite) : sans ce test, un
+       membre connecté garderait le pied de page du visiteur, décidé une fraction
+       de seconde trop tôt. On mémorise pour QUI le pied de page a été construit. */
+    var pour=connecte()?"membre":"visiteur";
+    var deja=sec.querySelector(".ps-footer");
+    if(deja){
+      if(deja.getAttribute("data-ps-pour")===pour) return;   // déjà construit, bon public
+      deja.remove();                                         // public changé : on refait
+    }
+    var COLS=connecte()?COLS_MEMBRE:COLS_VISITEUR;
 
     var social=SOCIAL.map(function(s){
       return '<a href="'+esc(s[1])+'" target="_blank" rel="noopener" aria-label="'+esc(s[2])+'">'+(ICON[s[0]]||"")+'</a>';
@@ -152,6 +200,11 @@
 
     var wrap=document.createElement("div");
     wrap.className="ps-footer";
+    wrap.setAttribute("data-ps-pour",pour);
+    /* La grille est calée sur le NOMBRE de colonnes : la marque, puis autant de
+       parts égales qu'il y a de colonnes de liens. En dur à 4 parts, un pied de
+       page à 2 colonnes aurait laissé un vide à droite. */
+    wrap.style.setProperty("--ps-footer-cols",String(COLS.length));
     wrap.innerHTML=html;
     sec.appendChild(wrap);
 

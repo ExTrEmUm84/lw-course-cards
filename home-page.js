@@ -1124,16 +1124,34 @@
     return "https://player.vimeo.com/video/"+id+(req?("?"+req):"");
   }
 
+  /* ====================================================================
+     PLUS AUCUNE ADRESSE DE VIDÉO ÉCRITE ICI (demande de Ziad, 04/08)
+     --------------------------------------------------------------------
+     Les trois adresses (hero, modale, fond) étaient en dur dans ce fichier, avec
+     l'identifiant Vimeo et son jeton privé. Changer la vidéo demandait donc une
+     modification de CODE et un déploiement, alors que « quelle vidéo » est un
+     choix de contenu — exactement ce que le configurateur existe pour régler.
+     🔴 Elles ne sont pas SUPPRIMÉES, elles sont DÉPLACÉES : la valeur vit
+     maintenant dans `REGLAGES` de `tokens.js`, écrit par le configurateur. Le
+     site affiche la même vidéo qu'avant, mais elle se change sans toucher au code.
+     🔴 PLUS DE REPLI EN DUR : `psVideo(..., null)`. Un repli aurait rendu le
+     déplacement inopérant — le jour où Ziad vide le champ pour retirer la vidéo,
+     l'ancienne serait revenue toute seule, et il aurait cherché longtemps.
+     Champ vide = pas de vidéo, et chaque appelant sait se taire proprement. */
+
   /* Vidéo du hero : le template a un iframe Vimeo avec un ID mort (« Cette vidéo
-     n'existe pas »). On remplace la source par la vraie vidéo (demande Ziad).
-     Posé UNE fois (garde `data-ps-vid`) pour ne pas recharger la vidéo à chaque build. */
-  var HERO_VIDEO="https://player.vimeo.com/video/910833393?h=94064c722b&badge=0&autopause=0&player_id=0&app_id=58479";
+     n'existe pas »). On remplace la source par celle qui est configurée.
+     Posé UNE fois (garde `data-ps-vid`) pour ne pas recharger la vidéo à chaque build.
+     🔴 Rien de configuré : on NE TOUCHE PAS à l'iframe natif. C'est le comportement
+     le plus sûr — on ne casse pas une page qu'on ne sait pas remplir. */
   function setHeroVideo(){
     var hero=document.querySelector(H+" .ps-home-hero");
     if(!hero || hero.classList.contains("ps-hero-bg")) return;   // mode vidéo-fond : géré par heroVideoBg
+    var src=psVideo("lien_video","hero",null);
+    if(!src) return;
     var ifr=hero.querySelector(".learnworlds-video-iframe iframe, .learnworlds-video-iframe-wrapper iframe, iframe");
     if(!ifr || ifr.getAttribute("data-ps-vid")) return;
-    ifr.setAttribute("src",psVideo("lien_video","hero",HERO_VIDEO));
+    ifr.setAttribute("src",src);
     ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture; clipboard-write");
     ifr.setAttribute("allowfullscreen","");
     ifr.setAttribute("data-ps-vid","1");
@@ -1143,12 +1161,16 @@
   function psVimeo(f,method,value){ if(!f||!f.contentWindow) return; var m={method:method}; if(value!==undefined) m.value=value; try{ f.contentWindow.postMessage(JSON.stringify(m),"https://player.vimeo.com"); }catch(e){} }
   function psHeroModal(bgIfr){
     if(document.querySelector(".ps-hero-modal")) return;
+    /* Même vidéo que le hero, mais lancée toute seule : c'est le mode `modale`
+       qui pose `autoplay`, pas l'URL collée par Ziad.
+       🔴 Rien de configuré : pas de modale VIDE. Une fenêtre noire qui s'ouvre sur
+       rien est pire que pas de fenêtre du tout. */
+    var src=psVideo("lien_video","modale",null);
+    if(!src) return;
     var ov=document.createElement("div"); ov.className="ps-hero-modal";
     var inner=document.createElement("div"); inner.className="ps-hero-modal-inner";
     var ifr=document.createElement("iframe");
-    /* Même vidéo que le hero, mais lancée toute seule : c'est le mode `modale`
-       qui pose `autoplay`, pas l'URL collée par Ziad. */
-    ifr.src=psVideo("lien_video","modale","https://player.vimeo.com/video/910833393?h=94064c722b&autoplay=1&title=0&byline=0&portrait=0");
+    ifr.src=src;
     ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture");
     ifr.setAttribute("allowfullscreen","");
     inner.appendChild(ifr);
@@ -1165,16 +1187,22 @@
 
   /* HERO plein écran avec la vidéo en FOND (Vimeo background=1 : autoplay muet en
      boucle, sans contrôles), voile sombre + contenu blanc dessus. Idempotent. */
-  var HERO_BG_VIDEO="https://player.vimeo.com/video/910833393?h=94064c722b&background=1&autopause=0&muted=1";
   function heroVideoBg(){
     var hero=document.querySelector(H+" .ps-home-hero");
     if(!hero || hero.classList.contains("ps-hero-bg")) return;
+    /* Mode `fond` : c'est LUI qui pose `background=1` (autoplay muet, en boucle,
+       sans contrôles). Ziad colle une adresse, rien d'autre.
+       🔴 LE TEST VIENT AVANT `ps-hero-bg` ET AVANT TOUTE INSERTION. Sans vidéo
+       configurée, le hero plein écran n'a plus de raison d'être : on le laisse
+       tel quel, et `setHeroVideo()` reprend la main (il sort si la classe est
+       posée). Poser la classe puis renoncer aurait laissé un hero sombre, avec
+       son voile et ses boutons, devant un cadre vide. */
+    var src=psVideo("lien_video_background","fond",null);
+    if(!src) return;
     hero.classList.add("ps-hero-bg");
     var wrap=document.createElement("div"); wrap.className="ps-hero-vwrap";
     var ifr=document.createElement("iframe");
-    /* Mode `fond` : c'est LUI qui pose `background=1` (autoplay muet, en boucle,
-       sans contrôles). Ziad colle une adresse, rien d'autre. */
-    ifr.src=psVideo("lien_video_background","fond",HERO_BG_VIDEO);
+    ifr.src=src;
     ifr.setAttribute("allow","autoplay; fullscreen; picture-in-picture");
     ifr.setAttribute("frameborder","0");
     ifr.setAttribute("title","Vidéo de fond");
