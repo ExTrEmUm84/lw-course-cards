@@ -369,7 +369,13 @@
      includedInProducts). Il faudrait charger les 6 pages de cours entières dans
      des iframes (~2,5 Mo) et lire leur DOM — inacceptable pour le temps
      d'affichage. La description est donc la source, tenue à jour à la main. */
-  var META=["Leçons","Lecons","Quiz"];
+  /* 🔴 LIBELLÉS TRADUITS (03/08) : Weglot traduit la description, donc « Leçons »
+     devient « Lessons » et « Quiz » devient « Quizzes ». Sans ces variantes, les
+     compteurs disparaissaient des cartes en anglais — constaté par Ziad sur la
+     page Cours. On liste les formes des langues activées plutôt qu'un motif
+     générique : un libellé inconnu vaut mieux qu'un faux compteur. */
+  var META=["Leçons","Lecons","Lessons","Quiz","Quizzes","Quizes",
+            "Lecciones","Lezioni","Lektionen","Aulas","Lições"];
   function parseMeta(desc){
     var re=new RegExp("("+META.join("|")+")\\s*:\\s*","gi"), m, ms=[];
     while((m=re.exec(desc))!==null){ ms.push({label:m[1], vs:re.lastIndex, start:m.index}); }
@@ -399,6 +405,16 @@
     });
   }
 
+  /* 🔴 TITRE « Niveau #N - Nom », TOUTES LANGUES (03/08). Weglot traduit le titre :
+     « Niveau #1 - … » devient « Level #1 - … ». Notre ancien motif exigeait le mot
+     « Niveau », donc en anglais la carte n'etait plus reconnue et restait dans son
+     habillage natif LearnWorlds — sans pastille de niveau, sans compteurs, sans
+     barre (constate par Ziad).
+     On ne reconnait donc plus un MOT mais une FORME : un mot court, un nombre, un
+     tiret. Ca marche dans toutes les langues activees sans avoir a les lister, et
+     un titre sans nombre (« Introduction au conseil ») ne matche toujours pas. */
+  var RE_NIVEAU=/^[A-Za-zÀ-ÿ]{2,12}\s*#?\s*(\d+)\s*[-–—:]\s*(.+)$/;
+
   function build(){
     document.querySelectorAll(S+" .lw-course-card").forEach(function(card){
       if(card.dataset.psM) return;
@@ -406,7 +422,7 @@
       var level, name;
       var badge=h.querySelector(".course-level-badge"), ct=h.querySelector(".course-title");
       if(badge && ct){ level=((badge.textContent.match(/(\d+)/)||[])[1]); name=ct.textContent.trim(); }
-      else { var m=h.textContent.trim().match(/^Niveau\s*#?\s*(\d+)\s*-\s*(.+)$/i); if(m){ level=m[1]; name=m[2]; } }
+      else { var m=h.textContent.trim().match(RE_NIVEAU); if(m){ level=m[1]; name=m[2]; } }
       /* Carte "domaine" : titre libre, sans "Niveau N -" (ex. "Le Conseil en
          Management"). On lui donne le MÊME design que les cartes Niveau, mais
          sans pastille de niveau (level reste vide -> la pastille est omise plus
