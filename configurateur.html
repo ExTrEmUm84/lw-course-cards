@@ -361,7 +361,17 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
        de la marque. */
     pages:{"fiches-secteur":"#fad54a","emptykk-clone-clone":"#6b7280","fiches-secteur-clone":"#007260",
            "formation-par-modules":"","sentrainer":"","formation-par-comptences":""},
-    reglages:{"lien_video":"","lien_video_background":""}
+    reglages:{"lien_video":"","lien_video_background":""},
+    /* Contour animé par page. 🔴 SEULE la page Cours en a un aujourd'hui, avec
+       ces valeurs exactes : le défaut reproduit donc le site tel qu'il est, il
+       ne le modifie pas. Les autres pages sont livrées ÉTEINTES (demande de
+       Ziad : « rajoute-le partout mais ne l'active pas »). */
+    style:{"formation-par-modules":{contour:true,ep:4,duree:1.1},
+           "sentrainer":{contour:false,ep:4,duree:1.1},
+           "fiches-secteur-clone":{contour:false,ep:4,duree:1.1},
+           "fiches-secteur":{contour:false,ep:4,duree:1.1},
+           "emptykk-clone-clone":{contour:false,ep:4,duree:1.1},
+           "formation-par-comptences":{contour:false,ep:4,duree:1.1}}
   };
   /* 🔴 Les LIBELLÉS vivent ici et non dans tokens.js : le bloc y est réécrit par
      ce fichier, donc tout commentaire posé entre les marqueurs serait effacé à la
@@ -472,6 +482,30 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       c.oninput=function(){ if(ck.checked){ S.pages[slug]=c.value; sortie(); } };
       d.appendChild(ck); d.appendChild(lb); d.appendChild(co); d.appendChild(c);
       box.appendChild(d);
+
+      /* --- contour animé de cette page ---------------------------------------
+         🔴 Les curseurs restent DÉSACTIVÉS tant que le contour est éteint : régler
+         une épaisseur sur un contour absent n'a aucun effet visible, et laisser
+         l'interface le suggérer, c'est fabriquer un faux souvenir de réglage. */
+      var st=S.style[slug]||(S.style[slug]={contour:false,ep:4,duree:1.1});
+      var d2=document.createElement("div"); d2.className="row";
+      d2.style.cssText="margin:-3px 0 12px 22px;gap:7px";
+      var ckL=document.createElement("input"); ckL.type="checkbox"; ckL.checked=!!st.contour;
+      ckL.style.flex="none"; ckL.title="contour animé au survol";
+      var lbL=document.createElement("label"); lbL.textContent="Contour animé";
+      lbL.style.cssText="font-size:12px;color:#8A90A2";
+      var ep=document.createElement("input"); ep.type="range"; ep.min=1; ep.max=10; ep.step=0.5; ep.value=st.ep;
+      ep.title="épaisseur du trait";
+      var du=document.createElement("input"); du.type="range"; du.min=0.2; du.max=3; du.step=0.1; du.value=st.duree;
+      du.title="durée du tracé";
+      var vv=document.createElement("span"); vv.className="val";
+      function maj(){ vv.textContent=st.ep+"px · "+st.duree+"s"; ep.disabled=du.disabled=!st.contour; }
+      ckL.onchange=function(){ st.contour=ckL.checked; maj(); sortie(); };
+      ep.oninput=function(){ st.ep=parseFloat(ep.value); maj(); sortie(); };
+      du.oninput=function(){ st.duree=parseFloat(du.value); maj(); sortie(); };
+      maj();
+      d2.appendChild(ckL); d2.appendChild(lbL); d2.appendChild(ep); d2.appendChild(du); d2.appendChild(vv);
+      box.appendChild(d2);
     });
   }
 
@@ -498,6 +532,13 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     var cols=PAGES_LIB.filter(function(p){ return S.pages[p[0]]; })
                       .map(function(p){ return '    "'+p[0]+'":"'+S.pages[p[0]]+'"'; });
     l.push(cols.join(",\n"));
+    l.push("  };");
+    /* PAGE_STYLE ne liste que les pages dont le contour est ALLUMÉ : une page
+       éteinte n'a pas d'entrée, donc rien à lire côté site. */
+    l.push("  var PAGE_STYLE={");
+    l.push(PAGES_LIB.filter(function(p){ var s=S.style[p[0]]; return s && s.contour; })
+      .map(function(p){ var s=S.style[p[0]];
+        return '    "'+p[0]+'":{"contour":1,"ep":'+s.ep+',"duree":'+s.duree+'}'; }).join(",\n"));
     l.push("  };");
     l.push("  var REGLAGES={");
     l.push(REGL_LIB.map(function(r){

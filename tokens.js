@@ -147,6 +147,9 @@
     "emptykk-clone-clone":"#6b7280",
     "fiches-secteur-clone":"#007260"
   };
+  var PAGE_STYLE={
+    "formation-par-modules":{"contour":1,"ep":4,"duree":1.1}
+  };
   var REGLAGES={
     "lien_video":"",
     "lien_video_background":""
@@ -174,18 +177,96 @@
     };
   }
 
+  function slugPage(){
+    if(!document.body) return "";
+    var m=document.body.className.match(/slug-([a-z0-9-]+)/i);
+    return m ? m[1] : "";
+  }
+
   function accentPage(){
     if(!document.body) return;                                    /* body pas encore là (script en <head>) */
-    var m=document.body.className.match(/slug-([a-z0-9-]+)/i);
-    var hex=m ? PAGE_ACCENTS[m[1]] : null;
+    var slug=slugPage();
+    var hex=slug ? PAGE_ACCENTS[slug] : null;
+    var sty=(slug && PAGE_STYLE[slug]) || null;
     var st=document.getElementById("ps-tokens-page");
-    if(!hex){ if(st) st.textContent=""; return; }                 /* page non listée -> accent global */
-    var d=_deriver(hex);
-    var css=":root{--ps-accent:"+d.accent+";--ps-accent-rgb:"+d.rgb+";--ps-accent-hover:"+d.hover+";--ps-accent-tint:"+d.tint+";}";
+    var css="";
+    if(hex){
+      var d=_deriver(hex);
+      css+=":root{--ps-accent:"+d.accent+";--ps-accent-rgb:"+d.rgb+";--ps-accent-hover:"+d.hover+";--ps-accent-tint:"+d.tint+";}";
+    }
+    /* 🔴 Les réglages de contour sont SÉPARÉS de la couleur : une page peut avoir
+       un contour sans couleur propre, et l'inverse. Les lier aurait obligé à
+       donner une couleur à une page juste pour épaissir son trait. */
+    if(sty){
+      var v=[];
+      if(sty.ep!=null)    v.push("--ps-line-w:"+sty.ep);
+      if(sty.duree!=null) v.push("--ps-line-t:"+sty.duree+"s");
+      if(v.length) css+=":root{"+v.join(";")+";}";
+    }
+    if(!css){ if(st) st.textContent=""; return; }                 /* page non réglée -> valeurs globales */
     /* APRÈS ps-tokens dans le <head> : même spécificité (:root), l'ordre du DOM
        tranche -> l'override de page gagne sur les valeurs globales. */
     if(!st){ st=document.createElement("style"); st.id="ps-tokens-page"; document.head.appendChild(st); }
     if(st.textContent!==css) st.textContent=css;
+  }
+
+  /* ====================================================================
+     CONTOUR ANIMÉ — DISPONIBLE PARTOUT, ACTIVÉ NULLE PART PAR DÉFAUT
+     --------------------------------------------------------------------
+     Demande de Ziad (03/08) : « tu peux le rajouter partout mais ne pas
+     l'activer ». Le liseré qui se dessine au survol n'existait que sur la page
+     Cours, écrit en dur dans `course-cards.js`. Il devient un réglage de page.
+
+     🔴 ACTIVÉ NULLE PART SAUF OÙ IL L'EST DÉJÀ. `PAGE_STYLE` ne contient au
+     départ que la page Cours, avec exactement ses valeurs actuelles (épaisseur 4,
+     durée 1,1 s) : le site ne change donc pas d'un pixel tant que Ziad n'active
+     rien. Un réglage neuf ne doit jamais modifier l'existant en s'installant.
+
+     🔴 LA PAGE COURS GARDE SON PROPRE CODE. `course-cards.js` injecte déjà son
+     liseré ; on ne le double pas ici (test `.ps-mline` déjà présent), on se
+     contente de lui fournir les variables. Deux injecteurs sur la même carte,
+     c'était la garantie d'un doublon invisible en test et voyant en prod.
+
+     ⚠️ Réserve honnête : sur les autres pages, le liseré n'a jamais été dessiné.
+     Leur carte peut porter un `overflow:hidden` qui le rognerait, ou un fond qui
+     le masque. À vérifier page par page AU MOMENT de l'activer — d'où le fait
+     qu'il soit livré éteint. */
+  function contourStyle(){
+    if(document.getElementById("ps-line-css")) return;
+    var st=document.createElement("style"); st.id="ps-line-css";
+    st.textContent=
+      ".ps-mline{position:absolute !important;inset:0 !important;width:100% !important;height:100% !important;"+
+        "pointer-events:none !important;z-index:1 !important;}"+
+      ".ps-mline rect{x:2px !important;y:2px !important;width:calc(100% - 4px) !important;height:calc(100% - 4px) !important;"+
+        "rx:calc(var(--ps-r-card,16px) - 2px) !important;fill:none !important;stroke:var(--ps-accent,#507EC5) !important;"+
+        "stroke-width:var(--ps-line-w,4) !important;stroke-dasharray:1.02 !important;stroke-dashoffset:1.02 !important;"+
+        "transition:stroke-dashoffset var(--ps-line-t,1.1s) ease !important;}"+
+      "[class*='ps-']:hover > .ps-mline rect{stroke-dashoffset:0 !important;}"+
+      /* Le liseré déborde de la carte si elle rogne son contenu. */
+      ".ps-line-hote{position:relative !important;overflow:visible !important;}"+
+      "@media(prefers-reduced-motion:reduce){.ps-mline rect{transition:none !important;}}";
+    (document.head||document.documentElement).appendChild(st);
+  }
+  var LINE_SEL=".ps-ccab,.ps-scard,.ps-cc,.ps-pfc";   /* cartes des pages AUTRES que Cours */
+  function contourPage(){
+    var slug=slugPage(); if(!slug) return;
+    var sty=PAGE_STYLE[slug];
+    if(!sty || !sty.contour) return;                  /* éteint : on ne touche à rien */
+    contourStyle();
+    var NS="http://www.w3.org/2000/svg";
+    document.querySelectorAll(LINE_SEL).forEach(function(c){
+      if(c.querySelector(":scope > .ps-mline")) return;            /* déjà posé (ou posé par sa page) */
+      c.classList.add("ps-line-hote");
+      var s=document.createElementNS(NS,"svg");
+      s.setAttribute("class","ps-mline");
+      s.setAttribute("preserveAspectRatio","none");
+      s.setAttribute("aria-hidden","true");
+      var r=document.createElementNS(NS,"rect");
+      r.setAttribute("x","0"); r.setAttribute("y","0");
+      r.setAttribute("width","100%"); r.setAttribute("height","100%");
+      r.setAttribute("rx","16"); r.setAttribute("pathLength","1");
+      s.appendChild(r); c.appendChild(s);
+    });
   }
 
   /* ====================================================================
@@ -1500,6 +1581,11 @@
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
      quelques relances pour attraper la classe active. */
   [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); setTimeout(immersivePlayer,d); setTimeout(partnerHeader,d); });
+  /* 🔴 Le contour se pose PLUS TARD que le reste : les cartes sont construites
+     par les scripts de page, eux-mêmes en attente du rendu LearnWorlds (~5-8 s
+     mesuré). Sortie immédiate si la page n'a pas le contour activé, donc ces
+     relances ne coûtent rien aux autres pages. */
+  [1000,3000,6000,10000].forEach(function(d){ setTimeout(contourPage,d); });
   /* 🔴 Le dépôt est relancé PLUS TARD que le reste : les cartes du Site Builder
      n'apparaissent qu'au bout de plusieurs secondes (mesuré : ~5 à 8 s avant que
      le compte de barres se stabilise). Déposer trop tôt n'enverrait qu'une partie
