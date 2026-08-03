@@ -296,7 +296,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-x</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-03-y</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -670,9 +670,10 @@ body.ps-verrou .ps-porte{display:grid}
   function _chan(hex){var h=hex.replace("#","");if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
   function _lum(hex){var c=_chan(hex).map(function(v){v/=255;return v<=0.03928?v/12.92:Math.pow((v+0.055)/1.055,2.4);});return 0.2126*c[0]+0.7152*c[1]+0.0722*c[2];}
   function _contraste(hex){return 1.05/(_lum(hex)+0.05);}
+  /* 🔴 Plus d'assombrissement ici non plus : les deux calculs doivent rester
+     jumeaux, sinon l'aperçu montre une couleur que le site ne produit pas. */
   function deriverPage(hex){
     var t=hex2hsl(hex), accent=hex;
-    if(t[2]>55){ var L=t[2]; while(L>10 && _contraste(hsl2hex(t[0],t[1],L))<4) L-=1; accent=hsl2hex(t[0],t[1],L); }
     var ta=hex2hsl(accent);
     return { accent:accent, rgb:_chan(hex).join(","),
              hover:hsl2hex(ta[0], Math.max(0,ta[1]*0.71), Math.max(0,ta[2]-10.4)),

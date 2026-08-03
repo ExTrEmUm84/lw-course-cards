@@ -178,9 +178,19 @@
 
   /* hex de page -> {accent (texte, lisible), rgb (lueur, vive), hover, tint}.
      hover/tint : mêmes coefficients que deduire() du configurateur. */
+  /* 🔴🔴 PLUS AUCUN ASSOMBRISSEMENT (demande de Ziad, 03/08 : « je ne veux plus
+     que tu assombrisses la couleur nulle part »). La couleur choisie est celle
+     qui s'affiche, point.
+     Ce que ça retire : une correction de contraste posée le 24/07, qui assombrissait
+     les teintes claires pour qu'elles restent lisibles en TEXTE. Elle produisait
+     silencieusement une couleur que Ziad n'avait pas choisie — sur Fiches secteur,
+     son #fad54a ressortait en #987904, et coexistait avec deux autres ors sur la
+     même page. C'est ce décalage invisible qui a fini par le gêner.
+     ⚠️ CONSÉQUENCE ASSUMÉE : une couleur très claire sur fond blanc devient peu
+     lisible en texte. C'est désormais un choix qui se voit et se corrige dans le
+     configurateur, au lieu d'être compensé dans le dos de celui qui l'a fait. */
   function _deriver(hex){
     var t=_hex2hsl(hex), accent=hex;
-    if(t[2]>55){ var L=t[2]; while(L>10 && _contraste(_hsl2hex(t[0],t[1],L))<4) L-=1; accent=_hsl2hex(t[0],t[1],L); }
     var ta=_hex2hsl(accent);
     return {
       accent:accent,
@@ -607,7 +617,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-y";
+  window.PS_TOKENS_V="2026-08-03-z";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
