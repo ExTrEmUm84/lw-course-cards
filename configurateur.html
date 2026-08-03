@@ -200,6 +200,17 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     <div class="lien"><input type="checkbox" id="f1Link" checked><label for="f1Link" style="flex:none">Champ 1 suit la marque</label></div>
     <div id="fs"></div>
 
+    <h2>Couleur par page</h2>
+    <div class="note" style="margin:0 0 10px">Une seule couleur par page — le survol, la teinte et la lueur en sont déduits.
+      Décoche une page pour qu'elle reprenne le violet de la marque.</div>
+    <div id="pages"></div>
+
+    <h2>Vidéos de la home</h2>
+    <div class="note" style="margin:0 0 10px">Colle simplement l'adresse Vimeo (le lien « Partager » convient).
+      Le muet, la boucle et la lecture automatique sont gérés par le code — rien à ajouter dans le lien.
+      Laisse vide pour garder la vidéo actuelle.</div>
+    <div id="reglages"></div>
+
     <div class="btns">
       <button id="reset">Tout réinitialiser</button>
       <button id="rand">Surprends-moi</button>
@@ -332,8 +343,29 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     rCard:16, rPill:999, rBtn:10, deriv:true,
     lvl:[["#4B4BE0","#EDEDFF"],["#12A85F","#E6F9F0"],["#009257","#E1F7EC"],["#D22B45","#FDECEF"],["#D98500","#FFF3E0"],["#8A45C9","#F3EAFB"]],
     f:[["#6161FF","#EDEDFF"],["#00C875","#E3F8EE"],["#E2445C","#FDECEF"],["#FDAB3D","#FFF3E0"],["#A25DDC","#F3EAFB"],["#0073EA","#E6F1FD"]],
-    lvl1Link:true, f1Link:true
+    lvl1Link:true, f1Link:true,
+    /* Couleur dominante par page + réglages libres. Clé = slug LearnWorlds
+       (la classe `slug-…` posée sur le <body>). Vide = la page reprend l'accent
+       de la marque. */
+    pages:{"fiches-secteur":"#fad54a","emptykk-clone-clone":"#6b7280","fiches-secteur-clone":"#007260",
+           "formation-par-modules":"","sentrainer":"","formation-par-comptences":""},
+    reglages:{"lien_video":"","lien_video_background":""}
   };
+  /* 🔴 Les LIBELLÉS vivent ici et non dans tokens.js : le bloc y est réécrit par
+     ce fichier, donc tout commentaire posé entre les marqueurs serait effacé à la
+     publication suivante. L'ordre de cette liste est celui de l'écran. */
+  var PAGES_LIB=[
+    ["formation-par-modules",   "Cours"],
+    ["sentrainer",              "S'entraîner"],
+    ["fiches-secteur-clone",    "Fiches cabinet"],
+    ["fiches-secteur",          "Fiches secteur"],
+    ["emptykk-clone-clone",     "Études de cas"],
+    ["formation-par-comptences","Compétences"]
+  ];
+  var REGL_LIB=[
+    ["lien_video",            "Vidéo du hero (lecture au clic)"],
+    ["lien_video_background", "Vidéo de fond du hero"]
+  ];
   var S=JSON.parse(JSON.stringify(DEF));
 
   /* 🔴 --ps-accent-rgb DOIT suivre --ps-accent : c'est lui qui porte la lueur
@@ -398,6 +430,65 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       b.oninput=function(){ S[cle][i][1]=b.value; rendre(); };
       d.appendChild(a); d.appendChild(b); box.appendChild(d);
     });
+  }
+
+  /* --- une ligne par page : case « couleur propre » + sélecteur ---------------
+     🔴 La case à cocher n'est pas cosmétique : `PAGE_ACCENTS` distingue « pas de
+     couleur » (la page suit la marque) de « couleur choisie ». Un simple
+     sélecteur ne peut PAS exprimer le premier cas — il vaut toujours quelque
+     chose, et #000000 serait pris pour un choix. Décocher retire la ligne. */
+  function pagesUI(){
+    var box=document.getElementById("pages");
+    box.innerHTML="";
+    PAGES_LIB.forEach(function(p){
+      var slug=p[0], lib=p[1], val=S.pages[slug]||"";
+      var d=document.createElement("div"); d.className="row";
+      var ck=document.createElement("input"); ck.type="checkbox"; ck.checked=!!val;
+      ck.style.flex="none"; ck.title="couleur propre à cette page";
+      var lb=document.createElement("label"); lb.textContent=lib;
+      var co=document.createElement("code"); co.textContent=slug;
+      var c=document.createElement("input"); c.type="color"; c.value=val||"#507EC5";
+      c.disabled=!val;
+      ck.onchange=function(){
+        S.pages[slug]= ck.checked ? (c.value||"#507EC5") : "";
+        c.disabled=!ck.checked; sortie();
+      };
+      c.oninput=function(){ if(ck.checked){ S.pages[slug]=c.value; sortie(); } };
+      d.appendChild(ck); d.appendChild(lb); d.appendChild(co); d.appendChild(c);
+      box.appendChild(d);
+    });
+  }
+
+  /* --- réglages libres (URLs de vidéo) --- */
+  function reglagesUI(){
+    var box=document.getElementById("reglages");
+    box.innerHTML="";
+    REGL_LIB.forEach(function(r){
+      var cle=r[0], lib=r[1];
+      var d=document.createElement("div"); d.className="row";
+      var lb=document.createElement("label"); lb.textContent=lib;
+      var i=document.createElement("input"); i.type="text"; i.placeholder="https://vimeo.com/…";
+      i.value=S.reglages[cle]||""; i.style.flex="1"; i.spellcheck=false;
+      i.oninput=function(){ S.reglages[cle]=i.value.trim(); sortie(); };
+      d.appendChild(lb); d.appendChild(i); box.appendChild(d);
+    });
+  }
+
+  /* Le bloc PAGES tel qu'il sera écrit dans tokens.js. Une page sans couleur
+     n'y figure pas du tout : c'est ce qui la fait retomber sur l'accent global. */
+  function blocPages(){
+    var l=[];
+    l.push("  var PAGE_ACCENTS={");
+    var cols=PAGES_LIB.filter(function(p){ return S.pages[p[0]]; })
+                      .map(function(p){ return '    "'+p[0]+'":"'+S.pages[p[0]]+'"'; });
+    l.push(cols.join(",\n"));
+    l.push("  };");
+    l.push("  var REGLAGES={");
+    l.push(REGL_LIB.map(function(r){
+      return '    "'+r[0]+'":"'+String(S.reglages[r[0]]||"").replace(/["\\]/g,"")+'"';
+    }).join(",\n"));
+    l.push("  };");
+    return l.filter(function(x){ return x!==""; }).join("\n");
   }
 
   var champsBox=document.getElementById("champs");
@@ -535,7 +626,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     document.getElementById("lvl1Link").checked=true;
     document.getElementById("f1Link").checked=true;
     document.getElementById("deriv").checked=true;
-    palette("lvls","lvl","Niveau"); palette("fs","f","Champ"); rendre();
+    palette("lvls","lvl","Niveau"); palette("fs","f","Champ"); pagesUI(); reglagesUI(); rendre();
   };
   /* tire une teinte au hasard et laisse `deduire()` fabriquer le reste, pour
      que le bouton produise exactement ce que produirait un choix à la main */
@@ -559,6 +650,11 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   /* Les marqueurs. Doivent correspondre EXACTEMENT à ceux de tokens.js —
      les renommer d'un côté sans l'autre casse la publication. */
   var RE=/(\/\* >>> DEBUT TOKENS[^\n]*\n)([\s\S]*?)(\n\/\* <<< FIN TOKENS \*\/)/;
+  /* Second bloc, même mécanique : couleurs par page + réglages libres.
+     🔴 Il est traité SÉPARÉMENT et non fusionné avec le premier : les tokens
+     sont des lignes de variables CSS, celui-ci est du JavaScript. Les mélanger
+     obligerait le générateur à savoir de quel type est chaque ligne. */
+  var RE_PAGES=/(\/\* >>> DEBUT PAGES[^\n]*\n)([\s\S]*?)(\n\/\* <<< FIN PAGES \*\/)/;
 
   /* btoa() ne gère que le latin-1 : tokens.js contient des accents et des
      emojis, il faut passer par les octets UTF-8 sinon le fichier est corrompu. */
@@ -605,9 +701,15 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
       var actuel=deb64(meta.content);
 
       if(!RE.test(actuel)) throw new Error("Les marqueurs <code>DEBUT/FIN TOKENS</code> sont introuvables dans tokens.js. Quelqu'un les a renommés — je ne touche à rien.");
+      /* 🔴 On vérifie les DEUX marqueurs AVANT d'écrire quoi que ce soit : une
+         publication qui ne remplacerait qu'un bloc sur deux laisserait le
+         fichier à moitié à jour, et l'écart passerait inaperçu. */
+      if(!RE_PAGES.test(actuel)) throw new Error("Les marqueurs <code>DEBUT/FIN PAGES</code> sont introuvables dans tokens.js. Je ne touche à rien.");
 
       var bloc=lignes().map(function(p){ return '    "'+p[0]+':'+p[1]+'"'; }).join(",\n");
       var neuf=actuel.replace(RE, function(_,a,__,c){ return a+bloc+c; });
+      var blocP=blocPages();
+      neuf=neuf.replace(RE_PAGES, function(_,a,__,c){ return a+blocP+c; });
 
       if(neuf===actuel){ dire("Rien à publier : le site a déjà exactement ces valeurs.","ok"); return; }
 
@@ -650,6 +752,8 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
 
   palette("lvls","lvl","Niveau");
   palette("fs","f","Champ");
+  pagesUI();
+  reglagesUI();
   champs();
   rendre();
 })();

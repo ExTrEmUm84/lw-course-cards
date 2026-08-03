@@ -1065,9 +1065,17 @@
     });
     return _regl;
   }
+  /* 🔴 DEUX SOURCES, DANS CET ORDRE (03/08). Ziad : « c'est chiant d'avoir ça
+     sur la page ». Les réglages vivent donc maintenant dans `tokens.js`, réglés
+     depuis le configurateur — et le bloc de texte de la home reste lu en repli,
+     le temps qu'il le supprime. Aucune transition brutale : tant que le bloc est
+     là, il continue de marcher ; dès qu'il part, le configurateur prend le
+     relais. Une valeur vide côté configurateur ne masque pas le bloc. */
   function psReglage(cle, repli){
-    var v=lireReglages()[String(cle).toLowerCase()];
-    return v || repli;
+    var k=String(cle).toLowerCase();
+    var glob=window.PS_REGLAGES;
+    if(glob && glob[k]) return glob[k];
+    return lireReglages()[k] || repli;
   }
 
   /* ====================================================================

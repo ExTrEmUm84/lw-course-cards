@@ -122,12 +122,37 @@
      jaune » vient de la lueur + des pastilles claires, pas du texte. Les
      couleurs déjà foncées (vert, rouge) restent fidèles au hex donné.
 
-     Pour changer/ajouter une page : une ligne dans PAGE_ACCENTS, c'est tout. */
+     Pour changer/ajouter une page : une ligne dans PAGE_ACCENTS, c'est tout.
+
+     🔴🔴 CE BLOC EST DÉSORMAIS RÉÉCRIT PAR LE CONFIGURATEUR (03/08, demande de
+     Ziad : « je veux pouvoir modifier les couleurs de chaque page principale »).
+     Mêmes règles que le bloc TOKENS : **aucun commentaire ni logique entre les
+     marqueurs**, ils seraient effacés au prochain « Publier ». Les libellés des
+     pages (« Secteurs », « Cabinets »…) vivent donc dans le configurateur, pas
+     ici. Ne jamais renommer les marqueurs sans changer le regex là-bas — il
+     refuse d'écrire s'il ne les trouve pas, ce qui est le comportement voulu.
+
+     Mémo des couleurs, hors du bloc pour survivre aux publications :
+       fiches-secteur = Secteurs (jaune) · emptykk-clone-clone = Études de cas
+       (gris) · fiches-secteur-clone = Cabinets (vert, choix du 24/07, était
+       rouge #c51d4a).
+
+     `REGLAGES` porte les valeurs libres (URLs de vidéo…). 🔴 Il vit ICI plutôt
+     que dans un bloc de texte de la home : Ziad en avait posé un sur la page,
+     et il s'affichait en clair pour les visiteurs. La configuration n'a rien à
+     faire dans le contenu. */
+/* >>> DEBUT PAGES — réécrit par le configurateur, ne rien ajouter ici */
   var PAGE_ACCENTS={
-    "fiches-secteur":"#fad54a",        /* Secteurs — jaune */
-    "emptykk-clone-clone":"#6b7280",   /* Cas — gris */
-    "fiches-secteur-clone":"#007260"   /* Cabinets — vert (choix Ziad 24/07, était rouge #c51d4a) */
+    "fiches-secteur":"#fad54a",
+    "emptykk-clone-clone":"#6b7280",
+    "fiches-secteur-clone":"#007260"
   };
+  var REGLAGES={
+    "lien_video":"",
+    "lien_video_background":""
+  };
+/* <<< FIN PAGES */
+  window.PS_REGLAGES=REGLAGES;                  // lu par home-page.js
 
   function _chan(hex){var h=hex.replace("#","");if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
   function _hex2hsl(hex){var c=_chan(hex),r=c[0]/255,g=c[1]/255,b=c[2]/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,H=0,L=(mx+mn)/2,S=d===0?0:d/(1-Math.abs(2*L-1));if(d!==0){if(mx===r)H=60*(((g-b)/d)%6);else if(mx===g)H=60*((b-r)/d+2);else H=60*((r-g)/d+4);}if(H<0)H+=360;return [H,S*100,L*100];}
