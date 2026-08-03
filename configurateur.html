@@ -219,7 +219,7 @@ body.ps-verrou .ps-porte{display:grid}
 .pv-an-ch span{font-size:12px;padding:4px 10px;border-radius:var(--ps-r-pill);
   background:var(--ps-accent-tint);color:var(--ps-accent-hover)}
 .pv-an-b{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;margin-top:16px;
-  padding:9px 15px;border-radius:var(--ps-r-btn);background:var(--ps-accent);color:#fff;
+  padding:9px 15px;border-radius:var(--ps-r-btn);background:var(--ps-an-btn,var(--ps-accent));color:#fff;
   font-size:13.5px;font-weight:600;text-decoration:none}
 /* ================= L'APERÇU — maquette des vrais composants ========= */
 .stage h3{font:800 12px/1 Figtree,sans-serif;text-transform:uppercase;letter-spacing:.07em;color:#9AA0B0;margin:0 0 12px}
@@ -346,7 +346,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-f</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-g</span></p>
     <p class="sub">Règle les tokens, regarde l'aperçu à droite, puis copie le code en bas.
     <strong>Rien n'est envoyé sur le site tant que tu ne colles pas le code.</strong></p>
 
@@ -1107,7 +1107,13 @@ body.ps-verrou .ps-porte{display:grid}
     if(!box) return;
     box.innerHTML="";
     BD_DEMO.forEach(function(p){
-      var col=S.pages[p[0]]||S.accent;
+      var col=S.pages[p[0]]||S.accent;              /* l'anneau garde TOUJOURS la couleur de sa page */
+      /* 🔴 Le bouton, lui, suit la surcharge si elle existe — exactement comme sur
+         le site (`background:var(--ps-pf-btn,var(--c))`). Sans cette ligne, cocher
+         « couleur propre » ne changeait rien dans l'apercu alors que la production
+         aurait obei : la maquette aurait menti sur le seul reglage qu'on venait
+         d'ajouter. */
+      var colBtn=S.pfBtn||col;
       var t=document.createElement("div"); t.className="pv-bd-t";
       var inn=document.createElement("div"); inn.className="pv-bd-in";
       var C=2*Math.PI*28, off=C*(1-p[2]/100);
@@ -1117,7 +1123,7 @@ body.ps-verrou .ps-porte{display:grid}
           '<circle class="fg" cx="32" cy="32" r="28" stroke="'+col+'" stroke-dasharray="'+C.toFixed(1)+'" stroke-dashoffset="'+off.toFixed(1)+'"></circle>'+
         '</svg><span class="pv-bd-pct">'+p[2]+'&nbsp;%</span></div>'+
         '<div class="pv-bd-n">'+p[1]+'</div></div>'+
-        '<a class="pv-bd-go" href="#" style="background:'+col+'">'+(p[2]>0?"Continuer":"Commencer")+' →</a>';
+        '<a class="pv-bd-go" href="#" style="background:'+colBtn+'">'+(p[2]>0?"Continuer":"Commencer")+' →</a>';
       t.appendChild(inn); box.appendChild(t);
     });
   }
