@@ -88,6 +88,7 @@
     "--ps-f4-tint:#FFF3E0",
     "--ps-f5:#A25DDC",
     "--ps-f5-tint:#F3EAFB",
+    "--ps-cab-logo:#507EC5",
     "--ps-f6:#0073EA",
     "--ps-f6-tint:#E6F1FD"
 /* <<< FIN TOKENS */
@@ -539,7 +540,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-03-i";
+  window.PS_TOKENS_V="2026-08-03-j";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug

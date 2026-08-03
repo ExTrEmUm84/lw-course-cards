@@ -107,7 +107,7 @@
        🔴 background-color EN DUR (pas var(--ps-accent) : l'accent de la page
        Cabinets est ROUGE #c51d4a). 🔴 Blanchiment (`brightness(0) invert(1)`) sur
        un élément INTERNE `.ps-cab-logo-img` (sinon le fond bleu blanchit aussi). */
-    ".ps-cab-logo{width:140px !important;height:140px !important;border-radius:50% !important;background-color:#507EC5 !important;display:flex !important;align-items:center !important;justify-content:center !important;margin:-70px auto 16px !important;border:4px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.12) !important;overflow:hidden !important;flex:none !important;transition:box-shadow .25s ease !important;}",
+    ".ps-cab-logo{width:140px !important;height:140px !important;border-radius:50% !important;background-color:var(--ps-cab-logo,#507EC5) !important;display:flex !important;align-items:center !important;justify-content:center !important;margin:-70px auto 16px !important;border:4px solid #fff !important;box-shadow:0 6px 18px rgba(15,23,42,.12) !important;overflow:hidden !important;flex:none !important;transition:box-shadow .25s ease !important;}",
     ".ps-cab-logo-img{width:66% !important;height:66% !important;background-repeat:no-repeat !important;background-position:center !important;background-size:contain !important;filter:brightness(0) invert(1) !important;}",
     /* Repli : cabinet sans logo hébergé transparent (Advancy, Sia, Kéa) ->
        initiales BLANCHES sur le même cercle bleu, look homogène. */
