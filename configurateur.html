@@ -114,7 +114,9 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
 @keyframes bl{50%{opacity:0}}
 .pv-desc{font-family:var(--ps-font);font-size:15px;line-height:1.65;color:var(--ps-text-soft);margin:12px 0 0;max-width:520px}
 /* rail + cartes cours */
-.pv-rail{display:flex;gap:16px;padding:74px 24px 26px;align-items:stretch}
+/* 🔴 Mesures RELEVÉES sur la vraie page Cours le 03/08, pas estimées : le rond
+   fait 180 px (pas 120) et remonte de -90 px, d'où ce retrait haut de 104 px. */
+.pv-rail{display:flex;gap:16px;padding:104px 24px 26px;align-items:stretch}
 .pv-card{position:relative;isolation:isolate;flex:1;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
   box-shadow:0 0 20px rgba(var(--ps-accent-rgb),.18);font-family:var(--ps-font);padding:0 22px 22px;
   transition:box-shadow .2s ease,transform .2s ease}
@@ -124,9 +126,15 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
 .pv-line rect{x:2px;y:2px;width:calc(100% - 4px);height:calc(100% - 4px);rx:calc(var(--ps-r-card) - 2px);
   fill:none;stroke:var(--ps-accent);stroke-width:4;stroke-dasharray:1.02;stroke-dashoffset:1.02;
   transition:stroke-dashoffset .55s ease}
-.pv-rond{width:120px;height:120px;border-radius:50%;margin:-60px auto 0;border:5px solid #fff;
+/* 🔴 La vraie carte porte une ILLUSTRATION, pas un numéro. La maquette affichait
+   « 1 », « 2 », « 3 » dans un rond teinté — c'était le plus gros écart avec le
+   site. On charge donc les vraies illustrations du dépôt (même origine que cette
+   page). Le fond teinté reste derrière, comme repli si une image manque.
+   Mesuré sur la vraie page : 180 px, bord blanc 5 px, ombre 0 6px 18px rgba(15,23,42,.10). */
+.pv-rond{width:180px;height:180px;border-radius:50%;margin:-90px auto 0;border:5px solid #fff;
   box-shadow:0 6px 18px rgba(15,23,42,.10);background:var(--ps-accent-tint);display:grid;place-items:center;
-  font:800 30px var(--ps-font);color:var(--ps-accent)}
+  overflow:hidden}
+.pv-rond img{width:100%;height:100%;object-fit:cover;display:block}
 .pv-tag{display:inline-block;font:800 13px var(--ps-font);padding:5px 12px;border-radius:var(--ps-r-pill);margin:18px 0 12px}
 .pv-c1 .pv-tag{background:var(--ps-lvl1-tint);color:var(--ps-lvl1)}
 .pv-c2 .pv-tag{background:var(--ps-lvl2-tint);color:var(--ps-lvl2)}
@@ -139,7 +147,12 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
 .pv-c1 .pv-bar i{background:var(--ps-lvl1)} .pv-c2 .pv-bar i{background:var(--ps-lvl2)} .pv-c3 .pv-bar i{background:var(--ps-lvl3)}
 .pv-pct{font:600 11.5px var(--ps-font);color:var(--ps-text-soft)}
 .pv-cta{display:inline-flex;align-items:center;gap:7px;margin-top:14px;font:700 14px var(--ps-font);color:var(--ps-accent);text-decoration:none}
-.pv-chev{align-self:center;color:#C3C9D6;font-size:26px;font-weight:800;flex:none}
+/* 🔴 Les chevrons entre cartes ont été RETIRÉS : mesuré sur la vraie page,
+   `.ps-chev` y est présent 0 fois — la rangée est un carrousel avec deux flèches
+   sur les côtés (`.ps-car-btn`), pas des séparateurs entre les cartes. La
+   maquette montrait quelque chose qui n'existe plus. */
+.pv-car{align-self:center;flex:none;width:34px;height:34px;border-radius:50%;border:1px solid var(--ps-border);
+  background:#fff;display:grid;place-items:center;color:var(--ps-text);font-size:15px;box-shadow:0 2px 8px rgba(15,23,42,.06)}
 /* tuile KPI */
 .pv-kpi{display:flex;align-items:center;gap:16px;background:#fff;border:1px solid var(--ps-border);
   border-radius:var(--ps-r-card);padding:16px 20px;font-family:var(--ps-font);max-width:360px}
@@ -287,34 +300,33 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
 
     <h3>Cartes de cours <span style="text-transform:none;font-weight:600;color:#B4BAC8">— survole pour voir le liseré et la lueur</span></h3>
     <div class="bloc" style="padding:0 4px">
-      <div class="pv-rail">
+      <div class="pv-rail"><div class="pv-car">‹</div>
         <div class="pv-card pv-c1">
           <svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect pathLength="1"/></svg>
-          <div class="pv-rond">1</div>
+          <div class="pv-rond"><img src="illustrations/niveau-1.svg" alt=""></div>
           <span class="pv-tag">Niveau 1</span>
           <div class="pv-mini"><span>8 leçons</span><span>3 quiz</span></div>
           <p class="pv-titre">Introduction au conseil en stratégie</p>
           <div class="pv-bar"><i></i></div><span class="pv-pct">72 % complété</span>
           <a class="pv-cta" href="#">Continuer →</a>
         </div>
-        <div class="pv-chev">»</div>
         <div class="pv-card pv-c2">
           <svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect pathLength="1"/></svg>
-          <div class="pv-rond">2</div>
+          <div class="pv-rond"><img src="illustrations/niveau-2.svg" alt=""></div>
           <span class="pv-tag">Niveau 2</span>
           <div class="pv-mini"><span>6 leçons</span></div>
           <p class="pv-titre">Passage du screening et fondamentaux</p>
           <a class="pv-cta" href="#">Commencer →</a>
         </div>
-        <div class="pv-chev">»</div>
         <div class="pv-card pv-c3">
           <svg class="pv-line" preserveAspectRatio="none" aria-hidden="true"><rect pathLength="1"/></svg>
-          <div class="pv-rond">3</div>
+          <div class="pv-rond"><img src="illustrations/niveau-3.svg" alt=""></div>
           <span class="pv-tag">Niveau 3</span>
           <div class="pv-mini"><span>9 leçons</span></div>
           <p class="pv-titre">Montée en puissance sur les études de cas</p>
           <a class="pv-cta" href="#">Commencer →</a>
         </div>
+        <div class="pv-car">›</div>
       </div>
     </div>
 
