@@ -413,6 +413,17 @@
       a.dataset.psJumelle="1";
     });
   }
+  window.PS_MENU_JUMELLES=liensMenuJumeles;      // pour observer, pas pour deviner
+
+  /* 🔴 NUMÉRO DE VERSION DU FICHIER SERVI. Sans lui, impossible de savoir si un
+     correctif ne marche pas ou si le navigateur exécute encore l'ancienne
+     version — j'ai perdu une heure là-dessus le 03/08, en concluant « c'est le
+     cache » sur la foi d'un `transferSize:0` qui ne prouvait RIEN (il vaut 0
+     pour toute ressource cross-origin sans `Timing-Allow-Origin`).
+     À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
+     et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
+     à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
+  window.PS_TOKENS_V="2026-08-03-e";
 
   var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-secteur-clone","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
