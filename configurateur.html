@@ -254,11 +254,15 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   </div>
 
   <!-- ================= APERÇU ================= -->
-  <div class="stage">
+  <!-- 🔴 `id="pageContent"` : LearnWorlds enveloppe ses pages dans ce conteneur, et
+       la moitié des règles de `course-cards.js` y sont scopées (51 mentions sur ~98,
+       0 dans sector-cards et cabinet-cards). Le poser ici suffit pour que la feuille
+       RÉELLE s'applique à l'aperçu — sans lui, elle ne matcherait rien. -->
+  <div class="stage" id="pageContent">
     <div class="note" style="margin:0 0 18px;border-left-color:#507EC5">
       🔴 <strong>Ceci est une maquette, pas le vrai site.</strong> Les vraies pages sont sur un autre
       domaine : impossible de les prévisualiser ici. Les composants sont redessinés avec les mêmes
-      tokens et les mêmes relations qu'en production — mais seul le site fait foi.
+      tokens et les mêmes relations qu'en production — mais seul le site fait foi.<br><strong id="cssReelEtat">…</strong>
     </div>
 
     <h3>Configuration par page</h3>
@@ -338,6 +342,16 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
   </div>
 </div>
 
+<!-- ====================================================================
+     LES VRAIES FEUILLES DE STYLE DU SITE
+     Le drapeau est posé AVANT : chaque script publie son CSS puis sort
+     immédiatement, sans toucher au DOM ni parler au Worker.
+     ==================================================================== -->
+<script>window.PS_CSS_ONLY=true;</script>
+<script src="course-cards.js"></script>
+<script src="sector-cards.js"></script>
+<script src="case-cards.js"></script>
+<script src="cabinet-cards.js"></script>
 <script>
 (function(){
   "use strict";
@@ -450,6 +464,26 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     S.accentTint =hsl2hex(t[0], 100, 96.5);
     document.getElementById("accentHover").value=S.accentHover;
     document.getElementById("accentTint").value=S.accentTint;
+  }
+
+  /* 🔴🔴 L'APERÇU UTILISE LA FEUILLE RÉELLE, PLUS UNE COPIE.
+     Les scripts de page publient leur CSS dans `window.PS_CSS` ; on l'injecte
+     tel quel. Toute évolution du design des cartes se voit ici sans que personne
+     ait à recopier quoi que ce soit — c'était la demande de Ziad, et ça supprime
+     l'avertissement « la maquette peut dériver » qui traînait depuis le 17/07.
+     🔴 Injecté APRÈS la feuille du châssis : à spécificité égale, l'ordre du DOM
+     tranche, et c'est la production qui doit gagner sur la maquette. */
+  function cssReel(){
+    var t=window.PS_CSS;
+    var el=document.getElementById("cssReelEtat");
+    if(!t || !Object.keys(t).length){
+      if(el) el.textContent="feuilles réelles NON chargées — l'aperçu retombe sur la maquette";
+      return;
+    }
+    var st=document.getElementById("ps-css-reel");
+    if(!st){ st=document.createElement("style"); st.id="ps-css-reel"; document.head.appendChild(st); }
+    st.textContent=Object.keys(t).map(function(k){ return t[k]; }).join("\n");
+    if(el) el.textContent="feuilles réelles chargées : "+Object.keys(t).join(", ");
   }
 
   /* --- construction des lignes de palette --- */
@@ -909,6 +943,7 @@ pre{margin:0;padding:14px;color:#C8D0E8;font:11.5px/1.65 ui-monospace,Menlo,mono
     }
   };
 
+  cssReel();
   pagesUI();                             /* construit aussi les palettes et les vidéos de l'onglet actif */
   champs();
   rendre();

@@ -164,6 +164,30 @@
     "@media(max-width:700px){"+GRID+"{grid-template-columns:1fr !important;}}"
   ].join("\n");
 
+
+  /* ====================================================================
+     CSS EXPOSÉ POUR LE CONFIGURATEUR — la maquette cesse d'être une COPIE
+     --------------------------------------------------------------------
+     Demande de Ziad (03/08) : « on peut synchroniser les designs des pages sur
+     le board, pour qu'il soit toujours à jour ? ». L'aperçu du configurateur
+     était redessiné À LA MAIN, avec l'avertissement, écrit dès le 17/07, qu'il
+     « peut dériver si les scripts évoluent ». Il a dérivé.
+     Le design des cartes ne vit plus dans LearnWorlds mais ICI : on publie donc
+     la feuille telle quelle, et le configurateur la charge au lieu de la
+     recopier. Une dérive redevient impossible par construction.
+
+     🔴 `PS_CSS_ONLY` EST UN DRAPEAU POSÉ PAR LE CONFIGURATEUR, JAMAIS PAR LE
+     SITE. Charger ce fichier ailleurs que sur LearnWorlds ne doit surtout pas
+     déclencher sa logique : observateurs, lecture du DOM, et surtout le dépôt de
+     progression vers le Worker. Un garde basé sur le nom de domaine ou sur la
+     présence de `#pageContent` aurait pu se tromper — le premier au moindre
+     domaine personnalisé, le second si LearnWorlds rend son conteneur en retard.
+     Un drapeau explicite ne peut pas se tromper : le site ne le pose jamais.
+     ==================================================================== */
+  window.PS_CSS=window.PS_CSS||{};
+  window.PS_CSS.cabinet=CSS;
+  if(window.PS_CSS_ONLY) return;
+
   var st=document.getElementById("ps-cabinet-style");
   if(!st){ st=document.createElement("style"); st.id="ps-cabinet-style"; document.head.appendChild(st); }
   st.textContent=CSS;

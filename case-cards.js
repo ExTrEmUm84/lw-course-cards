@@ -146,6 +146,30 @@
     "@keyframes ps-blink{50%{opacity:0}}",
     "@media(max-width:820px){#pageContent .cards-grandpa > .lw-cols.multiple-rows{grid-template-columns:1fr !important;}#pageContent h1.learnworlds-heading{font-size:36px !important;}#pageContent h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}#pageContent .ps-desc{padding-right:0 !important;}}"
   ].join("\n");
+
+  /* ====================================================================
+     CSS EXPOSÉ POUR LE CONFIGURATEUR — la maquette cesse d'être une COPIE
+     --------------------------------------------------------------------
+     Demande de Ziad (03/08) : « on peut synchroniser les designs des pages sur
+     le board, pour qu'il soit toujours à jour ? ». L'aperçu du configurateur
+     était redessiné À LA MAIN, avec l'avertissement, écrit dès le 17/07, qu'il
+     « peut dériver si les scripts évoluent ». Il a dérivé.
+     Le design des cartes ne vit plus dans LearnWorlds mais ICI : on publie donc
+     la feuille telle quelle, et le configurateur la charge au lieu de la
+     recopier. Une dérive redevient impossible par construction.
+
+     🔴 `PS_CSS_ONLY` EST UN DRAPEAU POSÉ PAR LE CONFIGURATEUR, JAMAIS PAR LE
+     SITE. Charger ce fichier ailleurs que sur LearnWorlds ne doit surtout pas
+     déclencher sa logique : observateurs, lecture du DOM, et surtout le dépôt de
+     progression vers le Worker. Un garde basé sur le nom de domaine ou sur la
+     présence de `#pageContent` aurait pu se tromper — le premier au moindre
+     domaine personnalisé, le second si LearnWorlds rend son conteneur en retard.
+     Un drapeau explicite ne peut pas se tromper : le site ne le pose jamais.
+     ==================================================================== */
+  window.PS_CSS=window.PS_CSS||{};
+  window.PS_CSS.case=CSS;
+  if(window.PS_CSS_ONLY) return;
+
   var st=document.getElementById("ps-casecards-style");
   if(!st){ st=document.createElement("style"); st.id="ps-casecards-style"; document.head.appendChild(st); }
   st.textContent=CSS;
