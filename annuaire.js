@@ -1417,6 +1417,13 @@
         if (r.status === 403) {
           grid.replaceChildren();
           count.textContent = "";
+          /* 🔴 La barre de recherche et les facettes disparaissent AUSSI.
+             Signalé par Ziad : les laisser, c'est proposer de filtrer une liste
+             qu'on n'a pas le droit de voir — quatre pastilles vides et un champ
+             sans effet, juste au-dessus d'un message qui dit qu'il n'y a rien.
+             Vider la grille ne suffit pas : il faut retirer ce qui la pilote. */
+          var barre = document.querySelector("#psa-root .psa-bar");
+          if (barre) barre.style.display = "none";
           empty.hidden = false;
           empty.replaceChildren();
           var t = document.createElement("p");
