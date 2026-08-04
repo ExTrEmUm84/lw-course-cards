@@ -189,28 +189,34 @@
   }
 
   /* ====================================================================
-     LA COULEUR D'UN PICTO = CELLE DE LA PAGE QU'IL VISE
+     LA COULEUR D'UN PICTO = LA SIENNE, FIXE, INDÉPENDANTE DES PAGES
      --------------------------------------------------------------------
-     Source unique : `PS_PAGE_ACCENTS`, la table que `tokens.js` utilise déjà pour
-     colorer les pages elles-mêmes. Rien n'est recopié ici : régler la couleur de
-     Cours dans le configurateur repeint son picto du menu, sans autre geste.
-     🔴 Les pages JUMELLES passent par `PS_PAGES_FR` : le lien « Formations » du
-     menu pointe sur `/formation-par-modules-clone-en` (mesuré), qui n'existe pas
-     dans la table. Sans cette résolution, la version anglaise du menu perdrait
-     toutes ses couleurs — la même dualité que celle corrigée le 03/08 côté pages.
-     🔴 Rien trouvé (page sans couleur propre, lien vers un cours, `/signout`) :
-     on ne pose RIEN, et la règle CSS de `.ps-mm-ic` fait retomber sur l'accent de
-     la marque. Un repli en dur ici aurait figé une couleur de plus. */
+     Troisième version, et c'est celle que Ziad a tranchée le 04/08 :
+       1. cycle par POSITION (`nth-child(6n+N)`) -> « les couleurs changent tout
+          le temps », et en effet elles se décalaient d'un menu à l'autre ;
+       2. couleur de la page COURANTE -> tous les pictos identiques ;
+       3. couleur de la page VISÉE -> juste sur le principe, mais sept entrées sur
+          onze n'ont pas de couleur propre et tombaient sur le bleu de marque.
+     ⇒ Chaque entrée porte SA teinte, décidée une fois dans `MENU_COULEURS`
+     (`tokens.js`) et identique partout sur le site.
+     🔴 La clé est le SLUG et non le libellé : les libellés sont traduits par
+     Weglot, une table indexée dessus perdrait ses couleurs en anglais.
+     🔴 Les jumelles EN passent par `PS_PAGES_FR` : le lien « Formations » pointe
+     sur `/formation-par-modules-clone-en` (mesuré), absent de la table. Sans cette
+     résolution, la version anglaise du menu serait entièrement bleue.
+     🔴 Entrée absente (Profil, Déconnexion) : on ne pose RIEN et la règle CSS de
+     `.ps-mm-ic` fait retomber sur l'accent de la marque. Un repli en dur ici
+     figerait une douzième couleur que personne ne pourrait régler. */
   function couleurLien(link){
-    var acc=window.PS_PAGE_ACCENTS;
-    if(!acc) return "";                       /* tokens.js absent : repli CSS */
+    var tab=window.PS_MENU_COULEURS;
+    if(!tab) return "";                       /* tokens.js absent : repli CSS */
     var slug="";
     try{ slug=new URL(link.getAttribute("href")||"",location.href).pathname.replace(/^\/+|\/+$/g,""); }
     catch(e){ return ""; }
     if(!slug) return "";
     var fr=window.PS_PAGES_FR;
-    if(fr && fr[slug]) slug=fr[slug];         /* jumelle EN -> réglages de sa page FR */
-    return acc[slug]||"";
+    if(fr && fr[slug]) slug=fr[slug];         /* jumelle EN -> réglage de sa page FR */
+    return tab[slug]||"";
   }
   /* 🔴 Passe SÉPARÉE de la construction, et rejouée à chaque `build()`. La
      construction est gardée par `data-ps-mm` (on ne réécrit pas le contenu d'un

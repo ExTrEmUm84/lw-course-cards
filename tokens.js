@@ -224,6 +224,41 @@
 /* <<< FIN PAGES */
   window.PS_REGLAGES=REGLAGES;                  // lu par home-page.js
 
+  /* ====================================================================
+     COULEUR DES PICTOS DU MEGA MENU — UNE PAR ENTRÉE, FIXE
+     --------------------------------------------------------------------
+     Décidé par Ziad le 04/08, après deux essais qui ne convenaient pas :
+       1. couleurs cyclées par POSITION (`nth-child(6n+N)`) -> elles changeaient
+          d'un menu à l'autre sans rien signifier ;
+       2. couleur de la page VISÉE -> sept entrées sur onze tombaient sur le bleu
+          de marque, faute de couleur propre, et le menu devenait monotone.
+     ⇒ Chaque entrée porte SA teinte, décidée une fois, **indépendante des pages**
+     et identique partout sur le site.
+
+     🔴 LA CLÉ EST LE SLUG, PAS LE LIBELLÉ. Les libellés sont traduits par Weglot :
+     une table indexée par « Fiches Secteur » perdrait toutes ses couleurs en
+     anglais. Les jumelles EN sont résolues via `PAGES_FR` par `mega-menu.js`.
+     🔴 Une entrée absente ne reçoit RIEN et retombe sur l'accent de la marque
+     (règle CSS de `.ps-mm-ic`). C'est le cas voulu pour Profil et Déconnexion :
+     ce sont des entrées de COMPTE, pas de contenu — les laisser sobres les
+     distingue du reste.
+     ⏳ Table tenue à la main pour l'instant. La rendre réglable depuis le
+     configurateur demande aussi une modification du Worker (c'est LUI qui
+     reconstruit le fichier publié, et il valide chaque valeur) : à faire dans un
+     second temps, le dépôt du Worker n'étant pas celui-ci. */
+  var MENU_COULEURS={
+    "formation-par-modules":"#507EC5",
+    "fiches-cabinet":"#00C875",
+    "fiches-secteur":"#FDAB3D",
+    "sentrainer":"#A25DDC",
+    "emptykk-clone-clone":"#E2445C",
+    "annuaire-partenaire-de-cas":"#0073EA",
+    "course/supports-webinar":"#12A85F",
+    "bootcamp-prepastrat":"#D98500",
+    "entretiens-en-conditions-reelles":"#8A45C9"
+  };
+  window.PS_MENU_COULEURS=MENU_COULEURS;        // lu par mega-menu.js
+
   function _chan(hex){var h=hex.replace("#","");if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}
   function _hex2hsl(hex){var c=_chan(hex),r=c[0]/255,g=c[1]/255,b=c[2]/255,mx=Math.max(r,g,b),mn=Math.min(r,g,b),d=mx-mn,H=0,L=(mx+mn)/2,S=d===0?0:d/(1-Math.abs(2*L-1));if(d!==0){if(mx===r)H=60*(((g-b)/d)%6);else if(mx===g)H=60*((b-r)/d+2);else H=60*((r-g)/d+4);}if(H<0)H+=360;return [H,S*100,L*100];}
   function _hsl2hex(hh,s,l){s/=100;l/=100;var a=s*Math.min(l,1-l);function f(n){var k=(n+hh/30)%12,c=l-a*Math.max(Math.min(k-3,9-k,1),-1);return Math.round(255*c).toString(16).padStart(2,"0");}return "#"+f(0)+f(8)+f(4);}
