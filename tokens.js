@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-f";
+  window.PS_TOKENS_V="2026-08-05-g";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2602,6 +2602,34 @@
     '<rect x="4" y="10.5" width="16" height="10.5" rx="2.2"/>'+
     '<path d="M8 10.5V7.4a4 4 0 0 1 8 0v3.1"/><circle cx="12" cy="15.6" r="1.35" fill="#fff" stroke="none"/></svg>';
 
+  /* ====================================================================
+     QUELLES CARTES SE VERROUILLENT : CELLES DONT L'INSCRIPTION EST FERMÉE
+     --------------------------------------------------------------------
+     Demande de Ziad : garder le webinaire gratuit ouvert, y compris pour un
+     compte non validé. La bonne règle n'est donc pas « tout verrouiller quand
+     la personne n'a pas d'accès » mais « verrouiller les cours FERMÉS ». Les
+     cours ouverts le restent tout seuls, sans exception à maintenir.
+
+     🔴🔴 ET C'EST UNE DÉTECTION PAR LE TEXTE, CE QUE JE M'INTERDIS D'HABITUDE.
+     Mesuré : la mention « Inscription fermée » vit dans un élément générique
+     (`learnworlds-main-text …`), sans classe dédiée ni attribut. Il n'existe
+     aucun marqueur stable à viser dans la page.
+     Ce qui rend le compromis acceptable ICI, et seulement ici : **le cadenas
+     n'est pas un contrôle d'accès**. C'est LearnWorlds qui protège les cours —
+     un clic qui passerait tombe sur son écran « premium content ». Une
+     détection qui se trompe coûte un affordance marketing, jamais l'accès.
+     Je ne l'écrirais pas pour un verrou réel ; pour celui-ci, oui.
+     🔴 Motif FR **et** EN : le site est traduit par Weglot, et ne matcher que
+     le français laisserait tout ouvert en anglais.
+     🔴 Et si plus RIEN n'est reconnu sur une page qui a des cartes, on le DIT.
+     Une reformulation côté LearnWorlds désactiverait sinon le cadenas partout,
+     en silence — exactement le défaut de l'opt-in corrigé ce matin. */
+  var MOTIF_FERME=/inscription\s*(ferm|cl[oô]tur)|enrollment\s*(is\s*)?closed|closed\s*for\s*enrollment/i;
+
+  function carteFermee(c){
+    return MOTIF_FERME.test((c.textContent||"").replace(/\s+/g," "));
+  }
+
   function verrouCartes(){
     if(CARTES_HORS_VERROU.test(location.pathname||"")) return;
     var u=membrePS();
@@ -2622,8 +2650,22 @@
     }catch(e){}
     var cartes=document.querySelectorAll(".lw-course-card");
     if(!cartes.length) return;
+
+    /* 🔴 RENDRE LE SILENCE AUDIBLE. Si la page porte des cartes et qu'AUCUNE
+       n'est reconnue comme fermée, ou bien tout est réellement ouvert, ou bien
+       LearnWorlds a reformulé sa mention et le cadenas vient de s'éteindre
+       partout sans prévenir. On ne peut pas trancher d'ici, mais on peut le
+       dire — c'est ce qui manquait à l'opt-in de l'annuaire pendant des jours. */
+    var fermees=[].slice.call(cartes).filter(carteFermee);
+    if(!fermees.length){
+      try{ console.warn("[PrepaStrat] Aucune carte « inscription fermée » reconnue sur "+
+        location.pathname+" ("+cartes.length+" cartes). Soit tout est ouvert, soit le libellé "+
+        "de LearnWorlds a changé et le cadenas ne s'applique plus."); }catch(e){}
+      return;
+    }
+
     cssVerrou();
-    [].slice.call(cartes).forEach(function(c){
+    fermees.forEach(function(c){
       if(c.getAttribute("data-ps-verrou")) return;         /* idempotent */
       c.setAttribute("data-ps-verrou","1");
       c.classList.add("ps-verrouille");
