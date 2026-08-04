@@ -1336,19 +1336,27 @@
      🔴 Réévalué à chaque passage : les cartes arrivent après le rendu initial,
      et conclure « vide » trop tôt masquerait une section qui allait se remplir.
      ==================================================================== */
+  /* 🔴🔴 ON LA RECONNAÎT PAR L'IDENTIFIANT DE LEARNWORLDS, ET C'EST TOUT LE
+     CORRECTIF DE LA SECONDE TENTATIVE. Ma première version cherchait « une
+     grille contenant des cartes de cours OU des filtres ». Elle ne s'est jamais
+     déclenchée — parce que le cas à traiter est précisément celui où il n'y a
+     NI carte NI filtre. J'avais bâti l'identification sur ce dont l'absence
+     définit le problème.
+     LearnWorlds pose lui-même `data-section-id="MyCourses1"` et la classe
+     `lw-course-cards` sur la section, pleine ou vide. On vise ça — pas le
+     titre (traduit par Weglot), pas le contenu (variable par définition). */
   function sectionCoursVide(){
     var hote=document.getElementById("pageContent");
     if(!hote) return;
-    [].slice.call(hote.children).forEach(function(sec){
-      if(!sec.querySelector) return;
-      /* On la reconnaît à ce qu'elle CONTIENT (une grille de cartes de cours),
-         pas à son titre : celui-ci est traduit par Weglot et changerait de
-         libellé sans prévenir. */
-      var grille=sec.querySelector(".lw-cols") && sec.querySelector(".lw-course-card, .lw-courses-filters, [class*='course-filter']");
-      if(!grille) return;
+    var secs=hote.querySelectorAll(':scope > [data-section-id^="MyCourses"], :scope > .lw-course-cards');
+    [].slice.call(secs).forEach(function(sec){
       var cartes=sec.querySelectorAll(".lw-course-card").length;
-      if(cartes>0){ sec.style.removeProperty("display"); return; }   /* elle s'est remplie : on la rend */
-      sec.style.display="none";
+      /* 🔴 Réévalué à chaque passage : les cartes arrivent après le rendu
+         initial. Conclure « vide » une fois pour toutes masquerait une section
+         qui allait se remplir — et avec elle les 55 barres de progression que
+         le collecteur y lit, la meilleure source du site. */
+      if(cartes>0) sec.style.removeProperty("display");
+      else sec.style.display="none";
     });
   }
 
