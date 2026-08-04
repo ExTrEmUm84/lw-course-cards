@@ -27,3 +27,26 @@ que rien ne force (jsDelivr ne connaît vraiment que les **tags**). Et `raw.gith
 servi en `text/plain` + `nosniff` : le navigateur refuse de l'exécuter.
 
 Pré-requis de contenu : le titre de chaque cours au format `Niveau #N - Nom du cours`.
+
+## Contenu de la home : c'est le Site Builder qui commande
+Les sections refaites par `home-page.js` (mur de cabinets, timeline « Notre histoire »,
+équipe, « Quel candidat êtes-vous ? ») **lisent le contenu natif du builder** et se
+refont dès qu'il change. Écrire le texte dans le builder suffit : pas de déploiement.
+
+Ce qui ne s'extrait pas d'une mise en page (des pourcentages, des étiquettes) passe par
+une **clé explicite**, à écrire dans un bloc de texte de la page — le bloc est masqué
+aux visiteurs, et le configurateur peut fournir les mêmes clés :
+
+```
+#profils_repartition : Fin d'études 40, M1 & césure 15, MBA 11
+#profils_chips_juniors : M1 & césure, Fin d'études
+#profils_chips_experimentes : Docteur (PhD), MBA, En poste
+#lien_video : https://vimeo.com/…
+```
+
+Une clé absente ou vide garde la valeur d'origine — jamais de section vide.
+
+**Vérifier d'où vient ce qui s'affiche** : `PS_HOME_SOURCE()` dans la console de la home
+répond bloc par bloc (« builder » ou « repli en dur ») et donne la version du fichier
+exécuté. À l'œil, un repli et une lecture réussie se ressemblent exactement : c'est ce
+qui a fait passer inaperçu, longtemps, le fait que les modifications n'arrivaient pas.

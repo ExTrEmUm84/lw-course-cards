@@ -33,6 +33,12 @@
     (document.head||document.documentElement).appendChild(f);
   }
 
+  /* 🔴 Marqueur de version du fichier servi, même règle et même service que
+     `PS_TOKENS_V` : savoir si la page exécute le correctif ou la version en
+     cache, plutôt que de le déduire. À incrémenter à chaque changement de
+     comportement. Lisible via `PS_HOME_SOURCE().version`. */
+  var PS_HOME_V="2026-08-04-a";
+
   var H="body.slug-home #pageContent";
   var FT="font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;";
 
@@ -397,6 +403,82 @@
   /* Garde slug évalué TARD (le body est null au chargement, cf. profile-page.js). */
   function surLaPage(){ return !!document.body && /(^|\s)slug-home(\s|$)/.test(document.body.className); }
 
+  /* ====================================================================
+     DÉGEL — NOS BLOCS SE RE-DÉRIVENT QUAND LE BUILDER CHANGE (04/08)
+     --------------------------------------------------------------------
+     🔴 LE PROBLÈME, signalé par Ziad : il modifie le contenu de la home dans le
+     Site Builder et la mise en page ne bouge pas. Le 03/08 avait corrigé une
+     moitié — les textes viennent du DOM natif au lieu d'être recopiés ici. Il
+     restait l'autre, et c'est celle qui se voit : les quatre blocs qu'on
+     RECONSTRUIT (cabinets, timeline, équipe, profils) se gardaient d'un
+     `if(déjà construit) return`. Ils lisaient donc le natif UNE fois, au premier
+     passage, et plus jamais — alors qu'on le MASQUE juste après. Une
+     modification arrivée ensuite est doublement invisible : notre copie est
+     périmée, et l'original est caché dessous.
+       • dans l'éditeur du builder, le contenu est repeint en place : le bloc
+         reste celui d'avant, et Ziad conclut — à raison — que rien ne bouge ;
+       • sur le site, LW rend par étapes et re-rend à la navigation SPA : une
+         section repeinte APRÈS notre construction garde notre version d'avant.
+
+     ⇒ Un bloc reconstruit porte désormais la SIGNATURE de la donnée dont il est
+     tiré. À chaque passage de `build()` on relit le natif et on recalcule cette
+     signature : identique, on ne touche à rien ; différente, on jette le bloc et
+     on reconstruit à partir du contenu à jour.
+
+     🔴 LA SIGNATURE EST LA DONNÉE EXTRAITE, PAS LE TEXTE DE LA SECTION. Signer
+     la section entière relancerait une reconstruction à chaque frame d'un
+     compteur animé, pour un rendu identique — et l'observateur de mutations
+     boucle­rait sur nos propres écritures. Signer ce qu'on affiche ferme la
+     boucle : reconstruire redonne la même signature, donc plus rien ne bouge.
+     🔴 ON NE RÉ-AFFICHE PAS LE NATIF au moment de reconstruire : il n'a jamais
+     été retiré, seulement masqué, et c'est LUI qu'on vient de relire. Le
+     re-masquer est idempotent.
+     ⚖️ Ce que ça coûte : l'extraction tourne à chaque passage au lieu d'une
+     seule fois — quelques `querySelectorAll` sur quatre sections, derrière le
+     `schedule()` qui les regroupe déjà par 60 ms. La construction, elle, reste
+     conditionnée au changement.
+     ==================================================================== */
+  function signature(donnee){
+    try{ return JSON.stringify(donnee); }catch(e){ return String(donnee); }
+  }
+
+  /* Renvoie `{ajour, revele}`. `ajour` : le bloc en place vient de la même
+     donnée, l'appelant s'arrête là (c'est le cas courant). Sinon le vieux bloc
+     est retiré et `revele` dit s'il était déjà apparu à l'écran — le neuf doit
+     alors naître visible, sans rejouer son animation. */
+  function etatBloc(hote, sel, sig){
+    var vieux=hote.querySelector(sel);
+    if(!vieux) return {ajour:false, revele:false};
+    if(vieux.getAttribute("data-ps-sig")===sig) return {ajour:true, revele:true};
+    var revele=vieux.classList.contains("ps-in");
+    vieux.remove();
+    return {ajour:false, revele:revele};
+  }
+
+  function marquerBloc(bloc, sig){
+    bloc.setAttribute("data-ps-gen","1");      // « ce nœud est à nous »
+    bloc.setAttribute("data-ps-sig",sig);
+  }
+
+  /* Révélation au scroll, factorisée. 🔴 L'observateur disparaît avec le nœud
+     qu'il observait : un bloc reconstruit doit être ré-observé, sinon il reste
+     invisible pour toujours. Et s'il remplace un bloc DÉJÀ révélé, il naît
+     révélé — sans quoi une modification dans le builder ferait clignoter la
+     section sous les yeux de celui qui vient de l'éditer. */
+  function reveler(node, seuil, dejaVu){
+    if(dejaVu || !window.IntersectionObserver){ node.classList.add("ps-in"); return; }
+    var io=new IntersectionObserver(function(es){
+      es.forEach(function(e){ if(e.isIntersecting){ node.classList.add("ps-in"); io.disconnect(); } });
+    },{threshold:seuil||0.1});
+    io.observe(node);
+    /* filet : déjà dans l'écran au chargement (l'observateur ne se déclenche pas
+       toujours pour un nœud inséré sous le pli du navigateur). */
+    setTimeout(function(){
+      var r=node.getBoundingClientRect();
+      if(r.top<(window.innerHeight||800)) node.classList.add("ps-in");
+    },450);
+  }
+
   /* Repère par CONTENU (pas par position) la section des stats et les bandes
      neutres, pour leur poser une classe stable ciblée par le CSS ci-dessus. */
   /* Chaque section repérée par le TEXTE de ses titres (robuste au réordonnancement).
@@ -455,7 +537,7 @@
      titre) et insère une grille de cellules-logos à leur place. */
   function buildCabinets(){
     var sec=document.querySelector(H+" .ps-home-cabinets");
-    if(!sec || sec.querySelector(".ps-cabgrid")) return;
+    if(!sec) return;
     var btnRows=Array.prototype.slice.call(sec.querySelectorAll(".lw-cols")).filter(function(r){
       return r.querySelector(".learnworlds-button") && !r.querySelector("h1,h2,h3,h4");
     });
@@ -466,7 +548,12 @@
       if(n) names.push(n);
     });
     if(!names.length) return;
+    /* Le mur se refait dès que Ziad ajoute, retire ou renomme un cabinet dans le
+       builder — les libellés des boutons natifs SONT la donnée. */
+    var sig=signature(names);
+    if(etatBloc(sec,".ps-cabgrid",sig).ajour) return;
     var grid=document.createElement("div"); grid.className="ps-cabgrid";
+    marquerBloc(grid,sig);
     names.forEach(function(name){
       var cell=document.createElement("div"); cell.className="ps-cabcell";
       var file=LOGOS[normName(name)];
@@ -701,13 +788,16 @@
   }
   function buildEquipe(){
     var sec=document.querySelector(H+" .ps-home-equipe"); if(!sec) return;
-    if(sec.querySelector(".ps-team")) return;
     var tabs=sec.querySelector(".lw-tabs"); if(!tabs) return;
     var btnWrap=tabs.querySelector(".lw-tabs-buttons");
     var labels=btnWrap ? [].slice.call(btnWrap.querySelectorAll(".lw-tab, .js-lw-tab")).map(function(b){ return (b.textContent||"").replace(/\s+/g," ").trim(); }) : [];
     var panels=[].slice.call(tabs.querySelectorAll(".lw-tab-content"));
     if(!panels.length) return;
-    var container=document.createElement("div"); container.className="ps-team";
+    /* 🔴 LECTURE D'ABORD, CONSTRUCTION ENSUITE. Les deux étaient mêlées : on ne
+       pouvait pas savoir si le contenu avait bougé sans reconstruire. Séparées,
+       la donnée devient comparable — un membre ajouté dans un onglet, un rôle
+       corrigé, une bio réécrite, et la grille se refait. */
+    var groupes=[];
     panels.forEach(function(p, gi){
       var members=[];
       p.querySelectorAll(".learnworlds-heading3, .learnworlds-heading4").forEach(function(h){
@@ -719,9 +809,18 @@
         if(/multiple ways of adding|awesome label|lorem ipsum|write your/i.test(bio)) bio="";  /* placeholder EN */
         if(name) members.push({name:name, role:role, bio:bio});
       });
-      if(!members.length) return;
+      if(members.length) groupes.push({titre:labels[gi]||"", membres:members});
+    });
+    if(!groupes.length) return;
+    var sig=signature(groupes);
+    if(etatBloc(sec,".ps-team",sig).ajour) return;
+
+    var container=document.createElement("div"); container.className="ps-team";
+    marquerBloc(container,sig);
+    groupes.forEach(function(g){
+      var members=g.membres;
       var grp=document.createElement("div"); grp.className="ps-team-group";
-      var gt=document.createElement("div"); gt.className="ps-team-gt"; gt.textContent=labels[gi]||"";
+      var gt=document.createElement("div"); gt.className="ps-team-gt"; gt.textContent=g.titre;
       grp.appendChild(gt);
       var grid=document.createElement("div"); grid.className="ps-team-grid";
       members.forEach(function(m){
@@ -755,7 +854,7 @@
      scroll. Idempotent. Masque les rangées natives verticales. */
   function buildTimeline(){
     var sec=document.querySelector(H+" .ps-home-histoire");
-    if(!sec || sec.querySelector(".ps-timeline")) return;
+    if(!sec) return;
     var dates=sec.querySelectorAll(".learnworlds-heading4");
     if(dates.length<2) return;
     var items=[];
@@ -767,7 +866,13 @@
       if(date) items.push({date:date, desc:desc});
     });
     if(!items.length) return;
+    /* Un jalon ajouté, une date corrigée, une description réécrite : la timeline
+       se refait. */
+    var sig=signature(items);
+    var et=etatBloc(sec,".ps-timeline",sig);
+    if(et.ajour) return;
     var tl=document.createElement("div"); tl.className="ps-timeline";
+    marquerBloc(tl,sig);
     items.forEach(function(it,i){
       var node=document.createElement("div"); node.className="ps-tl-node";
       node.style.transitionDelay=(i*0.12)+"s";
@@ -784,13 +889,7 @@
     });
     if(rows.length){ rows[0].parentNode.insertBefore(tl, rows[0]); rows.forEach(function(r){ r.classList.add("ps-home-hide"); }); }
     else { sec.appendChild(tl); }
-    /* révélation au scroll */
-    if(window.IntersectionObserver){
-      var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ tl.classList.add("ps-in"); io.disconnect(); } }); }, {threshold:0.15});
-      io.observe(tl);
-      /* filet : si déjà visible au chargement */
-      setTimeout(function(){ var r=tl.getBoundingClientRect(); if(r.top<(window.innerHeight||800)) tl.classList.add("ps-in"); }, 400);
-    } else { tl.classList.add("ps-in"); }
+    reveler(tl, 0.15, et.revele);
   }
 
   /* ===== Refonte section « Quel candidat êtes-vous ? » (buildProfils) =====
@@ -821,6 +920,64 @@
     {tier:"IT",        firms:["Accenture","IBM","Capgemini","BearingPoint"]}
   ];
   var PF_CALLOUT="Votre cabinet idéal vous correspond-il vraiment ? On répond à toutes vos questions pendant la formation.";
+
+  /* ====================================================================
+     CE QUI NE S'EXTRAIT PAS DU BUILDER PASSE PAR UNE CLÉ EXPLICITE (04/08)
+     --------------------------------------------------------------------
+     Il restait deux contenus que Ziad ne pouvait modifier NULLE PART : les
+     parts du donut et les « chips » des deux cartes profils. Le 03/08 les avait
+     laissés en dur avec la bonne raison — le camembert natif ne s'extrait pas,
+     et deviner des pourcentages dans de la prose, non — mais la conséquence
+     était qu'ils ne bougeaient jamais, et c'est exactement ce dont il se plaint.
+
+     ⇒ Ils passent par `psReglage`, le mécanisme déjà en place pour les vidéos :
+     une clé EXPLICITE, qui ne dépend d'aucune mise en page et ne s'analyse pas.
+     Ça marche des DEUX côtés sans une ligne de plus — le configurateur
+     (`PS_REGLAGES` dans tokens.js) d'abord, le bloc `#clé : valeur` de la home
+     en repli. Dans le builder :
+         #profils_repartition : Fin d'études 40, M1 & césure 15, MBA 11
+         #profils_chips_juniors : M1 & césure, Fin d'études
+         #profils_chips_experimentes : Docteur (PhD), MBA, En poste
+     ⏳ Les champs correspondants restent à ajouter dans le configurateur ; je ne
+     les y mets pas à l'aveugle. En attendant, le bloc de la home suffit, et il
+     est masqué aux visiteurs.
+
+     🔴 LES COULEURS NE SE RÈGLENT PAS ICI, et c'est volontaire : elles sont du
+     design, pas du contenu. Une part ajoutée reprend la couleur suivante de la
+     palette, qui tourne — jamais de segment invisible faute de couleur.
+     🔴 UNE LECTURE PARTIELLE NE PASSE PAS. Si une seule part est mal écrite, on
+     garde la table entière : un donut à qui il manque une tranche est faux sans
+     en avoir l'air, et « faux ne se voit pas ». Même règle que `lireTiers`. */
+  function lireRepartition(){
+    var brut=psReglage("profils_repartition","");
+    if(!brut) return PF_SEGMENTS;
+    var parts=String(brut).split(",");
+    var out=[], ok=true;
+    parts.forEach(function(p){
+      var m=p.replace(/\s+/g," ").trim().match(/^(.+?)\s+(\d{1,3})\s*%?$/);
+      if(!m){ if(p.trim()) ok=false; return; }
+      var v=parseInt(m[2],10);
+      if(!(v>0)){ ok=false; return; }
+      out.push({label:m[1].trim(), value:v, color:PF_SEGMENTS[out.length%PF_SEGMENTS.length].color});
+    });
+    if(!ok || out.length<2) return PF_SEGMENTS;
+    return out;
+  }
+
+  /* Deux listes simples, séparées par des virgules. Une clé absente ou vide
+     garde la liste d'origine — le repli vaut par carte, pas pour les deux : en
+     régler une ne doit pas effacer l'autre. */
+  function lireChips(){
+    function lire(cle, repli){
+      var brut=psReglage(cle,"");
+      if(!brut) return repli;
+      var l=String(brut).split(",").map(function(c){ return c.replace(/\s+/g," ").trim(); })
+                        .filter(function(c){ return c; });
+      return l.length ? l : repli;
+    }
+    return [lire("profils_chips_juniors", PF_JUNIORS.chips),
+            lire("profils_chips_experimentes", PF_EXPERT.chips)];
+  }
 
   /* ====================================================================
      LIRE LE CONTENU DU BUILDER AU LIEU DE LE RECOPIER (03/08)
@@ -952,27 +1109,38 @@
 
   function buildProfils(){
     var sec=document.querySelector(H+" .ps-home-profils");
-    if(!sec || sec.querySelector(".ps-pf2")) return;
+    if(!sec) return;
 
     /* 🔴 LECTURE AVANT CONSTRUCTION, et repli sur les tables si ça ne donne
        rien. C'est ici que le contenu du builder entre dans la section. */
     var tiers=lireTiers(sec)||PF_TIERS;
     var lus=lireProfils(sec);
+    var chips=lireChips();
     var cartesProfils=(lus && lus.length>=2)
-      ? [{title:lus[0].title, icon:PF_JUNIORS.icon, chips:PF_JUNIORS.chips, desc:lus[0].desc},
-         {title:lus[1].title, icon:PF_EXPERT.icon,  chips:PF_EXPERT.chips,  desc:lus[1].desc}]
-      : [PF_JUNIORS, PF_EXPERT];
+      ? [{title:lus[0].title, icon:PF_JUNIORS.icon, chips:chips[0], desc:lus[0].desc},
+         {title:lus[1].title, icon:PF_EXPERT.icon,  chips:chips[1], desc:lus[1].desc}]
+      : [{title:PF_JUNIORS.title, icon:PF_JUNIORS.icon, chips:chips[0], desc:PF_JUNIORS.desc},
+         {title:PF_EXPERT.title,  icon:PF_EXPERT.icon,  chips:chips[1], desc:PF_EXPERT.desc}];
     var droite=lireBlocDroite(sec)||{};
     var titreDroite=droite.titre||"À quels cabinets nous préparons-vous ?";
     var callout=droite.accroche||PF_CALLOUT;
+    var segments=lireRepartition();
+
+    /* Toute la donnée affichée entre dans la signature — y compris ce qui vient
+       des réglages : corriger un pourcentage doit refaire le donut, pas
+       seulement au prochain rechargement. */
+    var sig=signature([tiers,cartesProfils.map(function(c){ return [c.title,c.chips,c.desc]; }),titreDroite,callout,segments]);
+    var et=etatBloc(sec,".ps-pf2",sig);
+    if(et.ajour) return;
 
     var pf2=document.createElement("div"); pf2.className="ps-pf2";
+    marquerBloc(pf2,sig);
     /* ---- gauche : donut + 2 cartes profils ---- */
     var left=document.createElement("div"); left.className="ps-pf2-left";
     var dc=document.createElement("div"); dc.className="ps-donutcard ps-pf-rise";
-    dc.appendChild(makeDonut(PF_SEGMENTS));
+    dc.appendChild(makeDonut(segments));
     var leg=document.createElement("div"); leg.className="ps-donut-leg";
-    PF_SEGMENTS.forEach(function(s){
+    segments.forEach(function(s){
       var it=document.createElement("div"); it.className="ps-donut-leg-i";
       var dot=document.createElement("span"); dot.className="ps-donut-dot"; dot.style.background=s.color;
       var lb=document.createElement("span"); lb.textContent=s.label;
@@ -1011,12 +1179,7 @@
     if(anchor){ anchor.parentNode.insertBefore(pf2, anchor); }
     else { sec.appendChild(pf2); }
     Array.prototype.forEach.call(nativeCards,function(c){ c.classList.add("ps-home-hide"); });
-    /* ---- révélation au scroll ---- */
-    if(window.IntersectionObserver){
-      var io=new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ pf2.classList.add("ps-in"); io.disconnect(); } }); },{threshold:0.1});
-      io.observe(pf2);
-      setTimeout(function(){ var r=pf2.getBoundingClientRect(); if(r.top<(window.innerHeight||800)) pf2.classList.add("ps-in"); },450);
-    } else { pf2.classList.add("ps-in"); }
+    reveler(pf2, 0.1, et.revele);
   }
 
   /* ====================================================================
@@ -1404,8 +1567,41 @@
     else hote.insertBefore(wrap, hote.firstChild);
   }
 
+  /* 🔴 POUR OBSERVER, PAS POUR DEVINER. Depuis que tout peut venir soit du
+     builder soit d'un repli, la question qui se pose sur la vraie page est
+     « ce que je vois, d'où ça sort ? » — et à l'œil, les deux se ressemblent
+     exactement. C'est ce qui a fait passer inaperçu, pendant des semaines, le
+     fait que les modifications de Ziad n'arrivaient pas à l'écran.
+     `PS_HOME_SOURCE()` en console répond, bloc par bloc. Même service que
+     `PS_TOKENS_V` : un marqueur qui évite d'en déduire. */
+  window.PS_HOME_SOURCE=function(){
+    function sig(sel){
+      var e=document.querySelector(H+" "+sel);
+      return e ? (e.getAttribute("data-ps-sig")||"(non signé)").slice(0,140) : "(absent)";
+    }
+    function src(cle){ return psReglage(cle,"") ? "builder (réglage)" : "repli en dur"; }
+    var pf=document.querySelector(H+" .ps-home-profils");
+    return {
+      version:             PS_HOME_V,
+      cabinets:            sig(".ps-cabgrid"),
+      histoire:            sig(".ps-timeline"),
+      equipe:              sig(".ps-team"),
+      profils:             sig(".ps-pf2"),
+      profils_tiers:       pf ? (lireTiers(pf)   ? "builder (liste)" : "repli PF_TIERS") : "(section absente)",
+      profils_cartes:      pf ? (lireProfils(pf) ? "builder (accordéons)" : "repli PF_JUNIORS/PF_EXPERT") : "(section absente)",
+      donut:               src("profils_repartition"),
+      chips_juniors:       src("profils_chips_juniors"),
+      chips_experimentes:  src("profils_chips_experimentes")
+    };
+  };
+
   function build(){
     if(!surLaPage()) return;
+    /* 🔴 Les réglages sont RELUS à chaque passage. Le cache `_regl` était posé
+       une fois pour toutes : une clé corrigée dans le builder n'aurait jamais
+       pris effet, et on aurait refait exactement le bug qu'on corrige ici. Le
+       coût reste borné — `build()` est déjà groupé par `schedule()`. */
+    _regl=null;
     styles(); marquer(); cartes(); buildStats(); buildCta(); buildPreuve(); buildAtouts(); buildCabinets(); buildTimeline(); buildProfils(); buildEquipe(); heroVideoBg(); setHeroVideo(); buildFaq(); buildPartenaire();
   }
 
