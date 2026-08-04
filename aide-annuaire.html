@@ -1,0 +1,476 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aide — L'annuaire des étudiants · PrepaStrat</title>
+<!--
+  ============================================================
+  AIDE : COMMENT FONCTIONNE L'ANNUAIRE DES ÉTUDIANTS
+  https://extremum84.github.io/lw-course-cards/aide-annuaire.html
+  ------------------------------------------------------------
+  Ouverte depuis le configurateur (colonne de gauche), comme `aide-ecoles.html`
+  dont elle reprend la feuille de style — deux pages d'aide qui ne se
+  ressemblent pas donneraient l'impression de deux outils différents.
+
+  🔴 CE QUI EST SÛR, ET CE QUI NE L'EST PAS. Le tableau des champs distingue
+  explicitement deux niveaux de preuve :
+   - « mesuré » = relevé le 04/08/2026 sur le formulaire d'inscription en
+     ligne (valeurs d'options comprises) ;
+   - « lu par le code » = `annuaire.js` / `worker.js` savent l'afficher, mais
+     l'existence du champ côté LearnWorlds n'a PAS été revérifiée ce jour-là.
+  Cette distinction n'est pas de la prudence décorative : afficher un champ
+  comme « configuré » alors qu'il n'existe pas enverrait quelqu'un chercher
+  pendant une heure une case qui n'est nulle part.
+
+  🔴 Les « captures » sont des RECONSTITUTIONS HTML, jamais des images — même
+  raison que dans `aide-ecoles.html` : une capture se périme en silence.
+  ============================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ps-accent:#507EC5;
+  --ps-accent-hover:#486798;
+  --ps-accent-tint:#edf4ff;
+  --ps-navy:#243B6B;
+  --ps-text:#1c1f26;
+  --ps-text-soft:#676879;
+  --ps-surface-soft:#F7F8FB;
+  --ps-border:#E6E9EF;
+  --ps-font:Figtree,-apple-system,Segoe UI,Roboto,sans-serif;
+  --ps-r-card:16px;
+  --ps-ok:#217A52; --ps-ok-tint:#E4F5EC;
+  --ps-no:#B0432C; --ps-no-tint:#FBE9E6;
+  --ps-warn:#8A5320; --ps-warn-tint:#FFF6ED; --ps-warn-border:#f6ddc0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--ps-font);color:var(--ps-text);background:var(--ps-surface-soft);line-height:1.55;-webkit-font-smoothing:antialiased}
+
+.hero{background:var(--ps-navy);color:#fff;padding:56px 40px 60px}
+.hero-in{max-width:1180px;margin:0 auto}
+.hero .kicker{font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#7fa3d8;margin-bottom:18px}
+.hero h1{font-size:clamp(30px,4.2vw,46px);font-weight:800;letter-spacing:-.02em;line-height:1.12;max-width:22ch}
+.hero p{margin-top:16px;font-size:clamp(16px,1.8vw,19px);color:#c3cee4;max-width:64ch}
+.hero .back{display:inline-flex;align-items:center;gap:8px;margin-top:26px;font-size:14px;font-weight:700;color:#a9c0e5;text-decoration:none;border:1px solid #3c568d;padding:9px 16px;border-radius:999px;transition:.15s}
+.hero .back:hover{background:#2c477d;color:#fff}
+
+.page{max-width:1180px;margin:0 auto;padding:0 40px 90px;display:grid;grid-template-columns:236px 1fr;gap:52px;align-items:start}
+nav.toc{position:sticky;top:28px;margin-top:-28px;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);padding:20px 18px;box-shadow:0 6px 22px rgba(15,23,42,.05)}
+nav.toc h2{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ps-accent);margin-bottom:14px}
+nav.toc a{display:block;font-size:14px;font-weight:600;color:var(--ps-text-soft);text-decoration:none;padding:7px 10px;border-radius:8px;transition:.13s}
+nav.toc a:hover{background:var(--ps-accent-tint);color:var(--ps-navy)}
+main{padding-top:36px;min-width:0}
+
+details{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);margin-bottom:16px;box-shadow:0 6px 22px rgba(15,23,42,.05);overflow:hidden}
+details[open]{border-color:#d7e2f3}
+summary{list-style:none;cursor:pointer;padding:22px 26px;display:flex;align-items:center;gap:16px;font-size:19px;font-weight:800;color:var(--ps-navy);transition:.13s}
+summary::-webkit-details-marker{display:none}
+summary:hover{background:var(--ps-accent-tint)}
+summary .chev{margin-left:auto;flex:none;width:22px;height:22px;color:#b9c3d6;transition:transform .2s}
+details[open] summary .chev{transform:rotate(90deg);color:var(--ps-accent)}
+summary .idx{flex:none;width:30px;height:30px;border-radius:50%;background:var(--ps-accent-tint);color:var(--ps-accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+.inner{padding:4px 26px 28px}
+.inner > * + *{margin-top:16px}
+.inner p{font-size:16px;color:#4b5262}
+.inner strong{font-weight:700;color:var(--ps-navy)}
+.inner ul{padding-left:20px;font-size:16px;color:#4b5262}
+.inner li + li{margin-top:9px}
+code{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.87em;background:var(--ps-accent-tint);color:var(--ps-navy);padding:2px 8px;border-radius:6px;font-weight:600;white-space:nowrap}
+
+.box{border-radius:12px;padding:16px 20px;font-size:15.5px;border:1px solid}
+.box.info{background:var(--ps-accent-tint);border-color:#d3e2f8;color:var(--ps-navy)}
+.box.warn{background:var(--ps-warn-tint);border-color:var(--ps-warn-border);color:var(--ps-warn)}
+.box.warn strong{color:#6f4118}
+.box.ok{background:var(--ps-ok-tint);border-color:#c6e7d5;color:#1b5f41}
+.box.ok strong{color:#124430}
+
+figure{margin:20px 0 0;border:1px solid var(--ps-border);border-radius:14px;background:#fff;overflow:hidden}
+figure .bar{display:flex;align-items:center;gap:7px;padding:10px 14px;background:#F3F5F9;border-bottom:1px solid var(--ps-border)}
+figure .bar i{width:9px;height:9px;border-radius:50%;background:#d3d8e2;display:block}
+figure .bar span{margin-left:8px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#98a1b3}
+figure .shot{padding:22px;background:#FAFBFD;overflow-x:auto}
+figcaption{padding:11px 18px;font-size:13px;color:#8d95a6;background:#FAFBFD;border-top:1px solid var(--ps-border);font-style:italic}
+
+/* ---------- anatomie d'une carte de l'annuaire ---------- */
+.anat{display:flex;gap:26px;align-items:flex-start;flex-wrap:wrap}
+.psa-card{width:300px;flex:none;background:#fff;border:1px solid var(--ps-border);border-radius:14px;padding:22px 20px;box-shadow:0 6px 20px rgba(15,23,42,.06);position:relative}
+.psa-avatar{width:56px;height:56px;border-radius:50%;background:var(--ps-accent);color:#fff;display:flex;align-items:center;justify-content:center;font-size:19px;font-weight:800;letter-spacing:.02em}
+.psa-name{font-size:18px;font-weight:800;color:var(--ps-navy);margin-top:13px}
+.psa-filiere{font-size:14px;font-weight:600;color:var(--ps-accent);margin-top:2px}
+.psa-meta{font-size:13px;color:#7b8393;margin-top:7px}
+.psa-bio{font-size:13.5px;color:#5b6272;margin-top:10px;line-height:1.5}
+.psa-aide-titre{font-size:10.5px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;color:#98a1b3;margin-top:14px}
+.psa-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:7px}
+.psa-chip{background:var(--ps-accent-tint);color:var(--ps-accent-hover);border:1px solid #d3e2f8;border-radius:999px;padding:4px 11px;font-size:12px;font-weight:700}
+.psa-contact{display:block;text-align:center;margin-top:16px;background:var(--ps-accent);color:#fff;border-radius:10px;padding:9px 14px;font-size:13.5px;font-weight:700}
+.psa-links{display:flex;gap:14px;justify-content:center;margin-top:10px}
+.psa-links span{font-size:12.5px;font-weight:700;color:#98a1b3}
+/* 🔴 LES REPÈRES SONT ACCROCHÉS À LEUR ÉLÉMENT, PAS À UNE COORDONNÉE.
+   Première version : un `top` en pixels par repère. Ça dérivait dès que le
+   texte se repliait autrement — une largeur de carte différente, une police
+   qui charge, une bio plus longue, et le repère 4 désignait le bloc 3.
+   Un repère faux est pire qu'un repère absent : il enseigne une erreur. */
+.marque{position:relative}
+.rep{position:absolute;right:-11px;top:50%;transform:translateY(-50%);width:24px;height:24px;border-radius:50%;background:var(--ps-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;box-shadow:0 2px 6px rgba(15,23,42,.2)}
+.psa-card{padding-right:26px}
+.legende{flex:1;min-width:260px;font-size:14.5px}
+.legende li{list-style:none;display:flex;gap:11px;padding:8px 0;border-bottom:1px solid #F0F2F6;color:#4b5262}
+.legende li:last-child{border-bottom:none}
+.legende .n{flex:none;width:22px;height:22px;border-radius:50%;background:var(--ps-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:800;margin-top:1px}
+
+.tab{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:6px}
+.tab th{text-align:left;background:var(--ps-navy);color:#fff;padding:12px 14px;font-size:13px;font-weight:700}
+.tab th:first-child{border-radius:10px 0 0 0}
+.tab th:last-child{border-radius:0 10px 0 0}
+.tab td{padding:12px 14px;border-bottom:1px solid #EDEFF4;vertical-align:top;color:#4b5262}
+.tab td:first-child{font-weight:700;color:var(--ps-navy)}
+.tab tr:last-child td{border-bottom:none}
+.pill{display:inline-block;padding:4px 11px;border-radius:999px;font-size:12.5px;font-weight:700;white-space:nowrap}
+.pill.ok{background:var(--ps-ok-tint);color:var(--ps-ok)}
+.pill.no{background:var(--ps-no-tint);color:var(--ps-no)}
+.pill.hm{background:var(--ps-warn-tint);color:var(--ps-warn)}
+.scroll{overflow-x:auto}
+.scroll .tab{min-width:660px}
+
+footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;color:#98a1b3;border-top:1px solid var(--ps-border)}
+
+@media(max-width:900px){
+  .page{grid-template-columns:1fr;gap:0;padding:0 22px 70px}
+  nav.toc{position:static;margin:26px 0 0}
+  main{padding-top:24px}
+  .hero{padding:40px 22px 44px}
+  .psa-card{width:100%}
+  .rep{right:6px}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-in">
+    <div class="kicker">PrepaStrat · Aide</div>
+    <h1>L'annuaire des étudiants</h1>
+    <p>Qui y figure et qui n'y figure pas, quel champ nourrit quelle partie d'une fiche,
+       d'où viennent les filtres, et ce qui protège les membres.</p>
+    <a class="back" href="configurateur.html">← Retour au configurateur</a>
+  </div>
+</div>
+
+<div class="page">
+
+  <nav class="toc">
+    <h2>Sommaire</h2>
+    <a href="#quoi">À quoi il sert</a>
+    <a href="#qui">Qui apparaît</a>
+    <a href="#carte">Anatomie d'une fiche</a>
+    <a href="#champs">Le tableau des champs</a>
+    <a href="#filtres">Les filtres</a>
+    <a href="#contact">Le bouton Contacter</a>
+    <a href="#photos">Pourquoi des initiales</a>
+    <a href="#protection">Ce qui protège les membres</a>
+    <a href="#vigilance">Ce qui peut casser</a>
+  </nav>
+
+  <main>
+
+    <!-- 1 -->
+    <details id="quoi" open>
+      <summary><span class="idx">1</span> À quoi sert l'annuaire
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>C'est un annuaire d'<strong>étudiants en cours de préparation</strong>, pas un annuaire
+          d'anciens. Il sert à trouver un partenaire d'entraînement&nbsp;: quelqu'un de la même école,
+          du même niveau, qui vise le même type de poste, et qui peut aider sur une matière précise.</p>
+        <p>C'est pour ça qu'une fiche ne montre ni employeur ni parcours professionnel, mais l'école,
+          le niveau, le poste visé, la langue et <strong>les matières sur lesquelles on peut
+          s'entraider</strong>.</p>
+        <div class="box info">La page est <code>/annuaire-partenaire-de-cas</code>. Les fiches sont
+          construites par le script <code>annuaire.js</code>, alimenté par un serveur intermédiaire qui
+          va chercher les profils dans LearnWorlds et <strong>retire au passage tout ce qui ne doit pas
+          sortir</strong> — à commencer par les adresses e-mail.</div>
+      </div>
+    </details>
+
+    <!-- 2 -->
+    <details id="qui">
+      <summary><span class="idx">2</span> Qui apparaît, qui n'apparaît pas
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Un seul critère décide&nbsp;: le champ <strong>« Annuaire des étudiants »</strong>
+          (<code>cf_annuaire</code>), demandé à l'inscription.</p>
+        <div class="scroll">
+          <table class="tab">
+            <tr><th>Réponse du membre</th><th>Résultat</th></tr>
+            <tr><td>« Oui, afficher ma fiche »</td><td><span class="pill ok">Il apparaît</span></td></tr>
+            <tr><td>« Non, je préfère rester discret »</td><td><span class="pill no">Invisible</span></td></tr>
+            <tr><td>Champ vide, jamais rempli</td><td><span class="pill no">Invisible</span></td></tr>
+          </table>
+        </div>
+        <p><strong>Le silence vaut refus</strong>, volontairement&nbsp;: tout ce qui n'est pas un oui
+          lisible est traité comme un non. C'est la seule répartition acceptable pour un consentement.</p>
+        <p>Le rôle n'entre pas en compte&nbsp;: un professeur ou un administrateur qui accepte de
+          figurer apparaît comme n'importe quel membre. Seuls les comptes suspendus sont écartés.</p>
+        <div class="box warn"><strong>Un piège qui nous a déjà coûté cher.</strong> Le texte des options
+          de ce champ <em>est</em> la donnée enregistrée&nbsp;: LearnWorlds ne distingue pas le libellé
+          affiché de la valeur stockée. Réécrire « oui » en « Oui, afficher ma fiche » a rendu invisibles,
+          <em>en silence</em>, tous les membres inscrits après la modification — les anciens continuaient
+          d'apparaître, donc l'annuaire n'avait l'air ni vide ni cassé. Le serveur accepte désormais
+          n'importe quelle formulation qui commence par « oui », mais <strong>évitez de reformuler ces
+          options sans prévenir</strong>.</div>
+      </div>
+    </details>
+
+    <!-- 3 -->
+    <details id="carte">
+      <summary><span class="idx">3</span> Anatomie d'une fiche
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Chaque bloc d'une fiche vient d'un champ précis. Une zone vide n'est jamais un bug
+          d'affichage&nbsp;: c'est un champ que le membre n'a pas rempli — la fiche se replie
+          simplement dessus.</p>
+        <figure>
+          <div class="bar"><i></i><i></i><i></i><span>Site PrepaStrat · une fiche de l'annuaire</span></div>
+          <div class="shot">
+            <div class="anat">
+              <div class="psa-card">
+                <div class="marque"><div class="psa-avatar">RB</div><span class="rep">1</span></div>
+                <div class="marque">
+                  <h3 class="psa-name">Rafaëlle Bourgeois</h3>
+                  <p class="psa-filiere">ESSEC</p>
+                  <span class="rep">2</span>
+                </div>
+                <div class="marque">
+                  <p class="psa-meta">Niveau Avancé · Stage · Français · Paris</p>
+                  <span class="rep">3</span>
+                </div>
+                <div class="marque">
+                  <p class="psa-bio">En prépa pour les entretiens conseil, dispo pour des cas le week-end.</p>
+                  <span class="rep">4</span>
+                </div>
+                <div class="marque">
+                  <p class="psa-aide-titre">Peut aider en</p>
+                  <div class="psa-chips">
+                    <span class="psa-chip">Market sizing</span>
+                    <span class="psa-chip">Profit tree</span>
+                  </div>
+                  <span class="rep">5</span>
+                </div>
+                <div class="marque"><span class="psa-contact">Envoyer un email</span><span class="rep">6</span></div>
+                <div class="marque">
+                  <div class="psa-links"><span>LinkedIn</span><span>Site web</span></div>
+                  <span class="rep">7</span>
+                </div>
+              </div>
+              <ul class="legende">
+                <li><span class="n">1</span><div><strong>Photo ou initiales</strong> — <code>cf_photo</code>,
+                  sinon la photo déposée par le membre, sinon ses initiales.</div></li>
+                <li><span class="n">2</span><div><strong>Nom et sous-titre</strong> — prénom + nom du compte,
+                  puis <code>cf_ecole</code>&nbsp;; à défaut <code>cf_filiere</code> ou <code>cf_poste</code>.</div></li>
+                <li><span class="n">3</span><div><strong>Ligne d'infos</strong> — <code>cf_niveau</code>,
+                  <code>cf_recherche</code>, <code>cf_langue</code>, puis la ville (<code>location</code>).
+                  Les valeurs absentes disparaissent, sans trou ni séparateur orphelin.</div></li>
+                <li><span class="n">4</span><div><strong>Bio</strong> — le champ <code>bio</code> du profil,
+                  tronqué à 280 caractères.</div></li>
+                <li><span class="n">5</span><div><strong>« Peut aider en »</strong> — <code>cf_matieres</code>,
+                  découpé sur les virgules, points-virgules ou barres obliques. Chaque pastille est
+                  <strong>cliquable</strong> et relance la recherche sur cette matière.</div></li>
+                <li><span class="n">6</span><div><strong>Bouton Contacter</strong> — <code>cf_contact</code>.
+                  Pas de contact renseigné, pas de bouton.</div></li>
+                <li><span class="n">7</span><div><strong>Liens secondaires</strong> — <code>linkedin</code>
+                  et <code>url</code> (site web) du profil LearnWorlds.</div></li>
+              </ul>
+            </div>
+          </div>
+          <figcaption>Reconstitution d'une fiche — les données affichées sont fictives.</figcaption>
+        </figure>
+        <div class="box info">La fiche est construite pièce par pièce, jamais par injection de HTML&nbsp;:
+          une bio qui contiendrait du code s'affiche comme du texte au lieu de s'exécuter.</div>
+      </div>
+    </details>
+
+    <!-- 4 -->
+    <details id="champs">
+      <summary><span class="idx">4</span> Le tableau des champs
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Les champs personnalisés se règlent dans <strong>Utilisateurs → Champs personnalisés</strong>.
+          🔴 La <em>Data key</em> saisie à la création détermine le nom technique&nbsp;: une clé
+          <code>niveau</code> donne <code>cf_niveau</code>. <strong>La remplir à la main</strong> évite
+          d'avoir à deviner ce que le code doit lire.</p>
+        <div class="scroll">
+          <table class="tab">
+            <tr><th>Champ</th><th>Clé technique</th><th>Sert à</th><th>État</th></tr>
+            <tr><td>Annuaire des étudiants</td><td><code>cf_annuaire</code></td>
+              <td>Le consentement. Décide de tout.</td><td><span class="pill ok">mesuré</span></td></tr>
+            <tr><td>Votre école</td><td><code>cf_ecole</code></td>
+              <td>Sous-titre de la fiche + filtre École</td><td><span class="pill ok">mesuré</span></td></tr>
+            <tr><td>Niveau actuel</td><td><code>cf_niveau</code></td>
+              <td>Ligne d'infos + filtre Niveau</td><td><span class="pill ok">mesuré</span></td></tr>
+            <tr><td>Le poste que vous visez</td><td><code>cf_recherche</code></td>
+              <td>Ligne d'infos + filtre Recherche</td><td><span class="pill ok">mesuré</span></td></tr>
+            <tr><td>Langue préférée</td><td><code>cf_langue</code></td>
+              <td>Ligne d'infos + filtre Langue</td><td><span class="pill ok">mesuré</span></td></tr>
+            <tr><td>Comment vous joindre</td><td><code>cf_contact</code></td>
+              <td>Le bouton Contacter</td><td><span class="pill ok">mesuré</span></td></tr>
+            <tr><td>Matières d'entraide</td><td><code>cf_matieres</code></td>
+              <td>Les pastilles « Peut aider en »</td><td><span class="pill hm">lu par le code</span></td></tr>
+            <tr><td>Filière et année</td><td><code>cf_poste</code> / <code>cf_filiere</code></td>
+              <td>Sous-titre, si l'école est vide</td><td><span class="pill hm">lu par le code</span></td></tr>
+            <tr><td>Promo</td><td><code>cf_promo</code></td>
+              <td>Donnée reprise, non affichée aujourd'hui</td><td><span class="pill hm">lu par le code</span></td></tr>
+            <tr><td>Photo</td><td><code>cf_photo</code></td>
+              <td>L'avatar, en priorité sur tout le reste</td><td><span class="pill hm">lu par le code</span></td></tr>
+            <tr><td>Bio, ville, LinkedIn, site</td><td><code>bio</code>, <code>location</code>, <code>linkedin</code>, <code>url</code></td>
+              <td>Champs natifs LearnWorlds</td><td><span class="pill ok">natifs</span></td></tr>
+          </table>
+        </div>
+        <div class="box warn"><strong>Lire la colonne « État ».</strong> <span class="pill ok">mesuré</span>
+          = relevé le 4 août 2026 sur le formulaire d'inscription en ligne, options comprises.
+          <span class="pill hm">lu par le code</span> = la fiche sait l'afficher, mais l'existence du
+          champ côté LearnWorlds n'a pas été revérifiée ce jour-là. Avant de compter sur l'un d'eux,
+          ouvrez <em>Champs personnalisés</em> et vérifiez qu'il existe avec la bonne Data key.</div>
+        <div class="box info"><strong>Créer un champ ne suffit pas à le voir.</strong> Il faut aussi
+          cocher sa visibilité et son édition dans le profil, sinon le membre ne peut jamais le remplir
+          — et la fiche restera vide sans que rien ne l'explique.</div>
+      </div>
+    </details>
+
+    <!-- 5 -->
+    <details id="filtres">
+      <summary><span class="idx">5</span> Les filtres et la recherche
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Quatre filtres — <strong>École · Niveau · Recherche · Langue</strong> — plus un champ de
+          recherche libre.</p>
+        <p><strong>Les pastilles ne sont pas écrites à la main</strong>&nbsp;: elles sont déduites des
+          valeurs réellement présentes chez les membres affichés. Un filtre vide signifie donc que
+          personne n'a rempli ce champ, pas que le filtre est cassé.</p>
+        <p>Deux listes gardent en revanche un <strong>ordre imposé</strong>, parce que l'ordre
+          alphabétique n'y voudrait rien dire&nbsp;:</p>
+        <ul>
+          <li><strong>Niveau</strong> — Débutant, Avancé, Expert</li>
+          <li><strong>Recherche</strong> — Stage, CDI Junior, CDI expérimenté</li>
+        </ul>
+        <p>La <strong>recherche libre</strong> balaie le nom, l'école, la filière, le niveau, le poste
+          visé, la ville, la langue et les matières. C'est aussi elle que déclenchent les pastilles
+          « Peut aider en » d'une fiche.</p>
+        <div class="box warn">Un membre peut cocher <strong>plusieurs langues</strong>&nbsp;: la valeur
+          est traitée comme une liste. Les autres champs sont des choix uniques.</div>
+      </div>
+    </details>
+
+    <!-- 6 -->
+    <details id="contact">
+      <summary><span class="idx">6</span> Le bouton « Contacter »
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Un <strong>seul champ libre</strong>, <code>cf_contact</code>, et le membre y met ce qu'il
+          accepte de partager. Le serveur devine le canal et fabrique le bon lien&nbsp;:</p>
+        <div class="scroll">
+          <table class="tab">
+            <tr><th>Ce que le membre saisit</th><th>Bouton affiché</th></tr>
+            <tr><td>Une adresse e-mail</td><td>Envoyer un email</td></tr>
+            <tr><td>Un numéro de téléphone</td><td>Appeler</td></tr>
+            <tr><td>Un lien LinkedIn</td><td>Contacter sur LinkedIn</td></tr>
+            <tr><td>Un lien Calendly</td><td>Prendre rendez-vous</td></tr>
+            <tr><td>Instagram, X, WhatsApp</td><td>Contacter sur …</td></tr>
+            <tr><td>Rien, ou quelque chose d'inexploitable</td><td><span class="pill no">Aucun bouton</span></td></tr>
+          </table>
+        </div>
+        <div class="box ok"><strong>Ce n'est jamais l'e-mail du compte.</strong> L'adresse de connexion
+          d'un membre n'est jamais publiée&nbsp;: seul ce champ, rempli volontairement, sert de point de
+          contact. Un membre qui ne veut pas être joint le laisse vide.</div>
+      </div>
+    </details>
+
+    <!-- 7 -->
+    <details id="photos">
+      <summary><span class="idx">7</span> Pourquoi des initiales et pas des photos
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Ce n'est pas un choix esthétique, c'est une limite de LearnWorlds&nbsp;: <strong>son interface
+          d'administration n'expose aucun champ photo</strong>. La photo qu'un membre voit sur son propre
+          profil n'est pas récupérable de l'extérieur, et son adresse contient une empreinte
+          imprévisible qu'on ne peut pas reconstruire.</p>
+        <p>D'où trois sources, dans cet ordre&nbsp;:</p>
+        <ul>
+          <li><code>cf_photo</code> — une adresse d'image saisie à la main. Prioritaire, mais presque
+            personne ne la remplit.</li>
+          <li>La photo <strong>déposée par le membre lui-même</strong> depuis l'annuaire, conservée de
+            notre côté.</li>
+          <li>Sinon, une <strong>pastille d'initiales</strong> colorée — et c'est le cas le plus fréquent.</li>
+        </ul>
+        <p>Une photo qui ne charge pas retombe automatiquement sur les initiales&nbsp;: pas de carré
+          gris cassé.</p>
+      </div>
+    </details>
+
+    <!-- 8 -->
+    <details id="protection">
+      <summary><span class="idx">8</span> Ce qui protège les membres
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <ul>
+          <li><strong>Le consentement d'abord.</strong> Personne n'apparaît sans avoir répondu oui.</li>
+          <li><strong>Les e-mails ne sortent jamais.</strong> Le serveur intermédiaire retire les adresses
+            de connexion avant de renvoyer quoi que ce soit à la page.</li>
+          <li><strong>Un contrôle anti-robot</strong> protège la liste&nbsp;: elle ne peut être obtenue
+            que depuis un vrai navigateur, sur la vraie page.</li>
+          <li><strong>Pas d'indexation.</strong> Les fiches ne remontent pas dans les moteurs de recherche.</li>
+        </ul>
+        <div class="box warn"><strong>La limite, dite franchement.</strong> Ces protections prouvent
+          « un vrai navigateur », pas « un membre de PrepaStrat ». Un membre connecté peut toujours
+          recopier la liste qu'il a sous les yeux — c'est vrai de n'importe quel annuaire consultable.
+          Le vrai garde-fou reste le consentement&nbsp;: personne n'y figure sans l'avoir accepté.</div>
+      </div>
+    </details>
+
+    <!-- 9 -->
+    <details id="vigilance">
+      <summary><span class="idx">9</span> Ce qui peut casser
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <div class="box warn"><strong>L'annuaire affiche aujourd'hui 42 profils de démonstration.</strong>
+          Ce sont des personnes inventées, ajoutées pour montrer la page peuplée&nbsp;; leurs liens de
+          contact ne mènent nulle part. Sur les fiches actuellement visibles, <strong>seule une poignée
+          correspond à de vrais membres</strong>. À retirer avant d'ouvrir l'annuaire à une promo —
+          sinon les premiers étudiants arrivent dans un annuaire majoritairement fictif.</div>
+        <ul>
+          <li><strong>Reformuler une option, c'est changer une donnée.</strong> Vrai pour le consentement,
+            vrai pour le niveau, l'école ou le poste visé&nbsp;: les fiches déjà enregistrées gardent
+            l'ancien texte et se retrouvent classées à part dans les filtres.</li>
+          <li><strong>Renommer une Data key rompt tout.</strong> Le nom technique est ce que lit le code&nbsp;;
+            le libellé affiché peut changer librement, la clé non.</li>
+          <li><strong>Un délai d'une minute ou deux est normal.</strong> La liste est mise en cache pour
+            quelques minutes&nbsp;: un profil qu'on vient de remplir n'apparaît pas dans la seconde.
+            Attendre avant de conclure à une panne.</li>
+          <li><strong>Un champ créé mais non visible dans le profil</strong> ne sera jamais rempli par
+            personne, et la fiche restera vide sans explication.</li>
+        </ul>
+      </div>
+    </details>
+
+  </main>
+</div>
+
+<footer>
+  Aide PrepaStrat — l'annuaire des étudiants. Champs et options relevés le 4&nbsp;août&nbsp;2026 ;
+  la colonne « État » indique ce qui a été vérifié ce jour-là et ce qui reste à confirmer.
+  La fiche ci-dessus est une reconstitution dessinée à la main, avec des données fictives.
+</footer>
+
+</body>
+</html>
