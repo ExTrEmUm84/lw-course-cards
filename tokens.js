@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-e";
+  window.PS_TOKENS_V="2026-08-05-f";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2651,7 +2651,23 @@
          déjà noté le 25/07 sur les titres de widgets LearnWorlds.
          🔴 Seul `display` est forcé : `opacity` reste à la feuille, sinon
          l'apparition au survol ne pourrait plus s'animer. */
+      /* 🔴🔴 LA POSITION AUSSI, ET C'EST LE MÊME PIÈGE QU'AVEC `display`.
+         Signalé par Ziad : sur Fiches secteur, les cartes GRANDISSAIENT.
+         Mesuré — une sonde neuve portant la classe `ps-verrou` calculait
+         `position:relative` alors que ma feuille dit `absolute` : une règle de
+         `sector-cards.js`, plus spécifique et en `!important`, l'écrasait. Mon
+         overlay redevenait donc un bloc DANS LE FLUX (315×149) et poussait le
+         contenu vers le bas.
+         Je ne refais pas l'archéologie de spécificité pour chacun des cinq
+         scripts de page — et je ne veux pas d'un correctif à recasser au
+         prochain sélecteur ajouté. L'inline gagne toujours.
+         🔴 `inset` posé propriété par propriété : la forme courte n'est pas
+         reconnue par `setProperty` dans tous les navigateurs. */
       v.style.setProperty("display","flex","important");
+      v.style.setProperty("position","absolute","important");
+      ["top","right","bottom","left"].forEach(function(p){
+        v.style.setProperty(p,"0","important");
+      });
       c.appendChild(v);
 
       /* 🔴 En phase de CAPTURE : le lien est à l'intérieur de la carte, et
