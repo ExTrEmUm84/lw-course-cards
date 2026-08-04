@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-b";
+  window.PS_TOKENS_V="2026-08-05-c";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2595,6 +2595,19 @@
       var v=document.createElement("div");
       v.className="ps-verrou";
       v.innerHTML=SVG_CADENAS+"<b>Accès réservé</b><span>Ouvrez le catalogue pour accéder à ce cours.</span>";
+      /* 🔴🔴 `display` POSÉ EN INLINE, ET C'EST INDISPENSABLE. Les scripts de
+         page reconstruisent la carte et masquent tout enfant qui n'est pas à
+         eux : `course-cards.js` a
+         `#pageContent .lw-course-card > *:not(.ps-mcard):not(.learnworlds-image):not(.ps-mline){display:none !important}`.
+         Mon cadenas tombait dans le lot — présent dans le DOM, invisible au
+         survol, et rien ne le disait. Mesuré : `display:none`, taille 0×0.
+         Surenchérir en spécificité serait un calcul à refaire pour chacun des
+         cinq scripts de page, et à recasser au prochain `:not()` ajouté.
+         L'inline `!important` bat n'importe quelle feuille — c'est le piège
+         déjà noté le 25/07 sur les titres de widgets LearnWorlds.
+         🔴 Seul `display` est forcé : `opacity` reste à la feuille, sinon
+         l'apparition au survol ne pourrait plus s'animer. */
+      v.style.setProperty("display","flex","important");
       c.appendChild(v);
 
       /* 🔴 En phase de CAPTURE : le lien est à l'intérieur de la carte, et
