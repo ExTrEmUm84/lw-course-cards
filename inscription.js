@@ -257,6 +257,39 @@
     slot.setAttribute("data-ps-fait","1");
   }
 
+  /* ====================================================================
+     LA MODALE NE REPROPOSE PLUS LES CONNEXIONS SOCIALES  (04/08, soir)
+     --------------------------------------------------------------------
+     Signalé par Ziad avec une capture : après s'être authentifié par Google ou
+     LinkedIn, LearnWorlds affiche un écran de FINALISATION (prénom, nom,
+     e-mail pré-rempli, CGU — plus de mot de passe) et y réaffiche un bloc
+     social réduit au seul fournisseur utilisé. Résultat : une pastille
+     LinkedIn isolée, posée hors de toute mise en page.
+
+     🔴 Le vrai problème n'est pas qu'elle soit MAL PLACÉE, c'est qu'elle n'a
+     RIEN À FAIRE LÀ : on propose de se connecter avec LinkedIn à quelqu'un qui
+     vient de se connecter avec LinkedIn. La recentrer aurait soigné le symptôme
+     et gardé l'absurdité.
+
+     🔴 Restreint à CETTE page. Ailleurs sur le site, la modale reste le seul
+     endroit où ces boutons existent — les y masquer supprimerait la connexion
+     sociale pour quelqu'un qui ouvre l'inscription depuis le pied de page.
+     ⚠️ Je n'ai PAS pu reproduire l'écran d'après-OAuth moi-même : y arriver
+     demande une vraie authentification Google sur le compte de Ziad. La règle
+     est donc écrite sur ce que montre sa capture, et c'est à lui de confirmer.
+     ==================================================================== */
+  function modaleSansSocial(){
+    if(document.getElementById("ps-i-modale-css")) return;
+    var s=document.createElement("style");
+    s.id="ps-i-modale-css";
+    s.textContent=
+      "body.slug-inscription #animatedModal #signUpForm .-form-social-buttons,"+
+      "body.slug-inscription #animatedModal #signUpForm .-form-social-register-buttons,"+
+      "body.slug-inscription #animatedModal #signUpForm .-or"+
+      "{display:none !important;}";
+    (document.head||document.documentElement).appendChild(s);
+  }
+
   function poserCSS(){
     if(document.getElementById("ps-insc-css")) return;
     var s=document.createElement("style"); s.id="ps-insc-css"; s.textContent=CSS;
@@ -305,12 +338,30 @@
   /* Pré-remplit l'adresse déjà saisie : la redemander juste après l'avoir tapée
      est le genre de détail qui fait abandonner. La modale est construite par le
      SPA, donc elle n'existe pas encore au moment du clic — d'où les relances. */
+  /* 🔴🔴 ON NE PRÉ-REMPLIT JAMAIS L'ÉCRAN D'APRÈS-OAUTH  (04/08, soir)
+     Après une authentification Google ou LinkedIn, LearnWorlds affiche un écran
+     de FINALISATION où l'adresse vient du FOURNISSEUR — donc prouvée. Y écrire
+     l'adresse tapée sur notre page d'entrée serait remplacer une adresse
+     vérifiée par une adresse déclarée.
+     Le scénario que ça ouvrirait : taper `x@essec.edu` chez nous, s'authentifier
+     avec un Gmail personnel, et repartir avec `x@essec.edu` dans le champ. Si
+     LearnWorlds retient cette valeur, la personne obtient le tag de l'école sans
+     posséder l'adresse — et tout le contrôle d'accès B2B tombe, silencieusement.
+     Je ne sais pas si LearnWorlds accepterait cette valeur ; je ne veux pas le
+     savoir. Une porte dont on ignore si elle est ouverte se ferme.
+
+     🔴 Le repère, c'est le CHAMP MOT DE PASSE : le formulaire d'inscription
+     classique en a un, l'écran d'après-OAuth n'en a pas (vérifié sur la capture
+     de Ziad). Pas de mot de passe ⇒ on ne touche à rien. */
   function prefill(email){
     var essais=0;
     (function pousser(){
       var f=document.getElementById("signUpForm");
       var c=f && f.querySelector('input[name="email"]');
-      if(c){ c.value=email; c.dispatchEvent(new Event("input",{bubbles:true})); return; }
+      if(c){
+        if(!f.querySelector('input[type="password"],input[name="password"]')) return;  /* après-OAuth : on s'abstient */
+        c.value=email; c.dispatchEvent(new Event("input",{bubbles:true})); return;
+      }
       if(++essais<12) setTimeout(pousser,150);
     })();
   }
@@ -464,6 +515,7 @@
 
   function demarrer(){
     if(slugCourant()!==SLUG) return;
+    modaleSansSocial();          /* idempotent : garde-fou par id sur la feuille */
     var essais=0;
     (function attendre(){
       var pret=(typeof window.PS_PARTENAIRE_EMAIL==="function");
