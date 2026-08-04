@@ -36,7 +36,16 @@
   "use strict";
 
   var SLUG="inscription";                    // body.slug-inscription
-  var OFFRE="/program/collection-abonnement";
+  /* 🔴 DIRECTEMENT LE PAIEMENT, pas la page du programme (Ziad, 04/08) : celui qui
+     n'a pas d'adresse d'école a déjà choisi en arrivant ici, la page intermédiaire
+     n'ajoute qu'un clic.
+     🔴 SANS `packageId`. L'URL relevée sur le site en portait un
+     (`package_1785851559453_285`), généré à la création du plan tarifaire : le
+     figer ici, c'est un lien qui casse le jour où le tarif change — et il casserait
+     à l'étape la plus chère du parcours. Vérifié : sans lui, la page affiche bien
+     30 €/mois et charge Stripe. */
+  var PAIEMENT="/payment?product_id=collection-abonnement&type=learning_program";
+  var CLE_MAIL="psMailInscription";
 
   function slugCourant(){
     var b=document.body;
@@ -367,7 +376,12 @@
         });
         return;
       }
-      location.href=OFFRE;
+      /* On emporte l'adresse pour la reposer dans le tunnel : la retaper au moment
+         de sortir sa carte est un abandon gratuit. `sessionStorage` et non l'URL —
+         une adresse e-mail n'a rien à faire dans une barre d'adresse, ni dans les
+         journaux du serveur. */
+      try{ sessionStorage.setItem(CLE_MAIL, v); }catch(e){}
+      location.href=PAIEMENT;
     }
     box.querySelector(".ps-i-go").addEventListener("click",router);
     champ.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); router(); } });
@@ -379,7 +393,34 @@
      serait absente et TOUT LE MONDE partirait vers l'abonnement, y compris les
      étudiants d'écoles partenaires. On construit quand même l'interface (elle ne
      dépend de rien), mais on ne laisse pas router avant que la règle soit là. */
+  /* ====================================================================
+     REPRISE DE L'ADRESSE DANS LE TUNNEL DE PAIEMENT
+     --------------------------------------------------------------------
+     🔴🔴 ON NE TOUCHE À RIEN D'AUTRE SUR CETTE PAGE. C'est le seul endroit du
+     site où un bug coûte une vente. On ne remplit que le champ e-mail, et
+     SEULEMENT s'il est vide : si la personne a déjà saisi ou corrigé quelque
+     chose, sa valeur gagne toujours sur la nôtre. Une seule fois, puis la clé est
+     effacée — pour ne pas réécrire une adresse qu'elle viendrait de changer. */
+  function reprendreMail(){
+    if(!/^\/payment/.test(location.pathname||"")) return;
+    var v="";
+    try{ v=sessionStorage.getItem(CLE_MAIL)||""; }catch(e){ return; }
+    if(!v) return;
+    var essais=0;
+    (function poser(){
+      var c=document.querySelector('input[name="email"]');
+      if(c && !String(c.value||"").trim()){
+        c.value=v; c.dispatchEvent(new Event("input",{bubbles:true}));
+        try{ sessionStorage.removeItem(CLE_MAIL); }catch(e){}
+        return;
+      }
+      if(c) { try{ sessionStorage.removeItem(CLE_MAIL); }catch(e){} return; }  /* deja rempli : on s'efface */
+      if(++essais<20) setTimeout(poser,250);
+    })();
+  }
+
   function demarrer(){
+    reprendreMail();
     if(slugCourant()!==SLUG) return;
     var essais=0;
     (function attendre(){
