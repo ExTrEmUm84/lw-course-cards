@@ -715,7 +715,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-e";
+  window.PS_TOKENS_V="2026-08-04-f";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -1787,16 +1787,40 @@
       for(var k in PARTENAIRES){
         var p=PARTENAIRES[k], ok=false;
         for(var i=0;i<p.tags.length && !ok;i++){ if(tags.indexOf(p.tags[i].toLowerCase())>=0) ok=true; }
-        for(var j=0;j<p.domaines.length && !ok;j++){
-          var d=p.domaines[j].toLowerCase();
-          if(dom===d || (dom.length>d.length && dom.slice(-(d.length+1))==="."+d)) ok=true;
-        }
+        if(!ok && domaineEstPartenaire(dom,p)) ok=true;
         if(ok){ _part=p; break; }
       }
     }
     window.PS_PARTENAIRE=_part;    // home-page.js lit ça pour sa section d'accueil
     return _part;
   }
+
+  /* 🔴 UNE SEULE IMPLÉMENTATION DE LA RÈGLE DE DOMAINE. Elle était écrite en
+     ligne dans `partenaire()` ; `inscription.js` en a besoin aussi, pour aiguiller
+     un VISITEUR (qui n'a ni compte ni tags, donc rien d'autre que son adresse).
+     La recopier là-bas aurait produit deux règles vouées à diverger — le jour où
+     l'une accepte un sous-domaine que l'autre refuse, un étudiant couvert se voit
+     réclamer un abonnement sans que rien ne l'explique.
+     Le sous-domaine est accepté : `@student.essec.edu` correspond à `essec.edu`. */
+  function domaineEstPartenaire(dom, p){
+    dom=String(dom||"").toLowerCase();
+    for(var j=0;j<p.domaines.length;j++){
+      var d=String(p.domaines[j]).toLowerCase();
+      if(!d) continue;
+      if(dom===d || (dom.length>d.length && dom.slice(-(d.length+1))==="."+d)) return true;
+    }
+    return false;
+  }
+
+  /* Rendue publique pour la page d'entrée. 🔴 ELLE ORIENTE, ELLE N'AUTORISE PAS :
+     l'accès reste donné par le tag que LearnWorlds pose sur l'adresse VÉRIFIÉE.
+     Quelqu'un qui contournerait cet aiguillage n'obtiendrait donc rien. */
+  window.PS_PARTENAIRE_EMAIL=function(email){
+    var dom=(String(email||"").split("@")[1]||"").toLowerCase().trim();
+    if(!dom) return null;
+    for(var k in PARTENAIRES){ if(domaineEstPartenaire(dom,PARTENAIRES[k])) return PARTENAIRES[k]; }
+    return null;
+  };
 
   function partnerHeader(){
     var p=partenaire();
