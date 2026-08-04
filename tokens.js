@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-c";
+  window.PS_TOKENS_V="2026-08-05-d";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2558,18 +2558,39 @@
     var st=document.createElement("style"); st.id="ps-verrou-css";
     st.textContent=
       ".lw-course-card.ps-verrouille{position:relative !important;}"+
-      /* L'ombre du voile est posée SUR la carte, pas à la place : la vitrine
-         reste lisible, on ajoute seulement une intention. */
-      ".ps-verrou{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;"+
-      "align-items:center;justify-content:center;gap:10px;border-radius:inherit;"+
-      "background:rgba(28,31,38,.62);color:#fff;opacity:0;pointer-events:none;"+
-      "transition:opacity .18s ease;font-family:var(--ps-font,Figtree,sans-serif);text-align:center;padding:16px;}"+
+      /* 🔴🔴 ON FLOUTE LA CARTE, ON NE POSE PAS UN PANNEAU DESSUS.
+         Première version : un voile plein avec titre et sous-titre. Ziad :
+         « c'est moche », et il avait raison — je superposais un bloc de texte
+         à une carte qui a déjà sa mise en page. Les deux textes se
+         chevauchaient, et le rectangle gris ressemblait à un chargement raté.
+         Le flou porte sur les ENFANTS de la carte, pas sur la carte elle-même :
+         appliquer un filtre à la carte flouterait aussi le cadenas, qui est son
+         enfant. Et comme l'illustration déborde de la boîte, la flouter par ce
+         chemin la couvre enfin — ce qu'un `inset:0` ne faisait pas. */
+      ".lw-course-card.ps-verrouille > *:not(.ps-verrou){transition:filter .2s ease, opacity .2s ease;}"+
+      ".lw-course-card.ps-verrouille:hover > *:not(.ps-verrou),"+
+      ".lw-course-card.ps-verrouille:focus-within > *:not(.ps-verrou),"+
+      ".lw-course-card.ps-verrouille.ps-verrou-on > *:not(.ps-verrou)"+
+      "{filter:blur(3.5px) saturate(.5);opacity:.45;}"+
+      ".ps-verrou{position:absolute;inset:0;z-index:6;display:flex;flex-direction:column;"+
+      "align-items:center;justify-content:center;gap:14px;border-radius:inherit;"+
+      "opacity:0;pointer-events:none;transition:opacity .18s ease;"+
+      "font-family:var(--ps-font,Figtree,sans-serif);text-align:center;padding:16px;}"+
       ".lw-course-card.ps-verrouille:hover .ps-verrou,"+
       ".lw-course-card.ps-verrouille:focus-within .ps-verrou,"+
       ".lw-course-card.ps-verrouille.ps-verrou-on .ps-verrou{opacity:1;}"+
-      ".ps-verrou svg{width:46px;height:46px;stroke:#fff;fill:none;stroke-width:1.7;}"+
-      ".ps-verrou b{font:800 15px var(--ps-font,Figtree,sans-serif);}"+
-      ".ps-verrou span{font:500 12.5px/1.45 var(--ps-font,Figtree,sans-serif);opacity:.9;max-width:22ch;}"+
+      /* Le cadenas vit dans un disque : il se détache quelle que soit la carte
+         derrière, sans avoir à assombrir toute la vitrine. */
+      ".ps-verrou i{width:74px;height:74px;border-radius:50%;background:rgba(20,23,30,.88);"+
+      "display:flex;align-items:center;justify-content:center;box-shadow:0 12px 30px rgba(15,23,42,.32);}"+
+      ".ps-verrou svg{width:34px;height:34px;stroke:#fff;fill:none;stroke-width:1.8;}"+
+      /* 🔴 Libellé sur une pastille BLANCHE : lisible au-dessus de n'importe
+         quelle carte, quelles que soient ses couleurs — les pages ont chacune
+         leur accent, du jaune au vert. Du texte blanc sur fond flouté serait
+         illisible sur les cartes claires. */
+      ".ps-verrou b{font:800 12.5px var(--ps-font,Figtree,sans-serif);color:var(--ps-text,#1c1f26);"+
+      "background:#fff;padding:7px 15px;border-radius:var(--ps-r-pill,999px);"+
+      "box-shadow:0 6px 18px rgba(15,23,42,.18);letter-spacing:.01em;}"+
       /* 🔴 Au doigt il n'existe pas de survol : le premier appui révèle le
          cadenas (classe posée par le JS), le second suit le lien vers l'offre.
          Sans ça, l'utilisateur mobile ne verrait jamais l'explication. */
@@ -2594,7 +2615,10 @@
 
       var v=document.createElement("div");
       v.className="ps-verrou";
-      v.innerHTML=SVG_CADENAS+"<b>Accès réservé</b><span>Ouvrez le catalogue pour accéder à ce cours.</span>";
+      /* 🔴 UNE seule ligne de texte. La version précédente en avait deux, qui
+         se superposaient au titre de la carte. Le cadenas dit déjà « fermé » ;
+         la pastille dit quoi faire. Le reste est du bruit. */
+      v.innerHTML="<i>"+SVG_CADENAS+"</i><b>Ouvrir le catalogue</b>";
       /* 🔴🔴 `display` POSÉ EN INLINE, ET C'EST INDISPENSABLE. Les scripts de
          page reconstruisent la carte et masquent tout enfant qui n'est pas à
          eux : `course-cards.js` a
