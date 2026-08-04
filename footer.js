@@ -54,7 +54,7 @@
      sera créée, pas avant. */
   var COL_FORMATION={ title:"Formation", links:[
       ["Cours","/formation-par-modules"],
-      ["Études de cas","/emptykk-clone-clone"],
+      ["Études de cas","/etudes-cas"],
       ["Secteurs","/fiches-secteur"],
       ["Cabinets","/fiches-cabinet"],
       ["S'entraîner","/sentrainer"]

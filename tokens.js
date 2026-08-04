@@ -188,7 +188,7 @@
      refuse d'écrire s'il ne les trouve pas, ce qui est le comportement voulu.
 
      Mémo des couleurs, hors du bloc pour survivre aux publications :
-       fiches-secteur = Secteurs (jaune) · emptykk-clone-clone = Études de cas
+       fiches-secteur = Secteurs (jaune) · etudes-cas = Études de cas
        (gris) · fiches-cabinet = Cabinets (vert, choix du 24/07, était
        rouge #c51d4a).
 
@@ -211,7 +211,7 @@
     "formation-par-modules":"#12d380",
     "fiches-cabinet":"#007260",
     "fiches-secteur":"#fad54a",
-    "emptykk-clone-clone":"#6b7280"
+    "etudes-cas":"#6b7280"
   };
   var PAGE_STYLE={
     "formation-par-modules":{"contour":1,"ep":4,"duree":1.1},
@@ -259,7 +259,7 @@
     "fiches-cabinet":"#00C875",
     "fiches-secteur":"#FDAB3D",
     "sentrainer":"#A25DDC",
-    "emptykk-clone-clone":"#E2445C",
+    "etudes-cas":"#E2445C",
     "annuaire-partenaire-de-cas":"#0073EA",
     "course/supports-webinar":"#12A85F",
     "bootcamp-prepastrat":"#D98500",
@@ -444,7 +444,7 @@
      n'est valable que là où le titre est calé sur 1000px (page Cours). Ailleurs
      (ex. Compétences) le titre est à sa place naturelle et les boutons suivent.
      ==================================================================== */
-  var HERO_ACTIVE={ "formation-par-modules":0, "formation-par-comptences":1 };
+  var HERO_ACTIVE={ "formation-par-modules":0, "formation-par-thematiques":1 };
   var HERO_BTN_CSS=
       "#pageContent .learnworlds-button.learnworlds-button-outline-accent1{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;padding:11px 26px !important;height:auto !important;border-radius:var(--ps-r-pill,999px) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;background:#fff !important;color:var(--ps-text,#1c1f26) !important;box-shadow:0 1px 2px rgba(0,0,0,.04) !important;transition:all .15s ease !important;cursor:pointer !important;}"
     + "#pageContent .learnworlds-button.learnworlds-button-outline-accent1 *{font-family:inherit !important;color:inherit !important;font-weight:inherit !important;}"
@@ -478,7 +478,11 @@
      `formation-par-modules`, `page-introduction` -> `formation-par-comptences`
      (relevés dans le sitemap et vérifiés en direct ; `/page-introduction`
      renvoie désormais une page d'erreur). Conséquence de l'ancien nom ici :
-     l'anti-flash ne s'appliquait plus du tout sur la page Cours. */
+     l'anti-flash ne s'appliquait plus du tout sur la page Cours.
+     🔴🔴 MAJ 04/08 — deux de plus, trouvés par le sitemap : Compétences
+     `formation-par-comptences` -> `formation-par-thematiques`, Études de cas
+     `emptykk-clone-clone` -> `etudes-cas`. Les anciens noms de ce commentaire
+     datent chaque étape : ne pas les réécrire. */
   /* ====================================================================
      PASTILLE DE FILTRE — DÉFINITION UNIQUE, SITE-WIDE (03/08)
      --------------------------------------------------------------------
@@ -554,7 +558,7 @@
      endroit à toucher : l'anti-flash, le board et les liens du menu en dérivent.
      ==================================================================== */
   var PAGES_EN={
-    "formation-par-modules":"formation-par-modules-clone-en"
+    "formation-par-modules":"formation-par-modules-en"
   };
   var PAGES_FR={};
   Object.keys(PAGES_EN).forEach(function(fr){ PAGES_FR[PAGES_EN[fr]]=fr; });
@@ -690,7 +694,7 @@
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
   window.PS_TOKENS_V="2026-08-04-b";
 
-  var CLOAK_SLUGS=["formation-par-modules","emptykk-clone-clone","fiches-secteur","fiches-cabinet","sentrainer"];
+  var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
      différent (`…-clone-en`), donc `body.slug-…` ne matchait pas et le flash
      de cartes non stylées revenait. Dérivé de la table, jamais écrit à la main. */
@@ -835,7 +839,7 @@
      bouton retour natif du player (« Retour à la page du cours ») pour revenir
      DIRECT à cette page principale, sans passer par la présentation. Marche sur
      TOUTES les pages sans script par page. Libellé selon le slug de la page. */
-  var RETURN_LABELS={"formation-par-modules":"Retour aux cours",sentrainer:"Retour à l'entraînement","emptykk-clone-clone":"Retour aux études de cas","fiches-secteur":"Retour aux fiches secteur","fiches-cabinet":"Retour aux fiches cabinet","formation-par-comptences":"Retour aux compétences"};
+  var RETURN_LABELS={"formation-par-modules":"Retour aux cours",sentrainer:"Retour à l'entraînement","etudes-cas":"Retour aux études de cas","fiches-secteur":"Retour aux fiches secteur","fiches-cabinet":"Retour aux fiches cabinet","formation-par-thematiques":"Retour aux compétences"};
   function returnLabel(){ var m=(((document.body&&document.body.className)||"")).match(/slug-([a-z0-9-]+)/); return (m&&RETURN_LABELS[m[1]])||"Retour"; }
   function playerFlag(){
     if(window.__psFlagOn) return; window.__psFlagOn=true;

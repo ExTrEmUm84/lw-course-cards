@@ -428,15 +428,23 @@
      Compétences `page-introduction` -> `formation-par-comptences`. Vérifié en
      direct : `/page-introduction` renvoie une PAGE D'ERREUR, et la vraie page
      Cours est `formation-par-modules` (`/courses` est une page « A SUPPRIMER »).
-     Les boutons « Continuer » des tuiles envoyaient donc l'étudiant dans le mur. */
+     Les boutons « Continuer » des tuiles envoyaient donc l'étudiant dans le mur.
+     🔴🔴 MAJ 04/08 — ET ÇA A RECOMMENCÉ, DEUX FOIS : Compétences
+     `formation-par-comptences` -> **`formation-par-thematiques`** et Études de cas
+     `emptykk-clone-clone` -> **`etudes-cas`**, les deux en 404 au moment où on l'a
+     découvert. C'est le quatrième renommage silencieux en une semaine ; les mêmes
+     boutons « Continuer » renvoyaient donc à nouveau dans le mur.
+     ⚠️ Ne pas réécrire les anciens noms de ce commentaire : ils datent CHAQUE
+     étape. Une recherche-remplacement globale les a déjà aplatis une fois, ce qui
+     transformait l'historique en un état présent faux. */
   var PROG_PAGES={
     "introduction-conseil-strategie":                    {url:"/formation-par-modules",    col:"#507EC5"},
     "module-de-formation-les-autres-types-de-conseil":   {url:"/formation-par-modules",    col:"#507EC5"},
-    "introduction":                                      {url:"/formation-par-comptences", col:"#243B6B"},
-    "fit":                                               {url:"/formation-par-comptences", col:"#243B6B"},
-    "mathematiques":                                     {url:"/formation-par-comptences", col:"#243B6B"},
-    "etudes-de-cas":                                     {url:"/emptykk-clone-clone",      col:"#6B7280"},
-    "etudes-de-cas2":                                    {url:"/emptykk-clone-clone",      col:"#6B7280"},
+    "introduction":                                      {url:"/formation-par-thematiques", col:"#243B6B"},
+    "fit":                                               {url:"/formation-par-thematiques", col:"#243B6B"},
+    "mathematiques":                                     {url:"/formation-par-thematiques", col:"#243B6B"},
+    "etudes-de-cas":                                     {url:"/etudes-cas",      col:"#6B7280"},
+    "etudes-de-cas2":                                    {url:"/etudes-cas",      col:"#6B7280"},
     "fiches-secteurs":                                   {url:"/fiches-secteur",           col:"#C9A227"},
     "fiches-cabinet-and-tests-en-ligne":                 {url:"/fiches-cabinet",     col:"#007260"},
     "s-entrainer":                                       {url:"/sentrainer",               col:"#3887B4"}
@@ -474,8 +482,8 @@
     "/formation-par-modules":    "#507EC5",
     "/fiches-cabinet":           "#007260",
     "/fiches-secteur":           "#C9A227",
-    "/emptykk-clone-clone":      "#6B7280",
-    "/formation-par-comptences": "#243B6B",
+    "/etudes-cas":      "#6B7280",
+    "/formation-par-thematiques": "#243B6B",
     "/sentrainer":               "#3887B4"
   };
   var PAGE_COL=(function(){
@@ -489,10 +497,10 @@
     "lesautrestypesdeconseil":   "/formation-par-modules",
     "fichescabinettestsenligne": "/fiches-cabinet",
     "fichessecteurs":            "/fiches-secteur",
-    "etudesdecas":               "/emptykk-clone-clone",
-    "businesssense":             "/formation-par-comptences",
-    "fit":                       "/formation-par-comptences",
-    "mathematiques":             "/formation-par-comptences",
+    "etudesdecas":               "/etudes-cas",
+    "businesssense":             "/formation-par-thematiques",
+    "fit":                       "/formation-par-thematiques",
+    "mathematiques":             "/formation-par-thematiques",
     /* 🔴 « Webinars PrepaStrat » RETIRÉ de cette table : il n'a de carte sur AUCUNE
        page du site, cette ligne le rangeait donc faussement dans Compétences.
        Sans elle, il tombe dans « Autres » — et il rejoindra sa vraie section tout
@@ -587,13 +595,13 @@
     "/formation-par-modules":    "Cours",
     "/fiches-cabinet":     "Fiches cabinet",
     "/fiches-secteur":           "Fiches secteur",
-    "/emptykk-clone-clone":      "Études de cas",
-    "/formation-par-comptences": "Compétences",
+    "/etudes-cas":      "Études de cas",
+    "/formation-par-thematiques": "Compétences",
     "/sentrainer":               "S'entraîner"
   };
   /* Ordre d'affichage voulu par Ziad : Cours, Cabinet, Secteur, Études de cas,
      puis le reste. */
-  var PAGE_ORDRE=["/formation-par-modules","/fiches-cabinet","/fiches-secteur","/emptykk-clone-clone","/formation-par-comptences","/sentrainer"];
+  var PAGE_ORDRE=["/formation-par-modules","/fiches-cabinet","/fiches-secteur","/etudes-cas","/formation-par-thematiques","/sentrainer"];
   function rangPage(u){ var i=PAGE_ORDRE.indexOf(u); return i<0 ? 99 : i; }
   function labelPage(u){ return PAGE_LABELS[u] || "Autres"; }
 

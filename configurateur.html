@@ -492,8 +492,8 @@ body.ps-verrou .ps-porte{display:grid}
       <p class="pv-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed in metus vulputate, imperdiet tortor imperdiet, pulvinar metus.</p>
     </div>
 
-    <h3 data-p="formation-par-modules sentrainer fiches-secteur fiches-cabinet emptykk-clone-clone">Tuile de progression</h3>
-    <div class="bloc" data-p="formation-par-modules sentrainer fiches-secteur fiches-cabinet emptykk-clone-clone">
+    <h3 data-p="formation-par-modules sentrainer fiches-secteur fiches-cabinet etudes-cas">Tuile de progression</h3>
+    <div class="bloc" data-p="formation-par-modules sentrainer fiches-secteur fiches-cabinet etudes-cas">
       <div class="pv-kpi">
         <div style="flex:1"><b>14 %</b><small>Progression sur 6 cours</small><div class="pv-bar"><i></i></div></div>
         <div class="pv-kpi-ic">↗</div>
@@ -747,7 +747,7 @@ body.ps-verrou .ps-porte{display:grid}
       </div>
     </div>
 
-    <h3 data-p="emptykk-clone-clone">Études de cas <span style="text-transform:none;font-weight:600;color:#B4BAC8">— vraies classes du site ; les pastilles de champs, en contexte</span></h3>
+    <h3 data-p="etudes-cas">Études de cas <span style="text-transform:none;font-weight:600;color:#B4BAC8">— vraies classes du site ; les pastilles de champs, en contexte</span></h3>
     <!-- 🔴 STRUCTURE RÉELLE (`case-cards.js`) : titre bicolore construit par
          `caseTitle()` (`.ps-cc-cab` ✕ `.ps-cc-cli`), filet `.ps-cc-rule`, pastilles
          `.ps-pill` puis le CTA.
@@ -757,7 +757,7 @@ body.ps-verrou .ps-porte{display:grid}
          (`diffClass()` : `ps-diff-deb` / `-int` / `-adv`). Une pastille posée sur
          `nth-child` — ce que faisait la maquette — n'aurait rien montré de cette
          mécanique, qui est justement ce qui se règle dans la palette des champs. -->
-    <div class="bloc" data-p="emptykk-clone-clone">
+    <div class="bloc" data-p="etudes-cas">
       <div class="cards-grandpa">
         <div class="lw-cols multiple-rows">
           <div class="col lw-course-card ps-line-hote">
@@ -782,8 +782,8 @@ body.ps-verrou .ps-porte{display:grid}
       </div>
     </div>
 
-    <h3 data-p="formation-par-comptences">Panneau de programme (page Introduction)</h3>
-    <div class="bloc" data-p="formation-par-comptences">
+    <h3 data-p="formation-par-thematiques">Panneau de programme (page Introduction)</h3>
+    <div class="bloc" data-p="formation-par-thematiques">
       <div class="pv-panel">
         <div style="display:flex;align-items:flex-start;gap:20px">
           <div style="flex:1">
@@ -801,8 +801,8 @@ body.ps-verrou .ps-porte{display:grid}
       </div>
     </div>
 
-    <h3 data-p="fiches-secteur emptykk-clone-clone">Pastilles de champs (fiches secteur / études de cas)</h3>
-    <div class="bloc" data-p="fiches-secteur emptykk-clone-clone"><div class="pv-champs" id="champs"></div></div>
+    <h3 data-p="fiches-secteur etudes-cas">Pastilles de champs (fiches secteur / études de cas)</h3>
+    <div class="bloc" data-p="fiches-secteur etudes-cas"><div class="pv-champs" id="champs"></div></div>
   </div>
 </div>
 
@@ -861,15 +861,15 @@ body.ps-verrou .ps-porte{display:grid}
     /* Couleur dominante par page + réglages libres. Clé = slug LearnWorlds
        (la classe `slug-…` posée sur le <body>). Vide = la page reprend l'accent
        de la marque. */
-    pages:{"home":"","profile":"","annuaire-partenaire-de-cas":"","fiches-secteur":"#fad54a","emptykk-clone-clone":"#6b7280","fiches-cabinet":"#007260",
-           "formation-par-modules":"","sentrainer":"","formation-par-comptences":""},
+    pages:{"home":"","profile":"","annuaire-partenaire-de-cas":"","fiches-secteur":"#fad54a","etudes-cas":"#6b7280","fiches-cabinet":"#007260",
+           "formation-par-modules":"","sentrainer":"","formation-par-thematiques":""},
     reglages:{"lien_video":"","lien_video_background":""},
     /* Couleur du picto de chaque entrée du méga menu. Clé = le CHEMIN que vise le
        lien (pas le libellé : Weglot le traduit). Vide = l'entrée retombe sur
        l'accent de la marque. 🔴 Ces neuf valeurs sont celles publiées le 04/08 :
        le défaut reproduit le site tel qu'il est, il ne le modifie pas. */
     menu:{"formation-par-modules":"#507EC5","fiches-cabinet":"#00C875","fiches-secteur":"#FDAB3D",
-          "sentrainer":"#A25DDC","emptykk-clone-clone":"#E2445C","annuaire-partenaire-de-cas":"#0073EA",
+          "sentrainer":"#A25DDC","etudes-cas":"#E2445C","annuaire-partenaire-de-cas":"#0073EA",
           "course/supports-webinar":"#12A85F","bootcamp-prepastrat":"#D98500",
           "entretiens-en-conditions-reelles":"#8A45C9"},
     /* Contour animé par page. 🔴 SEULE la page Cours en a un aujourd'hui, avec
@@ -883,8 +883,8 @@ body.ps-verrou .ps-porte{display:grid}
            "sentrainer":{contour:false,ep:4,duree:1.1,couleur:""},
            "fiches-cabinet":{contour:false,ep:4,duree:1.1,couleur:""},
            "fiches-secteur":{contour:false,ep:4,duree:1.1,couleur:""},
-           "emptykk-clone-clone":{contour:false,ep:4,duree:1.1,couleur:""},
-           "formation-par-comptences":{contour:false,ep:4,duree:1.1,couleur:""}}
+           "etudes-cas":{contour:false,ep:4,duree:1.1,couleur:""},
+           "formation-par-thematiques":{contour:false,ep:4,duree:1.1,couleur:""}}
   };
   /* 🔴 Les LIBELLÉS vivent ici et non dans tokens.js : le bloc y est réécrit par
      ce fichier, donc tout commentaire posé entre les marqueurs serait effacé à la
@@ -895,8 +895,8 @@ body.ps-verrou .ps-porte{display:grid}
     ["sentrainer",              "S'entraîner"],
     ["fiches-cabinet",    "Fiches cabinet"],
     ["fiches-secteur",          "Fiches secteur"],
-    ["emptykk-clone-clone",     "Études de cas"],
-    ["formation-par-comptences","Compétences"],
+    ["etudes-cas",     "Études de cas"],
+    ["formation-par-thematiques","Compétences"],
     /* 🔴 `/profile` a son propre slug et donc ses propres reglages. Il n'est
        PAS dans les tables du board (PAGE_ORDRE) : ce n'est pas une page de
        catalogue, c'est la page du membre. Son apercu ne montre que la
@@ -931,7 +931,7 @@ body.ps-verrou .ps-porte{display:grid}
     ["fiches-cabinet",                  "Fiches cabinet",         "Fiches Cabinet"],
     ["fiches-secteur",                  "Fiches secteur",         "Fiches Secteur"],
     ["sentrainer",                      "S'entraîner",            "S'entraîner"],
-    ["emptykk-clone-clone",             "Études de cas",          "Études de cas"],
+    ["etudes-cas",             "Études de cas",          "Études de cas"],
     ["annuaire-partenaire-de-cas",      "Partenaires de cas",     "Partenaires de Cas"]
   ];
   /* 🔴 SEULES CES PAGES ONT DES CARTES QUE LE CONTOUR SAIT ATTEINDRE. Ailleurs
@@ -939,7 +939,7 @@ body.ps-verrou .ps-porte{display:grid}
      case a cocher qui ne fait rien est pire qu'une case absente, elle fait croire
      que le reglage a ete pris en compte. */
   var PAGES_A_CARTES=["formation-par-modules","sentrainer","fiches-cabinet",
-                      "fiches-secteur","emptykk-clone-clone"];
+                      "fiches-secteur","etudes-cas"];
   var REGL_LIB=[
     ["lien_video",            "Vidéo du hero (lecture au clic)"],
     ["lien_video_background", "Vidéo de fond du hero"]
@@ -1022,7 +1022,7 @@ body.ps-verrou .ps-porte{display:grid}
      ⇒ On reproduit la règle du site : la feuille de la page, et rien d'autre. */
   var CSS_PAGE={ "formation-par-modules":"course", "sentrainer":"course",
                  "fiches-secteur":"sector", "fiches-cabinet":"cabinet",
-                 "emptykk-clone-clone":"case" };
+                 "etudes-cas":"case" };
   function cssReel(){
     var t=window.PS_CSS;
     var el=document.getElementById("cssReelEtat");
@@ -1473,7 +1473,7 @@ body.ps-verrou .ps-porte{display:grid}
        Ils vivent donc dans l'onglet de leur page. */
     if(slug==="formation-par-modules") grille.appendChild(cartePalette("lvl","Palette des niveaux",
       "Pastille « Niveau N » et barre de progression des cartes de cours.","lvls","lvl1Link","Niveau 1 suit la marque"));
-    if(slug==="fiches-secteur" || slug==="emptykk-clone-clone") grille.appendChild(cartePalette("f","Pastilles de champs",
+    if(slug==="fiches-secteur" || slug==="etudes-cas") grille.appendChild(cartePalette("f","Pastilles de champs",
       "Les champs lus dans les descriptions (Année, Type, Difficulté…). ⚠️ Palette PARTAGÉE entre Fiches secteur et Études de cas : la modifier ici la change aussi là-bas.",
       "fs","f1Link","Champ 1 suit la marque"));
     if(slug==="fiches-cabinet") grille.appendChild(carteLogoCabinet());
@@ -1524,7 +1524,7 @@ body.ps-verrou .ps-porte{display:grid}
      C'est le point que Ziad voulait voir — le bouton d'une tuile prend la couleur
      de la page vers laquelle elle mene, pas celle de la marque. */
   var BD_DEMO=[["formation-par-modules","Cours",9],["fiches-cabinet","Fiches cabinet",4],
-               ["fiches-secteur","Fiches secteur",0],["emptykk-clone-clone","Études de cas",25]];
+               ["fiches-secteur","Fiches secteur",0],["etudes-cas","Études de cas",25]];
   function boardUI(){
     var box=document.getElementById("bdTiles");
     if(!box) return;

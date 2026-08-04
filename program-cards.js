@@ -1,7 +1,7 @@
 /* ============================================================
-   Cartes "Programme" (lw-learning-program-card) — page /formation-par-comptences
+   Cartes "Programme" (lw-learning-program-card) — page /formation-par-thematiques
    ------------------------------------------------------------
-   À charger dans le Code personnalisé de la PAGE /formation-par-comptences
+   À charger dans le Code personnalisé de la PAGE /formation-par-thematiques
    (Réglages de la PAGE — jamais dans un élément « HTML », les <script> y sont
    inertes) :
      <script src="https://extremum84.github.io/lw-course-cards/program-cards.js"></script>

@@ -227,8 +227,13 @@
      🔴 La clé est le SLUG et non le libellé : les libellés sont traduits par
      Weglot, une table indexée dessus perdrait ses couleurs en anglais.
      🔴 Les jumelles EN passent par `PS_PAGES_FR` : le lien « Formations » pointe
-     sur `/formation-par-modules-clone-en` (mesuré), absent de la table. Sans cette
-     résolution, la version anglaise du menu serait entièrement bleue.
+     sur la jumelle anglaise, absente de la table. Sans cette résolution, la
+     version anglaise du menu serait entièrement bleue.
+     🔴 Le slug de cette jumelle a CHANGÉ le 04/08 : `formation-par-modules-clone-en`
+     (mesuré le 03/08 sur le menu) renvoie désormais **404**, la page vit sous
+     `formation-par-modules-en`. Corrigé dans `PS_PAGES_FR`. ⚠️ Le nouveau nom vient
+     du sitemap, pas d'un relevé sur le menu lui-même : le menu ne se construit pas
+     pour un visiteur anonyme, donc la cible du lien reste à reconfirmer en session.
      🔴 Entrée absente (Profil, Déconnexion) : on ne pose RIEN et la règle CSS de
      `.ps-mm-ic` fait retomber sur l'accent de la marque. Un repli en dur ici
      figerait une douzième couleur que personne ne pourrait régler. */
