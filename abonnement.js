@@ -63,6 +63,26 @@
     "pied"
   ];
 
+  /* 🔴🔴 NI `innerText`, NI `textContent` — LES DEUX ÉCHOUENT ICI.
+     `innerText` est conscient de la mise en page : sur un élément en
+     `display:none` il renvoie une chaîne VIDE. Or on masque justement la
+     section une fois lue… donc au passage suivant il n'y avait plus aucune
+     clé, et la page se reconstruisait avec les valeurs par défaut. Le code
+     effaçait sa propre lecture, un tour plus tard — trouvé au harnais, pas en
+     production, en simulant une section qui arrive tardivement.
+     `textContent`, lui, ignore la mise en page mais AVALE les retours à la
+     ligne : `<p>a<br>b</p>` donne « ab », et le découpage en lignes tombe.
+     ⇒ On lit le HTML en rétablissant les sauts de ligne. Sans état, sans
+     cache : la lecture donne le même résultat que la section soit visible ou
+     non, ce qui est exactement la propriété qui manquait. */
+  function texteDe(el) {
+    var h = (el && el.innerHTML) || "";
+    h = h.replace(/<br\s*\/?>/gi, "\n").replace(/<\/(p|div|li|h[1-6]|section)>/gi, "\n");
+    var tmp = document.createElement("div");
+    tmp.innerHTML = h;
+    return tmp.textContent || "";
+  }
+
   /* Extrait les réglages d'un texte. Pure et testable : c'est elle qui décide
      ce que la page affiche, donc la seule à relire quand le résultat surprend. */
   function lireReglages(texte) {
@@ -217,8 +237,20 @@
     return { formules: f, inclus: inc };
   }
 
+  /* 🔴🔴 ON RELIT À CHAQUE PASSAGE, ET C'EST TOUT LE CORRECTIF (04/08, soir).
+     Première version : `if (document.getElementById("ps-abo")) return true;` en
+     tête — construire une bonne fois, puis ne plus rien faire. Or le Site
+     Builder peint PAR ÉTAPES : au premier passage (400 ms) la section de texte
+     de Ziad n'existait pas encore, la page se construisait donc avec les valeurs
+     par défaut, et les relances suivantes sortaient aussitôt. Résultat mesuré en
+     production : prix modifié dans le Builder, page inchangée, section de
+     réglages même pas masquée — la preuve qu'elle n'avait jamais été lue.
+     🔴 C'est EXACTEMENT le piège déjà documenté pour le découpage du formulaire
+     d'inscription. Je l'avais écrit, cité le jour même, et reproduit.
+     ⇒ On relit à chaque passage et on ne reconstruit que si le texte a changé
+     (signature) : pas de scintillement, et la page rattrape l'arrivée tardive
+     de la section quel qu'en soit le délai. */
   function construire() {
-    if (document.getElementById("ps-abo")) return true;      /* idempotent */
     var hote = document.getElementById("pageContent");
     if (!hote) return false;
 
@@ -233,7 +265,7 @@
     if (barre0) barreSection = barre0.closest("#pageContent > *");
     [].slice.call(hote.children).forEach(function (sec) {
       if (sec === barreSection || sec.id === "ps-abo") return;
-      var lu = lireReglages(sec.innerText || "");
+      var lu = lireReglages(texteDe(sec));
       var n = Object.keys(lu.valeurs).length;
       if (n < 2) return;                       /* pas la section de réglages */
       Object.keys(lu.valeurs).forEach(function (k) { reglages[k] = lu.valeurs[k]; });
@@ -245,11 +277,19 @@
         inconnues.join(", ") + ". Vérifier l'orthographe."); } catch (e) {}
     }
 
+    /* La signature, c'est le texte lu. Tant qu'il ne bouge pas, on ne touche à
+       rien — donc aucun scintillement malgré les relances. Dès qu'il bouge (la
+       section arrive enfin, ou Ziad republie), on refait le contenu. */
+    var signature = JSON.stringify(reglages);
+    var box = document.getElementById("ps-abo");
+    if (box && box.getAttribute("data-ps-sig") === signature) return true;
+
     var donnees = fusionner(reglages);
 
     poserCSS();
-    var box = document.createElement("div");
-    box.id = "ps-abo";
+    var neuf = !box;
+    if (neuf) { box = document.createElement("div"); box.id = "ps-abo"; }
+    box.setAttribute("data-ps-sig", signature);
 
     var cartes = donnees.formules.map(function (f) {
       return '<div class="ps-abo-c' + (f.avant ? " ps-abo-avant" : "") + '">' +
@@ -286,10 +326,12 @@
     /* 🔴 APRÈS la section qui porte la barre de navigation — le header EST une
        section de `#pageContent`. Piège déjà payé une fois sur `/inscription` :
        inséré en premier, mon bloc poussait le menu sous lui, en production. */
-    var barre = hote.querySelector("nav.lw-topbar-menu, .lw-topbar, [class*='topbar']");
-    var sectionBarre = barre && barre.closest("#pageContent > *");
-    if (sectionBarre && sectionBarre.parentElement === hote) hote.insertBefore(box, sectionBarre.nextSibling);
-    else hote.appendChild(box);
+    if (neuf) {
+      var barre = hote.querySelector("nav.lw-topbar-menu, .lw-topbar, [class*='topbar']");
+      var sectionBarre = barre && barre.closest("#pageContent > *");
+      if (sectionBarre && sectionBarre.parentElement === hote) hote.insertBefore(box, sectionBarre.nextSibling);
+      else hote.appendChild(box);
+    }
     return true;
   }
 
@@ -300,6 +342,8 @@
 
   if (document.readyState !== "loading") demarrer();
   else document.addEventListener("DOMContentLoaded", demarrer);
-  /* Le Site Builder peint par étapes ; la construction est idempotente. */
-  [400, 1200, 2500, 5000].forEach(function (d) { setTimeout(demarrer, d); });
+  /* 🔴 Le Site Builder peint par étapes, et mesuré sur ce site il lui faut
+     parfois 5 à 8 secondes. Les relances vont donc plus loin que sur les autres
+     pages : c'est le délai réel qui a fait rater la section de réglages. */
+  [400, 1200, 2500, 5000, 8000, 12000].forEach(function (d) { setTimeout(demarrer, d); });
 })();
