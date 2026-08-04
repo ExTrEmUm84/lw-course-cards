@@ -198,8 +198,64 @@
     "#ps-insc .ps-i-go:hover{background:var(--ps-accent-hover,#486798);}",
     "#ps-insc .ps-i-err{display:none;margin-top:10px;font:600 13px var(--ps-font,Figtree,sans-serif);color:#C0392B;}",
     "#ps-insc .ps-i-aide{margin-top:14px;text-align:center;font:400 12.5px/1.6 var(--ps-font,Figtree,sans-serif);color:#9AA0B0;}",
-    "#ps-insc .ps-i-aide a{color:var(--ps-accent,#507EC5);}"
+    "#ps-insc .ps-i-aide a{color:var(--ps-accent,#507EC5);}",
+    /* Boutons sociaux DÉPLACÉS depuis la modale : on ne touche pas à leur
+       apparence (elle vient de LearnWorlds et elle est correcte), seulement à
+       leur disposition dans notre carte. */
+    "#ps-insc .ps-i-social{display:flex;justify-content:center;gap:12px;margin:2px 0 4px;}",
+    "#ps-insc .ps-i-social > *{flex:0 0 auto;}",
+    "#ps-insc .ps-i-ou{display:flex;align-items:center;gap:12px;margin:18px 0 16px;"+
+      "font:600 11.5px var(--ps-font,Figtree,sans-serif);text-transform:uppercase;"+
+      "letter-spacing:.08em;color:#9AA0B0;}",
+    "#ps-insc .ps-i-ou::before,#ps-insc .ps-i-ou::after{content:'';flex:1;height:1px;background:var(--ps-border,#E6E9EF);}"
   ].join("\n");
+
+  /* ====================================================================
+     LES BOUTONS SOCIAUX, DÉPLACÉS DEPUIS LA MODALE
+     --------------------------------------------------------------------
+     Google, Facebook, LinkedIn et Apple sont activés côté LearnWorlds et
+     rendus dans la modale d'inscription — donc invisibles tant qu'on ne
+     l'ouvre pas. Cette page étant la porte d'entrée, ils doivent s'y voir.
+
+     🔴🔴 ON DÉPLACE LE VRAI NŒUD, ON NE LE COPIE PAS. Un clone perdrait les
+     gestionnaires de LearnWorlds : le bouton aurait l'air normal et ne ferait
+     rien — la pire panne, celle qui ne se voit pas. Un déplacement conserve
+     les gestionnaires attachés aux éléments eux-mêmes.
+     ⚠️ RÉSERVE ASSUMÉE, ET ELLE EST RÉELLE : si LearnWorlds a délégué ces
+     clics depuis le conteneur de la modale, le déplacement les casse. Je ne
+     peux pas le vérifier sans déclencher une vraie connexion Google sur le
+     compte de Ziad. C'est pourquoi on ne déplace QUE ce bloc : en cas
+     d'échec, seul le bouton social est inerte et le parcours e-mail — celui
+     qui compte — continue de fonctionner. À confirmer par un vrai clic.
+
+     🔴 On ne touche pas à leur apparence : elle vient de LearnWorlds, elle est
+     correcte (vérifié en ouvrant la modale), et la retoucher nous exposerait
+     à la casser au prochain changement de leur côté.
+     ==================================================================== */
+  function socialDansLaCarte(){
+    var slot=document.querySelector("#ps-insc .ps-i-social-slot");
+    if(!slot || slot.getAttribute("data-ps-fait")) return;
+    var bloc=document.querySelector("#signUpForm .-form-social-buttons");
+    if(!bloc) return;                       /* modale pas encore rendue : une relance repassera */
+
+    /* 🔴 On ne déplace que si des fournisseurs sont RÉELLEMENT actifs.
+       LearnWorlds livre le gabarit complet (Google, Facebook, LinkedIn,
+       Apple, X) et masque en `display:none` ceux qui ne sont pas configurés.
+       Sans ce contrôle, on poserait un séparateur « ou » au-dessus d'une
+       rangée vide le jour où tout serait désactivé. */
+    var actifs=[].slice.call(bloc.children).filter(function(b){
+      try{ return getComputedStyle(b).display!=="none"; }catch(e){ return true; }
+    });
+    if(!actifs.length) return;
+
+    var ou=document.createElement("div");
+    ou.className="ps-i-ou";
+    ou.textContent="ou en un clic";
+    slot.appendChild(ou);
+    bloc.classList.add("ps-i-social");
+    slot.appendChild(bloc);                 /* DÉPLACEMENT du nœud d'origine */
+    slot.setAttribute("data-ps-fait","1");
+  }
 
   function poserCSS(){
     if(document.getElementById("ps-insc-css")) return;
@@ -307,6 +363,10 @@
           '<input id="ps-i-mail" type="email" autocomplete="email" placeholder="prenom.nom@ecole.fr">'+
           '<div class="ps-i-err" id="ps-i-err"></div>'+
           '<button type="button" class="ps-i-go">Continuer</button>'+
+          /* Emplacement des boutons sociaux. Reste VIDE et invisible tant que
+             LearnWorlds n'a pas rendu son bloc — aucun trou, aucun séparateur
+             orphelin si les connexions sociales sont désactivées un jour. */
+          '<div class="ps-i-social-slot"></div>'+
           '<p class="ps-i-aide">Votre école est partenaire et on vous demande de payer&nbsp;? '+
             '<a href="mailto:contact@prepastrat.com">Écrivez-nous</a></p>'+
         '</div>'+
@@ -416,4 +476,10 @@
   else document.addEventListener("DOMContentLoaded",demarrer);
   /* Le Site Builder peint par étapes : on repasse, la construction est idempotente. */
   [400,1200,2500].forEach(function(d){ setTimeout(demarrer,d); });
+  /* 🔴 Le bloc social est rendu par LearnWorlds, PAS par le Site Builder : il
+     arrive à son propre rythme, souvent après notre carte. On le cherche donc
+     plus longtemps, et jusqu'à ce qu'il soit trouvé — le déplacement s'arrête
+     tout seul (`data-ps-fait`), donc ces relances ne coûtent rien une fois
+     l'affaire faite. */
+  [600,1500,3000,5000,8000].forEach(function(d){ setTimeout(socialDansLaCarte,d); });
 })();
