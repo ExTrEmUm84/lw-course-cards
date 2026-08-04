@@ -82,6 +82,61 @@
            '<div class="ps-i-eco-l">'+items.join("")+'</div></div>';
   }
 
+  /* ====================================================================
+     LE CONTENU DE DROITE VIENT DU SITE BUILDER
+     --------------------------------------------------------------------
+     Demande de Ziad : pouvoir changer ces mots sans moi ni déploiement. Il les
+     écrit dans une section normale du builder ; nous n'apportons que la mise en
+     forme. Les mots lui appartiennent, la présentation nous appartient.
+
+     🔴 IDENTIFICATION PAR POSITION, ET C'EST UNE LIMITE ASSUMÉE. On prend la
+     première section de `#pageContent` qui n'est ni la barre de navigation, ni le
+     pied de page, ni notre propre bloc. Repérer par le TEXTE serait pire — Weglot
+     traduit ces libellés, et une table indexée dessus perdrait tout en anglais.
+     ⏳ Le jour où cette page portera plusieurs sections, il faudra un marqueur.
+
+     🔴🔴 L'APPARIEMENT NE SE FAIT QUE SI LA FORME EST EXACTE. Le builder produit
+     un bloc de texte plat : huit lignes alternant intitulé et précision. Les
+     apparier par leur RANG marche tant que le compte est bon — mais une ligne
+     ajoutée décalerait tout, et chaque précision se retrouverait sous le mauvais
+     intitulé, sans que rien ne le signale. C'est la panne silencieuse qu'on a
+     payée trois fois cette semaine. Hors du compte attendu, on ne devine pas : on
+     garde le texte tel quel, simplement mis à la charte. Mal rangé se voit ;
+     faux ne se voit pas. */
+  /* Le texte vient du Site Builder, donc d'une saisie humaine : il passe par
+     `innerHTML`, il doit être échappé. Un `&` ou un chevron dans un libellé ne
+     doit pas pouvoir devenir du balisage. */
+  function esc(s){
+    return String(s==null?"":s).replace(/&/g,"&amp;").replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;").replace(/"/g,"&quot;");
+  }
+
+  function lignesUtiles(bloc){
+    var out=[];
+    var w=document.createTreeWalker(bloc,NodeFilter.SHOW_TEXT);
+    var n;
+    while((n=w.nextNode())){
+      var t=(n.nodeValue||"").replace(/\s+/g," ").trim();
+      if(t) out.push(t);
+    }
+    return out;
+  }
+
+  function sectionDeZiad(){
+    var pc=document.getElementById("pageContent");
+    if(!pc) return null;
+    var secs=[].slice.call(pc.querySelectorAll(":scope > section"));
+    for(var i=0;i<secs.length;i++){
+      var s=secs[i];
+      if(s.querySelector("nav.lw-topbar-menu, .lw-topbar, [class*='topbar']")) continue;
+      if(s.querySelector("[class*='footer']")) continue;
+      if(s.contains(document.getElementById("ps-insc"))) continue;
+      if(!lignesUtiles(s).length) continue;
+      return s;
+    }
+    return null;
+  }
+
   /* Contenu de la colonne de droite. 🔴 Écrit par moi faute de mieux, à faire
      valider : « 60 cours » est le nombre compté par l'API le 04/08, pas
      nécessairement celui que Ziad veut afficher. */
@@ -209,11 +264,30 @@
        a jamais deux versions du texte à tenir.
        Le repli n'est pas décoratif : sans lui, oublier le bloc — ou le renommer —
        laisserait une colonne vide sur la page d'entrée du site. */
-    var perso=document.getElementById("ps-insc-args");
-    var args=perso ? "" : ARGUMENTS.map(function(a){
-      return '<div class="ps-i-arg"><span class="ps-i-ic">'+picto(a[0])+'</span>'+
-             '<div><div class="ps-i-at">'+a[1]+'</div><div class="ps-i-as">'+a[2]+'</div></div></div>';
-    }).join("");
+    /* Le contenu de Ziad prime ; le nôtre n'est qu'un filet si la section a été
+       supprimée ou vidée — une colonne vide sur la page d'entrée serait pire. */
+    var sec=sectionDeZiad(), brut=null, titre="Tout le catalogue, un seul accès", args="";
+    if(sec){
+      var h=sec.querySelector("h1,h2,h3");
+      var tt=h ? (h.innerText||"").replace(/\s+/g," ").trim() : "";
+      var lignes=lignesUtiles(sec);
+      if(tt){ titre=tt; if(lignes[0]===tt) lignes=lignes.slice(1); }
+      if(lignes.length===8){
+        var CLES=["book","clip","doc","users"];
+        args=[0,1,2,3].map(function(k){
+          return '<div class="ps-i-arg"><span class="ps-i-ic">'+picto(CLES[k])+'</span>'+
+                 '<div><div class="ps-i-at">'+esc(lignes[k*2])+'</div>'+
+                 '<div class="ps-i-as">'+esc(lignes[k*2+1])+'</div></div></div>';
+        }).join("");
+      } else {
+        brut=sec;                                  /* forme inattendue : on ne devine pas */
+      }
+    } else {
+      args=ARGUMENTS.map(function(a){
+        return '<div class="ps-i-arg"><span class="ps-i-ic">'+picto(a[0])+'</span>'+
+               '<div><div class="ps-i-at">'+a[1]+'</div><div class="ps-i-as">'+a[2]+'</div></div></div>';
+      }).join("");
+    }
     box.innerHTML=
       '<div class="ps-i-grid">'+
         '<div class="ps-i-form">'+
@@ -227,7 +301,7 @@
           '<p class="ps-i-aide">Votre école est partenaire et on vous demande de payer&nbsp;? '+
             '<a href="mailto:contact@prepastrat.com">Écrivez-nous</a></p>'+
         '</div>'+
-        '<div class="ps-i-args">'+(perso ? "" : '<h3>Tout le catalogue, un seul accès</h3>')+args+'</div>'+
+        '<div class="ps-i-args"><h3>'+esc(titre)+'</h3>'+args+'</div>'+
       '</div>';
     /* 🔴🔴 SURTOUT PAS `firstChild` — LE HEADER EST UNE SECTION DE `#pageContent`.
        C'est le piège déjà noté sur la home (« section 1 = topbar, section 2 = le
@@ -241,18 +315,15 @@
     if(sectionBarre && sectionBarre.parentElement===hote) hote.insertBefore(box, sectionBarre.nextSibling);
     else hote.appendChild(box);
 
-    /* Le bloc de Ziad rejoint la colonne de droite. 🔴 Après l'insertion de `box`
-       dans la page, sinon on déplacerait un élément vers un conteneur qui n'est
-       pas encore dans le document. */
-    if(perso){
-      box.querySelector(".ps-i-args").appendChild(perso);
-      perso.style.display="";                       /* au cas où il serait masqué en attendant */
-      /* Les pictos sont posés ICI, pas collés par Ziad : il écrit `data-ps-ic="book"`
-         et le vrai jeu d'icônes du menu fait le reste. Un SVG dans le Site Builder
-         serait à retoucher à chaque changement de charte. */
-      [].slice.call(perso.querySelectorAll("[data-ps-ic]")).forEach(function(s){
-        if(!s.firstChild) s.innerHTML=picto(s.getAttribute("data-ps-ic"));
-      });
+    /* 🔴 On MASQUE la section d'origine, on ne la supprime pas : le Site Builder
+       la republie à chaque édition, et Ziad doit continuer de la voir et de la
+       modifier dans l'éditeur. La supprimer ferait disparaître son texte de la
+       page sans qu'il puisse le retrouver.
+       Après l'insertion de `box`, sinon on déplacerait vers un conteneur absent
+       du document. */
+    if(sec){
+      if(brut){ box.querySelector(".ps-i-args").appendChild(sec); }
+      else { sec.style.display="none"; sec.setAttribute("data-ps-repris","1"); }
     }
     /* La bande d'écoles se pose APRÈS le contenu, qu'il soit de Ziad ou le nôtre. */
     var eco=bandeEcoles();
