@@ -994,7 +994,30 @@
          laisserait un BLOC VIDE de 38 px en haut du formulaire. Une place réservée
          pour rien est pire que pas de logo. */
       "html.ps-logo-ok #animatedModal .js-form-enterkey::before{content:'' !important;display:block !important;"+
-        "height:38px !important;margin:0 0 20px !important;background:var(--ps-form-logo) center/contain no-repeat !important;}"
+        "height:38px !important;margin:0 0 20px !important;background:var(--ps-form-logo) center/contain no-repeat !important;}",
+      /* ---------- inscription en DEUX écrans ----------
+         🔴 TOUT EST PILOTÉ PAR LA CLASSE `ps-2etapes`, POSÉE PAR NOTRE JS. Sans
+         elle, aucune de ces règles ne s'applique : si le script échoue, ne tourne
+         pas, ou si LearnWorlds change sa structure, le formulaire reste ENTIER et
+         utilisable. Un découpage qui masque des champs par défaut transformerait
+         la moindre panne en inscription impossible — c'est le parcours le plus
+         critique du site. */
+      "#signUpForm.ps-2etapes.ps-etape-1 .-form-inputs > .ps-e2{display:none !important;}",
+      "#signUpForm.ps-2etapes.ps-etape-2 .-form-inputs > .ps-e1{display:none !important;}",
+      /* le vrai bouton d'envoi n'existe QUE sur le second écran */
+      "#signUpForm.ps-2etapes.ps-etape-1 .form-input-group > button{display:none !important;}",
+      "#signUpForm.ps-2etapes.ps-etape-1 .-form-create-forgot{display:none !important;}",
+      ".ps-etapes-nav{display:flex !important;gap:10px !important;align-items:center !important;margin:4px 0 0 !important;}",
+      ".ps-etapes-jauge{font:600 12.5px var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text-soft,#676879) !important;margin:0 0 14px !important;}",
+      ".ps-etape-btn{flex:1 !important;height:52px !important;border:0 !important;cursor:pointer !important;"+
+        "border-radius:var(--ps-r-btn,10px) !important;font:700 15px var(--ps-font,Figtree,sans-serif) !important;"+
+        "background:var(--ps-accent,#507EC5) !important;color:#fff !important;transition:background .18s !important;}",
+      ".ps-etape-btn:hover{background:var(--ps-accent-hover,#486798) !important;}",
+      ".ps-etape-btn.ps-retour{flex:0 0 auto !important;padding:0 18px !important;background:transparent !important;"+
+        "color:var(--ps-text-soft,#676879) !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;}",
+      ".ps-etape-btn.ps-retour:hover{background:var(--ps-surface-soft,#F7F8FB) !important;}",
+      "#signUpForm.ps-etape-2 .ps-suivant{display:none !important;}",
+      "#signUpForm.ps-etape-1 .ps-etapes-nav.ps-nav-2{display:none !important;}"
     ].join("\n");
     var st=document.createElement("style"); st.id="ps-form-ps"; st.textContent=F;
     (document.head||document.documentElement).appendChild(st);
@@ -1017,6 +1040,112 @@
       return true;
     };
     if(!poseLogo()) [120,400,900,2000].forEach(function(d){ setTimeout(poseLogo,d); });
+
+    /* ====================================================================
+       INSCRIPTION EN DEUX ÉCRANS
+       --------------------------------------------------------------------
+       Demande de Ziad (04/08) : « un premier screen avec les infos civiles,
+       l'école et la recherche, puis le mail et le mot de passe, ou l'inverse ».
+       Retenu : IDENTIFIANTS D'ABORD, profil ensuite.
+
+       🔴 LE DÉCOUPAGE EST PUREMENT VISUEL. LearnWorlds envoie le formulaire EN UNE
+       SEULE FOIS : rien n'est enregistré entre les deux écrans. L'argument habituel
+       des formulaires en étapes — « on garde au moins l'e-mail si la personne
+       abandonne » — NE S'APPLIQUE PAS. C'est ce qui décide de l'ordre : on ne
+       gagne rien à capturer l'e-mail tôt, alors on met d'abord ce que la personne
+       est venue faire (créer un compte), et les questions de profil ensuite.
+       Les champs masqués restent dans le formulaire, donc leurs valeurs partent
+       normalement à l'envoi — `display:none` n'exclut pas un champ d'un POST.
+
+       🔴🔴 L'ÉTAPE 2 EST DÉDUITE, PAS ÉNUMÉRÉE. L'écran 1 = les champs de COMPTE
+       de LearnWorlds (nom, prénom, e-mail, mot de passe) ; tout le reste va en 2.
+       Une liste écrite à la main aurait laissé le prochain champ personnalisé sur
+       le premier écran sans que personne ne s'en aperçoive — exactement le défaut
+       des tables indexées par slug qui nous a coûté quatre pannes cette semaine.
+
+       🔴🔴 ON REVIENT AU FORMULAIRE ENTIER À L'ENVOI. Si LearnWorlds refuse une
+       valeur, il affiche son message SUR le champ fautif. Un champ fautif resté
+       masqué, c'est un bouton qui « ne fait rien » et une inscription abandonnée.
+       Au clic sur le vrai bouton, on retire donc le découpage : au pire la
+       personne revoit le formulaire complet, ce qui est le comportement d'avant.
+       ==================================================================== */
+    var NATIFS={ first_name:1, last_name:1, email:1, password:1 };
+
+    function deuxEcrans(f){
+      if(!f || f.dataset.psEtapes) return;
+      var grille=f.querySelector(".-form-inputs");
+      var groupe=f.querySelector(".form-input-group");
+      var envoi=groupe && groupe.querySelector("button");
+      if(!grille || !groupe || !envoi) return;        /* structure inattendue : on ne touche à rien */
+
+      var n1=0, n2=0;
+      [].slice.call(grille.children).forEach(function(w){
+        var c=w.querySelector("input,select,textarea");
+        var nom=c ? String(c.name||"") : "";
+        if(nom && NATIFS[nom]){ w.classList.add("ps-e1"); n1++; }
+        else { w.classList.add("ps-e2"); n2++; }
+      });
+      /* 🔴 Un seul écran utile ⇒ on n'en fabrique pas deux. Le jour où Ziad retire
+         les champs personnalisés de l'inscription (ce qui est recommandé), le
+         formulaire redevient simple tout seul, sans qu'on ait à défaire ceci. */
+      if(!n1 || !n2) return;
+
+      var jauge=document.createElement("div");
+      jauge.className="ps-etapes-jauge"; jauge.textContent="Étape 1 sur 2 — votre compte";
+
+      var nav1=document.createElement("div"); nav1.className="ps-etapes-nav";
+      var suivant=document.createElement("button");
+      /* 🔴 `type="button"` OBLIGATOIRE : un <button> dans un <form> vaut `submit`
+         par défaut. Sans ça, « Continuer » enverrait le formulaire à moitié rempli. */
+      /* 🔴 MESURÉ : il n'existe AUCUN élément `<form>` — `#signUpForm` est un `div`
+         et LearnWorlds collecte les valeurs en JavaScript. `type="button"` n'est
+         donc pas ce qui empêche un envoi prématuré aujourd'hui ; c'est une
+         précaution pour le jour où LW enveloppera le tout dans un vrai `<form>`,
+         où un `<button>` vaut `submit` par défaut. Elle ne coûte rien.
+         🟢 Conséquence VÉRIFIÉE de cette architecture : masquer un champ ne lui
+         retire pas sa valeur. Écran 2 affiché, les quatre champs de l'écran 1
+         étaient bien `display:none` ET portaient toujours ce qui avait été saisi —
+         c'est `.value` que LearnWorlds lit, et `display` ne la touche pas. */
+      suivant.type="button"; suivant.className="ps-etape-btn ps-suivant";
+      suivant.textContent="Continuer";
+      nav1.appendChild(suivant);
+
+      var nav2=document.createElement("div"); nav2.className="ps-etapes-nav ps-nav-2";
+      var retour=document.createElement("button");
+      retour.type="button"; retour.className="ps-etape-btn ps-retour"; retour.textContent="Retour";
+      nav2.appendChild(retour);
+
+      groupe.insertBefore(jauge, grille);
+      groupe.insertBefore(nav1, envoi);
+      groupe.insertBefore(nav2, envoi);
+
+      function aller(n){
+        f.classList.toggle("ps-etape-1", n===1);
+        f.classList.toggle("ps-etape-2", n===2);
+        jauge.textContent = n===1 ? "Étape 1 sur 2 — votre compte"
+                                  : "Étape 2 sur 2 — pour mieux vous accompagner";
+        var p=f.querySelector(n===1 ? ".ps-e1 input" : ".ps-e2 input,.ps-e2 select");
+        if(p && p.focus) try{ p.focus({preventScroll:true}); }catch(e){ }
+        f.scrollTop=0;
+      }
+      suivant.addEventListener("click",function(){ aller(2); });
+      retour.addEventListener("click",function(){ aller(1); });
+      /* Filet : à l'envoi on redonne le formulaire entier (cf. le bloc ci-dessus). */
+      envoi.addEventListener("click",function(){ f.classList.remove("ps-2etapes","ps-etape-1","ps-etape-2"); });
+
+      f.classList.add("ps-2etapes");
+      f.dataset.psEtapes="1";
+      aller(1);
+    }
+
+    /* La modale est créée à l'ouverture et détruite à la fermeture : on ne peut
+       pas agir une fois pour toutes. L'observer la rattrape à chaque apparition ;
+       le garde `data-ps-etapes` empêche de la retravailler en boucle. */
+    function scruter(){ deuxEcrans(document.getElementById("signUpForm")); }
+    if(document.body) new MutationObserver(scruter).observe(document.body,{childList:true,subtree:true});
+    else document.addEventListener("DOMContentLoaded",function(){
+      new MutationObserver(scruter).observe(document.body,{childList:true,subtree:true}); });
+    scruter();
   })();
 
   /* ====================================================================
