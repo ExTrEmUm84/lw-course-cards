@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-d";
+  window.PS_TOKENS_V="2026-08-05-e";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2604,7 +2604,22 @@
 
   function verrouCartes(){
     if(CARTES_HORS_VERROU.test(location.pathname||"")) return;
-    if(accesOuvert(membrePS())) return;                    /* rien à verrouiller */
+    var u=membrePS();
+    if(accesOuvert(u)) return;                             /* rien à verrouiller */
+
+    /* 🔴🔴 UN ÉTUDIANT D'ÉCOLE PARTENAIRE NE VOIT JAMAIS « S'ABONNER ».
+       Même règle que le bandeau d'orientation, et pour la même raison : entre
+       son inscription et le passage de l'automatisation, il n'a aucun programme
+       — donc `accesOuvert()` dit non. Verrouiller ses cartes avec « s'abonner »,
+       ce serait réclamer 99 € à quelqu'un dont l'école a déjà payé, au moment
+       exact où il découvre la plateforme. Le pire résultat par le chemin par
+       défaut, encore une fois.
+       On préfère le laisser voir des cartes cliquables quelques minutes : au
+       pire il tombe sur l'écran d'accès de LearnWorlds, qui lui, ne lui réclame
+       pas d'argent. */
+    try{
+      if(u && window.PS_PARTENAIRE_EMAIL && window.PS_PARTENAIRE_EMAIL(u.email)) return;
+    }catch(e){}
     var cartes=document.querySelectorAll(".lw-course-card");
     if(!cartes.length) return;
     cssVerrou();
@@ -2618,7 +2633,12 @@
       /* 🔴 UNE seule ligne de texte. La version précédente en avait deux, qui
          se superposaient au titre de la carte. Le cadenas dit déjà « fermé » ;
          la pastille dit quoi faire. Le reste est du bruit. */
-      v.innerHTML="<i>"+SVG_CADENAS+"</i><b>Ouvrir le catalogue</b>";
+      /* 🔴 « S'abonner », pas « Ouvrir le catalogue » : Ziad l'a dit et il a
+         raison, la seconde formule ne veut rien dire pour quelqu'un qui
+         découvre le site. Le cadenas dit « fermé », la pastille dit ce qu'il
+         faut faire — et elle doit le dire en mots de client, pas en mots de
+         produit. */
+      v.innerHTML="<i>"+SVG_CADENAS+"</i><b>S'abonner</b>";
       /* 🔴🔴 `display` POSÉ EN INLINE, ET C'EST INDISPENSABLE. Les scripts de
          page reconstruisent la carte et masquent tout enfant qui n'est pas à
          eux : `course-cards.js` a
