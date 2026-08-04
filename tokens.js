@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-m";
+  window.PS_TOKENS_V="2026-08-04-n";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -1120,6 +1120,16 @@
          utilisable. Un découpage qui masque des champs par défaut transformerait
          la moindre panne en inscription impossible — c'est le parcours le plus
          critique du site. */
+      /* 🔴 Écran d'après-OAuth : ni boutons sociaux, ni séparateur « ou ». La
+         classe est posée par `apresOAuth()` sur le seul critère mesurable —
+         un formulaire d'inscription sans champ mot de passe. */
+      /* 🔴 PAS `.landing-form-title-social` : malgré son nom, cette classe porte
+         le TITRE de la modale (« Inscrivez-vous à … »), pas un élément social.
+         L'ajouter aurait décapité la fenêtre — un nom de classe n'est pas une
+         description de contenu. */
+      "#signUpForm.ps-oauth .-form-social-buttons,"+
+      "#signUpForm.ps-oauth .-form-social-register-buttons,"+
+      "#signUpForm.ps-oauth .-or{display:none !important;}",
       "#signUpForm.ps-2etapes.ps-etape-1 .-form-inputs > .ps-e2{display:none !important;}",
       "#signUpForm.ps-2etapes.ps-etape-2 .-form-inputs > .ps-e1{display:none !important;}",
       /* le vrai bouton d'envoi n'existe QUE sur le second écran */
@@ -1337,10 +1347,39 @@
       aller(1);
     }
 
+    /* ==================================================================
+       L'ÉCRAN D'APRÈS-OAUTH NE REPROPOSE PLUS LES CONNEXIONS SOCIALES
+       ------------------------------------------------------------------
+       Après Google ou LinkedIn, LearnWorlds affiche un écran de finalisation
+       (prénom, nom, e-mail du fournisseur, CGU — pas de mot de passe) et y
+       réaffiche un bloc social réduit au fournisseur utilisé : une pastille
+       isolée, hors mise en page. On propose de se connecter avec LinkedIn à
+       quelqu'un qui vient de se connecter avec LinkedIn.
+
+       🔴🔴 LE CRITÈRE EST L'ÉCRAN, PAS LA PAGE — ET C'EST TOUTE L'HISTOIRE DE
+       CE CORRECTIF. Première version, dans `inscription.js` et conditionnée à
+       `body.slug-inscription` : elle ne s'est jamais exécutée. Mesuré en direct
+       avec Ziad, le rappel OAuth atterrit sur **`/?code=…&signup=linkedin`**,
+       c'est-à-dire sur la PAGE D'ACCUEIL. J'avais rattaché une règle à l'endroit
+       d'où l'on PART, alors qu'elle devait valoir là où l'on ARRIVE.
+       ⇒ La règle vit ici, dans `tokens.js` chargé partout, et se reconnaît à ce
+       que l'écran EST : un formulaire d'inscription SANS champ mot de passe.
+       🔴 On repose la classe à chaque passage plutôt qu'une fois : la même
+       modale sert aux deux écrans, elle doit pouvoir redevenir normale. */
+    function apresOAuth(f){
+      if(!f) return;
+      var aMdp=!!f.querySelector('input[type="password"],input[name="password"]');
+      f.classList.toggle("ps-oauth", !aMdp);
+    }
+
     /* La modale est créée à l'ouverture et détruite à la fermeture : on ne peut
        pas agir une fois pour toutes. L'observer la rattrape à chaque apparition ;
        le garde `data-ps-etapes` empêche de la retravailler en boucle. */
-    function scruter(){ deuxEcrans(document.getElementById("signUpForm")); }
+    function scruter(){
+      var f=document.getElementById("signUpForm");
+      apresOAuth(f);
+      deuxEcrans(f);
+    }
     if(document.body) new MutationObserver(scruter).observe(document.body,{childList:true,subtree:true});
     else document.addEventListener("DOMContentLoaded",function(){
       new MutationObserver(scruter).observe(document.body,{childList:true,subtree:true}); });
