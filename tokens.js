@@ -557,8 +557,25 @@
      AJOUTER UNE PAGE TRADUITE = UNE LIGNE DANS `PAGES_EN`. C'est le seul
      endroit à toucher : l'anti-flash, le board et les liens du menu en dérivent.
      ==================================================================== */
+  /* 🔴 MAJ 04/08 — TROIS JUMELLES DE PLUS. Elles existaient déjà sur le site et
+     n'étaient déclarées NULLE PART : trouvées en listant le sitemap pour réparer
+     les slugs morts. Sans cette table, arriver sur elles ne forçait pas l'anglais
+     et le menu anglais gardait ses liens français.
+     Appariement sans ambiguïté : chaque page anglaise porte le titre français
+     suivi de « EN » (« Fiches secteur EN », « Formation par thématiques EN »), et
+     les quatre répondent 200.
+     ⚠️ CONTENU ENCORE FRANÇAIS SUR CES PAGES, ET C'EST ASSUMÉ. Ziad, 04/08 :
+     « il y a du contenu français pour l'instant sur les pages EN mais il faut
+     câbler, on changera le contenu plus tard ». Le câblage et la traduction sont
+     donc deux chantiers séparés : celui-ci envoie l'anglophone sur la bonne page,
+     ce qu'il y lit reste à corriger côté contenu.
+     🟢 L'anti-flash suit tout seul : `CLOAK_SLUGS` se dérive de cette table (plus
+     bas), il n'y a rien à ajouter à la main pour les trois nouvelles. */
   var PAGES_EN={
-    "formation-par-modules":"formation-par-modules-en"
+    "formation-par-modules":"formation-par-modules-en",
+    "fiches-cabinet":"fiches-cabinet-en",
+    "fiches-secteur":"fiches-secteur-en",
+    "formation-par-thematiques":"formation-par-thematiques-en"
   };
   var PAGES_FR={};
   Object.keys(PAGES_EN).forEach(function(fr){ PAGES_FR[PAGES_EN[fr]]=fr; });

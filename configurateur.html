@@ -291,7 +291,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-m</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-n</span></p>
     <!-- 🔴 TEXTE REFAIT (04/08) : il datait du temps où publier voulait dire
          « copier le bloc de code en bas et le coller dans tokens.js ». Ce bloc a été
          retiré le 03/08 et c'est le Worker qui écrit désormais — la phrase promettait
@@ -328,6 +328,12 @@ body.ps-verrou .ps-porte{display:grid}
       <button id="reset">Annuler mes changements</button>
     </div>
     <div class="note" id="resetNote" style="margin:8px 0 0;display:none"></div>
+
+    <!-- 🔴 SA PLACE EST JUSTE AU-DESSUS DE « PUBLIER », et pas dans un onglet :
+         c'est l'instant où l'information sert. Une page renommée côté LearnWorlds
+         fait cesser toutes nos correspondances en silence — quatre fois en une
+         semaine, dont un lien de pied de page en 404 sur tout le site. -->
+    <div class="note" id="slugNote" style="display:none"></div>
 
     <h2>Publier sur le site</h2>
     <div class="note" style="border-left-color:#00C875;background:#E9FBF2;color:#0B6B43">
@@ -1990,6 +1996,54 @@ body.ps-verrou .ps-porte{display:grid}
       lien_video_background:vimeoNormalise(S.reglages.lien_video_background) } } };
   }
 
+  /* ====================================================================
+     PAGES RENOMMÉES — l'outil le dit, on n'a plus à y penser
+     --------------------------------------------------------------------
+     Renommer une page dans LearnWorlds change son slug, et nos tables cessent d'y
+     correspondre SANS RIEN DIRE : la page perd sa couleur, son picto de menu, et
+     les liens qui la visent tombent en 404. C'est arrivé QUATRE fois en une
+     semaine. Un script local existe, mais il demande qu'on pense à le lancer —
+     la même discipline qui a déjà échoué quatre fois. Ici, l'information arrive
+     à l'ouverture de l'outil, sans rien demander.
+
+     🔴 ON SE TAIT PLUTÔT QUE D'ACCUSER À TORT. Route absente (Worker pas encore
+     déployé), session expirée, sitemap injoignable : on n'affiche RIEN. Un
+     avertissement qui se déclenche à tort apprend à être ignoré, et le jour où il
+     a raison plus personne ne le lit.
+     🔴 UNE SEULE PREUVE ICI, ET LE MOT LE DIT. Le navigateur ne peut pas sonder
+     learnworlds.com (CORS) : on ne dispose que de l'absence du sitemap, pas du
+     404. Le message dit donc « ne figure plus dans le sitemap », pas « n'existe
+     plus ». Le verdict ferme, lui, vient du Worker au moment de publier — il
+     sonde vraiment, et lui peut affirmer. */
+  async function verifierSlugs(){
+    var el=document.getElementById("slugNote");
+    if(!el) return;
+    el.style.display="none";
+    if(!session()) return;
+    var j=null;
+    try{
+      var r=await fetch(API_PS+"/slugs",{ headers:{ "X-PS-Session":session() } });
+      j=await r.json();
+    }catch(e){ return; }
+    if(!j || !j.ok || !Array.isArray(j.pages)) return;
+    var vivant={}, hors={};
+    j.pages.forEach(function(p){ vivant[p]=1; });
+    (j.horsSitemap||[]).forEach(function(p){ hors[p]=1; });
+    var douteux=[];
+    PAGES_LIB.forEach(function(p){ if(!vivant[p[0]] && !hors[p[0]]) douteux.push(p[1]+" <code>"+p[0]+"</code>"); });
+    MENU_LIB.forEach(function(e){ if(!vivant[e[0]] && !hors[e[0]]) douteux.push("menu : "+e[1]+" <code>"+e[0]+"</code>"); });
+    if(!douteux.length) return;
+    peindreNote(el,"⚠️ <strong>"+douteux.length+" réglage(s) visent une page qui ne figure plus dans le sitemap du site.</strong> "+
+      "Elle a sans doute été renommée&nbsp;: tant que ce n'est pas corrigé, sa couleur et son picto ne s'appliquent plus, "+
+      "et les liens qui la visent tombent en 404.<br>"+douteux.join("<br>"),"ko");
+  }
+
+  /* Exposée pour pouvoir la DÉCLENCHER et regarder ce qu'elle fait, plutôt que
+     d'en déduire — même idiome que `PS_MENU_JUMELLES` dans `tokens.js`. C'est ce
+     qui permet de vérifier l'affichage du cas « page renommée » sans attendre
+     qu'une page soit vraiment renommée. */
+  window.PS_VERIF_SLUGS=verifierSlugs;
+
   async function publier(){
     elPub.disabled=true; var lib=elPub.textContent; elPub.textContent="Publication…";
     try{
@@ -2001,8 +2055,17 @@ body.ps-verrou .ps-porte{display:grid}
       if(r.status===401){ try{ sessionStorage.removeItem(CLE_SESS); }catch(e){} majBouton();
         throw new Error("Session expirée — reconnecte-toi."); }
       if(!r.ok) throw new Error(j.error||("Refusé ("+r.status+")"));
-      if(j.inchange) dire("Rien à publier : le site a déjà exactement ces valeurs.","ok");
-      else dire("Publié ✓ — en ligne dans 1 à 2 minutes, le temps que GitHub Pages redéploie.","ok");
+      /* 🔴 Le verdict du Worker est plus DUR que celui affiché à l'ouverture : lui
+         sonde vraiment la page (absente du sitemap ET 404), donc il peut affirmer
+         qu'elle n'existe plus. On le colle au message de succès plutôt que dans
+         une note à part — c'est le moment où Ziad regarde cet endroit précis. */
+      var alerte=(j.slugsMorts&&j.slugsMorts.length)
+        ? "<br>⚠️ <strong>Attention</strong> : "+j.slugsMorts.join(", ")+" — "+
+          (j.slugsMorts.length>1?"ces pages n'existent plus":"cette page n'existe plus")+
+          " sur le site (404). Leurs réglages ne s'appliquent à rien."
+        : "";
+      if(j.inchange) dire("Rien à publier : le site a déjà exactement ces valeurs."+alerte, alerte?"":"ok");
+      else dire("Publié ✓ — en ligne dans 1 à 2 minutes, le temps que GitHub Pages redéploie."+alerte, alerte?"":"ok");
     }catch(e){ dire(String(e.message||e),"ko"); }
     finally{ elPub.disabled=false; elPub.textContent=lib; majBouton(); }
   }
@@ -2051,6 +2114,9 @@ body.ps-verrou .ps-porte{display:grid}
          "</strong>, et la liste des comptes autorisés contient "+j.nbAutorises+" entrée(s)."):""));
       try{ sessionStorage.setItem(CLE_SESS,j.session); sessionStorage.setItem(CLE_QUI,j.login); }catch(e){}
       dire("Connecté en tant que <strong>"+String(j.login).replace(/[<>&]/g,"")+"</strong>. Tu peux publier.","ok");
+      /* La route demande une session : au chargement il n'y en avait pas encore,
+         c'est donc ICI que le contrôle des pages renommées peut enfin tourner. */
+      verifierSlugs();
     }catch(e){
       /* 🔴 L'erreur s'affiche SUR le rideau : le panneau est masque, un message
          pose derriere lui serait invisible — la personne verrait un bouton qui
@@ -2173,6 +2239,7 @@ body.ps-verrou .ps-porte{display:grid}
   menuUI();
   rendre();
   chargerEtatPublie();
+  verifierSlugs();          /* silencieux tant qu'il n'y a pas de session */
 })();
 </script>
 </body>
