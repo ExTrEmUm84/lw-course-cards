@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-a";
+  window.PS_TOKENS_V="2026-08-05-b";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2520,6 +2520,101 @@
     return {montrer:true, mode:"offre"};
   }
 
+  /* ====================================================================
+     CADENAS SUR LES CARTES DE COURS NON ACCESSIBLES  (05/08)
+     --------------------------------------------------------------------
+     Demande de Ziad : la carte reste visible — c'est la vitrine, on a passé
+     des semaines à la styler — mais au survol (ou au premier appui sur
+     mobile) un cadenas apparaît et le clic ne mène plus au cours.
+
+     🔴 LE SIGNAL D'ACCÈS EST `me.userLearningPrograms`, PAS LA BARRE DE
+     PROGRESSION. Une barre à 0 % NE PROUVE PAS l'inscription : mesuré le
+     30/07, elles s'affichent même quand `/api/courses` dit `registered:false`.
+     Se fier à elles verrouillerait des cartes d'un membre inscrit.
+     ⇒ Zéro programme = aucun accès. C'est exact tant qu'UN programme ouvre
+     tout le catalogue, ce qui est le modèle actuel. **Le jour où un cours se
+     vend à l'unité, cette règle devient fausse** — c'est écrit ici pour qu'on
+     s'en souvienne à ce moment-là.
+
+     🔴 Le clic mène à l'offre, PAS dans le vide. Un clic sans effet, c'est un
+     prospect qui repart au moment précis où il manifeste son intérêt. C'est le
+     même raisonnement que le bandeau d'orientation. Une ligne à changer si
+     Ziad préfère le blocage sec.
+
+     🔴 JAMAIS sur `/profile` : ses 55 cartes sont les cours DU MEMBRE, et la
+     section est la meilleure source du collecteur de progression. Ni sur le
+     lecteur, ni sur le tunnel, ni sur la page d'offre elle-même.
+     ==================================================================== */
+  var CARTES_HORS_VERROU=/^\/(profile|path-player|course-player|payment|formules|account)/;
+
+  function accesOuvert(u){
+    if(!u) return false;                                   /* anonyme : verrouillé */
+    if(u.is_admin || u.isStaff || u.isAInstructor) return true;
+    return (u.userLearningPrograms || []).length > 0;
+  }
+
+  function cssVerrou(){
+    if(document.getElementById("ps-verrou-css")) return;
+    var st=document.createElement("style"); st.id="ps-verrou-css";
+    st.textContent=
+      ".lw-course-card.ps-verrouille{position:relative !important;}"+
+      /* L'ombre du voile est posée SUR la carte, pas à la place : la vitrine
+         reste lisible, on ajoute seulement une intention. */
+      ".ps-verrou{position:absolute;inset:0;z-index:5;display:flex;flex-direction:column;"+
+      "align-items:center;justify-content:center;gap:10px;border-radius:inherit;"+
+      "background:rgba(28,31,38,.62);color:#fff;opacity:0;pointer-events:none;"+
+      "transition:opacity .18s ease;font-family:var(--ps-font,Figtree,sans-serif);text-align:center;padding:16px;}"+
+      ".lw-course-card.ps-verrouille:hover .ps-verrou,"+
+      ".lw-course-card.ps-verrouille:focus-within .ps-verrou,"+
+      ".lw-course-card.ps-verrouille.ps-verrou-on .ps-verrou{opacity:1;}"+
+      ".ps-verrou svg{width:46px;height:46px;stroke:#fff;fill:none;stroke-width:1.7;}"+
+      ".ps-verrou b{font:800 15px var(--ps-font,Figtree,sans-serif);}"+
+      ".ps-verrou span{font:500 12.5px/1.45 var(--ps-font,Figtree,sans-serif);opacity:.9;max-width:22ch;}"+
+      /* 🔴 Au doigt il n'existe pas de survol : le premier appui révèle le
+         cadenas (classe posée par le JS), le second suit le lien vers l'offre.
+         Sans ça, l'utilisateur mobile ne verrait jamais l'explication. */
+      "@media(hover:none){.lw-course-card.ps-verrouille .ps-verrou{transition:opacity .12s ease;}}";
+    (document.head||document.documentElement).appendChild(st);
+  }
+
+  var SVG_CADENAS='<svg viewBox="0 0 24 24" aria-hidden="true" stroke-linecap="round" stroke-linejoin="round">'+
+    '<rect x="4" y="10.5" width="16" height="10.5" rx="2.2"/>'+
+    '<path d="M8 10.5V7.4a4 4 0 0 1 8 0v3.1"/><circle cx="12" cy="15.6" r="1.35" fill="#fff" stroke="none"/></svg>';
+
+  function verrouCartes(){
+    if(CARTES_HORS_VERROU.test(location.pathname||"")) return;
+    if(accesOuvert(membrePS())) return;                    /* rien à verrouiller */
+    var cartes=document.querySelectorAll(".lw-course-card");
+    if(!cartes.length) return;
+    cssVerrou();
+    [].slice.call(cartes).forEach(function(c){
+      if(c.getAttribute("data-ps-verrou")) return;         /* idempotent */
+      c.setAttribute("data-ps-verrou","1");
+      c.classList.add("ps-verrouille");
+
+      var v=document.createElement("div");
+      v.className="ps-verrou";
+      v.innerHTML=SVG_CADENAS+"<b>Accès réservé</b><span>Ouvrez le catalogue pour accéder à ce cours.</span>";
+      c.appendChild(v);
+
+      /* 🔴 En phase de CAPTURE : le lien est à l'intérieur de la carte, et
+         LearnWorlds pose ses propres gestionnaires dessus. Attendre la phase
+         de bouillonnement, c'est arriver après que la navigation a commencé. */
+      c.addEventListener("click", function(e){
+        var tactile=false;
+        try{ tactile=window.matchMedia("(hover:none)").matches; }catch(_){}
+        if(tactile && !c.classList.contains("ps-verrou-on")){
+          /* Premier appui : on montre, on ne va nulle part. */
+          c.classList.add("ps-verrou-on");
+          e.preventDefault(); e.stopPropagation();
+          return;
+        }
+        e.preventDefault(); e.stopPropagation();
+        location.href = window.PS_URL_OFFRE || URL_OFFRE_DEFAUT;
+      }, true);
+    });
+  }
+
   function orienterMembre(){
     var u=membrePS();
     if(!u || document.getElementById("ps-acces")) return;
@@ -2620,6 +2715,12 @@
      mesuré). Sortie immédiate si la page n'a pas le contour activé, donc ces
      relances ne coûtent rien aux autres pages. */
   [1000,3000,6000,10000].forEach(function(d){ setTimeout(contourPage,d); });
+  /* 🔴 Mêmes délais que le contour, et pour la même raison : les cartes sont
+     construites par les scripts de PAGE, eux-mêmes en attente du rendu
+     LearnWorlds (~5 à 8 s mesuré). Poser le cadenas trop tôt n'en verrouillerait
+     qu'une partie — et une carte non verrouillée au milieu d'un catalogue
+     verrouillé, c'est une porte ouverte qui a l'air d'un bug. */
+  [1000,3000,6000,10000,15000].forEach(function(d){ setTimeout(verrouCartes,d); });
   /* 🔴 Le rappel arrive APRÈS la page, jamais pendant. Il n'a aucune urgence
      et il est idempotent (`#ps-rappel` déjà posé ⇒ sortie immédiate) : deux
      relances suffisent à rattraper un `me` pas encore là, sans jamais voler
