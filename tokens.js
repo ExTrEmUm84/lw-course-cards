@@ -715,7 +715,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-g";
+  window.PS_TOKENS_V="2026-08-04-h";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -956,6 +956,41 @@
      enrollment_closed) ; le jour où l'un l'utilisera, il faudra distinguer les
      deux plutôt que de tout masquer. ⏳ Un libellé POSITIF renvoyant vers la page
      carrefour prendra sa place — il attend que cette page existe. */
+  /* ÉCRIRE DANS UN CHAMP QUE LE SPA CONTRÔLE.
+     🔴 `champ.value = x` NE SUFFIT PAS. React garde sur chaque input un « value
+     tracker » : à la réception d'un `input`, il compare la valeur du DOM à celle
+     qu'il a mémorisée, et n'appelle `onChange` QUE si elles diffèrent. Or écrire
+     `.value` met à jour le tracker EN MÊME TEMPS que le DOM — les deux valeurs
+     concordent, l'événement est jugé sans effet, et l'état du composant reste
+     vide. Résultat : l'adresse s'affiche, mais le formulaire, lui, n'en a pas.
+     Le seul symptôme est à la soumission, et le champ a l'air rempli à l'écran.
+     ⇒ On passe par le setter natif du prototype, que le tracker n'intercepte
+     pas, puis on annonce le changement. `input` sert aux frameworks, `change`
+     aux validations à l'ancienne : on émet les deux.
+     Sur un champ ordinaire, ce chemin est stricto sensu équivalent à `.value=`.
+     Mécanisme REPRODUIT dans Chromium sur un champ muni du même tracker : par
+     `.value=` le changement est jugé sans effet, par ce chemin il passe.
+     ⚠️ CE QUI RESTE À VÉRIFIER EN PRODUCTION, c'est que le tunnel est bien monté
+     sur React — donc que le champ était réellement dans ce cas. Le test : sur
+     `/payment`, laisser le pré-remplissage faire, ne PAS toucher au champ, et
+     soumettre. S'il passe, c'était ça (ou ce n'était pas React, et ce chemin ne
+     change rien). */
+  function poserValeur(champ, v){
+    if(!champ) return false;
+    try{
+      var d=Object.getOwnPropertyDescriptor(window.HTMLInputElement.prototype,"value");
+      if(d && d.set) d.set.call(champ, v); else champ.value=v;
+    }catch(e){ champ.value=v; }
+    try{
+      champ.dispatchEvent(new Event("input",{bubbles:true}));
+      champ.dispatchEvent(new Event("change",{bubbles:true}));
+    }catch(e){}
+    return true;
+  }
+  /* Publié pour `inscription.js`, qui remplit le même genre de champ dans la
+     modale d'inscription. Une seule implémentation pour les deux usages. */
+  window.PS_POSER_VALEUR=poserValeur;
+
   /* ====================================================================
      TUNNEL DE PAIEMENT — on y repose l'adresse déjà saisie
      --------------------------------------------------------------------
@@ -980,9 +1015,7 @@
     (function poser(){
       var c=document.querySelector('input[name="email"]');
       if(c){
-        if(!String(c.value||"").trim()){
-          c.value=v; c.dispatchEvent(new Event("input",{bubbles:true}));
-        }
+        if(!String(c.value||"").trim()) poserValeur(c, v);
         try{ sessionStorage.removeItem(CLE); }catch(e){}
         return;
       }

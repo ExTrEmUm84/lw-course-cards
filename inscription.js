@@ -249,12 +249,25 @@
   /* Pré-remplit l'adresse déjà saisie : la redemander juste après l'avoir tapée
      est le genre de détail qui fait abandonner. La modale est construite par le
      SPA, donc elle n'existe pas encore au moment du clic — d'où les relances. */
+  /* 🔴 L'ÉCRITURE PASSE PAR `PS_POSER_VALEUR` (tokens.js), PAS PAR `.value`.
+     Le champ appartient à la modale du SPA : écrire `.value` directement met à
+     jour le tracker de React en même temps que le DOM, l'événement est alors jugé
+     sans effet et l'état du composant reste vide — le champ a l'air rempli et le
+     formulaire part sans adresse. Le détail du mécanisme est commenté au-dessus
+     de la fonction, dans `tokens.js`.
+     On ne dépend pas de sa présence : `prefill` n'est appelée que sur la branche
+     partenaire, donc après `PS_PARTENAIRE_EMAIL` — tokens.js a forcément tourné.
+     Le repli garde quand même l'ancien comportement plutôt que de ne rien écrire. */
   function prefill(email){
     var essais=0;
     (function pousser(){
       var f=document.getElementById("signUpForm");
       var c=f && f.querySelector('input[name="email"]');
-      if(c){ c.value=email; c.dispatchEvent(new Event("input",{bubbles:true})); return; }
+      if(c){
+        if(typeof window.PS_POSER_VALEUR==="function") window.PS_POSER_VALEUR(c, email);
+        else { c.value=email; c.dispatchEvent(new Event("input",{bubbles:true})); }
+        return;
+      }
       if(++essais<12) setTimeout(pousser,150);
     })();
   }
