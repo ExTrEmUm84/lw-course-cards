@@ -45,8 +45,44 @@
     return (location.pathname||"").split("/").filter(Boolean).pop()||"";
   }
 
+  /* 🔴 LES PICTOS VIENNENT DE `mega-menu.js` (`PS_MM_ICON`), PAS D'UN TROISIÈME JEU.
+     Le fichier les publie déjà pour le configurateur ; les redessiner ici, c'est
+     exactement ce qui a été trouvé le 04/08 dans les maquettes de cartes — un jeu
+     dessiné à la main qui montrait autre chose que le site.
+     🔴 La mise en page ne DÉPEND PAS d'eux : si `mega-menu.js` n'est pas encore
+     exécuté, la ligne s'affiche sans picto plutôt que de casser. */
+  function picto(cle){
+    var I=window.PS_MM_ICON;
+    return (I && I[cle]) ? I[cle] : "";
+  }
+
+  /* Contenu de la colonne de droite. 🔴 Écrit par moi faute de mieux, à faire
+     valider : « 60 cours » est le nombre compté par l'API le 04/08, pas
+     nécessairement celui que Ziad veut afficher. */
+  var ARGUMENTS=[
+    ["book",  "60 cours",                    "Du screening à l'intégration en MBB"],
+    ["clip",  "Études de cas",               "Cas réels de cabinets, corrigés"],
+    ["doc",   "Fiches cabinets et secteurs", "Pour arriver préparé en entretien"],
+    ["users", "Annuaire de partenaires",     "Pour vous entraîner à deux"]
+  ];
+
   var CSS=[
-    "#ps-insc{max-width:460px;margin:0 auto;padding:8px 0 40px;font-family:var(--ps-font,Figtree,sans-serif);}",
+    /* 🔴 Le fond gris est porté par NOTRE bloc, pas par la page : peindre
+       `#pageContent` toucherait aussi la section du header. */
+    "#ps-insc{background:var(--ps-surface-soft,#F7F8FB);border-radius:var(--ps-r-card,16px);"+
+      "padding:34px 28px;margin:0 auto 44px;max-width:1000px;font-family:var(--ps-font,Figtree,sans-serif);}",
+    "#ps-insc .ps-i-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:30px;align-items:start;}",
+    "#ps-insc .ps-i-form{background:#fff;border:1px solid var(--ps-border,#E6E9EF);"+
+      "border-radius:var(--ps-r-card,16px);padding:26px 24px;}",
+    "#ps-insc .ps-i-args{padding-top:6px;}",
+    "#ps-insc .ps-i-args h3{font:800 19px/1.3 var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text,#1c1f26) !important;"+
+      "letter-spacing:-.01em !important;margin:0 0 18px !important;}",
+    "#ps-insc .ps-i-arg{display:flex;gap:11px;align-items:flex-start;margin-bottom:14px;}",
+    "#ps-insc .ps-i-ic{width:26px;height:26px;border-radius:8px;background:var(--ps-accent-tint,#edf4ff);"+
+      "color:var(--ps-accent,#507EC5);display:flex;align-items:center;justify-content:center;flex:none;}",
+    "#ps-insc .ps-i-ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}",
+    "#ps-insc .ps-i-at{font:700 14px var(--ps-font,Figtree,sans-serif);color:var(--ps-text,#1c1f26);}",
+    "#ps-insc .ps-i-as{font:400 12.5px/1.5 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);}",
     "#ps-insc .ps-i-sur{font:800 10.5px var(--ps-font,Figtree,sans-serif);text-transform:uppercase;letter-spacing:.07em;color:var(--ps-text-soft,#676879);margin-bottom:10px;}",
     "#ps-insc h2.ps-i-t{font:800 25px/1.25 var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text,#1c1f26) !important;letter-spacing:-.02em !important;margin:0 !important;}",
     "#ps-insc .ps-i-d{font:400 14px/1.6 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);margin:10px 0 20px;}",
@@ -129,17 +165,25 @@
 
     poserCSS();
     var box=document.createElement("div"); box.id="ps-insc";
+    var args=ARGUMENTS.map(function(a){
+      return '<div class="ps-i-arg"><span class="ps-i-ic">'+picto(a[0])+'</span>'+
+             '<div><div class="ps-i-at">'+a[1]+'</div><div class="ps-i-as">'+a[2]+'</div></div></div>';
+    }).join("");
     box.innerHTML=
-      '<div class="ps-i-sur">Créer votre compte</div>'+
-      '<h2 class="ps-i-t">Commencez par votre e-mail</h2>'+
-      '<p class="ps-i-d">Si votre école est partenaire, votre accès est déjà pris en charge. '+
-        'Sinon, l\'accès se fait par abonnement.</p>'+
-      '<label for="ps-i-mail">Votre adresse e-mail</label>'+
-      '<input id="ps-i-mail" type="email" autocomplete="email" placeholder="prenom.nom@ecole.fr">'+
-      '<div class="ps-i-err" id="ps-i-err"></div>'+
-      '<button type="button" class="ps-i-go">Continuer</button>'+
-      '<p class="ps-i-aide">Votre école est partenaire et on vous demande de payer&nbsp;? '+
-        '<a href="mailto:contact@prepastrat.com">Écrivez-nous</a></p>';
+      '<div class="ps-i-grid">'+
+        '<div class="ps-i-form">'+
+          '<div class="ps-i-sur">Créer votre compte</div>'+
+          '<h2 class="ps-i-t">Commencez par votre e-mail</h2>'+
+          '<p class="ps-i-d">Si votre école est partenaire, votre accès est déjà pris en charge.</p>'+
+          '<label for="ps-i-mail">Votre adresse e-mail</label>'+
+          '<input id="ps-i-mail" type="email" autocomplete="email" placeholder="prenom.nom@ecole.fr">'+
+          '<div class="ps-i-err" id="ps-i-err"></div>'+
+          '<button type="button" class="ps-i-go">Continuer</button>'+
+          '<p class="ps-i-aide">Votre école est partenaire et on vous demande de payer&nbsp;? '+
+            '<a href="mailto:contact@prepastrat.com">Écrivez-nous</a></p>'+
+        '</div>'+
+        '<div class="ps-i-args"><h3>Tout le catalogue, un seul accès</h3>'+args+'</div>'+
+      '</div>';
     /* 🔴🔴 SURTOUT PAS `firstChild` — LE HEADER EST UNE SECTION DE `#pageContent`.
        C'est le piège déjà noté sur la home (« section 1 = topbar, section 2 = le
        vrai hero »), et je l'ai reproduit : inséré en première position, mon bloc
