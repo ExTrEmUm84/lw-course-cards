@@ -709,7 +709,7 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-04-b";
+  window.PS_TOKENS_V="2026-08-04-c";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -893,6 +893,130 @@
     var st=document.createElement("style"); st.id="ps-wg-hide";
     st.textContent=".weglot-container,aside.weglot_switcher{display:none !important;}";
     (document.head||document.documentElement).appendChild(st);
+  })();
+
+  /* ====================================================================
+     FORMULAIRES D'INSCRIPTION ET DE CONNEXION (site-wide)
+     --------------------------------------------------------------------
+     Ce n'est PAS une page : `/signup` renvoie 404. C'est une modale native
+     `#animatedModal.loginForm2`, injectée par l'application LearnWorlds quand on
+     clique un lien `openformslink`. D'où le choix de la traiter ici : `tokens.js`
+     est chargé sur toutes les pages ET servi aux visiteurs DÉCONNECTÉS — c'est-à-
+     dire exactement le public qui s'inscrit.
+
+     🔴 EN CSS PUR, ET C'EST LE POINT. La modale n'existe pas au chargement : elle
+     apparaît au clic. Une feuille posée d'avance s'applique au moment où le DOM
+     arrive, sans observer ni relancer quoi que ce soit. Toute autre approche
+     (réécrire le formulaire en JS) se battrait avec Weglot, qui traduit ces
+     libellés — la règle du 25/07 : ce qui réécrit du texte à chaque passage fait
+     clignoter la page. On ne touche donc AUCUN texte, seulement l'apparence.
+
+     MESURÉ AVANT D'ÉCRIRE (modale ouverte sur le vrai site, en anonyme) :
+       `#signUpForm` = 420 px de large dans une modale de 990 -> 570 px perdus,
+       et 1363 px de contenu pour 820 px de fenêtre : on scrollait pour créer un
+       compte. 11 champs, chacun dans `.login-form-input-wrapper` de 360×76.
+       Champs : 49 px, rayon 7, fond #F5F3F5, police **Raleway** (pas la nôtre).
+       Bouton : #3887B4 — le bleu des FILTRES, pas l'accent de la marque.
+
+     🔴 LE PASSAGE À DEUX COLONNES EST LE VRAI CORRECTIF. Restyler sans élargir
+     aurait laissé le défaut principal — la longueur. La grille ne s'applique qu'à
+     `#signUpForm` : le formulaire de CONNEXION n'a que deux champs, deux colonnes
+     l'auraient rendu bancal. Les champs qui respirent mal à moitié de largeur
+     (langue en radios, case d'acceptation) reprennent toute la ligne.
+     🔴 `!important` partout : les classes de LearnWorlds
+     (`.learnworlds-input-solid-light`…) portent leurs propres valeurs et gagnent
+     autrement. Même raison que dans `mega-menu.js`.
+     ⚠️ CE QUI NE SE RÈGLE PAS ICI, ce sont les LIBELLÉS et la LISTE des champs :
+     ils viennent de la configuration LearnWorlds (Users -> User Fields). Deux
+     d'entre eux s'affichent en clé technique brute — « annuaire » (le
+     consentement RGPD de l'annuaire !) et « contact ». Les corriger en JS
+     masquerait un défaut de configuration au lieu de le réparer. */
+  (function(){
+    if(document.getElementById("ps-form-ps")) return;
+    var F=[
+      /* ---------- la boîte ---------- */
+      "#animatedModal .modal-content{font-family:var(--ps-font,Figtree,sans-serif) !important;}",
+      "#animatedModal #signUpForm{width:min(820px,92vw) !important;max-width:none !important;}",
+      "#animatedModal .landing-form-title{font:800 27px/1.25 var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text,#1c1f26) !important;letter-spacing:-.02em !important;}",
+      /* ---------- deux colonnes, inscription seulement ---------- */
+      "#animatedModal #signUpForm .-form-inputs{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:2px 22px !important;}",
+      /* un champ à radios ou une case d'acceptation tient mal sur une demi-ligne.
+         🔴 DEUX RÈGLES SÉPARÉES, ET C'EST VOLONTAIRE : un sélecteur invalide
+         invalide TOUTE la liste qui le contient. Réunies, un navigateur sans
+         `:has()` aurait aussi perdu la première ligne — pourtant parfaitement
+         valide — et la case d'acceptation serait retombée sur une demi-colonne.
+         🔴🔴 `:not(.user-custom-field)` EST INDISPENSABLE, ET J'AI DÛ LE MESURER
+         POUR LE VOIR. `.extra-form-input-wrapper` ne désigne PAS la case
+         d'acceptation : les CINQ champs personnalisés la portent aussi. Sans le
+         `:not`, École, Niveau, Recherche, annuaire et contact passaient tous en
+         pleine largeur — 7 lignes sur 11, et les deux colonnes ne servaient plus
+         à rien. Je l'avais écrit sur la foi d'un relevé qui TRONQUAIT les classes
+         aux quatre premières : la cinquième était justement celle-là. Un
+         sélecteur bâti sur une observation coupée décrit une page qui n'existe pas. */
+      "#animatedModal #signUpForm .-form-inputs > .extra-form-input-wrapper:not(.user-custom-field){grid-column:1 / -1 !important;}",
+      "#animatedModal #signUpForm .-form-inputs > .user-custom-field:has(input[type=radio]),"+
+      "#animatedModal #signUpForm .-form-inputs > .user-custom-field:has(input[type=checkbox])"+
+      "{grid-column:1 / -1 !important;}",
+      "@media(max-width:760px){#animatedModal #signUpForm .-form-inputs{grid-template-columns:1fr !important;}}",
+      /* ---------- les champs ---------- */
+      "#animatedModal .landing-form-input,#animatedModal .learnworlds-input,#animatedModal select.learnworlds-input{"+
+        "font-family:var(--ps-font,Figtree,sans-serif) !important;font-size:14.5px !important;"+
+        "background:#fff !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;"+
+        "border-radius:var(--ps-r-btn,10px) !important;height:46px !important;color:var(--ps-text,#1c1f26) !important;}",
+      /* 🔴 Le focus reprend le bleu des FILTRES (#3887B4) et non l'accent : c'est le
+         système de couleur des CONTRÔLES, celui du champ de recherche `.-search-box`.
+         Les deux accents du design system ne se mélangent pas. */
+      "#animatedModal .landing-form-input:focus,#animatedModal .learnworlds-input:focus{"+
+        "border-color:#3887B4 !important;box-shadow:0 0 0 3px rgba(56,135,180,.15) !important;outline:0 !important;}",
+      "#animatedModal .login-form-input-wrapper label,#animatedModal .landing-form-label{"+
+        "font:600 12.5px var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text-soft,#676879) !important;}",
+      /* ---------- le bouton ----------
+         🔴 `.-login-but` EST MESURÉ, PAS DEVINÉ. J'avais écrit `.signin-btn` par
+         symétrie avec `.signup-btn` : cette classe n'existe pas. Le bouton de
+         CONNEXION serait donc resté dans le bleu natif #3887B4 pendant que celui
+         d'inscription passait à l'accent de la marque — deux modales voisines,
+         deux bleus différents, introduits par le correctif censé les accorder.
+         Trouvé en ouvrant l'autre modale, pas en relisant le code. */
+      "#animatedModal .signup-btn,#animatedModal .-login-but,#animatedModal .landing-form-small-button{"+
+        "background:var(--ps-accent,#507EC5) !important;border:0 !important;"+
+        "border-radius:var(--ps-r-btn,10px) !important;height:52px !important;"+
+        "font:700 15px var(--ps-font,Figtree,sans-serif) !important;color:#fff !important;transition:background .18s !important;}",
+      "#animatedModal .signup-btn:hover,#animatedModal .-login-but:hover,#animatedModal .landing-form-small-button:hover{"+
+        "background:var(--ps-accent-hover,#486798) !important;}",
+      "#animatedModal .-form-create-forgot a{font-family:var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-accent,#507EC5) !important;}",
+      /* ---------- le logo, en haut des DEUX modales ----------
+         🔴 `.js-form-enterkey` est le seul ancrage COMMUN : la modale
+         d'inscription est `#signUpForm.landing-form`, celle de connexion
+         `.login-form`, et cette dernière n'a même pas de conteneur de titre. Viser
+         `.landing-form-title-social` aurait posé le logo sur l'inscription
+         seulement — mesuré avant d'écrire, en ouvrant les deux.
+         🔴 La règle est sous `html.ps-logo-ok` : sans ça, un logo introuvable
+         laisserait un BLOC VIDE de 38 px en haut du formulaire. Une place réservée
+         pour rien est pire que pas de logo. */
+      "html.ps-logo-ok #animatedModal .js-form-enterkey::before{content:'' !important;display:block !important;"+
+        "height:38px !important;margin:0 0 20px !important;background:var(--ps-form-logo) center/contain no-repeat !important;}"
+    ].join("\n");
+    var st=document.createElement("style"); st.id="ps-form-ps"; st.textContent=F;
+    (document.head||document.documentElement).appendChild(st);
+
+    /* 🔴 LE LOGO EST LU SUR L'EN-TÊTE, PAS ÉCRIT EN DUR. L'URL LearnWorlds porte
+       un hash propre au fichier téléversé (`…/0d0f4e02…png`) : la figer ici, c'est
+       afficher l'ANCIEN logo le jour où Ziad le remplace, sans que rien ne le
+       signale — le même piège que les URLs de photo de `me.image`, relevé le 29/07.
+       En le lisant sur la page, le formulaire suit toujours le logo du site.
+       🔴 Relances : `tokens.js` s'exécute avant que l'en-tête ne soit peint. Sans
+       elles, la variable ne serait posée qu'une fois, trop tôt, et jamais.
+       On n'écrit RIEN si on ne trouve pas : pas de logo plutôt qu'un logo faux. */
+    var poseLogo=function(){
+      if(document.documentElement.classList.contains("ps-logo-ok")) return true;
+      var img=document.querySelector(".lw-topbar-logo-wrapper img, .lw-topbar-logo-col img");
+      var src=img && img.currentSrc || img && img.src || "";
+      if(!/^https:\/\//.test(src)) return false;
+      document.documentElement.style.setProperty("--ps-form-logo",'url("'+src.replace(/["\\]/g,"")+'")');
+      document.documentElement.classList.add("ps-logo-ok");
+      return true;
+    };
+    if(!poseLogo()) [120,400,900,2000].forEach(function(d){ setTimeout(poseLogo,d); });
   })();
 
   /* ====================================================================
