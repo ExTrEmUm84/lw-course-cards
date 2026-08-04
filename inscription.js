@@ -124,7 +124,7 @@
 
   function construire(){
     if(document.getElementById("ps-insc")) return true;
-    var hote=document.getElementById("pageContent")||document.querySelector(".learnworlds-section-content");
+    var hote=document.getElementById("pageContent");
     if(!hote) return false;
 
     poserCSS();
@@ -140,7 +140,17 @@
       '<button type="button" class="ps-i-go">Continuer</button>'+
       '<p class="ps-i-aide">Votre école est partenaire et on vous demande de payer&nbsp;? '+
         '<a href="mailto:contact@prepastrat.com">Écrivez-nous</a></p>';
-    hote.insertBefore(box, hote.firstChild);
+    /* 🔴🔴 SURTOUT PAS `firstChild` — LE HEADER EST UNE SECTION DE `#pageContent`.
+       C'est le piège déjà noté sur la home (« section 1 = topbar, section 2 = le
+       vrai hero »), et je l'ai reproduit : inséré en première position, mon bloc
+       poussait la barre de navigation SOUS lui. Ziad l'a vu tout de suite —
+       « le header est bas ». En production, sur la page d'entrée du site.
+       On insère donc APRÈS la section qui contient la barre de navigation, et à
+       défaut on ajoute à la fin : dans les deux cas le header reste en tête. */
+    var barre=hote.querySelector("nav.lw-topbar-menu, .lw-topbar, [class*='topbar']");
+    var sectionBarre=barre && barre.closest("#pageContent > *");
+    if(sectionBarre && sectionBarre.parentElement===hote) hote.insertBefore(box, sectionBarre.nextSibling);
+    else hote.appendChild(box);
 
     var champ=box.querySelector("#ps-i-mail"), err=box.querySelector("#ps-i-err");
     function router(){
