@@ -715,7 +715,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-i";
+  window.PS_TOKENS_V="2026-08-04-j";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2416,6 +2416,105 @@
     (document.body||document.documentElement).appendChild(boite);
   }
 
+  /* ====================================================================
+     ORIENTATION APRÈS AUTHENTIFICATION  (04/08, nuit)
+     --------------------------------------------------------------------
+     La page d'entrée aiguille sur l'adresse SAISIE. Google et LinkedIn la
+     court-circuitent : le compte se crée, la personne atterrit sur le site,
+     et plus rien ne la mène nulle part. Mesuré sur un vrai compte créé par
+     Ziad via Google (`@boks.app`) : catalogue visible, mais un clic sur un
+     cours donne une PAGE D'ERREUR sur la page Cours, et une page de vente
+     SANS BOUTON NI PRIX sur S'entraîner. Aucun chemin d'achat, nulle part.
+
+     🔴 On rattrape donc APRÈS l'authentification, là où l'adresse est enfin
+     connue : `me.email`. La règle de domaine est celle de la page d'entrée
+     (`PS_PARTENAIRE_EMAIL`), il n'y en a toujours qu'une.
+
+     🔴🔴 UNE ÉCOLE PARTENAIRE NE VOIT JAMAIS DE PAYWALL, MÊME SANS ACCÈS.
+     C'est la règle la plus importante de ce bloc. Entre l'inscription et
+     l'exécution de l'automatisation, un étudiant d'école a zéro programme :
+     le pousser vers l'abonnement lui réclamerait 99 € pour un accès que son
+     école paie déjà. C'est exactement le pire résultat par le chemin par
+     défaut — le défaut que j'ai livré ce matin sur la page d'entrée. Ici on
+     préfère un message d'attente à une erreur de facturation.
+
+     🔴 On ORIENTE, on ne redirige pas. La personne vient de créer son compte ;
+     l'expulser vers un tunnel de paiement avant qu'elle ait rien vu, c'est
+     transformer une inscription réussie en sortie de site.
+     ==================================================================== */
+  var URL_OFFRE_DEFAUT="/program/collection-3-mois";
+
+  /* Pure et isolée : c'est elle qui décide, et elle seule mérite d'être relue
+     quand le comportement surprend. `partenaire` est le résultat de la règle de
+     domaine, `programmes` le nombre d'accès déjà obtenus. */
+  function orientation(u, partenaire, programmes){
+    if(!u) return {montrer:false};
+    if(u.is_admin) return {montrer:false};              /* l'admin voit tout, il n'achète rien */
+    if(programmes>0) return {montrer:false};            /* accès déjà en place */
+    if(partenaire) return {montrer:true, mode:"ecole", ecole:partenaire.nom||""};
+    return {montrer:true, mode:"offre"};
+  }
+
+  function orienterMembre(){
+    var u=membrePS();
+    if(!u || document.getElementById("ps-acces")) return;
+    if(/^\/(path-player|course-player|payment)/.test(location.pathname||"")) return;
+
+    var part=null;
+    try{ part=window.PS_PARTENAIRE_EMAIL ? window.PS_PARTENAIRE_EMAIL(u.email) : null; }catch(e){}
+    var etat=orientation(u, part, (u.userLearningPrograms||[]).length);
+    if(!etat.montrer) return;
+
+    if(!document.getElementById("ps-acces-css")){
+      var st=document.createElement("style"); st.id="ps-acces-css";
+      st.textContent=
+        "#ps-acces{position:relative;z-index:60;display:flex;align-items:center;justify-content:center;"+
+        "gap:16px;flex-wrap:wrap;padding:13px 22px;font-family:var(--ps-font,Figtree,sans-serif);"+
+        "background:var(--ps-accent,#507EC5);color:#fff;}"+
+        "#ps-acces.ps-acces-ecole{background:#E4F5EC;color:#1b5f41;border-bottom:1px solid #c6e7d5;}"+
+        "#ps-acces p{margin:0;font:600 14px/1.45 var(--ps-font,Figtree,sans-serif);}"+
+        "#ps-acces a.ps-acces-cta{background:#fff;color:var(--ps-accent,#507EC5);text-decoration:none;"+
+        "border-radius:var(--ps-r-btn,10px);padding:9px 18px;font:800 13.5px var(--ps-font,Figtree,sans-serif);"+
+        "white-space:nowrap;}"+
+        "#ps-acces a.ps-acces-cta:hover{background:#eef3fb;}"+
+        "#ps-acces.ps-acces-ecole a{color:#1b5f41;}"+
+        "@media(max-width:640px){#ps-acces{padding:12px 14px;text-align:center}}";
+      document.head.appendChild(st);
+    }
+
+    var b=document.createElement("div");
+    b.id="ps-acces";
+    var p=document.createElement("p");
+
+    if(etat.mode==="ecole"){
+      b.className="ps-acces-ecole";
+      /* 🔴 Aucun bouton d'achat ici, volontairement. */
+      p.textContent="Votre accès est pris en charge par "+(etat.ecole||"votre école")+
+        ". S'il n'apparaît pas d'ici quelques minutes, écrivez-nous.";
+      var a=document.createElement("a");
+      a.href="mailto:contact@prepastrat.com"; a.textContent="Nous écrire";
+      b.appendChild(p); b.appendChild(a);
+    }else{
+      p.textContent="Il vous reste une étape pour ouvrir le catalogue.";
+      var cta=document.createElement("a");
+      cta.className="ps-acces-cta";
+      cta.href=window.PS_URL_OFFRE || URL_OFFRE_DEFAUT;
+      cta.textContent="Voir les formules";
+      b.appendChild(p); b.appendChild(cta);
+    }
+
+    /* 🔴 EN TÊTE DE `#pageContent`, MAIS APRÈS LA SECTION DE LA BARRE DE
+       NAVIGATION — le header EST une section de `#pageContent`. Le piège est
+       écrit dans nos notes depuis la refonte de la home, et je l'ai quand même
+       reproduit une fois sur la page d'inscription. */
+    var hote=document.getElementById("pageContent");
+    if(!hote) return;
+    var barre=hote.querySelector("nav.lw-topbar-menu, .lw-topbar, [class*='topbar']");
+    var sectionBarre=barre && barre.closest("#pageContent > *");
+    if(sectionBarre && sectionBarre.parentElement===hote) hote.insertBefore(b, sectionBarre.nextSibling);
+    else hote.insertBefore(b, hote.firstChild);
+  }
+
   /* 🔴 GARDE-FOU CONTRE LA DÉRIVE SILENCIEUSE. La table ci-dessus doit rester
      alignée sur les champs cochés « édition profil » dans LearnWorlds. Le jour
      où l'un est décoché, on réclamerait un champ introuvable. Sur /profile —
@@ -2453,6 +2552,12 @@
      relances suffisent à rattraper un `me` pas encore là, sans jamais voler
      l'attention au moment où la personne cherche son cours. */
   [1500,4000].forEach(function(d){ setTimeout(rappelProfil,d); });
+  /* 🔴 L'orientation passe AVANT le rappel de profil dans le temps : quelqu'un
+     qui n'a pas encore d'accès n'a que faire de compléter sa fiche d'annuaire.
+     Elle est aussi relancée plus longtemps — juste après une inscription,
+     `me.userLearningPrograms` peut arriver après le premier rendu, et conclure
+     trop tôt afficherait un paywall à quelqu'un qui vient d'obtenir son accès. */
+  [900,2200,5000,9000].forEach(function(d){ setTimeout(orienterMembre,d); });
   [2500,6000].forEach(function(d){ setTimeout(verifierChampsProfil,d); });
   /* 🔴 Le dépôt est relancé PLUS TARD que le reste : les cartes du Site Builder
      n'apparaissent qu'au bout de plusieurs secondes (mesuré : ~5 à 8 s avant que
