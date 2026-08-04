@@ -715,7 +715,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-k";
+  window.PS_TOKENS_V="2026-08-04-l";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2442,7 +2442,11 @@
      l'expulser vers un tunnel de paiement avant qu'elle ait rien vu, c'est
      transformer une inscription réussie en sortie de site.
      ==================================================================== */
-  var URL_OFFRE_DEFAUT="/program/collection-3-mois";
+  /* La page d'offre, créée le 04/08 sous le slug `formules` (vérifié : 200).
+     🔴 Elle a d'abord pointé vers `/program/collection-3-mois` — la page de
+     programme native — le temps que celle-ci existe : un bandeau qui envoie
+     vers une page inexistante est pire que pas de bandeau du tout. */
+  var URL_OFFRE_DEFAUT="/formules";
 
   /* Pure et isolée : c'est elle qui décide, et elle seule mérite d'être relue
      quand le comportement surprend. `partenaire` est le résultat de la règle de
@@ -2605,8 +2609,8 @@
      jamais, sans la moindre erreur en console.
      🔴 Le test porte sur le slug ET sur le chemin : la classe `slug-*` arrive
      avec le rendu de LearnWorlds, le chemin est disponible tout de suite. */
-  if((/^\/abonnement(\/|$)/.test(location.pathname||"") ||
-      (document.body && document.body.classList.contains("slug-abonnement"))) &&
+  if((/^\/formules(\/|$)/.test(location.pathname||"") ||
+      (document.body && document.body.classList.contains("slug-formules"))) &&
      !document.getElementById("ps-abo-js")){
     var _ab=document.createElement("script");
     _ab.id="ps-abo-js";

@@ -27,7 +27,12 @@
 (function () {
   "use strict";
 
-  var SLUG = "abonnement";
+  /* 🔴 Le slug de la page, PAS le nom de ce fichier. Ziad renomme ses pages
+     souvent — quatre slugs morts en une semaine début août — donc le fichier
+     garde un nom qui décrit ce qu'il FAIT, et seule cette constante suit la
+     page. Page créée le 04/08 sous `formules` (vérifié : `/formules` répond
+     200, `/abonnement` est en 404). */
+  var SLUG = "formules";
 
   /* Une entrée par formule. L'ordre est celui de l'affichage. */
   var FORMULES = [
