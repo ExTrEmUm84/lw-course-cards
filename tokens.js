@@ -242,10 +242,18 @@
      (règle CSS de `.ps-mm-ic`). C'est le cas voulu pour Profil et Déconnexion :
      ce sont des entrées de COMPTE, pas de contenu — les laisser sobres les
      distingue du reste.
-     ⏳ Table tenue à la main pour l'instant. La rendre réglable depuis le
-     configurateur demande aussi une modification du Worker (c'est LUI qui
-     reconstruit le fichier publié, et il valide chaque valeur) : à faire dans un
-     second temps, le dépôt du Worker n'étant pas celui-ci. */
+     🔴🔴 CE BLOC EST RÉÉCRIT PAR LE CONFIGURATEUR (04/08). Mêmes règles que les
+     blocs TOKENS et PAGES : **aucun commentaire ni logique entre les marqueurs**,
+     ils seraient effacés à la prochaine publication. Les LIBELLÉS des entrées
+     (« Fiches Secteur », « Bootcamp »…) vivent donc dans le configurateur.
+     🔴 La clé peut porter une BARRE OBLIQUE : le menu vise `course/supports-webinar`,
+     qui n'est pas un slug de page mais un chemin de cours. Le Worker a un motif de
+     clé distinct de celui du bloc PAGES pour cette raison — le motif des pages
+     refuserait cette entrée, et le Webinar perdrait sa couleur.
+     🔴 Une entrée ABSENTE de la table retombe sur l'accent de la marque. C'est un
+     état qui se règle : dans le configurateur, décocher la case d'une entrée la
+     retire d'ici. Profil et Déconnexion n'y figurent pas du tout, volontairement. */
+/* >>> DEBUT MENU — réécrit par le configurateur, ne rien ajouter ici */
   var MENU_COULEURS={
     "formation-par-modules":"#507EC5",
     "fiches-cabinet":"#00C875",
@@ -257,6 +265,7 @@
     "bootcamp-prepastrat":"#D98500",
     "entretiens-en-conditions-reelles":"#8A45C9"
   };
+/* <<< FIN MENU */
   window.PS_MENU_COULEURS=MENU_COULEURS;        // lu par mega-menu.js
 
   function _chan(hex){var h=hex.replace("#","");if(h.length===3)h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];var n=parseInt(h,16);return [(n>>16)&255,(n>>8)&255,n&255];}

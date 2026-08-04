@@ -25,7 +25,14 @@
 (function(){
   "use strict";
 
-  if(!document.getElementById("ps-figtree")){
+  /* 🔴 `PS_CSS_ONLY` : drapeau posé par le CONFIGURATEUR et par lui seul (le site
+     ne le pose jamais). Sous ce drapeau, ce fichier ne fait plus rien d'autre que
+     PUBLIER ses pictos et sa feuille — il ne construit aucun menu, n'observe rien
+     et ne touche pas au <head> de l'outil. Même contrat que `tokens.js`.
+     Pourquoi : le configurateur doit montrer les VRAIS pictos du menu quand on en
+     règle la couleur. Sans ça il en garderait une copie, et une copie dérive —
+     c'est exactement ce qui a été retiré des maquettes de cartes le 04/08. */
+  if(!window.PS_CSS_ONLY && !document.getElementById("ps-figtree")){
     var f=document.createElement("link");
     f.id="ps-figtree"; f.rel="stylesheet";
     f.href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap";
@@ -163,6 +170,24 @@
     /* sous 900px la bande deviendrait illisible sur une ligne : on la scrolle */
     "@media(max-width:900px){"+NAV+".lw-topbar-submenu.js-submenu-list{justify-content:flex-start !important;overflow-x:auto !important;gap:28px !important;}}"
   ];
+  /* ====================================================================
+     PUBLICATION POUR LE CONFIGURATEUR — pictos, choix du picto, feuille
+     --------------------------------------------------------------------
+     Trois choses, et rien de plus : la table des SVG, la fonction qui choisit
+     lequel va sur quelle entrée, et le texte de la feuille. Le configurateur
+     s'en sert pour peindre ses lignes de réglage avec le picto exact que le
+     site posera — même glyphe, même pastille de 34px, même rayon.
+     🔴 `pick` est publiée elle aussi : recopier ses douze motifs dans l'outil
+     ferait diverger le picto affiché de celui du site au premier ajout d'entrée.
+     🔴 Publié AVANT toute écriture dans le document : sous `PS_CSS_ONLY` on sort
+     juste après, donc rien de ce qui suit (feuille injectée, mesures, observer,
+     construction du menu) ne s'exécute dans le configurateur. */
+  window.PS_CSS=window.PS_CSS||{};
+  window.PS_CSS.menu=CSS.join("\n");
+  window.PS_MM_ICON=ICON;
+  window.PS_MM_PICK=pick;
+  if(window.PS_CSS_ONLY) return;
+
   /* (le cycle de six couleurs par `nth-child` vivait ici : supprimé le 04/08,
      la couleur est posée une seule fois sur `.ps-mm-ic`, plus haut) */
   var st=document.getElementById("ps-megamenu-style");

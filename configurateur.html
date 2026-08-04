@@ -291,7 +291,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-k</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-m</span></p>
     <!-- 🔴 TEXTE REFAIT (04/08) : il datait du temps où publier voulait dire
          « copier le bloc de code en bas et le coller dans tokens.js ». Ce bloc a été
          retiré le 03/08 et c'est le Worker qui écrit désormais — la phrase promettait
@@ -301,43 +301,19 @@ body.ps-verrou .ps-porte{display:grid}
     site lui-même. <strong>Rien ne part en ligne tant que tu n'as pas cliqué sur « Publier sur le
     site », en bas de cette colonne.</strong></p>
 
-    <h2>Marque</h2>
-    <div class="row"><label>Couleur principale</label><code>--ps-accent</code><input type="color" id="accent"></div>
-    <div class="lien"><input type="checkbox" id="deriv" checked><label for="deriv" style="flex:none">déduire le survol et la teinte de la couleur principale</label></div>
-    <div class="row"><label>Couleur au survol</label><code>-hover</code><input type="color" id="accentHover"></div>
-    <div class="row"><label>Couleur teintée (fonds)</label><code>-tint</code><input type="color" id="accentTint"></div>
-
-    <h2>Texte, bords, surfaces</h2>
-    <div class="row"><label>Texte fort (titres)</label><code>--ps-text</code><input type="color" id="text"></div>
-    <div class="row"><label>Texte doux</label><code>-soft</code><input type="color" id="textSoft"></div>
-    <div class="row"><label>Bord des cartes</label><code>--ps-border</code><input type="color" id="border"></div>
-    <div class="row"><label>Fond doux (panneaux)</label><code>-surface-soft</code><input type="color" id="surfaceSoft"></div>
-
-    <h2>Typographie</h2>
-    <select id="fontSel">
-      <option value="Figtree,-apple-system,Segoe UI,Roboto,sans-serif">Figtree (actuelle)</option>
-      <option value="Inter,-apple-system,Segoe UI,Roboto,sans-serif">Inter</option>
-      <option value="Poppins,-apple-system,Segoe UI,Roboto,sans-serif">Poppins</option>
-      <option value="Manrope,-apple-system,Segoe UI,Roboto,sans-serif">Manrope</option>
-      <option value="DM Sans,-apple-system,Segoe UI,Roboto,sans-serif">DM Sans</option>
-      <option value="Space Grotesk,-apple-system,Segoe UI,Roboto,sans-serif">Space Grotesk</option>
-      <option value="Georgia,serif">Georgia (à empattements)</option>
-      <option value="__custom">Autre… (saisir à la main)</option>
-    </select>
-    <div class="row" style="margin-top:7px"><input type="text" id="fontTxt" placeholder="ex. Inter,sans-serif"></div>
-    <div class="note">⚠️ La police doit être <strong>disponible sur le site LearnWorlds</strong>. L'aperçu ici
-    charge les polices depuis Google Fonts ; si la tienne n'est pas installée côté LearnWorlds,
-    le site retombera sur la suivante de la liste.</div>
-
-    <h2>Arrondis</h2>
-    <div class="row"><label>Cartes</label><input type="range" id="rCard" min="0" max="32" step="1"><span class="val" id="rCardV"></span></div>
-    <div class="lien">↳ le liseré suit tout seul (<code>rayon − 2px</code>)</div>
-    <div class="row"><label>Pastilles</label><input type="range" id="rPill" min="0" max="999" step="1"><span class="val" id="rPillV"></span></div>
-    <div class="row"><label>Boutons</label><input type="range" id="rBtn" min="0" max="28" step="1"><span class="val" id="rBtnV"></span></div>
-
-    <div class="note" style="margin:16px 0 0">Tout ce qui ne vaut que pour <strong>une</strong> page — sa couleur, ses
-      palettes, ses vidéos — est dans le bloc à onglets, à droite. Cette colonne ne garde que ce qui s'applique
-      à <strong>tout le site</strong>.</div>
+    <!-- 🔴🔴 TOUS LES RÉGLAGES SONT PASSÉS DANS LE BLOC À ONGLETS (04/08, demande de
+         Ziad). Le global ne vivait plus dans cette colonne que par héritage : il y
+         était arrivé quand le bloc à onglets n'existait pas encore, et le partage
+         « global à gauche / page à droite » obligeait à lire à deux endroits.
+         Un seul endroit désormais : l'onglet **Général** pour ce qui vaut partout,
+         un onglet par page pour le reste.
+         🔴 LE HTML A ÉTÉ DÉPLACÉ TEL QUEL, ids compris (`accent`, `deriv`, `fontSel`,
+         `rCard`…). Tout le code qui lie ces contrôles le fait par `getElementById` au
+         démarrage : les renommer ou les reconstruire aurait cassé le branchement en
+         silence — les curseurs auraient bougé sans que rien ne suive. -->
+    <div class="note" style="margin:0 0 4px">Tous les réglages sont dans le bloc à onglets, à droite&nbsp;:
+      <strong>Général</strong> pour ce qui s'applique à tout le site (marque, typographie, arrondis, menu),
+      puis un onglet par page.</div>
 
     <!-- 🔴🔴 « Tout réinitialiser » RAMENAIT AUX VALEURS ÉCRITES EN DUR, pas à
          celles du site. C'était le piège corrigé au chargement (l'outil partait de
@@ -379,10 +355,88 @@ body.ps-verrou .ps-porte{display:grid}
       tokens et les mêmes relations qu'en production — mais seul le site fait foi.<br><strong id="cssReelEtat">…</strong><br>Aperçu de la page : <strong id="apercuPageNom">…</strong>
     </div>
 
-    <h3 data-p="*">Configuration par page</h3>
+    <!-- « par page » retiré du titre : le bloc porte désormais AUSSI l'onglet
+         Général. Un titre qui annonce autre chose que ce que contient le bloc,
+         c'est le même défaut qu'une case à cocher qui ne fait rien. -->
+    <h3 data-p="*">Configuration</h3>
     <div class="bloc" data-p="*" style="padding:0">
       <div class="ptabs" id="ptabs"></div>
       <div id="pageCfg" style="padding:22px 26px 26px"></div>
+      <!-- ================= ONGLET GÉNÉRAL =================
+           Ce qui s'applique à TOUT LE SITE. Écrit en dur ici plutôt que construit en
+           JS comme les onglets de page : ces contrôles sont branchés une seule fois
+           au démarrage, par leurs ids. Les reconstruire à chaque changement d'onglet
+           les détacherait de leurs écouteurs — c'est exactement le défaut corrigé le
+           03/08 sur le sélecteur de couleur de page, qui se reconstruisait pendant
+           qu'on s'en servait et ne répondait plus. -->
+      <div id="cfgGeneral" style="padding:22px 26px 26px;display:none">
+        <div class="pcfg">
+
+          <div class="card">
+            <h4>Marque</h4>
+            <p class="expl">La couleur principale du site. Le survol et la teinte de fond en sont déduits&nbsp;;
+              décoche pour les régler à la main.</p>
+            <div class="row"><label>Couleur principale</label><code>--ps-accent</code><input type="color" id="accent"></div>
+            <div class="lien"><input type="checkbox" id="deriv" checked><label for="deriv" style="flex:none">déduire le survol et la teinte de la couleur principale</label></div>
+            <div class="row"><label>Couleur au survol</label><code>-hover</code><input type="color" id="accentHover"></div>
+            <div class="row"><label>Couleur teintée (fonds)</label><code>-tint</code><input type="color" id="accentTint"></div>
+          </div>
+
+          <div class="card">
+            <h4>Texte, bords, surfaces</h4>
+            <p class="expl">Les gris du site&nbsp;: titres, textes secondaires, bords de cartes et fonds de panneaux.</p>
+            <div class="row"><label>Texte fort (titres)</label><code>--ps-text</code><input type="color" id="text"></div>
+            <div class="row"><label>Texte doux</label><code>-soft</code><input type="color" id="textSoft"></div>
+            <div class="row"><label>Bord des cartes</label><code>--ps-border</code><input type="color" id="border"></div>
+            <div class="row"><label>Fond doux (panneaux)</label><code>-surface-soft</code><input type="color" id="surfaceSoft"></div>
+          </div>
+
+          <div class="card">
+            <h4>Typographie</h4>
+            <p class="expl">La police de tout le site.</p>
+            <select id="fontSel">
+              <option value="Figtree,-apple-system,Segoe UI,Roboto,sans-serif">Figtree (actuelle)</option>
+              <option value="Inter,-apple-system,Segoe UI,Roboto,sans-serif">Inter</option>
+              <option value="Poppins,-apple-system,Segoe UI,Roboto,sans-serif">Poppins</option>
+              <option value="Manrope,-apple-system,Segoe UI,Roboto,sans-serif">Manrope</option>
+              <option value="DM Sans,-apple-system,Segoe UI,Roboto,sans-serif">DM Sans</option>
+              <option value="Space Grotesk,-apple-system,Segoe UI,Roboto,sans-serif">Space Grotesk</option>
+              <option value="Georgia,serif">Georgia (à empattements)</option>
+              <option value="__custom">Autre… (saisir à la main)</option>
+            </select>
+            <div class="row" style="margin-top:7px"><input type="text" id="fontTxt" placeholder="ex. Inter,sans-serif"></div>
+            <div class="note">⚠️ La police doit être <strong>disponible sur le site LearnWorlds</strong>. L'aperçu ici
+            charge les polices depuis Google Fonts&nbsp;; si la tienne n'est pas installée côté LearnWorlds,
+            le site retombera sur la suivante de la liste.</div>
+          </div>
+
+          <div class="card">
+            <h4>Arrondis</h4>
+            <p class="expl">Les rayons de coin, partout sur le site.</p>
+            <div class="row"><label>Cartes</label><input type="range" id="rCard" min="0" max="32" step="1"><span class="val" id="rCardV"></span></div>
+            <div class="lien">↳ le liseré suit tout seul (<code>rayon − 2px</code>)</div>
+            <div class="row"><label>Pastilles</label><input type="range" id="rPill" min="0" max="999" step="1"><span class="val" id="rPillV"></span></div>
+            <div class="row"><label>Boutons</label><input type="range" id="rBtn" min="0" max="28" step="1"><span class="val" id="rBtnV"></span></div>
+          </div>
+
+          <!-- 🔴 Le menu est le même sur toutes les pages : sa place est ici, et non
+               dans un onglet de page. Ses couleurs se choisissent ENSEMBLE — les
+               répartir par page aurait obligé à naviguer pour comparer deux teintes
+               voisines, et quatre des neuf entrées ne correspondent à aucun onglet.
+               🔴 Chaque ligne EST son propre aperçu : la pastille porte le picto réel
+               et la couleur réglée, exactement comme le menu l'affichera. -->
+          <div class="card" style="grid-column:1/-1">
+            <h4>Menu — couleur des pictos</h4>
+            <p class="expl">Une couleur par entrée du menu, décidée une fois et identique sur tout le site.
+              <strong>Décochée, l'entrée reprend la couleur principale</strong> de la marque.
+              <em>Profil</em> et <em>Déconnexion</em> n'y figurent pas&nbsp;: ce sont des entrées de compte,
+              elles restent volontairement sobres.</p>
+            <div id="menuRows" style="display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:0 22px"></div>
+            <div class="note" id="menuNote" style="display:none"></div>
+          </div>
+
+        </div>
+      </div>
     </div>
 
     <h3 data-p="profile">Tableau de bord du membre <span style="text-transform:none;font-weight:600;color:#B4BAC8">— le bouton de chaque tuile prend la couleur de SA page</span></h3>
@@ -770,6 +824,14 @@ body.ps-verrou .ps-porte{display:grid}
      token sur `:root` (ce qui écraserait les réglages de l'outil), ne touche ni à
      l'en-tête ni au menu. -->
 <script src="tokens.js"></script>
+<!-- 🔴 `mega-menu.js` pour ses PICTOS. Le réglage de couleur du menu se fait sur
+     des lignes qui montrent le picto exact que le site posera : même glyphe (table
+     `ICON`), même choix (fonction `pick`), même pastille (règle `.ps-mm-ic`). Un
+     jeu d'icônes recopié ici aurait dérivé — c'est précisément ce qui a été retiré
+     des maquettes de cartes le 04/08, où un TROISIÈME jeu d'icônes dessiné à la
+     main vivait dans ce fichier. Sous `PS_CSS_ONLY` il publie et sort : il ne
+     construit aucun menu et n'installe pas son observer. -->
+<script src="mega-menu.js"></script>
 <script>
 (function(){
   "use strict";
@@ -802,6 +864,14 @@ body.ps-verrou .ps-porte{display:grid}
     pages:{"home":"","profile":"","annuaire-partenaire-de-cas":"","fiches-secteur":"#fad54a","emptykk-clone-clone":"#6b7280","fiches-cabinet":"#007260",
            "formation-par-modules":"","sentrainer":"","formation-par-comptences":""},
     reglages:{"lien_video":"","lien_video_background":""},
+    /* Couleur du picto de chaque entrée du méga menu. Clé = le CHEMIN que vise le
+       lien (pas le libellé : Weglot le traduit). Vide = l'entrée retombe sur
+       l'accent de la marque. 🔴 Ces neuf valeurs sont celles publiées le 04/08 :
+       le défaut reproduit le site tel qu'il est, il ne le modifie pas. */
+    menu:{"formation-par-modules":"#507EC5","fiches-cabinet":"#00C875","fiches-secteur":"#FDAB3D",
+          "sentrainer":"#A25DDC","emptykk-clone-clone":"#E2445C","annuaire-partenaire-de-cas":"#0073EA",
+          "course/supports-webinar":"#12A85F","bootcamp-prepastrat":"#D98500",
+          "entretiens-en-conditions-reelles":"#8A45C9"},
     /* Contour animé par page. 🔴 SEULE la page Cours en a un aujourd'hui, avec
        ces valeurs exactes : le défaut reproduit donc le site tel qu'il est, il
        ne le modifie pas. Les autres pages sont livrées ÉTEINTES (demande de
@@ -833,6 +903,36 @@ body.ps-verrou .ps-porte{display:grid}
        configuration — le board n'est pas reproduit dans la maquette. */
     ["profile",                 "Profil"],
     ["annuaire-partenaire-de-cas","Annuaire"]
+  ];
+
+  /* ====================================================================
+     LES ENTRÉES DU MÉGA MENU — dans l'ordre où elles s'affichent
+     --------------------------------------------------------------------
+     Trois colonnes : le CHEMIN visé (la clé, celle de `MENU_COULEURS`), le
+     LIBELLÉ affiché ici, et le libellé RÉEL du lien sur le site.
+
+     🔴 Pourquoi deux libellés. Le picto est choisi par `pick()` de `mega-menu.js`
+     à partir du texte du lien : lui donner un libellé approché, c'est afficher ici
+     un picto que le site ne posera pas. La troisième colonne porte donc le texte
+     mesuré sur le vrai menu, et c'est LUI qu'on passe à `pick()`.
+     🔴 CETTE LISTE N'EST PAS LE MENU : c'est une liste de réglages. Le menu, lui,
+     est construit par LearnWorlds. Renommer une page côté LW change le chemin et
+     l'entrée cesse silencieusement de correspondre — c'est arrivé trois fois en
+     une semaine (`fiches-secteur-clone` -> `fiches-cabinet` le 03/08). À chaque
+     renommage : chercher le slug dans TOUT le dépôt, celui-ci compris.
+     🔴 Profil et Déconnexion sont volontairement absents : ce sont des entrées de
+     COMPTE, pas de contenu. Elles restent sur l'accent de la marque, ce qui les
+     distingue du reste — décision du 04/08, pas un oubli. */
+  var MENU_LIB=[
+    ["course/supports-webinar",         "Webinar gratuit",        "Webinar Gratuit"],
+    ["bootcamp-prepastrat",             "Bootcamp",               "Bootcamp"],
+    ["entretiens-en-conditions-reelles","Entretien réel",         "Entretien en conditions réelles"],
+    ["formation-par-modules",           "Formations",             "Formations PrepaStrat"],
+    ["fiches-cabinet",                  "Fiches cabinet",         "Fiches Cabinet"],
+    ["fiches-secteur",                  "Fiches secteur",         "Fiches Secteur"],
+    ["sentrainer",                      "S'entraîner",            "S'entraîner"],
+    ["emptykk-clone-clone",             "Études de cas",          "Études de cas"],
+    ["annuaire-partenaire-de-cas",      "Partenaires de cas",     "Partenaires de Cas"]
   ];
   /* 🔴 SEULES CES PAGES ONT DES CARTES QUE LE CONTOUR SAIT ATTEINDRE. Ailleurs
      — home, profil, annuaire — le reglage existait et ne produisait RIEN : une
@@ -937,10 +1037,16 @@ body.ps-verrou .ps-porte{display:grid}
        site il vient d'un fichier chargé PARTOUT. Il est scopé à `.ps-line-hote`,
        donc il ne peut toucher que les cartes qui portent cette classe — les cartes
        de cours, qui ont leur propre liseré, ne le voient pas. */
-    st.textContent=((cle && t[cle]) ? t[cle] : "")+(t.contour ? "\n"+t.contour : "");
-    if(el) el.textContent=(cle && t[cle])
-      ? "feuille réelle de cette page : "+cle+" — les cartes ci-dessous sont stylées par le site lui-même"
-      : "cette page n'a pas encore de feuille réelle dans l'aperçu : ses blocs sont des maquettes";
+    /* La feuille du MENU accompagne toujours, elle aussi : sur le site elle vient
+       d'un fichier chargé partout. Ses seules règles non scopées sont `.ps-mm-ic`
+       et `.ps-mm-t` — donc elle ne peut habiller que les pastilles de picto des
+       lignes de réglage, et rien d'autre dans cet outil. */
+    st.textContent=((cle && t[cle]) ? t[cle] : "")+(t.contour ? "\n"+t.contour : "")+(t.menu ? "\n"+t.menu : "");
+    if(el) el.textContent = pageActive===TAB_GENERAL
+      ? "onglet des réglages de tout le site — les pictos du menu ci-dessous sont ceux de mega-menu.js"
+      : (cle && t[cle])
+        ? "feuille réelle de cette page : "+cle+" — les cartes ci-dessous sont stylées par le site lui-même"
+        : "cette page n'a pas encore de feuille réelle dans l'aperçu : ses blocs sont des maquettes";
   }
 
   /* ====================================================================
@@ -990,6 +1096,13 @@ body.ps-verrou .ps-porte{display:grid}
       var l=el.getAttribute("data-p");
       el.style.display=(l==="*"||l.split(" ").indexOf(pageActive)>=0)?"":"none";
     });
+    /* Les deux corps du bloc à onglets s'échangent : réglages globaux ou réglages
+       de la page. 🔴 On les MASQUE, on ne les reconstruit pas — les contrôles du
+       Général sont branchés une seule fois, au démarrage, par leurs ids. */
+    var g=document.getElementById("cfgGeneral"), pc=document.getElementById("pageCfg");
+    var estGeneral=(pageActive===TAB_GENERAL);
+    if(g)  g.style.display  = estGeneral?"":"none";
+    if(pc) pc.style.display = estGeneral?"none":"";
     cssReel();                               /* la feuille suit l'onglet : une page = une feuille */
     /* 🔴 Un rail vient peut-etre d'etre revele : tant qu'il etait `display:none` ses
        largeurs valaient 0, donc « rien ne deborde » et les deux fleches se seraient
@@ -1087,6 +1200,14 @@ body.ps-verrou .ps-porte{display:grid}
     }
     var hex=S.pages[pageActive];
     var b=document.getElementById("apercuPageNom");
+    /* L'onglet Général ne montre AUCUNE page : dire « couleur de la marque » y
+       serait un demi-mensonge, il n'y a pas de page dont ce serait la couleur. */
+    if(pageActive===TAB_GENERAL){
+      ["--ps-accent","--ps-accent-rgb","--ps-accent-hover","--ps-accent-tint",
+       "--ps-f1","--ps-f1-tint","--ps-lvl1","--ps-lvl1-tint"].forEach(function(v){ st.style.removeProperty(v); });
+      if(b) b.textContent="Général — réglages de tout le site";
+      return;
+    }
     if(!hex){
       ["--ps-accent","--ps-accent-rgb","--ps-accent-hover","--ps-accent-tint",
        "--ps-f1","--ps-f1-tint","--ps-lvl1","--ps-lvl1-tint"].forEach(function(v){ st.style.removeProperty(v); });
@@ -1116,7 +1237,8 @@ body.ps-verrou .ps-porte{display:grid}
     if(b) b.textContent=libellePage(pageActive)+" — couleur propre "+hex;
   }
   function libellePage(slug){
-    for(var i=0;i<PAGES_LIB.length;i++) if(PAGES_LIB[i][0]===slug) return PAGES_LIB[i][1];
+    var t=TABS_LIB();                       /* l'onglet Général en fait partie */
+    for(var i=0;i<t.length;i++) if(t[i][0]===slug) return t[i][1];
     return slug;
   }
 
@@ -1152,15 +1274,25 @@ body.ps-verrou .ps-porte{display:grid}
          de ses réglages.
      🔴 L'onglet porte une PASTILLE de la couleur de sa page : on voit d'un coup
      d'œil lesquelles ont une couleur propre, sans ouvrir les six onglets. */
-  var pageActive=PAGES_LIB[0][0];
+  /* Clé de l'onglet Général. Le souligné est délibéré : `MOTIF_SLUG` (Worker) et
+     les slugs LearnWorlds n'acceptent que `[a-z0-9-]`, donc cette clé ne peut ni
+     désigner une page ni être confondue avec l'une d'elles. */
+  var TAB_GENERAL="__general";
+  function TABS_LIB(){ return [[TAB_GENERAL,"Général"]].concat(PAGES_LIB); }
+  var pageActive=TAB_GENERAL;              /* on ouvre sur le global */
 
   function pagesUI(){
     var tabs=document.getElementById("ptabs");
     if(!tabs) return;
     tabs.innerHTML="";
-    PAGES_LIB.forEach(function(p){
+    /* 🔴 L'onglet GÉNÉRAL n'est pas une page : sa clé (`__general`) porte un
+       souligné, que `MOTIF_SLUG` refuse côté Worker. Elle ne peut donc JAMAIS
+       entrer en collision avec un slug LearnWorlds, ni partir dans une charge
+       utile. Sa pastille montre la couleur de la MARQUE — ce qu'il règle. */
+    TABS_LIB().forEach(function(p){
       var b=document.createElement("button");
       b.className="ptab"+(p[0]===pageActive?" on":"");
+      b.dataset.slug=p[0];
       var i=document.createElement("i");
       /* 🔴🔴 `S.accent` ET NON `var(--ps-accent)`. Signalé par Ziad : sur l'onglet
          Fiches secteur, les pastilles d'Accueil, S'entraîner, Compétences, Profil et
@@ -1181,7 +1313,29 @@ body.ps-verrou .ps-porte{display:grid}
       b.onclick=function(){ pageActive=p[0]; pagesUI(); apercuPage(); blocsPage(); };
       tabs.appendChild(b);
     });
-    pageCfgUI();
+    /* 🔴 PAS de `pageCfgUI()` sur l'onglet Général : il écrit `S.style[slug]` s'il
+       manque, ce qui fabriquerait une entrée `__general` dans les réglages, et il
+       construirait les cartes « couleur de la page » / « contour » — deux réglages
+       qui n'ont aucun sens pour un onglet qui n'est pas une page. */
+    if(pageActive!==TAB_GENERAL) pageCfgUI();
+  }
+
+  /* 🔴 DÉFAUT PRÉEXISTANT, RENDU FLAGRANT PAR L'ONGLET GÉNÉRAL. Les pastilles sont
+     peintes à la CONSTRUCTION du bandeau, avec `S.accent` résolu à cet instant (et
+     non `var(--ps-accent)`, cf. la fuite corrigée le 04/08). Or `rendre()` ne
+     reconstruit pas le bandeau : changer la couleur de marque laissait donc TOUTES
+     les pastilles des pages sans couleur propre sur l'ANCIEN accent. Invisible tant
+     qu'on ne regardait pas, mais la pastille du Général EST la marque — elle
+     annonçait une couleur qu'on venait justement de remplacer.
+     🔴 On repeint les pastilles, et RIEN d'autre : rappeler `pagesUI()` ici
+     reconstruirait aussi les contrôles de la page pendant qu'on s'en sert, ce qui
+     les détacherait de leurs écouteurs (le défaut du 03/08 sur le sélecteur de
+     couleur, qui ne répondait plus après le premier glissement). */
+  function majPastilles(){
+    document.querySelectorAll("#ptabs .ptab[data-slug]").forEach(function(b){
+      var pt=b.querySelector("i");
+      if(pt) pt.style.background=S.pages[b.dataset.slug]||S.accent;
+    });
   }
 
   function pageCfgUI(){
@@ -1222,14 +1376,16 @@ body.ps-verrou .ps-porte{display:grid}
        On met donc à jour l'ÉTAT, l'APERÇU et la seule pastille de l'onglet — rien
        d'autre. Un contrôle ne doit jamais se reconstruire lui-même pendant qu'on
        s'en sert. */
+    /* 🔴🔴 REPÉRÉE PAR SA CLÉ, PLUS PAR SA POSITION. Cette boucle appariait
+       `PAGES_LIB[i]` au i-ème bouton — un accord tacite entre deux listes, qui a
+       tenu tant que les onglets étaient exactement les pages. L'onglet Général,
+       ajouté EN TÊTE, décale tout : régler la couleur de Cours serait allé
+       repeindre la pastille de S'entraîner. Le bouton porte maintenant son
+       `data-slug` et on le cherche par là — plus aucun accord à maintenir. */
     function majPastilleOnglet(){
-      var t=document.querySelectorAll("#ptabs .ptab");
-      for(var i=0;i<PAGES_LIB.length && i<t.length;i++){
-        if(PAGES_LIB[i][0]===slug){
-          var pt=t[i].querySelector("i");
-          if(pt) pt.style.background=S.pages[slug]||S.accent;   /* jamais var() : cf. pagesUI() */
-        }
-      }
+      var b=document.querySelector('#ptabs .ptab[data-slug="'+slug+'"]');
+      var pt=b&&b.querySelector("i");
+      if(pt) pt.style.background=S.pages[slug]||S.accent;       /* jamais var() : cf. pagesUI() */
     }
     ck.onchange=function(){
       S.pages[slug]= ck.checked ? (c.value||"#507EC5") : "";
@@ -1410,6 +1566,84 @@ body.ps-verrou .ps-porte{display:grid}
     if(aide){ var p=document.createElement("p"); p.className="expl"; p.style.margin="4px 0 0"; p.innerHTML=aide; parent.appendChild(p); }
   }
 
+  /* ====================================================================
+     COULEUR DES PICTOS DU MÉGA MENU
+     --------------------------------------------------------------------
+     Le dernier réglage qui vivait encore À LA MAIN dans `tokens.js` : la table
+     `MENU_COULEURS`, posée le 04/08, se modifiait en éditant le fichier et en
+     poussant. Elle se règle désormais ici et part dans le bloc MENU, écrit par le
+     Worker comme les deux autres.
+
+     🔴 LE PICTO VIENT DE `mega-menu.js`, PAS D'ICI. `PS_MM_ICON` (les SVG) et
+     `PS_MM_PICK` (le choix par libellé) sont publiés par le fichier lui-même. Un
+     jeu recopié aurait dérivé — c'est exactement ce qui a été trouvé le 04/08 dans
+     les maquettes de cartes, où un troisième jeu d'icônes dessiné à la main vivait
+     dans ce fichier et montrait autre chose que le site.
+     🔴 DÉCOCHÉE = ON RETIRE LA PROPRIÉTÉ, on ne peint pas l'accent à la place.
+     C'est ce que fait `couleurs()` en production, et la conséquence est visible :
+     changer la couleur de marque repeint aussitôt toutes les entrées décochées,
+     ici comme sur le site. Peindre `S.accent` en dur aurait figé une valeur qui
+     aurait cessé de suivre au premier changement de marque. */
+  function pictoMenu(libReel){
+    var I=window.PS_MM_ICON, P=window.PS_MM_PICK;
+    if(!I || !P) return "";
+    return I[P(libReel)] || I.def || "";
+  }
+  function menuUI(){
+    var box=document.getElementById("menuRows"), note=document.getElementById("menuNote");
+    if(!box) return;
+    /* 🔴 Si `mega-menu.js` n'a pas publié, on le DIT au lieu d'afficher des lignes
+       sans picto : l'outil doit annoncer ce qu'il ne sait pas montrer. Les réglages
+       restent utilisables — c'est l'aperçu qui manque, pas la fonction. */
+    if(note){
+      var ok=!!(window.PS_MM_ICON && window.PS_MM_PICK);
+      note.style.display=ok?"none":"block";
+      if(!ok) note.textContent="Les pictos du menu n'ont pas pu être chargés : les couleurs restent réglables, mais les pastilles ci-dessous sont vides.";
+    }
+    box.innerHTML="";
+    MENU_LIB.forEach(function(e){
+      var cle=e[0], lib=e[1], libReel=e[2];
+      var r=document.createElement("div"); r.className="row";
+      var ck=document.createElement("input"); ck.type="checkbox"; ck.style.flex="none";
+      ck.id="mm-"+cle.replace(/[^a-z0-9]+/g,"-"); ck.checked=!!S.menu[cle];
+      /* 🔴 PASTILLE À SA TAILLE RÉELLE (34px). J'avais posé `width:26px` en inline
+         pour tasser la colonne : sans effet, la règle du site porte
+         `width:34px !important` et un inline ordinaire ne bat pas un `!important`.
+         Mesuré plutôt que supposé — la ligne affichait 34px pendant que le code
+         annonçait 26. Retiré : la vraie taille est la bonne, c'est celle que le
+         menu montrera, et la forcer aurait demandé de re-déclarer en `important`
+         une valeur qui appartient à `mega-menu.js`. */
+      var ic=document.createElement("span"); ic.className="ps-mm-ic";
+      ic.innerHTML=pictoMenu(libReel);
+      var l=document.createElement("label"); l.textContent=lib; l.setAttribute("for",ck.id);
+      var c=document.createElement("input"); c.type="color";
+      c.value=S.menu[cle]||S.accent; c.disabled=!S.menu[cle];
+      /* 🔴 `propre` = la couleur PROPRE de l'entrée, retenue même décochée. Sans
+         elle, décocher puis recocher rendait l'accent de la marque au lieu de la
+         couleur qu'on venait de retirer : on perdait un réglage par un aller-retour
+         de case, sans rien pour le signaler.
+         Et on ne peut pas se contenter de relire le nuancier : sur une ligne
+         livrée décochée il n'affiche qu'un ESPACE RÉSERVÉ (l'accent du moment où
+         la ligne a été construite), qui ne suit pas les changements de marque —
+         cocher aurait alors figé un ancien accent que Ziad n'a jamais choisi.
+         `propre` distingue les deux : une vraie couleur, ou rien. */
+      var propre=S.menu[cle]||"";
+      function peindre(){
+        if(S.menu[cle]) ic.style.setProperty("background",S.menu[cle],"important");
+        else ic.style.removeProperty("background");
+      }
+      ck.onchange=function(){
+        S.menu[cle]= ck.checked ? (propre || S.accent) : "";
+        c.value=S.menu[cle]||S.accent;
+        c.disabled=!ck.checked; peindre(); sortie();
+      };
+      c.oninput=function(){ propre=c.value; if(ck.checked){ S.menu[cle]=c.value; peindre(); sortie(); } };
+      peindre();
+      r.appendChild(ck); r.appendChild(ic); r.appendChild(l); r.appendChild(c);
+      box.appendChild(r);
+    });
+  }
+
   /* 🔴 Un curseur nomme et chiffre, au meme format que le reste du panneau. */
   function ligneCurseur(parent, lib, cle, min, max, pas, unite){
     var r=document.createElement("div"); r.className="row";
@@ -1542,6 +1776,7 @@ body.ps-verrou .ps-porte{display:grid}
       R.setProperty("--ps-f"+(i+1)+"-tint", lienf?"var(--ps-accent-tint)":S.f[i][1]);
     }
     apercuPage();                          /* la couleur de la page choisie prime dans l'aperçu */
+    majPastilles();                        /* les repères d'onglet suivent la marque */
     boardUI();
     document.getElementById("rCardV").textContent=S.rCard+"px";
     document.getElementById("rPillV").textContent=S.rPill+"px";
@@ -1673,6 +1908,11 @@ body.ps-verrou .ps-porte{display:grid}
     f=document.getElementById("rBtn");      if(f) f.value=S.rBtn;
     f=document.getElementById("fontTxt");   if(f) f.value=S.font;
     f=document.getElementById("deriv");     if(f) f.checked=!!S.deriv;
+    /* 🔴 `menuUI()` RECONSTRUIT ses lignes à partir de `S` : sans cet appel,
+       « Annuler mes changements » et la relecture de `tokens.js` remettraient bien
+       la table en mémoire, mais l'écran garderait les cases et les couleurs
+       précédentes — l'outil afficherait autre chose que ce qu'il publierait. */
+    menuUI();
     pagesUI(); rendre();                 /* pagesUI reconstruit palettes et vidéos */
   }
 
@@ -1738,7 +1978,14 @@ body.ps-verrou .ps-porte{display:grid}
         if(st.couleur) styles[p[0]].couleur=st.couleur;
       }
     });
-    return { tokens:lignes(), pages:{ accents:accents, styles:styles, reglages:{
+    /* 🔴 Seules les entrées RÉELLEMENT réglées partent. Une entrée décochée est
+       ABSENTE de la table, elle n'y vaut pas "" : c'est l'absence qui fait
+       retomber le picto sur l'accent de la marque, côté site comme ici. Envoyer
+       une chaîne vide ferait refuser la publication entière par le Worker, qui
+       n'accepte que des couleurs hexadécimales. */
+    var menu={};
+    MENU_LIB.forEach(function(e){ if(S.menu[e[0]]) menu[e[0]]=S.menu[e[0]]; });
+    return { tokens:lignes(), menu:menu, pages:{ accents:accents, styles:styles, reglages:{
       lien_video:vimeoNormalise(S.reglages.lien_video),
       lien_video_background:vimeoNormalise(S.reglages.lien_video_background) } } };
   }
@@ -1886,6 +2133,22 @@ body.ps-verrou .ps-porte{display:grid}
         S.reglages.lien_video=reg.lien_video||"";
         S.reglages.lien_video_background=reg.lien_video_background||"";
       }
+      /* ── Couleurs du menu ──────────────────────────────────────────────
+         🔴 REPLI HORS MARQUEURS, ET IL SERT VRAIMENT. La table a vécu un temps
+         dans `tokens.js` SANS bloc délimité ; et pendant les une à deux minutes
+         que met GitHub Pages à redéployer, c'est encore cette version-là que
+         l'outil relit. Sans ce repli il partirait sur ses valeurs par défaut et
+         la publication suivante aurait écrasé les couleurs en place.
+         🔴 On lit la table publiée, PAS `PS_MENU_COULEURS` : `tokens.js` est
+         chargé ici sous `PS_CSS_ONLY` et sort avant de la poser. */
+      var mm=t.match(/>>> DEBUT MENU[^\n]*\n([\s\S]*?)\n\/\* <<< FIN MENU/);
+      var brut=(mm?mm[1]:t).match(/var MENU_COULEURS=(\{[\s\S]*?\});/);
+      if(brut){
+        var tabm={}; try{ tabm=JSON.parse(brut[1]); }catch(e){ tabm=null; }
+        /* Une table illisible n'est pas une table vide : on garde les valeurs par
+           défaut et on laisse le message d'erreur global faire son travail. */
+        if(tabm) MENU_LIB.forEach(function(e){ S.menu[e[0]]=tabm[e[0]]||""; });
+      }
       /* on remet l'interface en accord avec l'etat relu */
       appliquerS();
       /* 🔴 L'INSTANTANE DE REFERENCE, pris ICI et seulement ici : c'est le seul
@@ -1907,6 +2170,7 @@ body.ps-verrou .ps-porte{display:grid}
   carrouselApercu("apercuEntrainer");
   blocsPage();                             /* construit aussi les palettes et les vidéos de l'onglet actif */
   champs();
+  menuUI();
   rendre();
   chargerEtatPublie();
 })();
