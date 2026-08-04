@@ -715,7 +715,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-f";
+  window.PS_TOKENS_V="2026-08-04-g";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -956,6 +956,42 @@
      enrollment_closed) ; le jour où l'un l'utilisera, il faudra distinguer les
      deux plutôt que de tout masquer. ⏳ Un libellé POSITIF renvoyant vers la page
      carrefour prendra sa place — il attend que cette page existe. */
+  /* ====================================================================
+     TUNNEL DE PAIEMENT — on y repose l'adresse déjà saisie
+     --------------------------------------------------------------------
+     La page d'entrée (`/inscription`) demande une adresse pour aiguiller ; sans
+     ceci, l'acheteur la retape au moment de sortir sa carte. C'est un abandon
+     gratuit, à l'endroit le plus cher du parcours.
+     🔴 POURQUOI ICI ET NON DANS `inscription.js` : mesuré le 04/08, ce dernier
+     n'est PAS chargé sur `/payment` — l'emplacement de code personnalisé qui le
+     porte ne couvre pas cette page. Le code y était juste, et ne s'exécutait
+     jamais : champ vide, aucune erreur en console. `tokens.js`, lui, est partout.
+     🔴🔴 ON NE TOUCHE À RIEN D'AUTRE SUR CETTE PAGE. C'est le seul endroit du site
+     où un bug coûte une vente. On ne remplit que le champ e-mail, et SEULEMENT
+     s'il est vide : la valeur saisie par la personne gagne toujours sur la nôtre.
+     Une seule fois, puis la clé est effacée — sinon on réécrirait une adresse
+     qu'elle viendrait de corriger. */
+  (function(){
+    if(!/^\/payment/.test(location.pathname||"")) return;
+    var CLE="psMailInscription", v="";
+    try{ v=sessionStorage.getItem(CLE)||""; }catch(e){ return; }
+    if(!v) return;
+    var essais=0;
+    (function poser(){
+      var c=document.querySelector('input[name="email"]');
+      if(c){
+        if(!String(c.value||"").trim()){
+          c.value=v; c.dispatchEvent(new Event("input",{bubbles:true}));
+        }
+        try{ sessionStorage.removeItem(CLE); }catch(e){}
+        return;
+      }
+      /* Le tunnel est peint par le SPA, et Stripe met du temps : on laisse
+         largement de quoi arriver plutôt que d'abandonner trop tôt. */
+      if(++essais<40) setTimeout(poser,250);
+    })();
+  })();
+
   (function(){
     if(document.getElementById("ps-cardovl")) return;
     var st=document.createElement("style"); st.id="ps-cardovl";

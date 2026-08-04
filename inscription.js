@@ -393,34 +393,16 @@
      serait absente et TOUT LE MONDE partirait vers l'abonnement, y compris les
      étudiants d'écoles partenaires. On construit quand même l'interface (elle ne
      dépend de rien), mais on ne laisse pas router avant que la règle soit là. */
-  /* ====================================================================
-     REPRISE DE L'ADRESSE DANS LE TUNNEL DE PAIEMENT
-     --------------------------------------------------------------------
-     🔴🔴 ON NE TOUCHE À RIEN D'AUTRE SUR CETTE PAGE. C'est le seul endroit du
-     site où un bug coûte une vente. On ne remplit que le champ e-mail, et
-     SEULEMENT s'il est vide : si la personne a déjà saisi ou corrigé quelque
-     chose, sa valeur gagne toujours sur la nôtre. Une seule fois, puis la clé est
-     effacée — pour ne pas réécrire une adresse qu'elle viendrait de changer. */
-  function reprendreMail(){
-    if(!/^\/payment/.test(location.pathname||"")) return;
-    var v="";
-    try{ v=sessionStorage.getItem(CLE_MAIL)||""; }catch(e){ return; }
-    if(!v) return;
-    var essais=0;
-    (function poser(){
-      var c=document.querySelector('input[name="email"]');
-      if(c && !String(c.value||"").trim()){
-        c.value=v; c.dispatchEvent(new Event("input",{bubbles:true}));
-        try{ sessionStorage.removeItem(CLE_MAIL); }catch(e){}
-        return;
-      }
-      if(c) { try{ sessionStorage.removeItem(CLE_MAIL); }catch(e){} return; }  /* deja rempli : on s'efface */
-      if(++essais<20) setTimeout(poser,250);
-    })();
-  }
+  /* 🔴 LA REPRISE DE L'ADRESSE DANS LE TUNNEL VIT DANS `tokens.js`, PAS ICI.
+     Mesuré : ce fichier n'est PAS chargé sur `/payment` — seuls `tokens.js`,
+     `mega-menu.js`, `footer.js` et `account-page.js` y sont. L'emplacement de code
+     personnalisé où le loader a été posé ne couvre pas cette page. Le code était
+     donc écrit, correct, et ne s'exécutait jamais : le champ restait vide sans la
+     moindre erreur en console.
+     ⇒ On ÉCRIT la clé ici (page d'entrée, où ce fichier tourne) et `tokens.js`,
+     chargé partout, la RELIT sur le tunnel. Même clé des deux côtés. */
 
   function demarrer(){
-    reprendreMail();
     if(slugCourant()!==SLUG) return;
     var essais=0;
     (function attendre(){
