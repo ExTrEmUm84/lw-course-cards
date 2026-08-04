@@ -977,17 +977,49 @@
       "{grid-column:1 / -1 !important;}",
       "@media(max-width:760px){#animatedModal #signUpForm .-form-inputs{grid-template-columns:1fr !important;}}",
       /* ---------- les champs ---------- */
-      "#animatedModal .landing-form-input,#animatedModal .learnworlds-input,#animatedModal select.learnworlds-input{"+
+      /* 🔴🔴 ON VISE LES CONTRÔLES, PAS LA CLASSE. Première version :
+         `.learnworlds-input` tout court — or LearnWorlds pose CETTE MÊME CLASSE sur
+         le `ul` de la liste déroulante des menus (École, Niveau, Recherche…), pour
+         lui donner l'allure d'un champ. Mon `height:46px !important` écrasait donc
+         sa hauteur : la liste, qui a pourtant un `max-height:500px`, s'ouvrait sur
+         **UNE SEULE option** avec un ascenseur. Signalé par Ziad, capture à l'appui,
+         et invisible tant qu'on n'ouvre pas un menu — je ne les avais jamais ouverts.
+         ⇒ On nomme les éléments qui sont vraiment des contrôles : les `input`, les
+         `select`, et le déclencheur du menu personnalisé (un `div`, d'où sa mention
+         explicite). **Styler par une classe partagée, c'est styler ce qu'on n'a pas
+         regardé.** */
+      "#animatedModal input.landing-form-input,#animatedModal input.learnworlds-input,"+
+      "#animatedModal select.learnworlds-input,#animatedModal .custom-dropdown-trigger{"+
         "font-family:var(--ps-font,Figtree,sans-serif) !important;font-size:14.5px !important;"+
         "background:#fff !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;"+
         "border-radius:var(--ps-r-btn,10px) !important;height:46px !important;color:var(--ps-text,#1c1f26) !important;}",
+      /* Le panneau de la liste garde l'allure du reste, mais SANS hauteur imposée :
+         c'est `max-h-500` + `overflow-y:auto` de LearnWorlds qui doivent décider. */
+      "#animatedModal .custom-dropdown-list{background:#fff !important;"+
+        "border:1.5px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-btn,10px) !important;"+
+        "font-family:var(--ps-font,Figtree,sans-serif) !important;}",
       /* 🔴 Le focus reprend le bleu des FILTRES (#3887B4) et non l'accent : c'est le
          système de couleur des CONTRÔLES, celui du champ de recherche `.-search-box`.
          Les deux accents du design system ne se mélangent pas. */
-      "#animatedModal .landing-form-input:focus,#animatedModal .learnworlds-input:focus{"+
+      "#animatedModal input.landing-form-input:focus,#animatedModal input.learnworlds-input:focus,"+
+      "#animatedModal select.learnworlds-input:focus{"+
         "border-color:#3887B4 !important;box-shadow:0 0 0 3px rgba(56,135,180,.15) !important;outline:0 !important;}",
+      /* 🔴🔴 HAUTEUR DE LIGNE FIGÉE, SINON LES DEUX COLONNES SE DÉCALENT. Signalé
+         par Ziad, capture à l'appui. Mesuré : un libellé SANS étoile fait 15 px
+         (line-height `normal` sur 12,5 px), un libellé AVEC étoile fait **21 px** —
+         l'astérisque est un `span.lw-field-required-asterisk` en 14px/21px
+         `inline-flex`, et il étire la boîte de ligne du libellé. Le champ de
+         gauche descendait donc de 6 px par rapport à celui de droite, sur chaque
+         ligne où un seul des deux est obligatoire.
+         ⇒ On pose une hauteur de ligne EXPLICITE (21 px, la plus grande des deux,
+         pour ne rien rogner) et on empêche l'astérisque d'imposer la sienne. La
+         hauteur du libellé ne dépend plus de son contenu, donc l'alignement ne
+         dépend plus de quels champs sont obligatoires — un réglage que Ziad
+         change dans LearnWorlds sans penser à la mise en page. */
       "#animatedModal .login-form-input-wrapper label,#animatedModal .landing-form-label{"+
-        "font:600 12.5px var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text-soft,#676879) !important;}",
+        "font:600 12.5px/21px var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text-soft,#676879) !important;"+
+        "display:block !important;}",
+      "#animatedModal .lw-field-required-asterisk{font-size:12.5px !important;line-height:21px !important;}",
       /* ---------- le bouton ----------
          🔴 `.-login-but` EST MESURÉ, PAS DEVINÉ. J'avais écrit `.signin-btn` par
          symétrie avec `.signup-btn` : cette classe n'existe pas. Le bouton de
