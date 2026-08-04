@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aide — Écoles partenaires · PrepaStrat</title>
+<!--
+  ============================================================
+  AIDE : LES COMPTES ÉTUDIANTS DES ÉCOLES PARTENAIRES
+  https://extremum84.github.io/lw-course-cards/aide-ecoles.html
+  ------------------------------------------------------------
+  Ouverte depuis le configurateur (bouton « Aide » de la colonne de gauche).
+
+  🔴 LES « CAPTURES » SONT DES RECONSTITUTIONS EN HTML, PAS DES IMAGES.
+  Choix délibéré : une capture d'écran se périme en silence le jour où
+  LearnWorlds change son interface, et personne ne s'en aperçoit avant qu'un
+  utilisateur cherche un bouton qui a bougé. Une reconstitution reste nette à
+  tous les zooms, ne dépend d'aucun fichier externe (la page se recopie d'un
+  bloc), et chaque bloc porte la mention « reconstitution » pour que personne
+  ne la prenne pour l'écran réel.
+
+  🔴 CONTENU MESURÉ LE 04/08/2026 dans l'admin LearnWorlds et sur le site :
+  les deux automatisations et leur configuration, le nom du programme, le
+  nombre de cours qu'il contient, et le format des noms de champs. Si l'un de
+  ces éléments change côté LearnWorlds, CETTE PAGE NE LE SAURA PAS — elle est
+  écrite à la main. La relire à chaque nouvelle école.
+  ============================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ps-accent:#507EC5;
+  --ps-accent-hover:#486798;
+  --ps-accent-tint:#edf4ff;
+  --ps-navy:#243B6B;
+  --ps-text:#1c1f26;
+  --ps-text-soft:#676879;
+  --ps-surface-soft:#F7F8FB;
+  --ps-border:#E6E9EF;
+  --ps-font:Figtree,-apple-system,Segoe UI,Roboto,sans-serif;
+  --ps-r-card:16px;
+  --ps-ok:#217A52; --ps-ok-tint:#E4F5EC;
+  --ps-no:#B0432C; --ps-no-tint:#FBE9E6;
+  --ps-warn:#8A5320; --ps-warn-tint:#FFF6ED; --ps-warn-border:#f6ddc0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--ps-font);color:var(--ps-text);background:var(--ps-surface-soft);line-height:1.55;-webkit-font-smoothing:antialiased}
+
+/* ---------- en-tête ---------- */
+.hero{background:var(--ps-navy);color:#fff;padding:56px 40px 60px}
+.hero-in{max-width:1180px;margin:0 auto}
+.hero .kicker{font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#7fa3d8;margin-bottom:18px}
+.hero h1{font-size:clamp(30px,4.2vw,46px);font-weight:800;letter-spacing:-.02em;line-height:1.12;max-width:22ch}
+.hero p{margin-top:16px;font-size:clamp(16px,1.8vw,19px);color:#c3cee4;max-width:62ch}
+.hero .back{display:inline-flex;align-items:center;gap:8px;margin-top:26px;font-size:14px;font-weight:700;color:#a9c0e5;text-decoration:none;border:1px solid #3c568d;padding:9px 16px;border-radius:999px;transition:.15s}
+.hero .back:hover{background:#2c477d;color:#fff}
+
+/* ---------- gabarit ---------- */
+.page{max-width:1180px;margin:0 auto;padding:0 40px 90px;display:grid;grid-template-columns:236px 1fr;gap:52px;align-items:start}
+nav.toc{position:sticky;top:28px;margin-top:-28px;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);padding:20px 18px;box-shadow:0 6px 22px rgba(15,23,42,.05)}
+nav.toc h2{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ps-accent);margin-bottom:14px}
+nav.toc a{display:block;font-size:14px;font-weight:600;color:var(--ps-text-soft);text-decoration:none;padding:7px 10px;border-radius:8px;transition:.13s}
+nav.toc a:hover{background:var(--ps-accent-tint);color:var(--ps-navy)}
+main{padding-top:36px;min-width:0}
+
+/* ---------- sections dépliables ---------- */
+details{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);margin-bottom:16px;box-shadow:0 6px 22px rgba(15,23,42,.05);overflow:hidden}
+details[open]{border-color:#d7e2f3}
+summary{list-style:none;cursor:pointer;padding:22px 26px;display:flex;align-items:center;gap:16px;font-size:19px;font-weight:800;color:var(--ps-navy);transition:.13s}
+summary::-webkit-details-marker{display:none}
+summary:hover{background:var(--ps-accent-tint)}
+summary .chev{margin-left:auto;flex:none;width:22px;height:22px;color:#b9c3d6;transition:transform .2s}
+details[open] summary .chev{transform:rotate(90deg);color:var(--ps-accent)}
+summary .idx{flex:none;width:30px;height:30px;border-radius:50%;background:var(--ps-accent-tint);color:var(--ps-accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+.inner{padding:4px 26px 28px}
+.inner > * + *{margin-top:16px}
+.inner p{font-size:16px;color:#4b5262}
+.inner strong{font-weight:700;color:var(--ps-navy)}
+.inner ul{padding-left:20px;font-size:16px;color:#4b5262}
+.inner li + li{margin-top:9px}
+code{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.87em;background:var(--ps-accent-tint);color:var(--ps-navy);padding:2px 8px;border-radius:6px;font-weight:600;white-space:nowrap}
+
+/* ---------- encadrés ---------- */
+.box{border-radius:12px;padding:16px 20px;font-size:15.5px;border:1px solid}
+.box.info{background:var(--ps-accent-tint);border-color:#d3e2f8;color:var(--ps-navy)}
+.box.warn{background:var(--ps-warn-tint);border-color:var(--ps-warn-border);color:var(--ps-warn)}
+.box.warn strong{color:#6f4118}
+
+/* ---------- reconstitutions d'écran ---------- */
+figure{margin:20px 0 0;border:1px solid var(--ps-border);border-radius:14px;background:#fff;overflow:hidden}
+figure .bar{display:flex;align-items:center;gap:7px;padding:10px 14px;background:#F3F5F9;border-bottom:1px solid var(--ps-border)}
+figure .bar i{width:9px;height:9px;border-radius:50%;background:#d3d8e2;display:block}
+figure .bar span{margin-left:8px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#98a1b3}
+figure .shot{padding:20px 22px;overflow-x:auto}
+figcaption{padding:11px 18px;font-size:13px;color:#8d95a6;background:#FAFBFD;border-top:1px solid var(--ps-border);font-style:italic}
+
+/* écran : liste des automatisations */
+.lw-tab{width:100%;border-collapse:collapse;font-size:14px;min-width:560px}
+.lw-tab th{text-align:left;padding:9px 12px;font-size:11.5px;font-weight:700;color:#8d95a6;border-bottom:1px solid var(--ps-border);white-space:nowrap}
+.lw-tab td{padding:14px 12px;border-bottom:1px solid #F0F2F6;vertical-align:middle}
+.lw-tab tr:last-child td{border-bottom:none}
+.lw-tab .nom{font-weight:700;color:var(--ps-navy);max-width:210px}
+.lw-chip{display:inline-block;background:#EFF1F5;color:#4b5262;border-radius:6px;padding:4px 10px;font-size:12.5px;font-weight:600;white-space:nowrap}
+.lw-chip.tag{background:#E4F5EC;color:var(--ps-ok)}
+.lw-on{width:9px;height:9px;border-radius:50%;background:#28a745;display:inline-block}
+
+/* écran : éditeur d'automatisation */
+.node{border:2px solid var(--ps-accent);border-radius:12px;padding:18px 20px;text-align:center;background:#fff;max-width:390px;margin:0 auto}
+.node .when{font-size:13px;color:#98a1b3}
+.node .what{font-size:16.5px;font-weight:800;color:var(--ps-navy);margin:5px 0 11px}
+.node .val{display:inline-block;background:#EFF1F5;border-radius:7px;padding:6px 14px;font-size:14px;font-weight:700;color:#3d4453;font-family:ui-monospace,Menlo,monospace}
+.link-v{width:2px;height:26px;background:#d7dce5;margin:0 auto}
+.node.act{border:1px solid var(--ps-border);text-align:left;display:flex;align-items:center;gap:14px}
+.node.act .ico{flex:none;width:38px;height:38px;border-radius:9px;background:#F1EBFB;color:#7A4FD0;display:flex;align-items:center;justify-content:center}
+.node.act .what{margin:0 0 7px}
+
+/* ---------- chaîne en 4 temps ---------- */
+.chain{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
+.chain .c{background:#fff;border:1px solid var(--ps-border);border-radius:12px;padding:16px 14px;position:relative}
+.chain .c .n{width:26px;height:26px;border-radius:50%;background:var(--ps-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;margin-bottom:10px}
+.chain .c h4{font-size:14.5px;font-weight:800;color:var(--ps-navy);margin-bottom:6px;line-height:1.3}
+.chain .c p{font-size:13.5px;color:#5b6272;line-height:1.45}
+.chain .c:not(:last-child)::after{content:"›";position:absolute;right:-9px;top:50%;transform:translateY(-50%);color:#c3cad6;font-size:22px;z-index:1}
+
+/* ---------- tableaux de contenu ---------- */
+.tab{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
+.tab th{text-align:left;background:var(--ps-navy);color:#fff;padding:12px 16px;font-size:13.5px;font-weight:700}
+.tab th:first-child{border-radius:10px 0 0 0}
+.tab th:last-child{border-radius:0 10px 0 0}
+.tab td{padding:13px 16px;border-bottom:1px solid #EDEFF4;vertical-align:top;color:#4b5262}
+.tab td:first-child{font-weight:700;color:var(--ps-navy)}
+.tab tr:last-child td{border-bottom:none}
+.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700}
+.pill.ok{background:var(--ps-ok-tint);color:var(--ps-ok)}
+.pill.no{background:var(--ps-no-tint);color:var(--ps-no)}
+.scroll{overflow-x:auto}
+.scroll .tab{min-width:520px}
+
+/* ---------- étapes numérotées ---------- */
+.steps{counter-reset:s;margin-top:6px}
+.stp{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid #F0F2F6}
+.stp:last-child{border-bottom:none;padding-bottom:0}
+.stp .n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--ps-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800}
+.stp h4{font-size:16.5px;font-weight:800;color:var(--ps-navy);margin-bottom:5px}
+.stp p{font-size:15.5px;color:#4b5262}
+.who{display:inline-block;margin-top:9px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 11px;border-radius:999px}
+.who.vous{background:var(--ps-ok-tint);color:var(--ps-ok)}
+.who.nous{background:var(--ps-accent-tint);color:#3466A8}
+
+footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;color:#98a1b3;border-top:1px solid var(--ps-border)}
+
+@media(max-width:900px){
+  .page{grid-template-columns:1fr;gap:0;padding:0 22px 70px}
+  nav.toc{position:static;margin:26px 0 0}
+  main{padding-top:24px}
+  .hero{padding:40px 22px 44px}
+  .chain{grid-template-columns:1fr 1fr}
+  .chain .c:not(:last-child)::after{display:none}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-in">
+    <div class="kicker">PrepaStrat · Aide</div>
+    <h1>Les comptes étudiants des écoles partenaires</h1>
+    <p>Comment un étudiant d'une école partenaire obtient son accès sans rien payer, ce qui se
+       déclenche automatiquement, et comment ajouter une nouvelle école.</p>
+    <a class="back" href="configurateur.html">← Retour au configurateur</a>
+  </div>
+</div>
+
+<div class="page">
+
+  <nav class="toc">
+    <h2>Sommaire</h2>
+    <a href="#principe">Le principe</a>
+    <a href="#etudiant">Ce que vit l'étudiant</a>
+    <a href="#mecanique">Ce qui se déclenche</a>
+    <a href="#etiquette">Étiquette ou groupe&nbsp;?</a>
+    <a href="#ajouter">Ajouter une école</a>
+    <a href="#modifier">Modifier ou retirer</a>
+    <a href="#vigilance">Ce qui peut casser</a>
+    <a href="#quifaitquoi">Qui fait quoi</a>
+  </nav>
+
+  <main>
+
+    <!-- 1 -->
+    <details id="principe" open>
+      <summary><span class="idx">1</span> Le principe, en une phrase
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <div class="box info"><strong>L'adresse e-mail de l'école est la clé d'accès.</strong> Un étudiant
+          qui s'inscrit avec son adresse universitaire est reconnu, inscrit et servi automatiquement.
+          Personne ne saisit de code, personne ne valide un compte à la main.</div>
+        <p>Trois conséquences pratiques&nbsp;:</p>
+        <ul>
+          <li><strong>L'école n'a aucune liste à fournir</strong> — ni fichier d'étudiants à transmettre,
+            ni mise à jour à chaque nouvelle promo. Le domaine de l'adresse suffit.</li>
+          <li><strong>Vous n'avez aucune inscription à saisir</strong>, quel que soit le nombre
+            d'étudiants. Une promo entière passe sans intervention.</li>
+          <li><strong>L'étudiant ne fait rien de particulier</strong> — il crée son compte comme
+            n'importe qui, et son accès est déjà ouvert quand il arrive.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- 2 -->
+    <details id="etudiant">
+      <summary><span class="idx">2</span> Ce que vit l'étudiant
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Quatre écrans, moins d'une minute.</p>
+        <div class="chain">
+          <div class="c"><div class="n">1</div><h4>Il saisit son adresse</h4>
+            <p>Sur la page d'inscription, un seul champ&nbsp;: son adresse e-mail.</p></div>
+          <div class="c"><div class="n">2</div><h4>Il est reconnu</h4>
+            <p>Le domaine correspond à une école partenaire&nbsp;: le formulaire s'ouvre, adresse déjà
+              remplie. Sinon, il part vers l'abonnement payant.</p></div>
+          <div class="c"><div class="n">3</div><h4>Il confirme son e-mail</h4>
+            <p>L'étape qui prouve que l'adresse est bien la sienne. C'est elle qui déclenche le reste.</p></div>
+          <div class="c"><div class="n">4</div><h4>Il entre, tout est ouvert</h4>
+            <p>Le catalogue est accessible et le site affiche les couleurs de son école.</p></div>
+        </div>
+        <div class="box info" style="margin-top:22px">La page d'inscription <strong>oriente, elle
+          n'autorise pas</strong>. Contourner cet écran ne donne aucun accès&nbsp;: c'est l'adresse
+          vérifiée qui décide, pas le formulaire.</div>
+      </div>
+    </details>
+
+    <!-- 3 -->
+    <details id="mecanique">
+      <summary><span class="idx">3</span> Ce qui se déclenche, côté plateforme
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Deux automatisations LearnWorlds, qui se passent le relais. Elles sont dans
+          <strong>Utilisateurs → Automatisations</strong>.</p>
+
+        <figure>
+          <div class="bar"><i></i><i></i><i></i><span>LearnWorlds · Utilisateurs → Automatisations</span></div>
+          <div class="shot">
+            <table class="lw-tab">
+              <tr><th>Titre</th><th>Quand</th><th>Alors</th><th>Étiquette</th><th>Statut</th></tr>
+              <tr>
+                <td class="nom">Enroll users when they are tagged</td>
+                <td><span class="lw-chip">A tag is added to a user</span></td>
+                <td><span class="lw-chip">Enroll in products</span></td>
+                <td><span class="lw-chip tag">ecole-essec</span></td>
+                <td><span class="lw-on"></span></td>
+              </tr>
+              <tr>
+                <td class="nom">Tag users based on their registration email</td>
+                <td><span class="lw-chip">User signs up</span></td>
+                <td><span class="lw-chip">Add user email …</span></td>
+                <td>—</td>
+                <td><span class="lw-on"></span></td>
+              </tr>
+            </table>
+          </div>
+          <figcaption>Reconstitution de l'écran — les deux automatisations en service.</figcaption>
+        </figure>
+
+        <p style="margin-top:24px"><strong>Automatisation 1 — elle pose l'étiquette.</strong>
+          À l'inscription, l'adresse est examinée. Si le domaine est celui d'une école partenaire,
+          l'étiquette de cette école est posée sur le compte — pour l'ESSEC, <code>ecole-essec</code>.</p>
+
+        <p><strong>Automatisation 2 — elle ouvre l'accès.</strong> Dès que l'étiquette apparaît,
+          l'étudiant est inscrit au programme qui contient les cours auxquels son école a droit.</p>
+
+        <figure>
+          <div class="bar"><i></i><i></i><i></i><span>LearnWorlds · Éditeur d'automatisation</span></div>
+          <div class="shot">
+            <div class="node">
+              <div class="when">Démarrer l'automatisation quand</div>
+              <div class="what">Une étiquette est ajoutée à un utilisateur</div>
+              <div class="val">ecole-essec</div>
+            </div>
+            <div class="link-v"></div>
+            <div class="node act">
+              <div class="ico">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5V5a2 2 0 0 1 2-2h13v18H6a2 2 0 0 1-2-2Z"/><path d="M9 3v18"/></svg>
+              </div>
+              <div>
+                <div class="what">Inscrire à des produits</div>
+                <div class="val">Collection 3 mois</div>
+              </div>
+            </div>
+          </div>
+          <figcaption>Reconstitution — l'étiquette <code>ecole-essec</code> inscrit au programme
+            « Collection 3 mois », qui contient l'ensemble du catalogue (55 cours au 4 août 2026).</figcaption>
+        </figure>
+
+        <div class="box info" style="margin-top:22px">L'étiquette est le pivot&nbsp;:
+          <strong>elle seule ouvre l'accès, et elle seule déclenche l'affichage aux couleurs de
+          l'école.</strong> C'est aussi elle qu'on retire pour couper l'accès en fin de contrat.</div>
+      </div>
+    </details>
+
+    <!-- 4 -->
+    <details id="etiquette">
+      <summary><span class="idx">4</span> Pourquoi une étiquette, et pas un groupe d'utilisateurs
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <div class="scroll">
+          <table class="tab">
+            <tr><th></th><th>Groupe d'utilisateurs</th><th>Étiquette</th></tr>
+            <tr><td>Nombre d'étudiants</td>
+              <td><span class="pill no">200 maximum</span> par groupe</td>
+              <td><span class="pill ok">Aucune limite</span></td></tr>
+            <tr><td>Nombre d'écoles</td>
+              <td><span class="pill no">10 groupes</span> sur notre formule</td>
+              <td><span class="pill ok">Aucune limite</span></td></tr>
+            <tr><td>Ajout automatique</td>
+              <td>Par domaine e-mail, étiquette ou champ de profil</td>
+              <td>Par domaine e-mail, à l'inscription</td></tr>
+          </table>
+        </div>
+        <div class="box warn" style="margin-top:20px">Une seule promo de grande école dépasse déjà les
+          200 places d'un groupe. <strong>Le groupe était le seul élément qui nous plafonnait</strong>
+          — en le retirant de la chaîne, le dispositif accepte autant d'écoles et d'étudiants que
+          nécessaire.</div>
+      </div>
+    </details>
+
+    <!-- 5 -->
+    <details id="ajouter">
+      <summary><span class="idx">5</span> Ajouter une nouvelle école
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Deux réglages dans LearnWorlds ouvrent l'accès. Le troisième point ajoute la reconnaissance
+          visuelle sur le site.</p>
+        <div class="steps">
+          <div class="stp">
+            <div class="n">1</div>
+            <div>
+              <h4>Faire poser l'étiquette de la nouvelle école</h4>
+              <p>Ouvrir l'automatisation <strong>« Tag users based on their registration email »</strong>
+                et y ajouter le domaine de la nouvelle école, associé à une étiquette au même format&nbsp;:
+                <code>ecole-hec</code>, <code>ecole-escp</code>. Les sous-domaines sont couverts —
+                <code>@student.essec.edu</code> compte comme <code>essec.edu</code>.</p>
+              <span class="who vous">Réglage LearnWorlds</span>
+            </div>
+          </div>
+          <div class="stp">
+            <div class="n">2</div>
+            <div>
+              <h4>Faire ouvrir l'accès à cette étiquette</h4>
+              <p>Dupliquer l'automatisation <strong>« Enroll users when they are tagged »</strong>, puis,
+                sur la copie&nbsp;: mettre la <strong>nouvelle étiquette</strong> comme déclencheur et
+                choisir le <strong>programme</strong> auquel cette école a droit. C'est ici que se règle
+                une offre différente d'une école à l'autre.</p>
+              <span class="who vous">Réglage LearnWorlds</span>
+            </div>
+          </div>
+          <div class="stp">
+            <div class="n">3</div>
+            <div>
+              <h4>Déclarer l'école dans le site</h4>
+              <p>Une entrée à ajouter dans la <strong>table des partenaires</strong>&nbsp;: nom de
+                l'école, étiquette, domaine(s), logo et textes affichés à ses étudiants. Une seule
+                entrée pilote <strong>tout</strong> — le badge « avec &lt;École&gt; » en tête de site, la
+                section dédiée sur la page d'accueil, la reconnaissance de son domaine sur la page
+                d'inscription et la bande des écoles partenaires.</p>
+              <p><strong>Où est cette table&nbsp;?</strong> Elle s'appelle <code>PARTENAIRES</code> et vit
+                dans <code>tokens.js</code>, le fichier qui porte la charte du site. C'est du code&nbsp;:
+                elle ne se modifie pas depuis une interface, contrairement aux couleurs que règle le
+                configurateur. D'où la mention ci-dessous.</p>
+              <span class="who nous">À notre charge — nous fournir textes et logo</span>
+            </div>
+          </div>
+          <div class="stp">
+            <div class="n">4</div>
+            <div>
+              <h4>Tester avec un vrai compte avant d'annoncer</h4>
+              <p>Créer un compte avec une adresse du nouveau domaine, vérifier que l'accès s'ouvre et que
+                l'école s'affiche. Cinq minutes qui évitent une promo bloquée le jour du lancement.</p>
+              <span class="who vous">Vous et nous</span>
+            </div>
+          </div>
+        </div>
+        <div class="box warn" style="margin-top:22px"><strong>Les comptes déjà créés ne sont pas
+          repris</strong>&nbsp;: l'automatisation ne vaut que pour les inscriptions à venir. Si des
+          étudiants de la nouvelle école ont déjà un compte, leur poser l'étiquette en lot depuis
+          <em>Utilisateurs → Tous les utilisateurs</em> — la seconde automatisation fera le reste.</div>
+        <div class="box info"><strong>Le logo se négocie.</strong> Un logo d'école est une marque
+          déposée&nbsp;: son usage relève du contrat avec l'établissement. Tant qu'il n'est pas fourni,
+          le nom s'affiche en toutes lettres — le dispositif fonctionne sans.</div>
+      </div>
+    </details>
+
+    <!-- 6 -->
+    <details id="modifier">
+      <summary><span class="idx">6</span> Modifier ou retirer une école
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <div class="scroll">
+          <table class="tab">
+            <tr><th>Ce que vous voulez faire</th><th>Où</th><th>Effet</th></tr>
+            <tr>
+              <td>Ajouter un second domaine (ex. les alumni)</td>
+              <td>L'automatisation « Tag users… » <em>et</em> la table <code>PARTENAIRES</code></td>
+              <td>Les deux endroits doivent recevoir le domaine, sinon l'étudiant est reconnu à un
+                endroit et pas à l'autre.</td>
+            </tr>
+            <tr>
+              <td>Changer le programme auquel une école a droit</td>
+              <td>Son automatisation d'inscription</td>
+              <td>S'applique aux <strong>nouveaux</strong> inscrits. Les comptes existants gardent
+                l'accès déjà obtenu.</td>
+            </tr>
+            <tr>
+              <td>Changer un texte ou le logo affiché</td>
+              <td>La table <code>PARTENAIRES</code> (dans <code>tokens.js</code>)</td>
+              <td>Immédiat pour tous les étudiants de cette école.</td>
+            </tr>
+            <tr>
+              <td>Fin de contrat&nbsp;: couper l'accès</td>
+              <td>Désactiver son automatisation, puis retirer l'étiquette</td>
+              <td>Désactiver arrête les nouveaux comptes. Retirer l'étiquette ferme aussi l'accès des
+                étudiants déjà inscrits.</td>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </details>
+
+    <!-- 7 -->
+    <details id="vigilance">
+      <summary><span class="idx">7</span> Ce qui peut casser, et comment l'éviter
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <ul>
+          <li><strong>Un nouveau cours n'arrive pas tout seul.</strong> L'accès des écoles passe par un
+            programme. Un cours créé et non ajouté à ce programme reste invisible pour leurs étudiants.
+            À vérifier à chaque nouveau contenu.</li>
+          <li><strong>Le nom de l'étiquette doit être exact.</strong> <code>ecole-essec</code> est le mot
+            qui relie l'automatisation, l'accès et l'affichage. Une majuscule ou un accent de plus, et le
+            lien est rompu — <em>sans aucun message d'erreur</em>.</li>
+          <li><strong>La vérification de l'e-mail est indispensable.</strong> C'est elle qui prouve que
+            l'adresse appartient à l'étudiant. Sans elle, n'importe qui pourrait se déclarer d'une école
+            partenaire.</li>
+          <li><strong>L'école déclarée dans le profil ne compte pas.</strong> Le champ « votre école » du
+            formulaire est déclaratif&nbsp;: l'étudiant y met ce qu'il veut. L'accès ne s'appuie jamais
+            dessus, uniquement sur l'adresse vérifiée.</li>
+          <li><strong>Rien n'est visible avant connexion.</strong> Un visiteur non connecté voit le site
+            standard&nbsp;; les couleurs de son école n'apparaissent qu'une fois le compte créé.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- 8 -->
+    <details id="quifaitquoi">
+      <summary><span class="idx">8</span> Qui fait quoi
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <div class="scroll">
+          <table class="tab">
+            <tr><th>Étape</th><th>Qui</th><th>Où</th></tr>
+            <tr><td>Le contrat fixe le périmètre</td><td><span class="pill ok">Vous</span></td>
+              <td>Domaine e-mail, programme concerné, autorisation d'utiliser le logo</td></tr>
+            <tr><td>L'étiquette posée sur le domaine</td><td><span class="pill ok">Vous</span></td>
+              <td>LearnWorlds → Utilisateurs → Automatisations</td></tr>
+            <tr><td>L'inscription déclenchée par l'étiquette</td><td><span class="pill ok">Vous</span></td>
+              <td>LearnWorlds → Utilisateurs → Automatisations</td></tr>
+            <tr><td>L'habillage du site</td><td><span class="pill" style="background:var(--ps-accent-tint);color:#3466A8">Nous</span></td>
+              <td>Table <code>PARTENAIRES</code> dans <code>tokens.js</code> — nous transmettre textes et logo</td></tr>
+            <tr><td>Le compte de test avant l'annonce</td><td><span class="pill ok">Vous et nous</span></td>
+              <td>Une adresse du nouveau domaine, sur le site</td></tr>
+          </table>
+        </div>
+      </div>
+    </details>
+
+  </main>
+</div>
+
+<footer>
+  Aide PrepaStrat — écoles partenaires. Contenu relevé dans l'administration LearnWorlds le
+  4&nbsp;août&nbsp;2026. Les reconstitutions d'écran ci-dessus sont dessinées à la main&nbsp;: elles
+  illustrent, elles ne remplacent pas l'écran réel.
+</footer>
+
+</body>
+</html>

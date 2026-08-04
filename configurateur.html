@@ -80,6 +80,11 @@ button:hover{background:#F5F7FB}
 button.primary{background:#507EC5;color:#fff;border-color:#507EC5}
 button.primary:hover{background:#486798}
 .note{font-size:11.5px;color:#8A90A2;line-height:1.5;margin-top:10px;padding:9px 10px;background:#F7F8FB;border-radius:7px;border-left:2px solid #DCE0E8}
+/* ---- Lien vers l'aide « écoles partenaires » ------------------------- */
+.ps-aide{display:flex;gap:9px;align-items:flex-start;margin-top:10px;padding:10px 12px;background:#edf4ff;border:1px solid #d3e2f8;border-radius:8px;text-decoration:none;color:#3466A8;font-size:11.5px;line-height:1.45;transition:.15s}
+.ps-aide:hover{background:#e2edfd;border-color:#bcd4f4}
+.ps-aide svg{flex:none;width:15px;height:15px;margin-top:1px}
+.ps-aide strong{color:#243B6B}
 /* ---- Sortie ------------------------------------------------------- */
 /* ---- Rideau de connexion --------------------------------------------
    🔴 C'EST UN RIDEAU, PAS UNE SERRURE. Cette page est servie par GitHub Pages,
@@ -314,6 +319,17 @@ body.ps-verrou .ps-porte{display:grid}
     <div class="note" style="margin:0 0 4px">Tous les réglages sont dans le bloc à onglets, à droite&nbsp;:
       <strong>Général</strong> pour ce qui s'applique à tout le site (marque, typographie, arrondis, menu),
       puis un onglet par page.</div>
+
+    <!-- 🔴 L'AIDE EST UN LIEN, PAS UN PANNEAU DÉPLIABLE DANS CETTE COLONNE.
+         Elle explique un dispositif qui ne vit pas ici (les automatisations
+         LearnWorlds, les contrats d'école) : la loger dans le configurateur
+         mélangerait deux sujets et allongerait une colonne déjà dense.
+         `target="_blank"` pour ne PAS quitter la page : des réglages en cours
+         non publiés seraient perdus par une simple navigation. -->
+    <a class="ps-aide" href="aide-ecoles.html" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M9.1 9a3 3 0 0 1 5.8 1c0 2-3 3-3 3"/><path d="M12 17h.01"/></svg>
+      <span><strong>Écoles partenaires</strong> — comment un étudiant obtient son accès, et comment ajouter une école</span>
+    </a>
 
     <!-- 🔴🔴 « Tout réinitialiser » RAMENAIT AUX VALEURS ÉCRITES EN DUR, pas à
          celles du site. C'était le piège corrigé au chargement (l'outil partait de
