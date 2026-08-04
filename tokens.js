@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-n";
+  window.PS_TOKENS_V="2026-08-04-o";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2351,11 +2351,27 @@
 
   var RAPPEL_JOURS=7;
 
+  /* ====================================================================
+     LES PAGES OÙ NOS BANDEAUX SE TAISENT  (04/08, soir)
+     --------------------------------------------------------------------
+     🔴🔴 Vu en direct sur le compte que Ziad venait de créer par LinkedIn :
+     sur `/email-verification-pending` — « Verify your email address » — mon
+     bandeau d'orientation ET mon rappel de profil s'affichaient. La personne
+     n'a QU'UNE chose à faire, cliquer le lien reçu par mail, et on lui
+     proposait deux autres actions, dont **payer**. Trois appels à l'action
+     concurrents sur l'écran le plus fragile du parcours, et le plus visible
+     poussait vers l'abonnement alors que l'inscription n'est pas finie.
+     🔴 La règle générale : tant que le compte n'est pas utilisable, on
+     n'essaie ni de vendre ni de faire remplir un profil. Un écran de
+     transaction ou de vérification appartient à LearnWorlds, pas à nous.
+     ==================================================================== */
+  var PAGES_MUETTES=/^\/(path-player|course-player|payment|email-verification|error|checkout|reset-password|confirm)/;
+
   function rappelProfil(){
     var u=membrePS();
     if(!u || document.getElementById("ps-rappel")) return;
-    /* On n'interrompt pas quelqu'un qui est en train de suivre une leçon. */
-    if(/^\/(path-player|course-player)/.test(location.pathname||"")) return;
+    /* On n'interrompt ni une leçon, ni une inscription en cours de validation. */
+    if(PAGES_MUETTES.test(location.pathname||"")) return;
 
     /* 🔴 CLÉ SUFFIXÉE PAR LE MEMBRE. Sans ça, sur un poste partagé, la mise
        en veille d'un membre masque le rappel du suivant — bug déjà commis
@@ -2507,7 +2523,7 @@
   function orienterMembre(){
     var u=membrePS();
     if(!u || document.getElementById("ps-acces")) return;
-    if(/^\/(path-player|course-player|payment)/.test(location.pathname||"")) return;
+    if(PAGES_MUETTES.test(location.pathname||"")) return;
 
     var part=null;
     try{ part=window.PS_PARTENAIRE_EMAIL ? window.PS_PARTENAIRE_EMAIL(u.email) : null; }catch(e){}
