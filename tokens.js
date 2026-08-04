@@ -715,7 +715,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-j";
+  window.PS_TOKENS_V="2026-08-04-k";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2593,5 +2593,25 @@
     _pl.src="https://extremum84.github.io/lw-course-cards/player.js";
     _pl.async=true;
     (document.head||document.documentElement).appendChild(_pl);
+  }
+
+  /* ====================================================================
+     CHARGEMENT DE LA PAGE D'ABONNEMENT (abonnement.js) — slug `abonnement`
+     --------------------------------------------------------------------
+     Même principe : Ziad crée la page dans LearnWorlds, et RIEN d'autre. Pas
+     de code personnalisé à coller — ce qui évite le piège déjà payé avec
+     `inscription.js`, dont le loader avait été posé dans un emplacement qui ne
+     couvrait pas toutes les pages : le code était juste, et ne s'exécutait
+     jamais, sans la moindre erreur en console.
+     🔴 Le test porte sur le slug ET sur le chemin : la classe `slug-*` arrive
+     avec le rendu de LearnWorlds, le chemin est disponible tout de suite. */
+  if((/^\/abonnement(\/|$)/.test(location.pathname||"") ||
+      (document.body && document.body.classList.contains("slug-abonnement"))) &&
+     !document.getElementById("ps-abo-js")){
+    var _ab=document.createElement("script");
+    _ab.id="ps-abo-js";
+    _ab.src="https://extremum84.github.io/lw-course-cards/abonnement.js";
+    _ab.async=true;
+    (document.head||document.documentElement).appendChild(_ab);
   }
 })();
