@@ -1815,6 +1815,11 @@
   /* Rendue publique pour la page d'entrée. 🔴 ELLE ORIENTE, ELLE N'AUTORISE PAS :
      l'accès reste donné par le tag que LearnWorlds pose sur l'adresse VÉRIFIÉE.
      Quelqu'un qui contournerait cet aiguillage n'obtiendrait donc rien. */
+  /* La table entière, pour la bande d'écoles de la page d'entrée. 🔴 Elle reste
+     la SEULE source : ajouter une école, c'est une entrée ici, et le co-branding,
+     l'aiguillage par domaine et la bande de logos suivent ensemble. */
+  window.PS_PARTENAIRES=PARTENAIRES;
+
   window.PS_PARTENAIRE_EMAIL=function(email){
     var dom=(String(email||"").split("@")[1]||"").toLowerCase().trim();
     if(!dom) return null;

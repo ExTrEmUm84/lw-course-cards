@@ -56,6 +56,32 @@
     return (I && I[cle]) ? I[cle] : "";
   }
 
+  /* Bande des écoles partenaires, en bas de la colonne de droite.
+     🔴 ELLE SE DÉRIVE DE `PS_PARTENAIRES`, jamais écrite à la main : la même table
+     qui porte les domaines et le co-branding. Ajouter une école, c'est une entrée,
+     et la bande suit.
+     🔴🔴 UN LOGO EST UNE MARQUE DÉPOSÉE. Note du 29/07 : ne pas récupérer le logo
+     sur le site de l'école, son usage se négocie dans le contrat. Tant que le champ
+     `logo` est vide, on affiche le NOM en pastille — mention neutre, sans reproduire
+     une identité visuelle qu'on n'a pas le droit d'afficher.
+     🔴 Rien du tout s'il n'y a aucune école : une bande « ils nous font confiance »
+     vide dit exactement le contraire de ce qu'elle cherche à dire. */
+  function bandeEcoles(){
+    var T=window.PS_PARTENAIRES;
+    if(!T) return "";
+    var items=[];
+    for(var k in T){
+      var p=T[k];
+      if(!p || !p.nom) continue;
+      items.push(p.logo
+        ? '<img src="'+String(p.logo).replace(/"/g,"")+'" alt="'+String(p.nom).replace(/"/g,"")+'">'
+        : '<span class="ps-i-eco-n">'+p.nom+'</span>');
+    }
+    if(!items.length) return "";
+    return '<div class="ps-i-eco"><div class="ps-i-eco-t">Écoles partenaires</div>'+
+           '<div class="ps-i-eco-l">'+items.join("")+'</div></div>';
+  }
+
   /* Contenu de la colonne de droite. 🔴 Écrit par moi faute de mieux, à faire
      valider : « 60 cours » est le nombre compté par l'API le 04/08, pas
      nécessairement celui que Ziad veut afficher. */
@@ -71,7 +97,10 @@
        `#pageContent` toucherait aussi la section du header. */
     "#ps-insc{background:var(--ps-surface-soft,#F7F8FB);border-radius:var(--ps-r-card,16px);"+
       "padding:34px 28px;margin:0 auto 44px;max-width:1000px;font-family:var(--ps-font,Figtree,sans-serif);}",
-    "#ps-insc .ps-i-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:30px;align-items:start;}",
+    /* 🔴 `center` et non `start` : la colonne de droite est plus courte que le
+       formulaire, elle restait collée en haut avec un vide sous elle. Demandé par
+       Ziad. Sur une seule colonne (mobile), l'alignement n'a plus d'effet. */
+    "#ps-insc .ps-i-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:30px;align-items:center;}",
     "#ps-insc .ps-i-form{background:#fff;border:1px solid var(--ps-border,#E6E9EF);"+
       "border-radius:var(--ps-r-card,16px);padding:26px 24px;}",
     "#ps-insc .ps-i-args{padding-top:6px;}",
@@ -83,6 +112,14 @@
     "#ps-insc .ps-i-ic svg{width:15px;height:15px;stroke:currentColor;fill:none;stroke-width:2;stroke-linecap:round;stroke-linejoin:round;}",
     "#ps-insc .ps-i-at{font:700 14px var(--ps-font,Figtree,sans-serif);color:var(--ps-text,#1c1f26);}",
     "#ps-insc .ps-i-as{font:400 12.5px/1.5 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);}",
+    /* bande des écoles partenaires */
+    "#ps-insc .ps-i-eco{margin-top:20px;padding-top:16px;border-top:1px solid var(--ps-border,#E6E9EF);}",
+    "#ps-insc .ps-i-eco-t{font:800 10px var(--ps-font,Figtree,sans-serif);text-transform:uppercase;"+
+      "letter-spacing:.07em;color:#9AA0B0;margin-bottom:10px;}",
+    "#ps-insc .ps-i-eco-l{display:flex;flex-wrap:wrap;gap:10px 16px;align-items:center;}",
+    "#ps-insc .ps-i-eco-l img{max-height:26px;width:auto;opacity:.75;}",
+    "#ps-insc .ps-i-eco-n{font:700 13px var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);"+
+      "background:#fff;border:1px solid var(--ps-border,#E6E9EF);border-radius:var(--ps-r-pill,999px);padding:5px 13px;}",
     "#ps-insc .ps-i-sur{font:800 10.5px var(--ps-font,Figtree,sans-serif);text-transform:uppercase;letter-spacing:.07em;color:var(--ps-text-soft,#676879);margin-bottom:10px;}",
     "#ps-insc h2.ps-i-t{font:800 25px/1.25 var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text,#1c1f26) !important;letter-spacing:-.02em !important;margin:0 !important;}",
     "#ps-insc .ps-i-d{font:400 14px/1.6 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);margin:10px 0 20px;}",
@@ -165,7 +202,15 @@
 
     poserCSS();
     var box=document.createElement("div"); box.id="ps-insc";
-    var args=ARGUMENTS.map(function(a){
+    /* 🔴 SI ZIAD A POSÉ SON PROPRE BLOC, C'EST LE SIEN QUI GAGNE. Il colle un
+       élément HTML `<div id="ps-insc-args">…</div>` dans le Site Builder et
+       modifie les mots sans moi ni déploiement. On le DÉPLACE dans la colonne de
+       droite plutôt que de le recopier : son contenu reste sa propriété, et il n'y
+       a jamais deux versions du texte à tenir.
+       Le repli n'est pas décoratif : sans lui, oublier le bloc — ou le renommer —
+       laisserait une colonne vide sur la page d'entrée du site. */
+    var perso=document.getElementById("ps-insc-args");
+    var args=perso ? "" : ARGUMENTS.map(function(a){
       return '<div class="ps-i-arg"><span class="ps-i-ic">'+picto(a[0])+'</span>'+
              '<div><div class="ps-i-at">'+a[1]+'</div><div class="ps-i-as">'+a[2]+'</div></div></div>';
     }).join("");
@@ -182,7 +227,7 @@
           '<p class="ps-i-aide">Votre école est partenaire et on vous demande de payer&nbsp;? '+
             '<a href="mailto:contact@prepastrat.com">Écrivez-nous</a></p>'+
         '</div>'+
-        '<div class="ps-i-args"><h3>Tout le catalogue, un seul accès</h3>'+args+'</div>'+
+        '<div class="ps-i-args">'+(perso ? "" : '<h3>Tout le catalogue, un seul accès</h3>')+args+'</div>'+
       '</div>';
     /* 🔴🔴 SURTOUT PAS `firstChild` — LE HEADER EST UNE SECTION DE `#pageContent`.
        C'est le piège déjà noté sur la home (« section 1 = topbar, section 2 = le
@@ -195,6 +240,23 @@
     var sectionBarre=barre && barre.closest("#pageContent > *");
     if(sectionBarre && sectionBarre.parentElement===hote) hote.insertBefore(box, sectionBarre.nextSibling);
     else hote.appendChild(box);
+
+    /* Le bloc de Ziad rejoint la colonne de droite. 🔴 Après l'insertion de `box`
+       dans la page, sinon on déplacerait un élément vers un conteneur qui n'est
+       pas encore dans le document. */
+    if(perso){
+      box.querySelector(".ps-i-args").appendChild(perso);
+      perso.style.display="";                       /* au cas où il serait masqué en attendant */
+      /* Les pictos sont posés ICI, pas collés par Ziad : il écrit `data-ps-ic="book"`
+         et le vrai jeu d'icônes du menu fait le reste. Un SVG dans le Site Builder
+         serait à retoucher à chaque changement de charte. */
+      [].slice.call(perso.querySelectorAll("[data-ps-ic]")).forEach(function(s){
+        if(!s.firstChild) s.innerHTML=picto(s.getAttribute("data-ps-ic"));
+      });
+    }
+    /* La bande d'écoles se pose APRÈS le contenu, qu'il soit de Ziad ou le nôtre. */
+    var eco=bandeEcoles();
+    if(eco) box.querySelector(".ps-i-args").insertAdjacentHTML("beforeend", eco);
 
     var champ=box.querySelector("#ps-i-mail"), err=box.querySelector("#ps-i-err");
     function router(){
