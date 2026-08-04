@@ -1393,14 +1393,55 @@
     } catch (e) {}
   }
 
+  /* 🔴 L'identifiant du membre connecté part avec la requête : c'est lui qui
+     permet au Worker d'appliquer la réciprocité (« tu figures dans l'annuaire,
+     tu peux le lire »). Sans `me`, on n'appelle même pas — un visiteur anonyme
+     n'a rien à demander. */
+  function idMembre() {
+    try { return (typeof me === "object" && me && me.id) ? String(me.id) : ""; }
+    catch (e) { return ""; }
+  }
+
   // --- Chargement -------------------------------------------------------
   function charger(jeton) {
-    fetch(ENDPOINT, { headers: { Accept: "application/json", "X-Turnstile-Token": jeton } })
+    var entetes = { Accept: "application/json", "X-Turnstile-Token": jeton };
+    var uid = idMembre();
+    if (uid) entetes["X-LW-User"] = uid;
+
+    fetch(ENDPOINT, { headers: entetes })
       .then(function (r) {
+        /* 🔴 403 N'EST PAS UNE PANNE, C'EST UNE RÉPONSE. Le traiter comme une
+           erreur afficherait « une erreur est survenue » à quelqu'un dont le
+           compte va parfaitement bien — et qui n'aurait aucune idée de ce
+           qu'il doit faire. On explique, et on dit COMMENT entrer. */
+        if (r.status === 403) {
+          grid.replaceChildren();
+          count.textContent = "";
+          empty.hidden = false;
+          empty.replaceChildren();
+          var t = document.createElement("p");
+          t.textContent = "L'annuaire est réservé aux membres qui y figurent.";
+          t.style.cssText = "font:700 16px var(--ps-font,Figtree,sans-serif);color:var(--ps-text,#1c1f26);margin:0 0 8px";
+          var d = document.createElement("p");
+          d.textContent = "Acceptez d'apparaître dans l'annuaire depuis votre profil, et vous pourrez consulter celui des autres étudiants.";
+          d.style.cssText = "font:400 14px/1.6 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);margin:0 0 16px";
+          var a = document.createElement("a");
+          a.href = "/profile";
+          a.textContent = "Ouvrir mon profil";
+          a.style.cssText = "display:inline-block;background:var(--ps-accent,#507EC5);color:#fff;text-decoration:none;" +
+            "border-radius:var(--ps-r-btn,10px);padding:11px 20px;font:700 14px var(--ps-font,Figtree,sans-serif)";
+          empty.appendChild(t); empty.appendChild(d); empty.appendChild(a);
+          return null;
+        }
         if (!r.ok) throw new Error("HTTP " + r.status);
         return r.json();
       })
       .then(function (data) {
+        /* 🔴 Le refus a déjà tout affiché : on s'arrête là. Sans cette garde,
+           le maillon suivant ferait `data.members` sur `undefined`, l'exception
+           partirait dans `.catch`, et le message « une erreur est survenue »
+           recouvrirait l'explication qu'on vient d'écrire. */
+        if (!data) return;
         membres = Array.isArray(data.members) ? data.members : [];
         if (DEMO_FILL) membres = membres.concat(DEMO_MEMBERS.map(demoPhoto).map(demoEnrich));
         if (!membres.length) {
