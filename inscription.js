@@ -73,10 +73,40 @@
   /* Ouvre la modale native d'inscription. 🔴 Même mécanique que `footer.js` : on
      clique le déclencheur `openformslink` de LearnWorlds plutôt que d'inventer une
      URL — il n'existe pas de page `/signup` (elle renvoie 404), c'est une modale. */
-  function ouvrirInscription(){
+  /* 🔴🔴 DEUX CHEMINS, PARCE QUE LE PREMIER N'EXISTE PAS SUR CETTE PAGE.
+     Mesuré : depuis que le bouton « Sign up » du menu pointe vers `/inscription`,
+     il n'y a plus AUCUN déclencheur `openformslink[signup]` ici — seulement
+     `signin`. Mon premier jet cliquait donc dans le vide et retombait sur un
+     `location.href="/"` : l'étudiant ESSEC était éjecté sur l'accueil, sans un
+     mot. Le pire des résultats, et invisible dans le code.
+     Chemin de repli, vérifié en direct : ouvrir la modale de CONNEXION (son
+     déclencheur, lui, existe) puis cliquer son lien « Créer un nouveau compte ».
+     🔴 On ne se contente pas d'avoir cliqué : on vérifie que le formulaire
+     d'inscription est RÉELLEMENT visible. Le même lien, depuis l'inscription,
+     ramène vers la connexion — annoncer le succès sur la foi d'un clic ferait
+     exactement l'inverse de ce qu'on veut. */
+  function inscriptionVisible(){
+    var f=document.getElementById("signUpForm");
+    return !!f && getComputedStyle(f).display!=="none" && f.getBoundingClientRect().height>0;
+  }
+
+  function ouvrirInscription(apres){
+    if(inscriptionVisible()){ apres(true); return; }
     var t=document.querySelector('a[data-interactive-link-type="openformslink"][data-interactive-link-var1="signup"]');
-    if(t){ t.click(); return true; }
-    return false;
+    if(t){ t.click(); setTimeout(function(){ apres(inscriptionVisible()); },600); return; }
+
+    var s=document.querySelector('a[data-interactive-link-type="openformslink"][data-interactive-link-var1="signin"]');
+    if(!s){ apres(false); return; }
+    s.click();
+    var n=0;
+    (function bascule(){
+      if(inscriptionVisible()){ apres(true); return; }
+      var m=document.getElementById("animatedModal");
+      var a=m && [].slice.call(m.querySelectorAll("a")).filter(function(e){
+        return /compte|account/i.test(e.textContent||"") && e.getBoundingClientRect().height>0; })[0];
+      if(a) a.click();
+      if(++n<15) setTimeout(bascule,200); else apres(inscriptionVisible());
+    })();
   }
 
   /* Pré-remplit l'adresse déjà saisie : la redemander juste après l'avoir tapée
@@ -123,8 +153,33 @@
         err.style.display="block"; champ.focus(); return;
       }
       err.style.display="none";
-      var p=(typeof window.PS_PARTENAIRE_EMAIL==="function") ? window.PS_PARTENAIRE_EMAIL(v) : null;
-      if(p){ if(ouvrirInscription()) prefill(v); else location.href="/"; return; }
+      /* 🔴🔴 SANS LA RÈGLE, ON NE DÉCIDE PAS — ON NE DEVINE PAS.
+         Le commentaire en tête de `demarrer()` annonçait cette protection, mais le
+         code ne l'assurait pas : `PS_PARTENAIRE_EMAIL` absente donnait `p=null`,
+         donc TOUT LE MONDE partait vers l'abonnement — y compris un étudiant
+         ESSEC, à qui on aurait réclamé 30 €/mois pour un accès déjà payé par son
+         école. Le pire résultat possible, produit par le chemin par défaut.
+         Attrapé en testant la page : `tokens.js` était encore en cache et la règle
+         manquait pour de vrai. Un repli silencieux vers le cas payant n'est jamais
+         acceptable ; on le dit et on laisse réessayer. */
+      if(typeof window.PS_PARTENAIRE_EMAIL!=="function"){
+        err.textContent="La page finit de charger, réessayez dans un instant.";
+        err.style.display="block";
+        return;
+      }
+      var p=window.PS_PARTENAIRE_EMAIL(v);
+      if(p){
+        ouvrirInscription(function(ok){
+          if(ok){ prefill(v); return; }
+          /* 🔴 JAMAIS DE REDIRECTION MUETTE ICI. Envoyer cet étudiant vers
+             l'abonnement serait lui réclamer un accès que son école paie déjà ;
+             l'envoyer sur l'accueil, c'est le perdre sans explication. On lui dit
+             ce qui se passe et on lui laisse la main. */
+          err.textContent="Le formulaire n'a pas pu s'ouvrir. Utilisez « Sign in » en haut de page, puis « Créer un nouveau compte ».";
+          err.style.display="block";
+        });
+        return;
+      }
       location.href=OFFRE;
     }
     box.querySelector(".ps-i-go").addEventListener("click",router);
