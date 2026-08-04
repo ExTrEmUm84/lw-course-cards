@@ -34,6 +34,49 @@
      200, `/abonnement` est en 404). */
   var SLUG = "formules";
 
+  /* ==================================================================
+     LE TEXTE VIENT DU SITE BUILDER — ces valeurs ne sont qu'un REPLI
+     ------------------------------------------------------------------
+     Ziad doit pouvoir corriger un prix, un argument ou un libellé sans
+     moi. Il écrit donc des lignes `clé : valeur` dans un bloc de texte
+     normal de la page, et ce fichier les reprend.
+
+     🔴 CONVENTION `clé : valeur`, PAS UN ORDRE DE LIGNES. La page
+     d'inscription apparie ses lignes par position : une ligne déplacée
+     et tout se décale, en silence. Ici une clé mal orthographiée garde
+     simplement le repli ci-dessous — le pire cas est « ma correction
+     n'apparaît pas », jamais « la page affiche autre chose ».
+     🔴 SEULES LES CLÉS CONNUES SONT LUES. Sans ça, n'importe quelle
+     phrase contenant deux-points ailleurs sur la page deviendrait un
+     réglage.
+     🔴 Les clés non reconnues sont SIGNALÉES en console : une faute de
+     frappe qui ne fait rien est exactement le genre de silence qui fait
+     perdre une demi-heure.
+     ================================================================== */
+  var CLES = [
+    "surtitre","titre","description","produit",
+    "f1-nom","f1-prix","f1-unite","f1-detail","f1-bouton","f1-package","f1-lien",
+    "f2-nom","f2-prix","f2-unite","f2-detail","f2-bouton","f2-package","f2-lien","f2-badge",
+    "inclus-titre",
+    "inclus1-titre","inclus1-detail","inclus2-titre","inclus2-detail",
+    "inclus3-titre","inclus3-detail","inclus4-titre","inclus4-detail",
+    "pied"
+  ];
+
+  /* Extrait les réglages d'un texte. Pure et testable : c'est elle qui décide
+     ce que la page affiche, donc la seule à relire quand le résultat surprend. */
+  function lireReglages(texte) {
+    var out = {}, inconnues = [];
+    String(texte || "").split(/\r?\n/).forEach(function (ligne) {
+      var m = ligne.match(/^\s*([A-Za-z0-9_-]{2,20})\s*:\s*(\S.*?)\s*$/);
+      if (!m) return;
+      var cle = m[1].toLowerCase();
+      if (CLES.indexOf(cle) >= 0) out[cle] = m[2];
+      else if (/^(f1|f2|inclus\d?|titre|surtitre|description|pied)/.test(cle)) inconnues.push(cle);
+    });
+    return { valeurs: out, inconnues: inconnues };
+  }
+
   /* Une entrée par formule. L'ordre est celui de l'affichage. */
   var FORMULES = [
     {
@@ -141,16 +184,74 @@
     (document.head || document.documentElement).appendChild(s);
   }
 
+  var PRODUIT_DEFAUT = "collection-3-mois";
+
+  /* 🔴 L'IDENTIFIANT DE FORMULE EST VÉRIFIÉ AVANT D'ÊTRE UTILISÉ. Un `tier_…`
+     tronqué au copier-coller enverrait vers un paiement cassé, ou pire vers la
+     mauvaise formule — et rien ne le dirait. Une valeur qui n'a pas la forme
+     attendue est donc ignorée : on garde le lien de repli, qui marche. */
+  function lienFormule(pkg, produit, repli) {
+    if (!/^tier_[A-Za-z0-9]{6,}$/.test(String(pkg || ""))) return repli;
+    return "/payment?product_id=" + encodeURIComponent(produit || PRODUIT_DEFAUT) +
+           "&type=learning_program&packageId=" + encodeURIComponent(pkg);
+  }
+
+  /* Applique les réglages du Site Builder par-dessus les replis. */
+  function fusionner(v) {
+    var f = JSON.parse(JSON.stringify(FORMULES));
+    [0, 1].forEach(function (i) {
+      var p = "f" + (i + 1) + "-";
+      ["nom", "prix", "unite", "detail"].forEach(function (k) {
+        if (v[p + k]) f[i][k] = v[p + k];
+      });
+      if (v[p + "bouton"]) f[i].cta = v[p + "bouton"];
+      if (i === 1 && v["f2-badge"]) f[i].badge = v["f2-badge"];
+      /* `lien` (URL complète) reste la porte de sortie si un jour LearnWorlds
+         change la forme de ses URL de paiement. Sinon, `package` suffit. */
+      f[i].url = v[p + "lien"] || lienFormule(v[p + "package"], v.produit, f[i].url);
+    });
+    var inc = INCLUS.map(function (l, i) {
+      var p = "inclus" + (i + 1) + "-";
+      return [l[0], v[p + "titre"] || l[1], v[p + "detail"] || l[2]];
+    });
+    return { formules: f, inclus: inc };
+  }
+
   function construire() {
     if (document.getElementById("ps-abo")) return true;      /* idempotent */
     var hote = document.getElementById("pageContent");
     if (!hote) return false;
 
+    /* ── Le texte de Ziad, lu dans les sections de la page ────────────────
+       🔴 On MASQUE la section qui porte les réglages, on ne la supprime pas :
+       le Site Builder la republie à chaque édition, et Ziad doit continuer de
+       la voir et de la modifier dans l'éditeur. La supprimer ferait
+       disparaître son texte sans qu'il puisse le retrouver. */
+    var reglages = {}, inconnues = [];
+    var barreSection = null;
+    var barre0 = hote.querySelector("nav.lw-topbar-menu, .lw-topbar, [class*='topbar']");
+    if (barre0) barreSection = barre0.closest("#pageContent > *");
+    [].slice.call(hote.children).forEach(function (sec) {
+      if (sec === barreSection || sec.id === "ps-abo") return;
+      var lu = lireReglages(sec.innerText || "");
+      var n = Object.keys(lu.valeurs).length;
+      if (n < 2) return;                       /* pas la section de réglages */
+      Object.keys(lu.valeurs).forEach(function (k) { reglages[k] = lu.valeurs[k]; });
+      inconnues = inconnues.concat(lu.inconnues);
+      sec.style.display = "none";
+    });
+    if (inconnues.length) {
+      try { console.warn("[PrepaStrat] Page formules — clés non reconnues, donc ignorées : " +
+        inconnues.join(", ") + ". Vérifier l'orthographe."); } catch (e) {}
+    }
+
+    var donnees = fusionner(reglages);
+
     poserCSS();
     var box = document.createElement("div");
     box.id = "ps-abo";
 
-    var cartes = FORMULES.map(function (f) {
+    var cartes = donnees.formules.map(function (f) {
       return '<div class="ps-abo-c' + (f.avant ? " ps-abo-avant" : "") + '">' +
         (f.badge ? '<span class="ps-abo-badge">' + esc(f.badge) + "</span>" : "") +
         '<div class="ps-abo-nom">' + esc(f.nom) + "</div>" +
@@ -160,23 +261,27 @@
         "</div>";
     }).join("");
 
-    var liste = INCLUS.map(function (i) {
+    var liste = donnees.inclus.map(function (i) {
       return '<div class="ps-abo-l"><span class="ps-abo-ic">' + picto(i[0]) + "</span>" +
         '<div><div class="ps-abo-ln">' + esc(i[1]) + '</div><div class="ps-abo-ls">' + esc(i[2]) + "</div></div></div>";
     }).join("");
 
+    var r = reglages;
     box.innerHTML =
       '<div class="ps-abo-tete">' +
-        '<div class="ps-abo-sur">Accès complet</div>' +
-        '<h2 class="ps-abo-t">Tout le catalogue, un seul accès</h2>' +
-        '<p class="ps-abo-d">Les 60 cours, les études de cas, les fiches cabinets et secteurs, ' +
-          "et l'annuaire pour vous entraîner à deux. Une seule formule à choisir.</p>" +
+        '<div class="ps-abo-sur">' + esc(r.surtitre || "Accès complet") + "</div>" +
+        '<h2 class="ps-abo-t">' + esc(r.titre || "Tout le catalogue, un seul accès") + "</h2>" +
+        '<p class="ps-abo-d">' + esc(r.description ||
+          "Les 60 cours, les études de cas, les fiches cabinets et secteurs, et l'annuaire " +
+          "pour vous entraîner à deux. Une seule formule à choisir.") + "</p>" +
       "</div>" +
       '<div class="ps-abo-cartes">' + cartes + "</div>" +
-      '<div class="ps-abo-inclus"><div class="ps-abo-it">Compris dans les deux formules</div>' +
+      '<div class="ps-abo-inclus"><div class="ps-abo-it">' +
+        esc(r["inclus-titre"] || "Compris dans les deux formules") + "</div>" +
         '<div class="ps-abo-liste">' + liste + "</div></div>" +
-      '<p class="ps-abo-pied">Paiement sécurisé par Stripe. Vous gérez ou résiliez votre abonnement ' +
-        'depuis votre page <a href="/account">Mon compte</a>.</p>';
+      '<p class="ps-abo-pied">' + esc(r.pied ||
+        "Paiement sécurisé par Stripe. Vous gérez ou résiliez votre abonnement depuis votre page Mon compte.") +
+        "</p>";
 
     /* 🔴 APRÈS la section qui porte la barre de navigation — le header EST une
        section de `#pageContent`. Piège déjà payé une fois sur `/inscription` :
