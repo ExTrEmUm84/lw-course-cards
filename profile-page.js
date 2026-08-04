@@ -1313,10 +1313,49 @@
     });
   }
 
+  /* ====================================================================
+     LA SECTION « MY COURSES » : MASQUÉE SEULEMENT SI ELLE EST VIDE
+     --------------------------------------------------------------------
+     Signalée par Ziad, qui la voyait brute sur un compte neuf. Mon premier
+     réflexe a été de la masquer ; la mesure l'a interdit.
+
+     🔴🔴 C'EST LA SOURCE DE PROGRESSION LA PLUS RICHE DU SITE. Mesuré sur le
+     compte de Ziad : **55 cartes de cours et 55 barres de progression** dans
+     cette seule section, et ZÉRO ailleurs sur la page. C'est très exactement
+     l'élément que mes notes du 30/07 recommandaient d'AJOUTER pour que chaque
+     membre dépose sa progression complète en une visite — il existait déjà.
+     La masquer, c'était supprimer la couverture qu'on cherche à gagner depuis
+     trois sessions (« 12 cours inscrits n'ont de carte nulle part »).
+
+     🔴 Le vrai défaut n'est pas qu'elle soit visible : c'est qu'elle est LAIDE
+     QUAND ELLE EST VIDE. Sur un compte sans cours, notre script n'a rien à
+     transformer et le bloc natif reste nu, en anglais (« My Courses », « Exp.
+     Soon »), haut de 381 px pour ne rien montrer.
+     ⇒ On ne masque que ce cas-là, et on le décide sur ce que la section
+     CONTIENT, pas sur un compte ou un rôle : zéro carte ⇒ zéro raison d'être.
+     🔴 Réévalué à chaque passage : les cartes arrivent après le rendu initial,
+     et conclure « vide » trop tôt masquerait une section qui allait se remplir.
+     ==================================================================== */
+  function sectionCoursVide(){
+    var hote=document.getElementById("pageContent");
+    if(!hote) return;
+    [].slice.call(hote.children).forEach(function(sec){
+      if(!sec.querySelector) return;
+      /* On la reconnaît à ce qu'elle CONTIENT (une grille de cartes de cours),
+         pas à son titre : celui-ci est traduit par Weglot et changerait de
+         libellé sans prévenir. */
+      var grille=sec.querySelector(".lw-cols") && sec.querySelector(".lw-course-card, .lw-courses-filters, [class*='course-filter']");
+      if(!grille) return;
+      var cartes=sec.querySelectorAll(".lw-course-card").length;
+      if(cartes>0){ sec.style.removeProperty("display"); return; }   /* elle s'est remplie : on la rend */
+      sec.style.display="none";
+    });
+  }
+
   var scheduled=false;
-  function schedule(){ if(scheduled) return; scheduled=true; requestAnimationFrame(function(){ scheduled=false; build(); }); }
+  function schedule(){ if(scheduled) return; scheduled=true; requestAnimationFrame(function(){ scheduled=false; build(); sectionCoursVide(); }); }
   var obs=new MutationObserver(schedule);
-  function start(){ build(); obs.observe(document.body,{childList:true,subtree:true}); }
+  function start(){ build(); sectionCoursVide(); obs.observe(document.body,{childList:true,subtree:true}); }
   if(document.readyState!=="loading") start(); else document.addEventListener("DOMContentLoaded",start);
   window.addEventListener("load",build);
   /* Le tableau dépend de la langue -> le reconstruire quand elle change.

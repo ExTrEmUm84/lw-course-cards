@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-o";
+  window.PS_TOKENS_V="2026-08-05-a";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2533,7 +2533,15 @@
     if(!document.getElementById("ps-acces-css")){
       var st=document.createElement("style"); st.id="ps-acces-css";
       st.textContent=
-        "#ps-acces{position:relative;z-index:60;display:flex;align-items:center;justify-content:center;"+
+        /* 🔴 NI `position`, NI `z-index` — signalé par Ziad : le bandeau
+           recouvrait le panneau du méga menu. `mega-menu.js` ne pose AUCUN
+           z-index, il s'en remet à l'ordre naturel ; mon `position:relative`
+           créait un contexte d'empilement et, venant après la barre dans le
+           DOM, passait devant son panneau déroulant.
+           Ce bandeau est un bloc dans le flux, il n'a rien à recouvrir. Le
+           laisser statique suffit : un élément positionné (le panneau) repasse
+           naturellement au-dessus d'un élément qui ne l'est pas. */
+        "#ps-acces{display:flex;align-items:center;justify-content:center;"+
         "gap:16px;flex-wrap:wrap;padding:13px 22px;font-family:var(--ps-font,Figtree,sans-serif);"+
         "background:var(--ps-accent,#507EC5);color:#fff;}"+
         "#ps-acces.ps-acces-ecole{background:#E4F5EC;color:#1b5f41;border-bottom:1px solid #c6e7d5;}"+
