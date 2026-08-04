@@ -162,8 +162,33 @@
     "#ps-abo h2.ps-abo-t{font:800 34px/1.2 var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text,#1c1f26) !important;letter-spacing:-.02em !important;margin:10px 0 0 !important;}",
     "#ps-abo .ps-abo-d{font:400 15.5px/1.6 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);margin:12px auto 0;max-width:56ch;}",
     "#ps-abo .ps-abo-cartes{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:stretch;}",
+    /* 🔴 MÊME VOCABULAIRE DE SURVOL QUE LES CARTES DE COURS : élévation de 3 px
+       et lueur à l'accent (`--ps-accent-rgb`), relevé dans `course-cards.js`.
+       Un troisième effet inventé ici ferait de cette page une pièce rapportée.
+       🔴 La transition porte sur des propriétés nommées, jamais sur `all` : le
+       liseré animé du configurateur peut être posé sur ces mêmes cartes, et
+       `all` interfèrerait avec son propre tracé. */
     "#ps-abo .ps-abo-c{position:relative;display:flex;flex-direction:column;background:#fff;"+
-      "border:1.5px solid var(--ps-border,#E6E9EF);border-radius:var(--ps-r-card,16px);padding:30px 28px 28px;}",
+      "border:1.5px solid var(--ps-border,#E6E9EF);border-radius:var(--ps-r-card,16px);padding:30px 28px 28px;"+
+      "transition:transform .18s ease, box-shadow .18s ease, border-color .18s ease;}",
+    "#ps-abo .ps-abo-c:hover{transform:translateY(-3px);"+
+      "box-shadow:0 12px 30px rgba(var(--ps-accent-rgb,80,126,197),.30);"+
+      "border-color:var(--ps-accent,#507EC5);}",
+    /* La carte mise en avant est déjà élevée : au survol elle monte un peu plus,
+       sinon l'effet serait invisible sur celle qu'on veut justement faire choisir. */
+    "#ps-abo .ps-abo-c.ps-abo-avant:hover{transform:translateY(-5px);"+
+      "box-shadow:0 18px 44px rgba(var(--ps-accent-rgb,80,126,197),.34);}",
+    "#ps-abo .ps-abo-cta{transition:background .18s ease, color .18s ease, border-color .18s ease, transform .18s ease;}",
+    "#ps-abo .ps-abo-c:hover .ps-abo-cta{transform:translateY(-1px);}",
+    "#ps-abo .ps-abo-l{transition:transform .16s ease;}",
+    "#ps-abo .ps-abo-l:hover{transform:translateX(3px);}",
+    "#ps-abo .ps-abo-l:hover .ps-abo-ic{background:var(--ps-accent,#507EC5);color:#fff;}",
+    "#ps-abo .ps-abo-ic{transition:background .16s ease, color .16s ease;}",
+    /* 🔴 Respect du réglage système : quelqu'un qui a demandé moins d'animation
+       ne doit pas voir la page bouger. Deux lignes, et c'est une exigence
+       d'accessibilité, pas une préférence. */
+    "@media(prefers-reduced-motion:reduce){#ps-abo *{transition:none !important;}"+
+      "#ps-abo .ps-abo-c:hover,#ps-abo .ps-abo-c.ps-abo-avant:hover{transform:none;}}",
     /* La formule mise en avant se distingue par le liseré d'accent, pas par une
        couleur de fond : le contenu doit rester lisible, c'est une page qui vend. */
     "#ps-abo .ps-abo-c.ps-abo-avant{border-color:var(--ps-accent,#507EC5);box-shadow:0 14px 38px rgba(var(--ps-accent-rgb,80,126,197),.16);}",

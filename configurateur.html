@@ -928,7 +928,11 @@ body.ps-verrou .ps-porte{display:grid}
        catalogue, c'est la page du membre. Son apercu ne montre que la
        configuration — le board n'est pas reproduit dans la maquette. */
     ["profile",                 "Profil"],
-    ["annuaire-partenaire-de-cas","Annuaire"]
+    ["annuaire-partenaire-de-cas","Annuaire"],
+    /* Page d'offre (04/08). Ses deux cartes sont construites par
+       `abonnement.js` et utilisent `var(--ps-accent)` partout : la couleur de
+       page les repeint donc en entier, prix, badge, boutons et liseré compris. */
+    ["formules",                "Formules"]
   ];
 
   /* ====================================================================
@@ -964,8 +968,11 @@ body.ps-verrou .ps-porte{display:grid}
      — home, profil, annuaire — le reglage existait et ne produisait RIEN : une
      case a cocher qui ne fait rien est pire qu'une case absente, elle fait croire
      que le reglage a ete pris en compte. */
+  /* 🔴 `formules` y figure parce que ses cartes ont été AJOUTÉES à `LINE_SEL`
+     dans tokens.js le 04/08 — pas l'inverse. Inscrire une page ici sans que le
+     liseré sache l'atteindre recréerait la case qui ne fait rien. */
   var PAGES_A_CARTES=["formation-par-modules","sentrainer","fiches-cabinet",
-                      "fiches-secteur","etudes-cas"];
+                      "fiches-secteur","etudes-cas","formules"];
   var REGL_LIB=[
     ["lien_video",            "Vidéo du hero (lecture au clic)"],
     ["lien_video_background", "Vidéo de fond du hero"]

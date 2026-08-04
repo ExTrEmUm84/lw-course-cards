@@ -394,7 +394,13 @@
     st.textContent=LINE_CSS;
     (document.head||document.documentElement).appendChild(st);
   }
-  var LINE_SEL=".ps-ccab,.ps-scard,.ps-cc,.ps-pfc";   /* cartes des pages AUTRES que Cours */
+  /* 🔴 `.ps-abo-c` = les deux cartes de la page Formules. Elles ne sont pas des
+     `.lw-course-card` : le `closest()` du bloc ci-dessous ne trouvera rien et
+     retombera sur l'élément lui-même, ce qui est exactement le bon hôte ici.
+     Sans cette entrée, cocher « liseré » sur cette page dans le configurateur
+     n'aurait produit RIEN — une case qui ne fait rien est pire qu'une case
+     absente, elle fait croire que le réglage a été pris en compte. */
+  var LINE_SEL=".ps-ccab,.ps-scard,.ps-cc,.ps-pfc,.ps-abo-c";   /* cartes des pages AUTRES que Cours */
   function contourPage(){
     var slug=slugPage(); if(!slug) return;
     var sty=PAGE_STYLE[slug];
@@ -715,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-l";
+  window.PS_TOKENS_V="2026-08-04-m";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
