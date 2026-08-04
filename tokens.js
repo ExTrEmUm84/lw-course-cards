@@ -1071,20 +1071,42 @@
        ==================================================================== */
     var NATIFS={ first_name:1, last_name:1, email:1, password:1 };
 
+    /* 🔴🔴 LE CLASSEMENT EST REJOUÉ À CHAQUE PASSAGE, ET C'EST TOUT LE CORRECTIF.
+       Première version : on classait une fois, puis `data-ps-etapes` interdisait
+       d'y revenir. Or LearnWorlds construit le formulaire PROGRESSIVEMENT — au
+       premier passage de l'observer, la grille ne contenait que ses premiers
+       champs. Les suivants n'ont donc reçu AUCUNE classe, et un champ sans classe
+       n'est masqué par aucune des deux règles : il reste visible sur les deux
+       écrans. Résultat en production : l'écran 1 affichait DIX champs au lieu de
+       quatre — le découpage ne découpait rien.
+       🔴 Invisible en test parce que j'injectais le code sur une modale DÉJÀ
+       peinte. Un composant construit progressivement doit être retravaillé à
+       chaque passage, jamais « une bonne fois ». C'est la raison des relances
+       partout ailleurs dans ce dépôt.
+       Le classement est idempotent (on ne touche qu'aux non-classés), donc le
+       rejouer ne coûte rien ; seule la CONSTRUCTION de la navigation reste gardée. */
+    function classer(grille){
+      var n=[0,0];
+      [].slice.call(grille.children).forEach(function(w){
+        if(!w.classList.contains("ps-e1") && !w.classList.contains("ps-e2")){
+          var c=w.querySelector("input,select,textarea");
+          var nom=c ? String(c.name||"") : "";
+          w.classList.add(nom && NATIFS[nom] ? "ps-e1" : "ps-e2");
+        }
+        n[w.classList.contains("ps-e1") ? 0 : 1]++;
+      });
+      return n;
+    }
+
     function deuxEcrans(f){
-      if(!f || f.dataset.psEtapes) return;
+      if(!f) return;
       var grille=f.querySelector(".-form-inputs");
       var groupe=f.querySelector(".form-input-group");
-      var envoi=groupe && groupe.querySelector("button");
+      var envoi=groupe && groupe.querySelector("button:not(.ps-etape-btn)");
       if(!grille || !groupe || !envoi) return;        /* structure inattendue : on ne touche à rien */
 
-      var n1=0, n2=0;
-      [].slice.call(grille.children).forEach(function(w){
-        var c=w.querySelector("input,select,textarea");
-        var nom=c ? String(c.name||"") : "";
-        if(nom && NATIFS[nom]){ w.classList.add("ps-e1"); n1++; }
-        else { w.classList.add("ps-e2"); n2++; }
-      });
+      var compte=classer(grille), n1=compte[0], n2=compte[1];
+      if(f.dataset.psEtapes) return;                  /* navigation déjà construite */
       /* 🔴 Un seul écran utile ⇒ on n'en fabrique pas deux. Le jour où Ziad retire
          les champs personnalisés de l'inscription (ce qui est recommandé), le
          formulaire redevient simple tout seul, sans qu'on ait à défaire ceci. */
@@ -1095,8 +1117,6 @@
 
       var nav1=document.createElement("div"); nav1.className="ps-etapes-nav";
       var suivant=document.createElement("button");
-      /* 🔴 `type="button"` OBLIGATOIRE : un <button> dans un <form> vaut `submit`
-         par défaut. Sans ça, « Continuer » enverrait le formulaire à moitié rempli. */
       /* 🔴 MESURÉ : il n'existe AUCUN élément `<form>` — `#signUpForm` est un `div`
          et LearnWorlds collecte les valeurs en JavaScript. `type="button"` n'est
          donc pas ce qui empêche un envoi prématuré aujourd'hui ; c'est une
