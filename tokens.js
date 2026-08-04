@@ -715,7 +715,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-h";
+  window.PS_TOKENS_V="2026-08-04-i";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -1215,7 +1215,23 @@
        Au clic sur le vrai bouton, on retire donc le découpage : au pire la
        personne revoit le formulaire complet, ce qui est le comportement d'avant.
        ==================================================================== */
-    var NATIFS={ first_name:1, last_name:1, email:1, password:1 };
+    /* 🔴🔴 CORRIGÉ LE 04/08 (soir), APRÈS AVOIR VU LE RÉSULTAT EN PRODUCTION.
+       Première règle : « écran 1 = les champs de compte connus, écran 2 = tout
+       le reste ». Elle paraissait robuste — je l'avais même défendue comme
+       « déduite, pas énumérée ». Elle ne l'était pas : elle énumérait l'écran 1.
+       Le jour où Ziad a retiré les champs personnalisés du formulaire, « tout le
+       reste » n'était plus le profil, c'était **l'avatar, la case des conditions
+       générales et l'opt-in marketing**. Résultat mesuré : un formulaire de
+       quatre champs toujours coupé en deux, avec les CGU derrière un bouton.
+       J'avais annoncé que le découpage se désactiverait seul. C'était faux.
+
+       La vraie règle tient au marqueur que LearnWorlds pose LUI-MÊME sur ses
+       champs personnalisés : `user-custom-field`. Écran 2 = ces champs-là, et
+       rien d'autre. Plus aucun champ perso ⇒ écran 2 vide ⇒ `if(!n1||!n2)` sort
+       et le formulaire redevient simple, cette fois pour de bon.
+       🔴 LEÇON : « déduit » ne veut rien dire tant qu'on n'a pas nommé DE QUOI.
+       Je déduisais du mauvais côté. */
+    var CLASSE_PERSO="user-custom-field";
 
     /* 🔴🔴 LE CLASSEMENT EST REJOUÉ À CHAQUE PASSAGE, ET C'EST TOUT LE CORRECTIF.
        Première version : on classait une fois, puis `data-ps-etapes` interdisait
@@ -1235,9 +1251,11 @@
       var n=[0,0];
       [].slice.call(grille.children).forEach(function(w){
         if(!w.classList.contains("ps-e1") && !w.classList.contains("ps-e2")){
-          var c=w.querySelector("input,select,textarea");
-          var nom=c ? String(c.name||"") : "";
-          w.classList.add(nom && NATIFS[nom] ? "ps-e1" : "ps-e2");
+          /* Le marqueur vient de LearnWorlds, pas de nous : il suit ses champs
+             personnalisés où qu'ils aillent, et il ne se met pas à désigner les
+             CGU le jour où la composition du formulaire change. */
+          var perso=w.classList.contains(CLASSE_PERSO) || !!w.querySelector("."+CLASSE_PERSO);
+          w.classList.add(perso ? "ps-e2" : "ps-e1");
         }
         n[w.classList.contains("ps-e1") ? 0 : 1]++;
       });
