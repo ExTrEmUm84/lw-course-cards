@@ -209,7 +209,7 @@
 /* >>> DEBUT PAGES — réécrit par le configurateur, ne rien ajouter ici */
   var PAGE_ACCENTS={
     "formation-par-modules":"#12d380",
-    "fiches-cabinet":"#007260",
+    "fiches-cabinet":"#47ce22",
     "fiches-secteur":"#fad54a",
     "etudes-cas":"#6b7280"
   };
@@ -218,8 +218,8 @@
     "fiches-secteur":{"contour":1,"ep":4,"duree":1.1}
   };
   var REGLAGES={
-    "lien_video":"https://vimeo.com/910833393/94064c722b",
-    "lien_video_background":"https://vimeo.com/910833393/94064c722b"
+    "lien_video":"https://player.vimeo.com/video/910833393?h=94064c722b",
+    "lien_video_background":"https://player.vimeo.com/video/910833393?h=94064c722b"
   };
 /* <<< FIN PAGES */
   window.PS_REGLAGES=REGLAGES;                  // lu par home-page.js
@@ -255,15 +255,15 @@
      retire d'ici. Profil et Déconnexion n'y figurent pas du tout, volontairement. */
 /* >>> DEBUT MENU — réécrit par le configurateur, ne rien ajouter ici */
   var MENU_COULEURS={
+    "course/supports-webinar":"#12A85F",
+    "bootcamp-prepastrat":"#D98500",
+    "entretiens-en-conditions-reelles":"#8A45C9",
     "formation-par-modules":"#507EC5",
     "fiches-cabinet":"#00C875",
     "fiches-secteur":"#FDAB3D",
     "sentrainer":"#A25DDC",
     "etudes-cas":"#E2445C",
-    "annuaire-partenaire-de-cas":"#0073EA",
-    "course/supports-webinar":"#12A85F",
-    "bootcamp-prepastrat":"#D98500",
-    "entretiens-en-conditions-reelles":"#8A45C9"
+    "annuaire-partenaire-de-cas":"#0073EA"
   };
 /* <<< FIN MENU */
   window.PS_MENU_COULEURS=MENU_COULEURS;        // lu par mega-menu.js
