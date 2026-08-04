@@ -709,7 +709,13 @@
      À incrémenter à chaque changement de comportement. Même règle que `AUTH_V`
      et `LP_STORE_V`. La fonction du menu est exposée pour pouvoir la déclencher
      à la main et observer ce qu'elle fait, plutôt que d'en déduire. */
-  window.PS_TOKENS_V="2026-08-04-c";
+  /* 🔴 -d : correctif du classement des deux écrans. J'ai poussé le correctif SANS
+     incrémenter ce marqueur, et je me suis retrouvé incapable de dire si la page
+     exécutait la version corrigée ou celle du cache — les deux annonçaient `-c`.
+     C'est précisément le service que ce marqueur rend, et la règle est écrite deux
+     lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
+     il donne une réponse, et elle est fausse. */
+  window.PS_TOKENS_V="2026-08-04-d";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -936,6 +942,18 @@
     var F=[
       /* ---------- la boîte ---------- */
       "#animatedModal .modal-content{font-family:var(--ps-font,Figtree,sans-serif) !important;}",
+      /* 🔴 LA BOÎTE BLANCHE, C'EST `#signUpForm` (et `.login-form` pour la
+         connexion) — PAS `#animatedModal`, qui est le VOILE plein écran, ni
+         `.modal-content`, qui est transparent. Arrondir le voile n'aurait rien
+         donné : il couvre toute la fenêtre. Mesuré avant d'écrire.
+         Rayon pris sur `--ps-r-card` : le popup suit les cartes du site et se
+         règle depuis le configurateur, comme le reste.
+         🔴 L'ombre n'est pas décorative : le voile est un blanc à 85 %, donc une
+         carte blanche aux coins arrondis posée dessus ne se détacherait presque
+         pas — l'arrondi serait invisible, et le réglage aurait l'air sans effet. */
+      "#animatedModal #signUpForm,#animatedModal .login-form{"+
+        "border-radius:var(--ps-r-card,16px) !important;"+
+        "box-shadow:0 18px 50px rgba(0,0,0,.10) !important;}",
       "#animatedModal #signUpForm{width:min(820px,92vw) !important;max-width:none !important;}",
       "#animatedModal .landing-form-title{font:800 27px/1.25 var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text,#1c1f26) !important;letter-spacing:-.02em !important;}",
       /* ---------- deux colonnes, inscription seulement ---------- */
@@ -1006,9 +1024,43 @@
       "#signUpForm.ps-2etapes.ps-etape-2 .-form-inputs > .ps-e1{display:none !important;}",
       /* le vrai bouton d'envoi n'existe QUE sur le second écran */
       "#signUpForm.ps-2etapes.ps-etape-1 .form-input-group > button{display:none !important;}",
-      "#signUpForm.ps-2etapes.ps-etape-1 .-form-create-forgot{display:none !important;}",
+      /* 🔴 « Connectez-vous avec votre compte » et « Mot de passe oublié ? » vont
+         sur l'écran 1, pas sur le 2 (Ziad, 04/08 — il a raison). Je les avais
+         masqués avec le bouton d'envoi, en les traitant comme des accessoires de
+         la validation. Ce sont des SORTIES : quelqu'un qui a déjà un compte s'en
+         aperçoit devant le champ e-mail, pas après avoir renseigné son école et
+         son niveau. Les lui cacher à ce moment-là, c'est le faire remplir un
+         formulaire pour rien.
+         Masqués sur l'écran 2 en revanche : on y est engagé, une porte de sortie
+         n'y est plus une aide mais une distraction. */
+      "#signUpForm.ps-2etapes.ps-etape-2 .-form-create-forgot{display:none !important;}",
       ".ps-etapes-nav{display:flex !important;gap:10px !important;align-items:center !important;margin:4px 0 0 !important;}",
-      ".ps-etapes-jauge{font:600 12.5px var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text-soft,#676879) !important;margin:0 0 14px !important;}",
+      /* 🔴 La jauge vit SOUS le bouton (demande de Ziad, 04/08). Elle y change de
+         nature : au-dessus des champs c'était un en-tête de section, en dessous
+         c'est une légende du bouton. D'où la marge inversée et le centrage — un
+         texte laissé à gauche sous un bouton pleine largeur paraît orphelin.
+         🔴🔴 ET ELLE NE PEUT PAS RESTER UN SIMPLE TEXTE GRIS. Ziad : « ça fait
+         juste un texte qui ressemble trop aux liens en bas ». Exact : sous le
+         bouton, un texte gris centré au-dessus de deux liens bleus se lit comme
+         un troisième lien. On en fait donc un VRAI indicateur — deux segments
+         qui se remplissent — et le libellé passe en micro-titre capitales, l'idiome
+         déjà utilisé pour les titres de cartes du configurateur. Une barre de
+         progression ne peut pas être confondue avec un lien, et elle dit en plus
+         ce que le texte disait : où l'on en est. */
+      ".ps-etapes-jauge{display:flex !important;flex-direction:column !important;align-items:center !important;"+
+        "gap:8px !important;margin:18px 0 0 !important;}",
+      ".ps-jauge-bars{display:flex !important;gap:5px !important;}",
+      ".ps-jauge-bars i{display:block !important;width:26px !important;height:4px !important;"+
+        "border-radius:999px !important;background:var(--ps-border,#E6E9EF) !important;transition:background .2s !important;}",
+      "#signUpForm.ps-etape-1 .ps-jauge-bars i:first-child,"+
+      "#signUpForm.ps-etape-2 .ps-jauge-bars i{background:var(--ps-accent,#507EC5) !important;}",
+      ".ps-jauge-t{font:800 10.5px var(--ps-font,Figtree,sans-serif) !important;text-transform:uppercase !important;"+
+        "letter-spacing:.07em !important;color:var(--ps-text-soft,#676879) !important;}",
+      /* 🔴 Les liens de sortie ont besoin d'air : mesuré, l'écart avec la jauge
+         valait ZÉRO — les trois blocs se touchaient, ce qui accentuait justement
+         la confusion signalée. Scopé à l'inscription : la modale de connexion
+         n'a pas de jauge, sa mise en page n'a pas à bouger. */
+      "#animatedModal #signUpForm .-form-create-forgot{margin-top:20px !important;}",
       ".ps-etape-btn{flex:1 !important;height:52px !important;border:0 !important;cursor:pointer !important;"+
         "border-radius:var(--ps-r-btn,10px) !important;font:700 15px var(--ps-font,Figtree,sans-serif) !important;"+
         "background:var(--ps-accent,#507EC5) !important;color:#fff !important;transition:background .18s !important;}",
@@ -1112,8 +1164,13 @@
          formulaire redevient simple tout seul, sans qu'on ait à défaire ceci. */
       if(!n1 || !n2) return;
 
+      /* 🔴 Les deux segments sont des éléments à part, pas des pseudo-éléments :
+         il faut pouvoir les remplir l'un après l'autre, et une règle CSS sur
+         `:first-child` le fait sans que le JS ait à toucher au style. */
       var jauge=document.createElement("div");
-      jauge.className="ps-etapes-jauge"; jauge.textContent="Étape 1 sur 2 — votre compte";
+      jauge.className="ps-etapes-jauge";
+      jauge.innerHTML='<span class="ps-jauge-bars"><i></i><i></i></span><span class="ps-jauge-t"></span>';
+      var jaugeT=jauge.querySelector(".ps-jauge-t");
 
       var nav1=document.createElement("div"); nav1.className="ps-etapes-nav";
       var suivant=document.createElement("button");
@@ -1135,15 +1192,19 @@
       retour.type="button"; retour.className="ps-etape-btn ps-retour"; retour.textContent="Retour";
       nav2.appendChild(retour);
 
-      groupe.insertBefore(jauge, grille);
       groupe.insertBefore(nav1, envoi);
       groupe.insertBefore(nav2, envoi);
+      /* 🔴 APRÈS le bouton d'envoi, pas avant la grille. `envoi.nextSibling` peut
+         valoir `null` quand le bouton est le dernier enfant — `insertBefore(x,null)`
+         ajoute alors à la fin, ce qui est exactement le placement voulu. */
+      groupe.insertBefore(jauge, envoi.nextSibling);
 
       function aller(n){
         f.classList.toggle("ps-etape-1", n===1);
         f.classList.toggle("ps-etape-2", n===2);
-        jauge.textContent = n===1 ? "Étape 1 sur 2 — votre compte"
-                                  : "Étape 2 sur 2 — pour mieux vous accompagner";
+        /* Libellés courts : les deux segments disent déjà « sur 2 », et un
+           micro-titre en capitales ne supporte pas une phrase. */
+        jaugeT.textContent = n===1 ? "Étape 1 · votre compte" : "Étape 2 · votre profil";
         var p=f.querySelector(n===1 ? ".ps-e1 input" : ".ps-e2 input,.ps-e2 select");
         if(p && p.focus) try{ p.focus({preventScroll:true}); }catch(e){ }
         f.scrollTop=0;
