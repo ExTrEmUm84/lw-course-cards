@@ -715,7 +715,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-d";
+  window.PS_TOKENS_V="2026-08-04-e";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -937,6 +937,32 @@
      d'entre eux s'affichent en clé technique brute — « annuaire » (le
      consentement RGPD de l'annuaire !) et « contact ». Les corriger en JS
      masquerait un défaut de configuration au lieu de le réparer. */
+  /* ====================================================================
+     LE BANDEAU « INSCRIPTION FERMÉE » DES CARTES DE COURS
+     --------------------------------------------------------------------
+     Depuis le 04/08, tout le catalogue est en « inscription clôturée » : on ne
+     vend plus de cours à l'unité, on vend deux programmes « Accès total ». Le
+     statut est le bon — les cartes restent visibles, ce que « Privé » aurait
+     empêché — mais LearnWorlds pose alors sur CHAQUE carte un calque qui
+     recouvre l'illustration et annonce « Inscription fermée ».
+     🔴 Pour un prospect, ça se lit « c'est fermé, revenez plus tard » : l'inverse
+     exact du message voulu, sur la page qui doit donner envie d'acheter. Le cours
+     n'est pas fermé, il est inclus dans une offre.
+     MESURÉ avant d'écrire : `div.lw-card-overlay`, `position:absolute`, 303×171,
+     posé sur `div.learnworlds-image`, et ne contenant QUE ce libellé (11 cartes
+     sur 12). Le masquer retire donc aussi le voile sombre et rend l'illustration.
+     ⚠️ Ce calque sert aussi au statut « Bientôt ». Aucun cours ne le porte
+     aujourd'hui (l'inventaire du 04/08 ne montre que free / paid / draft /
+     enrollment_closed) ; le jour où l'un l'utilisera, il faudra distinguer les
+     deux plutôt que de tout masquer. ⏳ Un libellé POSITIF renvoyant vers la page
+     carrefour prendra sa place — il attend que cette page existe. */
+  (function(){
+    if(document.getElementById("ps-cardovl")) return;
+    var st=document.createElement("style"); st.id="ps-cardovl";
+    st.textContent=".lw-course-card .lw-card-overlay{display:none !important;}";
+    (document.head||document.documentElement).appendChild(st);
+  })();
+
   (function(){
     if(document.getElementById("ps-form-ps")) return;
     var F=[
