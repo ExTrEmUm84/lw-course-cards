@@ -715,7 +715,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-04-g";
+  window.PS_TOKENS_V="2026-08-04-h";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2213,6 +2213,213 @@
     depTurnstile();
   }
 
+  /* ====================================================================
+     RAPPEL DE COMPLÉTION DE PROFIL  (04/08)
+     --------------------------------------------------------------------
+     Les champs de l'annuaire sortent du formulaire d'inscription : on ne
+     demande plus rien pour créer un compte, et on invite à compléter APRÈS,
+     quand la personne a déjà ce qu'elle est venue chercher.
+
+     🔴🔴 ON NE RÉCLAME QUE CE QUI EST RÉELLEMENT SAISISSABLE. Mesuré le
+     04/08 sur `/profile` : seuls `cf_annuaire, cf_contact, cf_ecole,
+     cf_niveau, cf_recherche, cf_langue` y sont éditables. `cf_poste`,
+     `cf_promo` et `cf_photo` EXISTENT dans l'école mais n'ont pas leur case
+     « édition profil » cochée — les réclamer enverrait le membre chercher
+     un champ qui n'est nulle part, et c'est nous qui aurions l'air cassés.
+
+     🔴 `cf_matieres` N'EXISTE PAS ENCORE. Il est déclaré ci-dessous mais
+     n'est compté que s'il apparaît dans `me.custom_fields` : le jour où
+     Ziad le crée, le rappel le demande tout seul, sans toucher au code. On
+     déduit, on n'énumère pas — même principe que le découpage en deux
+     écrans, et pour la même raison : une liste écrite à la main se périme
+     en silence.
+
+     🔴 AUCUN APPEL RÉSEAU. `me.custom_fields` porte les 9 champs AVEC leurs
+     valeurs sur une page membre (mesuré le 04/08). Attention : la même
+     lecture faite dans l'ADMIN ressort vide — ne pas généraliser depuis là.
+
+     🔴 ON NE COMPTE PAS `bio`, `location`, `linkedin` : ils ne sont pas
+     exposés par `me`, et une mesure impossible ne doit pas entrer dans un
+     pourcentage. Un profil « à 60 % » à cause de champs illisibles serait
+     un chiffre inventé — l'erreur exacte de l'ancien calcul de progression.
+     ==================================================================== */
+  var CHAMPS_PROFIL=[
+    {cle:"cf_ecole",     nom:"votre école"},
+    {cle:"cf_niveau",    nom:"votre niveau"},
+    {cle:"cf_recherche", nom:"le poste que vous visez"},
+    {cle:"cf_langue",    nom:"votre langue"},
+    {cle:"cf_contact",   nom:"comment vous joindre"},
+    {cle:"cf_matieres",  nom:"les matières où vous pouvez aider"}
+  ];
+
+  /* 🔴 LA MÊME RÈGLE QUE LE WORKER, MOT POUR MOT. Lui décide qui apparaît
+     dans l'annuaire (`accepteAnnuaire`), nous décidons qui on sollicite. Si
+     les deux divergeaient, on réclamerait un profil à quelqu'un qui
+     n'apparaîtra jamais, ou on laisserait tranquille quelqu'un qui figure
+     dans la liste avec une fiche vide. Fermé par défaut des deux côtés. */
+  function reponseOptin(v){
+    var s=String(v==null?"":v).normalize("NFD").replace(/[̀-ͯ]/g,"").trim().toLowerCase();
+    if(!s) return "sans-reponse";
+    return s.indexOf("oui")===0 ? "oui" : "non";
+  }
+
+  function rempli(v){
+    if(v==null) return false;
+    if(Array.isArray(v)) return v.length>0;
+    return String(v).trim()!=="";
+  }
+
+  /* Séparé et pur : c'est la seule partie qui décide quoi afficher, donc la
+     seule qu'on ait besoin de relire quand le comportement surprend. */
+  function etatProfil(champsMembre){
+    var cf=champsMembre||{};
+    var optin=reponseOptin(cf.cf_annuaire);
+    if(optin==="non") return {afficher:false};              // choix respecté, on n'insiste jamais
+    if(optin==="sans-reponse") return {afficher:true, mode:"invite"};
+
+    var attendus=CHAMPS_PROFIL.filter(function(c){ return c.cle in cf; });
+    var manquants=attendus.filter(function(c){ return !rempli(cf[c.cle]); });
+    if(!attendus.length || !manquants.length) return {afficher:false};
+    return {
+      afficher:true, mode:"complement", manquants:manquants,
+      pct:Math.round((attendus.length-manquants.length)/attendus.length*100)
+    };
+  }
+
+  var RAPPEL_JOURS=7;
+
+  function rappelProfil(){
+    var u=membrePS();
+    if(!u || document.getElementById("ps-rappel")) return;
+    /* On n'interrompt pas quelqu'un qui est en train de suivre une leçon. */
+    if(/^\/(path-player|course-player)/.test(location.pathname||"")) return;
+
+    /* 🔴 CLÉ SUFFIXÉE PAR LE MEMBRE. Sans ça, sur un poste partagé, la mise
+       en veille d'un membre masque le rappel du suivant — bug déjà commis
+       avec `psLpProgress`, qui n'était pas clé par membre non plus. */
+    var cle="psRappelProfil:"+(u.id||"?");
+    try{
+      var jusqua=Number(localStorage.getItem(cle)||0);
+      if(jusqua && Date.now()<jusqua) return;
+    }catch(e){}
+
+    var etat=etatProfil(u.custom_fields);
+    if(!etat.afficher) return;
+
+    if(!document.getElementById("ps-rappel-css")){
+      var st=document.createElement("style"); st.id="ps-rappel-css";
+      st.textContent=
+        "#ps-rappel{position:fixed;right:20px;bottom:20px;z-index:9998;width:min(360px,calc(100vw - 40px));"+
+        "background:#fff;border:1px solid var(--ps-border,#E6E9EF);border-radius:var(--ps-r-card,16px);"+
+        "box-shadow:0 12px 34px rgba(15,23,42,.16);padding:18px 20px;font-family:var(--ps-font,Figtree,sans-serif);"+
+        "animation:ps-rappel-in .32s ease both}"+
+        "@keyframes ps-rappel-in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}"+
+        "#ps-rappel h4{margin:0 0 6px;font:800 15.5px/1.3 var(--ps-font,Figtree,sans-serif);color:var(--ps-text,#1c1f26)}"+
+        "#ps-rappel p{margin:0;font:400 13.5px/1.5 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879)}"+
+        "#ps-rappel .ps-rappel-x{position:absolute;top:10px;right:10px;width:26px;height:26px;border:0;background:transparent;"+
+        "color:#b9c3d6;cursor:pointer;border-radius:50%;font-size:17px;line-height:1}"+
+        "#ps-rappel .ps-rappel-x:hover{background:#F3F5F9;color:#676879}"+
+        "#ps-rappel .ps-rappel-jauge{height:6px;border-radius:3px;background:#EDF0F5;margin:12px 0 4px;overflow:hidden}"+
+        "#ps-rappel .ps-rappel-jauge i{display:block;height:100%;border-radius:3px;background:var(--ps-accent,#507EC5);transition:width .5s}"+
+        "#ps-rappel .ps-rappel-pct{font:700 11.5px/1 var(--ps-font,Figtree,sans-serif);color:var(--ps-accent,#507EC5);letter-spacing:.04em}"+
+        "#ps-rappel .ps-rappel-cta{display:inline-block;margin-top:14px;background:var(--ps-accent,#507EC5);color:#fff;"+
+        "text-decoration:none;border:0;cursor:pointer;border-radius:var(--ps-r-btn,10px);padding:9px 16px;"+
+        "font:700 13px var(--ps-font,Figtree,sans-serif)}"+
+        "#ps-rappel .ps-rappel-cta:hover{background:var(--ps-accent-hover,#486798)}"+
+        "@media(max-width:640px){#ps-rappel{right:12px;left:12px;bottom:12px;width:auto}}";
+      document.head.appendChild(st);
+    }
+
+    var boite=document.createElement("div");
+    boite.id="ps-rappel";
+    boite.setAttribute("role","complementary");
+    boite.style.position="fixed";
+
+    var fermer=document.createElement("button");
+    fermer.className="ps-rappel-x"; fermer.type="button";
+    fermer.setAttribute("aria-label","Masquer ce rappel"); fermer.textContent="×";
+    boite.appendChild(fermer);
+
+    var titre=document.createElement("h4");
+    var texte=document.createElement("p");
+    if(etat.mode==="invite"){
+      titre.textContent="Rejoignez l'annuaire des étudiants";
+      texte.textContent="Trouvez un partenaire pour vous entraîner aux études de cas — et laissez les autres vous trouver.";
+    }else{
+      /* 🔴 Le titre suit le taux RÉEL. « Presque prête » sur une fiche à 0 %,
+         c'est une phrase qui ment à la personne qui la lit — et un encouragement
+         qui se contredit lui-même trois lignes plus bas, sous la barre. */
+      titre.textContent = etat.pct>=60 ? "Votre fiche est presque prête"
+                        : "Complétez votre fiche d'annuaire";
+      /* On NOMME ce qui manque : « complétez votre profil » n'indique rien,
+         et la personne repart chercher quoi remplir. */
+      var liste=etat.manquants.map(function(c){ return c.nom; });
+      var enTexte=liste.length===1 ? liste[0]
+        : liste.slice(0,-1).join(", ")+" et "+liste[liste.length-1];
+      texte.textContent="Il manque "+enTexte+".";
+    }
+    boite.appendChild(titre); boite.appendChild(texte);
+
+    if(etat.mode==="complement"){
+      var jauge=document.createElement("div"); jauge.className="ps-rappel-jauge";
+      var barre=document.createElement("i"); barre.style.width=etat.pct+"%";
+      jauge.appendChild(barre); boite.appendChild(jauge);
+      var pct=document.createElement("div"); pct.className="ps-rappel-pct";
+      pct.textContent=etat.pct+" % complété"; boite.appendChild(pct);
+    }
+
+    /* 🔴 Sur /profile, le lien ne sert à rien : on y est déjà. On ouvre alors
+       le formulaire natif — et s'il a changé de nom, le bouton se contente de
+       ne rien faire plutôt que de renvoyer la personne sur la même page. */
+    var surProfil=/^\/profile/.test(location.pathname||"");
+    var cta;
+    if(surProfil){
+      cta=document.createElement("button");
+      cta.type="button"; cta.textContent="Modifier mon profil";
+      cta.addEventListener("click",function(){
+        var b=[].slice.call(document.querySelectorAll("a,button")).filter(function(e){
+          return /edit\s*profile|modifier\s*(mon\s*)?profil/i.test((e.textContent||"").trim());
+        })[0];
+        if(b) b.click();
+        boite.remove();
+      });
+    }else{
+      cta=document.createElement("a");
+      cta.href="/profile"; cta.textContent="Compléter mon profil";
+    }
+    cta.className="ps-rappel-cta";
+    boite.appendChild(cta);
+
+    fermer.addEventListener("click",function(){
+      try{ localStorage.setItem(cle, String(Date.now()+RAPPEL_JOURS*864e5)); }catch(e){}
+      boite.remove();
+    });
+
+    (document.body||document.documentElement).appendChild(boite);
+  }
+
+  /* 🔴 GARDE-FOU CONTRE LA DÉRIVE SILENCIEUSE. La table ci-dessus doit rester
+     alignée sur les champs cochés « édition profil » dans LearnWorlds. Le jour
+     où l'un est décoché, on réclamerait un champ introuvable. Sur /profile —
+     la seule page où le formulaire existe — on compare et on le dit. Ça ne
+     répare rien, mais ça transforme une dérive muette en dérive constatable. */
+  function verifierChampsProfil(){
+    if(!/^\/profile/.test(location.pathname||"")) return;
+    var form=document.querySelectorAll('[name^="extralogin-cf_"]');
+    if(!form.length) return;                       // formulaire pas encore rendu
+    var presents={};
+    [].slice.call(form).forEach(function(c){
+      presents[(c.getAttribute("name")||"").replace("extralogin-","")]=1;
+    });
+    var u=membrePS(); if(!u) return;
+    var reclames=CHAMPS_PROFIL.filter(function(c){ return c.cle in (u.custom_fields||{}); });
+    var introuvables=reclames.filter(function(c){ return !presents[c.cle]; }).map(function(c){ return c.cle; });
+    if(introuvables.length){
+      try{ console.warn("[PrepaStrat] Le rappel de profil réclame des champs absents du formulaire /profile : "
+        +introuvables.join(", ")+". Cocher leur « édition profil » dans LearnWorlds, ou les retirer de CHAMPS_PROFIL."); }catch(e){}
+    }
+  }
+
   cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
   if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
@@ -2223,6 +2430,12 @@
      mesuré). Sortie immédiate si la page n'a pas le contour activé, donc ces
      relances ne coûtent rien aux autres pages. */
   [1000,3000,6000,10000].forEach(function(d){ setTimeout(contourPage,d); });
+  /* 🔴 Le rappel arrive APRÈS la page, jamais pendant. Il n'a aucune urgence
+     et il est idempotent (`#ps-rappel` déjà posé ⇒ sortie immédiate) : deux
+     relances suffisent à rattraper un `me` pas encore là, sans jamais voler
+     l'attention au moment où la personne cherche son cours. */
+  [1500,4000].forEach(function(d){ setTimeout(rappelProfil,d); });
+  [2500,6000].forEach(function(d){ setTimeout(verifierChampsProfil,d); });
   /* 🔴 Le dépôt est relancé PLUS TARD que le reste : les cartes du Site Builder
      n'apparaissent qu'au bout de plusieurs secondes (mesuré : ~5 à 8 s avant que
      le compte de barres se stabilise). Déposer trop tôt n'enverrait qu'une partie
