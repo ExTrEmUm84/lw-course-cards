@@ -435,8 +435,22 @@
     secs.forEach(function(s){
       if(s.parentElement && s.parentElement.closest("section.learnworlds-section")) return; // sections de tête seulement
       if(s.querySelector(".progress-container_counter")) s.classList.add("ps-home-stats");
-      /* hero = la section qui porte la vidéo (iframe / learnworlds-video-iframe) */
-      if(s.querySelector(".learnworlds-video-iframe, iframe")) s.classList.add("ps-home-hero");
+      /* 🔴🔴 LE HERO SE RECONNAÎT À SON `data-section-id`, PLUS À SA VIDÉO.
+         Historique : on l'identifiait à la présence d'un `iframe`. Ça marchait,
+         mais ça faisait dépendre TOUT l'habillage du hero — fond marine, texte
+         blanc, et la vidéo de fond elle-même — d'un élément vidéo NATIF que
+         Ziad ne voit que comme un défaut : il s'affiche brièvement en blanc au
+         chargement, et son champ contient un chemin de fichier local
+         (`file:///Users/…`) qui déclenche une requête inutile.
+         Le 05/08 il a demandé s'il pouvait le supprimer : avec l'ancienne
+         détection, la réponse aurait été « oui, et la home perd son hero » —
+         sans la moindre erreur pour le signaler.
+         ⇒ On lit `data-section-id`, que LearnWorlds pose lui-même (`hero41`,
+         relevé en direct). L'iframe reste acceptée en second signal, pour les
+         gabarits où l'identifiant ne commencerait pas par « hero ».
+         **Un repère qu'on veut pouvoir supprimer ne doit rien commander.** */
+      var _sid=s.getAttribute("data-section-id")||"";
+      if(/^hero/i.test(_sid) || s.querySelector(".learnworlds-video-iframe, iframe")) s.classList.add("ps-home-hero");
       /* tag par titre — on lit AUSSI les titres en <div> (learnworlds-heading/subheading),
          car sur ce template beaucoup de titres ne sont pas des balises h1-h4. */
       var htext=""; s.querySelectorAll("h1,h2,h3,h4,.learnworlds-heading,.learnworlds-subheading,.learnworlds-heading3,.learnworlds-heading4").forEach(function(x){ htext+=" "+(x.textContent||""); });
