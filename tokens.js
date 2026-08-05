@@ -731,7 +731,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-af";
+  window.PS_TOKENS_V="2026-08-05-ag";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3014,6 +3014,18 @@
     if(!u) return {montrer:false};
     if(u.is_admin) return {montrer:false};              /* l'admin voit tout, il n'achète rien */
     if(programmes>0) return {montrer:false};            /* accès déjà en place */
+    /* 🔴🔴 UNE ADRESSE NON VALIDÉE PASSE AVANT TOUT LE RESTE (05/08).
+       Mesuré sur le compte de test `…@boks.app` : sans ce cas, il recevait
+       « Il vous reste une étape — Voir les formules », c'est-à-dire une
+       proposition d'abonnement à 99 €… alors que la seule chose qui le bloque
+       est un lien à cliquer dans sa boîte mail. On lui vendait la solution d'un
+       problème qu'il n'a pas.
+       🔴 Et ça vaut AUSSI pour un étudiant d'école : depuis que l'automatisation
+       attend la vérification, son domaine ne suffit plus à le reconnaître (le
+       tag n'est pas encore posé), donc il retombait précisément dans la branche
+       « offre » que ce bandeau avait été écrit pour lui épargner.
+       ⇒ Un seul message, vrai dans les deux cas : validez votre adresse. */
+    if(verifEnAttente(u)) return {montrer:true, mode:"verification"};
     if(partenaire) return {montrer:true, mode:"ecole", ecole:partenaire.nom||""};
     return {montrer:true, mode:"offre"};
   }
@@ -3259,8 +3271,21 @@
        On préfère le laisser voir des cartes cliquables quelques minutes : au
        pire il tombe sur l'écran d'accès de LearnWorlds, qui lui, ne lui réclame
        pas d'argent. */
+    /* 🔴🔴 L'EXEMPTION CI-DESSUS SUPPOSAIT UNE ATTENTE DE QUELQUES MINUTES —
+       CE N'EST PLUS VRAI (05/08). Elle a été écrite quand l'automatisation
+       LearnWorlds se déclenchait sur « L'utilisateur s'inscrit » : le trou entre
+       l'inscription et l'inscription au programme se comptait en secondes.
+       Ziad l'a fait basculer sur « L'utilisateur vérifie son adresse e-mail »
+       pour qu'on ne donne plus l'accès d'une école à une adresse non prouvée.
+       ⇒ Le trou peut désormais durer des JOURS, ou toujours. Un compte
+       `@essec.edu` jamais validé gardait donc des cartes sans gardien, et
+       finissait sur l'écran d'accès de LearnWorlds sans explication.
+       ⇒ On le verrouille — mais le clic ne l'envoie PAS vers l'offre : il n'a
+       rien à acheter, son école a payé. `versOffre()` l'oriente vers la
+       validation. On ne garde l'exemption que pour l'attente courte et
+       légitime : adresse VÉRIFIÉE, automatisation pas encore passée. */
     try{
-      if(u && window.PS_PARTENAIRE_EMAIL && window.PS_PARTENAIRE_EMAIL(u.email)) return false;
+      if(u && !verifEnAttente(u) && window.PS_PARTENAIRE_EMAIL && window.PS_PARTENAIRE_EMAIL(u.email)) return false;
     }catch(e){}
     return true;
   }
@@ -3308,7 +3333,16 @@
     return _fermes ? false : null;
   }
 
-  function versOffre(){ location.href = window.PS_URL_OFFRE || URL_OFFRE_DEFAUT; }
+  /* 🔴 LA DESTINATION DÉPEND DE LA RAISON DU VERROU, PAS DU VERROU LUI-MÊME.
+     Un compte dont l'adresse n'est pas validée n'a rien à acheter : le clic
+     l'envoie là où il peut se débloquer. L'y envoyer vers l'offre serait lui
+     réclamer 99 € pour un problème qui se règle en cliquant un lien reçu par
+     e-mail — et, pour un étudiant d'école, réclamer ce que son école a déjà payé. */
+  function versOffre(){
+    var u=membrePS();
+    if(u && verifEnAttente(u)){ location.href="/email-verification-pending"; return; }
+    location.href = window.PS_URL_OFFRE || URL_OFFRE_DEFAUT;
+  }
 
   function attendreListe(cb){
     if(_fermes){ cb(); return; }
@@ -4177,7 +4211,17 @@
     b.id="ps-acces";
     var p=document.createElement("p");
 
-    if(etat.mode==="ecole"){
+    if(etat.mode==="verification"){
+      /* Même habillage vert que l'école : c'est une attente, pas un refus, et
+         surtout pas une invitation à payer. Le lien mène là où le vrai bouton
+         « Renvoyer l'e-mail » de LearnWorlds se trouve — page vérifiée le 05/08
+         comme rendue pour un compte en attente. */
+      b.className="ps-acces-ecole";
+      p.textContent="Validez votre adresse e-mail pour ouvrir votre accès. Le lien vous a été envoyé à l'inscription.";
+      var av=document.createElement("a");
+      av.href="/email-verification-pending"; av.textContent="Renvoyer le lien";
+      b.appendChild(p); b.appendChild(av);
+    }else if(etat.mode==="ecole"){
       b.className="ps-acces-ecole";
       /* 🔴 Aucun bouton d'achat ici, volontairement. */
       p.textContent="Votre accès est pris en charge par "+(etat.ecole||"votre école")+
