@@ -491,44 +491,86 @@
     (document.head||document.documentElement).appendChild(st);
   }
 
-  /* 🔴🔴 LEARNWORLDS FAIT DÉJÀ LES ONGLETS — MESURÉ LE 05/08, APRÈS AVOIR
-     ÉCRIT LE CONTRAIRE. Avec `#personal-details` dans l'URL, cette section est
-     en `display:block` et les QUATRE autres en `display:none`. Le comportement
-     existe : seule l'APPARENCE manquait, la navigation étant rendue en colonne
-     étroite à gauche.
-     ⇒ Ce code ne masque plus rien et n'intercepte plus aucun clic. Il ne fait
-     que deux choses : déverrouiller la largeur, et marquer la pastille active.
-     C'était la bonne façon depuis le début — ma version précédente
-     réimplémentait le mécanisme par-dessus le leur, avec le risque de rendre
-     Sécurité et Paiements inaccessibles si la barre débordait. Moins de code,
-     et plus rien à casser. */
+  /* 🔴🔴 NON, LEARNWORLDS NE FAIT PAS D'ONGLETS — ET J'AI CRU LE CONTRAIRE
+     EN OBSERVANT MON PROPRE CODE. Le 05/08 j'ai relevé « une seule section en
+     block, les quatre autres masquées » et j'en ai déduit que la plateforme
+     gérait déjà le basculement. C'était la version PRÉCÉDENTE de ce fichier,
+     déjà en production, qui masquait. Mesure refaite une fois le masquage
+     retiré : les quatre sections utiles sont TOUTES en `block`, au chargement
+     comme onze secondes plus tard, sans aucun style inline de notre part.
+     ⇒ Regarder l'effet de son propre code et l'attribuer à la plateforme :
+     l'erreur la plus coûteuse de la journée, parce qu'elle m'a fait retirer un
+     mécanisme qui marchait.
+
+     🔴 CE QUI RESTE VRAI de cet aller-retour : le garde-fou. Des onglets
+     masquent les sections non actives ; si la barre déborde de son conteneur,
+     une seule pastille reste cliquable et Sécurité, Paiements et Notifications
+     deviennent INACCESSIBLES. On vérifie donc, et on renonce plutôt que de
+     livrer une page amputée.
+     🟢 Le risque de capture partielle (une section pas encore rendue) est
+     écarté : mesuré, les cinq sections existent DÈS le chargement. */
   function onglets(){
     var nav=document.querySelector(".account-section-navigation");
-    if(!nav) return false;
-    var liens=[].slice.call(nav.querySelectorAll("a[href^='#']"));
-    if(liens.length<2) return false;
-    stylesOnglets();
-    nav.setAttribute("data-ps-tabs","1");
+    if(!nav || nav.dataset.psTabs) return !!(nav && nav.dataset.psTabs);
+    var vues=[];
+    [].slice.call(nav.querySelectorAll("a[href^='#']")).forEach(function(a){
+      var id=(a.getAttribute("href")||"").slice(1);
+      var el=id && document.getElementById(id);
+      /* Une section masquée par ailleurs (« Cours et programmes ») ne devient
+         pas un onglet : on ouvrirait un panneau vide. */
+      if(el && el.offsetParent!==null) vues.push({a:a, el:el, id:id});
+    });
+    if(vues.length<2) return false;
 
-    /* La section active est celle que LearnWorlds affiche, pas celle qu'on
-       croit : on lit le DOM plutôt que de suivre les clics — c'est vrai aussi
-       après un retour arrière ou un lien externe portant une ancre. */
-    function marquer(){
-      liens.forEach(function(a){
-        var id=(a.getAttribute("href")||"").slice(1);
-        var el=id && document.getElementById(id);
-        var actif=!!(el && el.offsetParent!==null);
-        a.classList.toggle("ps-acc-on", actif);
+    stylesOnglets();
+    nav.dataset.psTabs="1";
+    nav.setAttribute("role","tablist");
+    if(io){ try{ io.disconnect(); }catch(e){} io=null; }
+
+    function activer(id, memoriser){
+      vues.forEach(function(v){
+        var on=v.id===id;
+        v.el.style.display = on ? "" : "none";
+        v.a.classList.toggle("ps-acc-on", on);
+        v.a.setAttribute("aria-selected", on ? "true" : "false");
+        v.a.setAttribute("tabindex", on ? "0" : "-1");
+        v.el.setAttribute("role","tabpanel");
+        v.el.setAttribute("aria-hidden", on ? "false" : "true");
       });
+      /* `replaceState` et non `location.hash` : écrire le hash ferait sauter la
+         page vers l'ancre, or c'est justement ce qu'on remplace. */
+      if(memoriser) try{ history.replaceState(null,"","#"+id); }catch(e){}
     }
-    if(!nav.dataset.psTabsCable){
-      nav.dataset.psTabsCable="1";
-      /* Pas de `preventDefault` : c'est LearnWorlds qui change de section. On
-         se contente de repasser après lui. */
-      liens.forEach(function(a){ a.addEventListener("click", function(){ setTimeout(marquer,0); setTimeout(marquer,120); }); });
-      window.addEventListener("hashchange", marquer);
+
+    vues.forEach(function(v){
+      v.a.setAttribute("role","tab");
+      v.a.addEventListener("click", function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        activer(v.id, true);
+      });
+    });
+
+    var vise=(location.hash||"").slice(1);
+    var trouve=vues.filter(function(v){ return v.id===vise; })[0];
+    activer(trouve ? trouve.id : vues[0].id, false);
+
+    /* Le garde-fou : si le dernier onglet déborde, on défait TOUT. */
+    var boite=nav.getBoundingClientRect();
+    var dernier=vues[vues.length-1].a.getBoundingClientRect();
+    if(dernier.right > boite.right + 1){
+      vues.forEach(function(v){
+        v.el.style.display="";
+        v.a.classList.remove("ps-acc-on");
+        ["role","aria-selected","tabindex"].forEach(function(k){ v.a.removeAttribute(k); });
+        ["role","aria-hidden"].forEach(function(k){ v.el.removeAttribute(k); });
+      });
+      nav.removeAttribute("data-ps-tabs"); nav.removeAttribute("role");
+      var css=document.getElementById("ps-acc-tabs-css");
+      if(css && css.parentNode) css.parentNode.removeChild(css);
+      try{ console.warn("[PrepaStrat] /account : barre d'onglets trop large ("+
+        Math.round(boite.width)+" px), page laissée en sections empilées."); }catch(e){}
+      return false;
     }
-    marquer();
     return true;
   }
 
@@ -537,7 +579,7 @@
     figtree(); styles(); blocEcole();
     /* Les onglets remplacent le repérage par défilement : le spy n'est appelé
        que s'ils n'ont pas pu se poser (une seule section, ou nav absente). */
-    onglets();
+    if(!onglets()) spy();
     /* progression() n'est PLUS appelée : la section « Cours et programmes » est
        masquée (cf. CSS), donc inutile d'aller chercher l'avancement via le
        Worker/Turnstile. Le code de progression est conservé plus haut au cas où
