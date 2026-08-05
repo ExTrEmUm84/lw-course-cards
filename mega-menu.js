@@ -32,7 +32,7 @@
      n'avait rien. Posé AVANT tout le reste : un marqueur défini en fin de
      fichier ne dit rien quand une erreur survient au milieu.
      ⇒ En console : `PS_MENU_V`. */
-  window.PS_MENU_V="2026-08-05-b";
+  window.PS_MENU_V="2026-08-05-c";
 
   /* 🔴 `PS_CSS_ONLY` : drapeau posé par le CONFIGURATEUR et par lui seul (le site
      ne le pose jamais). Sous ce drapeau, ce fichier ne fait plus rien d'autre que
@@ -109,6 +109,18 @@
     ".ps-mm-t{font-size:14.5px !important;}",
     ".lw-topbar-submenu-item.ps-mm-hide{display:none !important;}",
     ".lw-topbar-submenu.ps-mm-empty{display:none !important;}",
+
+    /* ---------- drapeaux de langue : état actif ----------
+       🔴 Le drapeau INACTIF est atténué, pas masqué : on doit voir qu'une autre
+       langue existe. Et le soulignement est en `box-shadow` plutôt qu'en
+       `border-bottom` : une bordure ajouterait 2 px à la hauteur de l'élément et
+       décalerait la barre de navigation d'un cheveu au changement de langue. */
+    "[data-ps-lang]{opacity:.45 !important;transition:opacity .15s ease, box-shadow .15s ease !important;"+
+      "border-radius:4px !important;}",
+    "[data-ps-lang]:hover{opacity:.85 !important;}",
+    "[data-ps-lang].ps-lang-on{opacity:1 !important;"+
+      "box-shadow:inset 0 -2px 0 0 var(--ps-accent,#507EC5) !important;}",
+    "[data-ps-lang]:focus-visible{outline:2px solid var(--ps-accent,#507EC5) !important;outline-offset:2px !important;}",
 
     /* ---------- menu centré, drapeaux inchangés ----------
        La colonne de droite est en `justify-content:flex-end` et contient, à la
@@ -242,6 +254,35 @@
 
     function pretWeglot(){ try{ return !!(window.Weglot && Weglot.initialized && Weglot.switchTo); }catch(e){ return false; } }
 
+    /* ------------------------------------------------------------------
+       INDIQUER LA LANGUE ACTIVE  (05/08, signalé par Ziad)
+       ------------------------------------------------------------------
+       Deux drapeaux côte à côte sans état actif ne disent pas dans quelle
+       langue on est : ils ressemblent à deux boutons identiques. L'information
+       manquait complètement.
+       🔴 L'ÉTAT VIENT DE WEGLOT, PAS D'UN SOUVENIR À NOUS. On lit
+       `getCurrentLang()` et on écoute son changement : garder notre propre
+       variable, c'est se condamner à diverger le jour où la langue change par
+       un autre chemin (URL `/en/…`, sélecteur natif, retour arrière).
+       🔴 Le drapeau inactif est ATTÉNUÉ, pas masqué : on doit voir qu'une autre
+       langue existe — c'est tout l'intérêt de l'afficher. */
+    function marquerActif(){
+      var actuelle;
+      try{ actuelle=Weglot.getCurrentLang(); }catch(e){ return; }
+      [].slice.call(document.querySelectorAll("[data-ps-lang]")).forEach(function(z){
+        var on=(z.getAttribute("data-ps-lang")===actuelle);
+        z.classList.toggle("ps-lang-on", on);
+        /* `aria-current` : un lecteur d'écran annonce la langue active, pas
+           seulement deux boutons de même nom. */
+        if(on) z.setAttribute("aria-current","true"); else z.removeAttribute("aria-current");
+      });
+    }
+
+    /* Weglot prévient quand la langue change — y compris quand le changement ne
+       vient pas de nous. Repli : on repasse après le clic, au cas où cette
+       version de l'API n'exposerait pas `on()`. */
+    try{ if(window.Weglot && Weglot.on) Weglot.on("languageChanged", marquerActif); }catch(e){}
+
     function drapeauxDansEnTete(){
       return [].slice.call(document.querySelectorAll("img")).filter(function(e){
         var r=e.getBoundingClientRect();
@@ -270,9 +311,13 @@
       zone.title = lang==="en" ? "English" : "Français";
       function aller(){ try{ Weglot.switchTo(lang); }catch(e){} }
       zone.addEventListener("click", aller);
+      marquerActif();
       zone.addEventListener("keydown", function(ev){
         if(ev.key==="Enter" || ev.key===" "){ ev.preventDefault(); aller(); }
       });
+      /* Repli du repli : Weglot recharge parfois la page, parfois non. On
+         repasse après le clic sans dépendre de son événement. */
+      zone.addEventListener("click", function(){ setTimeout(marquerActif, 300); });
       try{ console.info("[PrepaStrat] Drapeau câblé sur « "+lang+" » ("+origine+")."); }catch(e){}
     }
 
