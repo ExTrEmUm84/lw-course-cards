@@ -721,8 +721,16 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-h";
+  window.PS_TOKENS_V="2026-08-05-i";
 
+  /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
+     régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
+     effet : `cloak()` ne masque que `.cards-grandpa .lw-course-card`, pas une
+     section de texte. Un réglage qui ne fait rien est pire qu'un réglage
+     absent, il fait croire que le problème est traité. Retiré.
+     ⏳ Le flash reste OUVERT : il faudra masquer la section de réglages depuis
+     `tokens.js` (chargé en premier) avec un observateur, et non depuis
+     `abonnement.js` qui arrive 400 ms trop tard. */
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
      différent (`…-clone-en`), donc `body.slug-…` ne matchait pas et le flash
