@@ -646,19 +646,34 @@
     if(!obsFiche){
       obsFiche=new MutationObserver(function(){
         var s=document.getElementById("personal-details");
-        if(s && !s.querySelector(".ps-fpills") && !s.querySelector("input")) pastillesFiche();
+        if(s && !s.querySelector("input")) pastillesFiche();
       });
       obsFiche.observe(sec,{childList:true,subtree:true});
     }
     /* En mode édition la section porte des champs de saisie : on n'ajoute rien,
        ce serait afficher deux fois la même information. */
     if(sec.querySelector("input,select,textarea")) return;
-    if(sec.querySelector(".ps-fpills")) return;
 
     var cf=champsFiche();
+    /* 🔴🔴 SIGNATURE, PAS « DÉJÀ POSÉ ». Premier jet : on sortait si les
+       pastilles existaient. Résultat mesuré en production — « Contact à
+       compléter » et aucune pastille d'annuaire, alors que `me.custom_fields`
+       portait bien les deux valeurs : les pastilles avaient été construites
+       AVANT que LearnWorlds n'ait fini de remplir l'objet, et le garde-fou
+       d'idempotence figeait cet état faux pour toute la visite.
+       ⇒ On compare ce qu'on afficherait à ce qui est affiché, et on refait si
+       ça diffère. Une donnée qui arrive en retard se corrige toute seule. */
+    var sig=JSON.stringify(FICHE_PASTILLES.map(function(c){ return String(cf[c.cle]||""); })
+      .concat([String(cf.cf_annuaire||"")]));
+    var deja=sec.querySelector(".ps-fpills");
+    if(deja){
+      if(deja.getAttribute("data-ps-sig")===sig) return;
+      if(deja.parentNode) deja.parentNode.removeChild(deja);
+    }
     var hote=sec.querySelector(".personal-details")||sec;
     var boite=document.createElement("div");
     boite.className="ps-fpills";
+    boite.setAttribute("data-ps-sig", sig);
 
     var optin=String(cf.cf_annuaire||"").normalize("NFD").replace(/[̀-ͯ]/g,"").trim().toLowerCase();
     if(optin){
@@ -713,5 +728,7 @@
   window.addEventListener("load",run);
   /* l'app compte est rendue en JS : les sections n'existent pas au 1er passage.
      Mêmes relances que les autres fichiers du repo. */
-  [200,600,1200,2500].forEach(function(d){ setTimeout(run,d); });
+  /* 🔴 Relances poussées à 12 s : `me.custom_fields` est rempli TARD par
+     l'app de compte, et les pastilles doivent pouvoir se corriger. */
+  [200,600,1200,2500,5000,8000,12000].forEach(function(d){ setTimeout(run,d); });
 })();
