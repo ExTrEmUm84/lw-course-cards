@@ -32,7 +32,7 @@
      n'avait rien. Posé AVANT tout le reste : un marqueur défini en fin de
      fichier ne dit rien quand une erreur survient au milieu.
      ⇒ En console : `PS_MENU_V`. */
-  window.PS_MENU_V="2026-08-05-d";
+  window.PS_MENU_V="2026-08-05-e";
 
   /* 🔴 `PS_CSS_ONLY` : drapeau posé par le CONFIGURATEUR et par lui seul (le site
      ne le pose jamais). Sous ce drapeau, ce fichier ne fait plus rien d'autre que
@@ -120,9 +120,19 @@
        **26×16** (mesuré). Le trait se dessinait donc 19 px SOUS le drapeau, seul
        au milieu du vide, et Ziad l'a signalé dans la minute avec une capture.
        Un indicateur doit toucher ce qu'il indique. */
-    "[data-ps-lang]{opacity:.45 !important;transition:opacity .15s ease !important;}",
-    "[data-ps-lang]:hover{opacity:.85 !important;}",
-    "[data-ps-lang].ps-lang-on{opacity:1 !important;}",
+    /* 🔴🔴 LE DÉFAUT EST « NORMAL », L'EXCEPTION EST « ATTÉNUÉ » — ET C'EST
+       L'INVERSE DE MA PREMIÈRE VERSION, qui a produit le défaut signalé par
+       Ziad : « pourquoi les drapeaux sont transparents maintenant ? ».
+       J'avais mis `opacity:.45` sur TOUS les drapeaux, et `1` sur le seul actif.
+       Or `marquerActif()` sort sans rien faire si Weglot n'est pas encore prêt à
+       lire la langue — et dans ce cas AUCUN drapeau n'est marqué actif, donc les
+       deux restent à 45 % : l'en-tête a l'air désactivé.
+       **Un état qui dépend d'une lecture doit dégrader vers le NORMAL, pas vers
+       l'anormal.** Sans langue connue, on n'affiche pas d'indicateur — et rien
+       ne paraît cassé. */
+    "[data-ps-lang]{opacity:1 !important;transition:opacity .15s ease !important;}",
+    "[data-ps-lang].ps-lang-off{opacity:.45 !important;}",
+    "[data-ps-lang].ps-lang-off:hover{opacity:.85 !important;}",
     "[data-ps-lang] img{transition:box-shadow .15s ease !important;border-radius:2px !important;}",
     /* 2 px sous l'image, avec 3 px de respiration : assez pour se voir, assez
        près pour appartenir au drapeau. */
@@ -275,10 +285,19 @@
        langue existe — c'est tout l'intérêt de l'afficher. */
     function marquerActif(){
       var actuelle;
-      try{ actuelle=Weglot.getCurrentLang(); }catch(e){ return; }
-      [].slice.call(document.querySelectorAll("[data-ps-lang]")).forEach(function(z){
-        var on=(z.getAttribute("data-ps-lang")===actuelle);
+      try{ actuelle=Weglot.getCurrentLang(); }catch(e){ actuelle=null; }
+      var zones=[].slice.call(document.querySelectorAll("[data-ps-lang]"));
+      /* 🔴🔴 ON N'ATTÉNUE QUE SI UN DRAPEAU CORRESPOND VRAIMENT. Ma première
+         écriture atténuait « tout ce qui n'est pas actif » — donc les DEUX
+         quand la langue courante ne correspondait à aucun d'eux (Weglot pas
+         encore prêt, ou une troisième langue ajoutée un jour). C'est ce qui a
+         donné l'en-tête tout pâle signalé par Ziad. On calcule d'abord si
+         l'information est exploitable, ET SEULEMENT ALORS on marque. */
+      var connue = !!actuelle && zones.some(function(z){ return z.getAttribute("data-ps-lang")===actuelle; });
+      zones.forEach(function(z){
+        var on = connue && z.getAttribute("data-ps-lang")===actuelle;
         z.classList.toggle("ps-lang-on", on);
+        z.classList.toggle("ps-lang-off", connue && !on);
         /* `aria-current` : un lecteur d'écran annonce la langue active, pas
            seulement deux boutons de même nom. */
         if(on) z.setAttribute("aria-current","true"); else z.removeAttribute("aria-current");
