@@ -96,6 +96,18 @@
     /* 40 px de marge sous le contenu creusaient encore le bas d'une section courte. */
     B+".account-page-content{margin-bottom:16px !important;padding-bottom:0 !important;}",
 
+    /* --- pastilles de la fiche d'annuaire (hors panneau « Modifier ») --- */
+    B+".ps-fpills{display:flex !important;flex-wrap:wrap !important;gap:8px !important;margin-top:16px !important;padding-top:16px !important;border-top:1px solid var(--ps-border,#E6E9EF) !important;}",
+    B+".ps-fpill{display:inline-flex !important;align-items:center !important;gap:7px !important;background:#fff !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-pill,999px) !important;padding:7px 14px !important;"+FT+"font-size:13px !important;font-weight:600 !important;color:var(--ps-text,#1c1f26) !important;}",
+    B+".ps-fpill b{"+FT+"font-size:11px !important;font-weight:800 !important;letter-spacing:.04em !important;text-transform:uppercase !important;color:var(--ps-text-soft,#676879) !important;}",
+    /* état de l'opt-in : le seul qui porte une couleur, parce que c'est le seul
+       qui conditionne quelque chose (apparaître ou non dans l'annuaire). */
+    B+".ps-fpill-oui{background:var(--ps-accent-tint,#edf4ff) !important;border-color:var(--ps-accent,#3887b4) !important;color:var(--ps-accent,#3887b4) !important;font-weight:800 !important;}",
+    B+".ps-fpill-non{background:#F3F5F9 !important;border-color:#E6E9EF !important;color:var(--ps-text-soft,#676879) !important;font-weight:800 !important;}",
+    /* champ manquant : pointillé, cliquable — il ouvre le formulaire. */
+    B+".ps-fpill-vide{border-style:dashed !important;color:var(--ps-text-soft,#676879) !important;cursor:pointer !important;font-weight:600 !important;}",
+    B+".ps-fpill-vide:hover{border-color:var(--ps-accent,#3887b4) !important;color:var(--ps-accent,#3887b4) !important;}",
+
     /* La grande carte blanche unique s'efface : ce sont les sections qui
        portent désormais la carte (choix de Ziad). */
     B+".lw-body-bg.border-radius.account-cnt{background:transparent !important;border-radius:0 !important;box-shadow:none !important;}",
@@ -585,9 +597,109 @@
     return true;
   }
 
+  /* ════════════════════════════════════════════════════════════════════════
+     LA FICHE D'ANNUAIRE, EN PASTILLES, HORS DU PANNEAU « MODIFIER »  (05/08)
+     ────────────────────────────────────────────────────────────────────────
+     Demande de Ziad : en lecture, la carte n'affiche que Prénom, Nom et
+     E-mail ; école, niveau, recherche, langue et contact ne sont visibles
+     qu'une fois « Modifier » ouvert. On les sort donc, en pastilles.
+
+     🔴 SOURCE : `me.custom_fields`, avec repli sur les TAGS. Mesuré sur cette
+     page : les valeurs y sont (`cf_ecole:"ESSEC"`…), mais elles manquent sur
+     d'autres pages du site où seuls les tags `cf_<champ>_<valeur>` subsistent.
+     Lire les deux coûte trois lignes et évite une carte vide selon la page.
+     🔴 UN CHAMP VIDE N'EST PAS CACHÉ : il devient une pastille pointillée qui
+     OUVRE LE FORMULAIRE. Masquer ce qui manque, c'est laisser une fiche
+     incomplète le rester — et on a justement construit la popup pour ça.
+     ════════════════════════════════════════════════════════════════════════ */
+  var FICHE_PASTILLES=[
+    {cle:"cf_ecole",     nom:"École"},
+    {cle:"cf_niveau",    nom:"Niveau"},
+    {cle:"cf_recherche", nom:"Recherche"},
+    {cle:"cf_langue",    nom:"Langue"},
+    {cle:"cf_contact",   nom:"Contact"}
+  ];
+
+  function champsFiche(){
+    var m=(typeof me==="object"&&me)?me:null;
+    if(!m) return {};
+    var cf={}, k, src=m.custom_fields||{};
+    for(k in src) if(Object.prototype.hasOwnProperty.call(src,k)) cf[k]=src[k];
+    [].slice.call(m.tags||[]).forEach(function(t){
+      var s=String(typeof t==="string"?t:(t&&t.name)||"");
+      if(s.indexOf("cf_")!==0) return;
+      var reste=s.slice(3), i=reste.indexOf("_");
+      if(i<=0) return;
+      var cle="cf_"+reste.slice(0,i), val=reste.slice(i+1);
+      if(!cf[cle] && val) cf[cle]=val;
+    });
+    return cf;
+  }
+
+  var obsFiche=null;
+  function pastillesFiche(){
+    var sec=document.getElementById("personal-details");
+    if(!sec) return;
+    /* 🔴 LearnWorlds reconstruit la section à chaque passage en édition : on
+       surveille, sinon les pastilles disparaissent au premier « Modifier » et
+       ne reviennent jamais (les relances de `run()` s'arrêtent à 2,5 s). */
+    if(!obsFiche){
+      obsFiche=new MutationObserver(function(){
+        var s=document.getElementById("personal-details");
+        if(s && !s.querySelector(".ps-fpills") && !s.querySelector("input")) pastillesFiche();
+      });
+      obsFiche.observe(sec,{childList:true,subtree:true});
+    }
+    /* En mode édition la section porte des champs de saisie : on n'ajoute rien,
+       ce serait afficher deux fois la même information. */
+    if(sec.querySelector("input,select,textarea")) return;
+    if(sec.querySelector(".ps-fpills")) return;
+
+    var cf=champsFiche();
+    var hote=sec.querySelector(".personal-details")||sec;
+    var boite=document.createElement("div");
+    boite.className="ps-fpills";
+
+    var optin=String(cf.cf_annuaire||"").normalize("NFD").replace(/[̀-ͯ]/g,"").trim().toLowerCase();
+    if(optin){
+      var etat=document.createElement("span");
+      var oui=optin.indexOf("oui")===0;
+      etat.className="ps-fpill "+(oui?"ps-fpill-oui":"ps-fpill-non");
+      etat.textContent = oui ? "Visible dans l'annuaire" : "Fiche masquée";
+      boite.appendChild(etat);
+    }
+
+    var manquants=0;
+    FICHE_PASTILLES.forEach(function(c){
+      var v=String(cf[c.cle]==null?"":cf[c.cle]).trim();
+      var p=document.createElement("span");
+      if(v){
+        p.className="ps-fpill";
+        p.innerHTML='<b>'+c.nom+'</b>'+v.replace(/[&<>]/g,"");
+      }else{
+        manquants++;
+        p.className="ps-fpill ps-fpill-vide";
+        p.textContent=c.nom+" à compléter";
+        p.setAttribute("role","button"); p.setAttribute("tabindex","0");
+        var ouvrir=function(){
+          if(typeof window.PS_FICHE_OUVRIR==="function" && window.PS_FICHE_OUVRIR(true)) return;
+          var b=[].slice.call(sec.querySelectorAll("button")).filter(function(x){
+            return /modifier/i.test((x.textContent||"").trim()); })[0];
+          if(b) b.click();
+        };
+        p.addEventListener("click",ouvrir);
+        p.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); ouvrir(); } });
+      }
+      boite.appendChild(p);
+    });
+
+    if(!boite.children.length) return;
+    hote.appendChild(boite);
+  }
+
   function run(){
     if(!surLaPage()) return;
-    figtree(); styles(); blocEcole();
+    figtree(); styles(); blocEcole(); pastillesFiche();
     /* Les onglets remplacent le repérage par défilement : le spy n'est appelé
        que s'ils n'ont pas pu se poser (une seule section, ou nav absente). */
     if(!onglets()) spy();
