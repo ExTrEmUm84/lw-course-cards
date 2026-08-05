@@ -720,7 +720,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-o";
+  window.PS_TOKENS_V="2026-08-05-p";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3216,10 +3216,28 @@
      liens `/course/<slug>` — j'y ai vu 11 cartes verrouillées sur 12 et j'ai
      généralisé à tout le site. Une page vérifiée n'est pas cinq pages
      vérifiées. */
+  /* 🔴🔴🔴 LA LISTE CONFIRME, ELLE NE DÉMENT PAS. Deuxième correctif du même
+     jour, parce que le premier ne traitait que le slug VIDE (page Cas) et pas
+     le slug FAUX. Mesuré sur `/fiches-secteur` : trois cartes portent
+     « Inscription fermée » et restaient déverrouillées —
+        fiche-secteur-pharmaceutique   absente de la liste
+        fiche-secteur-aeronautique     absente de la liste
+        lire-un-bilan-financier        l'API l'appelle « comment-lire-un-bilan-financier »
+     Le slug étant non vide, j'interrogeais la liste, elle répondait « non », et
+     je concluais « ouvert ». **Une jointure qui échoue ne dit pas « non », elle
+     ne dit rien.** Confondre les deux, c'est déverrouiller un cours fermé.
+     ⇒ Les deux signaux sont désormais POSITIFS et indépendants : la liste peut
+     verrouiller, le libellé peut verrouiller, aucun des deux ne peut
+     déverrouiller l'autre. L'union couvre le cas où l'identifiant d'API diffère
+     du slug de page (avéré) ET le cas où LearnWorlds cesserait d'afficher sa
+     mention (le motif de départ de la liste).
+     🔴 Sur-verrouiller un cours réellement ouvert supposerait qu'il affiche
+     « inscription fermée » : le webinaire gratuit ne le fait pas, et c'est
+     vérifié à chaque page. */
   function carteVerrouillee(c){
     var s=slugDeCarte(c);
-    if(_fermes && s) return _fermes.has(s);   /* jointure possible : la liste tranche */
-    if(carteFermee(c)) return true;           /* sinon le libellé reprend la main */
+    if(_fermes && s && _fermes.has(s)) return true;   /* la liste confirme */
+    if(carteFermee(c)) return true;                   /* le libellé confirme */
     return _fermes ? false : null;
   }
 
