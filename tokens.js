@@ -256,14 +256,14 @@
 /* >>> DEBUT MENU — réécrit par le configurateur, ne rien ajouter ici */
   var MENU_COULEURS={
     "course/supports-webinar":"#12A85F",
-    "bootcamp-prepastrat":"#D98500",
-    "entretiens-en-conditions-reelles":"#8A45C9",
-    "formation-par-modules":"#507EC5",
-    "fiches-cabinet":"#00C875",
-    "fiches-secteur":"#FDAB3D",
-    "sentrainer":"#A25DDC",
-    "etudes-cas":"#E2445C",
-    "annuaire-partenaire-de-cas":"#0073EA"
+    "bootcamp-prepastrat":"#ff5e5b",
+    "entretiens-en-conditions-reelles":"#fdab3d",
+    "formation-par-modules":"#3887b4",
+    "fiches-cabinet":"#009e78",
+    "fiches-secteur":"#deb125",
+    "sentrainer":"#c51d4a",
+    "etudes-cas":"#6b7280",
+    "annuaire-partenaire-de-cas":"#203866"
   };
 /* <<< FIN MENU */
   window.PS_MENU_COULEURS=MENU_COULEURS;        // lu par mega-menu.js
