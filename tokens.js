@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-q";
+  window.PS_TOKENS_V="2026-08-05-r";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3786,6 +3786,23 @@
     var u=fichePeutSAfficher();
     if(u) ficheOuvrir(u);
   }
+
+  /* Ouverture À LA DEMANDE, depuis une autre page. L'annuaire s'en sert quand il
+     refuse l'accès : plutôt que de renvoyer vers `/profile` — où le membre ne
+     trouve d'ailleurs pas ces champs (mesuré le 05/08) — on lui ouvre le
+     formulaire sur place.
+     🔴 `force` court-circuite la temporisation ET l'état : la personne vient de
+     cliquer, elle n'a pas besoin qu'on juge si c'est le bon moment. Sans ça, un
+     membre ayant reporté la popup la semaine dernière cliquerait sur un bouton
+     qui ne fait rien. */
+  window.PS_FICHE_OUVRIR=function(force){
+    var u=membrePS();
+    if(!u) return false;
+    if(document.getElementById("ps-fiche")) return true;
+    if(!force && !fichePeutSAfficher()) return false;
+    ficheOuvrir(u);
+    return true;
+  };
 
   function orienterMembre(){
     var u=membrePS();

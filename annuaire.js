@@ -1402,6 +1402,26 @@
     catch (e) { return ""; }
   }
 
+  /* Réponse du membre à l'opt-in, normalisée (sans accent, minuscules).
+     🔴 DEUX SOURCES, ET C'EST NÉCESSAIRE. `me.custom_fields` n'est pas garni
+     partout ; LearnWorlds fabrique en revanche un tag `cf_<champ>_<valeur>`
+     pour chaque champ rempli (pépite du 29/07), lisible sur toutes les pages.
+     On lit le champ s'il est là, le tag sinon. */
+  function optinDuMembre() {
+    try {
+      var m = (typeof me === "object" && me) ? me : null;
+      if (!m) return "";
+      var v = (m.custom_fields || {}).cf_annuaire;
+      if (!v) {
+        var t = [].slice.call(m.tags || []).map(function (x) {
+          return String(typeof x === "string" ? x : (x && x.name) || "");
+        }).filter(function (x) { return x.indexOf("cf_annuaire_") === 0; })[0];
+        if (t) v = t.slice("cf_annuaire_".length);
+      }
+      return String(v || "").normalize("NFD").replace(/[̀-ͯ]/g, "").trim().toLowerCase();
+    } catch (e) { return ""; }
+  }
+
   // --- Chargement -------------------------------------------------------
   function charger(jeton) {
     var entetes = { Accept: "application/json", "X-Turnstile-Token": jeton };
@@ -1429,15 +1449,54 @@
           var t = document.createElement("p");
           t.textContent = "L'annuaire est réservé aux membres qui y figurent.";
           t.style.cssText = "font:700 16px var(--ps-font,Figtree,sans-serif);color:var(--ps-text,#1c1f26);margin:0 0 8px";
+          /* 🔴🔴 ON N'ENVOIE PLUS VERS `/profile` (05/08). Mesuré ce jour : le
+             bouton « Edit profile » de `/profile` mène à `/account`, et
+             `/account` ne contient AUCUN des champs d'annuaire. On envoyait donc
+             la personne chercher un formulaire qui n'existe pas — ce qui
+             explique très bien les 13 comptes sur 17 sans réponse à l'opt-in.
+             Le formulaire s'ouvre désormais SUR PLACE (`PS_FICHE_OUVRIR`).
+             🔴 SAUF SI LE REFUS EST DÉJÀ POSÉ : rouvrir le formulaire à
+             quelqu'un qui a répondu « non » reviendrait à lui reposer la
+             question qu'il a déjà tranchée. On lui donne alors le chemin pour
+             changer d'avis, sans le lui redemander. */
+          var refus = optinDuMembre().indexOf("non") === 0;
+
           var d = document.createElement("p");
-          d.textContent = "Acceptez d'apparaître dans l'annuaire depuis votre profil, et vous pourrez consulter celui des autres étudiants.";
+          d.textContent = refus
+            ? "Vous avez choisi de ne pas apparaître dans l'annuaire. Vous pouvez revenir sur ce choix depuis votre profil."
+            : "Renseignez votre fiche en une minute, et vous pourrez consulter celle des autres étudiants.";
           d.style.cssText = "font:400 14px/1.6 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);margin:0 0 16px";
-          var a = document.createElement("a");
-          a.href = "/profile";
-          a.textContent = "Ouvrir mon profil";
-          a.style.cssText = "display:inline-block;background:var(--ps-accent,#507EC5);color:#fff;text-decoration:none;" +
-            "border-radius:var(--ps-r-btn,10px);padding:11px 20px;font:700 14px var(--ps-font,Figtree,sans-serif)";
-          empty.appendChild(t); empty.appendChild(d); empty.appendChild(a);
+          empty.appendChild(t); empty.appendChild(d);
+
+          var styleCta = "display:inline-block;background:var(--ps-accent,#507EC5);color:#fff;text-decoration:none;" +
+            "border:0;cursor:pointer;border-radius:var(--ps-r-btn,10px);padding:11px 20px;" +
+            "font:700 14px var(--ps-font,Figtree,sans-serif)";
+
+          if (refus || typeof window.PS_FICHE_OUVRIR !== "function") {
+            /* Repli sur le profil aussi quand `tokens.js` n'a pas (encore) posé
+               l'ouverture : un bouton qui ne fait rien est pire qu'un lien. */
+            var a = document.createElement("a");
+            a.href = "/profile";
+            a.textContent = refus ? "Modifier ce choix" : "Ouvrir mon profil";
+            a.style.cssText = styleCta;
+            empty.appendChild(a);
+          } else {
+            var b = document.createElement("button");
+            b.type = "button";
+            b.textContent = "Remplir ma fiche";
+            b.style.cssText = styleCta;
+            b.addEventListener("click", function () {
+              /* `force` : la personne vient de cliquer, on n'applique ni
+                 temporisation ni jugement sur « est-ce le bon moment ». */
+              if (window.PS_FICHE_OUVRIR(true) === false) location.href = "/profile";
+            });
+            empty.appendChild(b);
+
+            var lien = document.createElement("div");
+            lien.style.cssText = "margin-top:12px;font:500 13px var(--ps-font,Figtree,sans-serif)";
+            lien.innerHTML = '<a href="/profile" style="color:var(--ps-text-soft,#676879)">ou depuis mon profil</a>';
+            empty.appendChild(lien);
+          }
           return null;
         }
         if (!r.ok) throw new Error("HTTP " + r.status);
