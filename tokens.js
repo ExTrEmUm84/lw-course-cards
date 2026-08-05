@@ -731,7 +731,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-aj";
+  window.PS_TOKENS_V="2026-08-05-ak";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4475,6 +4475,22 @@
      plus tard l'est toujours par un CLIC. Les deux chemins sont couverts. */
   [0,400,1200,3000,6000].forEach(function(d){ setTimeout(socialSolitaire,d); });
   document.addEventListener("click", function(){ setTimeout(socialSolitaire,300); }, true);
+
+  /* ====================================================================
+     PAGE DE PAIEMENT (paiement.js) — dernier écran avant de payer
+     --------------------------------------------------------------------
+     🔴 Chargée d'ici parce qu'elle ne PEUT pas l'être ailleurs : mesuré le
+     05/08, `/payment` ne reçoit que quatre loaders et `inscription.js` n'en
+     fait pas partie. C'est le piège déjà payé une demi-journée — du code juste,
+     posé dans un emplacement qui ne couvre pas la page, ne s'exécute jamais et
+     sans la moindre erreur en console. */
+  if(/^\/payment(\/|$)/.test(location.pathname||"") && !document.getElementById("ps-paiement-js")){
+    var _pa=document.createElement("script");
+    _pa.id="ps-paiement-js";
+    _pa.src="https://extremum84.github.io/lw-course-cards/paiement.js";
+    _pa.async=true;
+    (document.head||document.documentElement).appendChild(_pa);
+  }
 
   /* ====================================================================
      PAGE DE VÉRIFICATION D'E-MAIL (verification-page.js)
