@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-m";
+  window.PS_TOKENS_V="2026-08-05-n";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -752,12 +752,51 @@
     var head=document.head||document.documentElement; head.insertBefore(st, head.firstChild);
   }
   function reveal(){ if(document.body) document.body.classList.add("ps-cards-ready"); }
+
+  /* ====================================================================
+     🔴🔴 PERSONNE NE VA RESTYLER CES CARTES : IL FAUT LES MONTRER TOUT DE SUITE
+     --------------------------------------------------------------------
+     Défaut relevé le 05/08 en mesurant, et il coûtait deux secondes À CHAQUE
+     PROSPECT. `READY_SEL` ne vise que des classes construites par les scripts
+     de PAGE (`.ps-mcard`, `.ps-cc`…). Or **aucun script de cartes n'est servi à
+     un visiteur déconnecté** — vérifié au curl sur la page Cours : il ne reçoit
+     que `mega-menu.js`, `account-page.js` et `tokens.js`. Le sélecteur ne
+     pouvait donc JAMAIS correspondre, et le dévoilement n'arrivait que par le
+     filet des 3,5 s — alors que les cartes natives sont dans le DOM vers 1,4 s.
+     ⇒ **Deux secondes de grille masquée par notre propre anti-flash**, et pour
+     rien : il n'y avait aucun restylage à attendre.
+     🔴 L'anti-flash n'est pas en cause dans son principe : il protège du
+     passage « carte brute → carte à la charte ». Le défaut, c'est d'avoir fait
+     dépendre le dévoilement d'un événement qui ne peut pas se produire dans la
+     moitié des cas. La bonne question n'est pas « les cartes sont-elles
+     stylées ? » mais « quelqu'un va-t-il les styler ? » — et ça se lit dans les
+     balises `<script>` de la page.
+     🔴 Le test se fait TARD, jamais à l'exécution de ce fichier : dans le
+     `<head>`, les loaders de page ne sont pas encore analysés et on conclurait
+     « personne » pour tout le monde, ce qui rendrait l'anti-flash inopérant
+     pour les membres. L'observateur, lui, se déclenche quand les cartes
+     arrivent — donc bien après. */
+  var SCRIPTS_CARTES=/(course|case|sector|cabinet|program)-cards\.js/;
+  function restylageAttendu(){
+    var s=document.querySelectorAll("script[src]");
+    for(var i=0;i<s.length;i++){
+      if(SCRIPTS_CARTES.test(s[i].getAttribute("src")||"")) return true;
+    }
+    return false;
+  }
+  function pretADevoiler(){
+    if(document.querySelector(READY_SEL)) return true;      /* cartes restylées : le cas d'origine */
+    /* Aucun script de cartes sur la page ⇒ ce que LearnWorlds a peint est le
+       rendu FINAL. Le cacher plus longtemps ne protège de rien. */
+    return !restylageAttendu() &&
+           !!document.querySelector("#pageContent .cards-grandpa .lw-course-card");
+  }
   var _revObs=null;
   function watchReveal(){
     if(!document.body || document.body.classList.contains("ps-cards-ready")) return;
-    if(document.querySelector(READY_SEL)){ reveal(); return; }
+    if(pretADevoiler()){ reveal(); return; }
     if(_revObs) return;
-    _revObs=new MutationObserver(function(){ if(document.querySelector(READY_SEL)){ reveal(); _revObs.disconnect(); } });
+    _revObs=new MutationObserver(function(){ if(pretADevoiler()){ reveal(); _revObs.disconnect(); } });
     _revObs.observe(document.documentElement,{childList:true,subtree:true});
   }
 
