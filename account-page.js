@@ -62,7 +62,13 @@
        moche ». Relevé sur l'annuaire, qui sert de référence : ses sections sont
        sur du BLANC PUR, et ses cartes se détachent par une bordure fine, sans
        ombre ni fond coloré. On aligne. */
-    "body.slug-account .account-app-page,body.slug-account .account-app{background:#fff !important;}",
+    /* 🔴 LE `body` AUSSI, sinon le cadre reste. Mesuré : `body` était en
+       `rgb(225,225,225)` et la boîte blanche `.account-app` descend jusqu'en
+       bas de la fenêtre (847 px) alors que le contenu n'en fait que 308. D'où
+       l'impression que la carte « flotte dans du vide » — ce n'était pas la
+       carte, c'était un grand rectangle blanc posé sur du gris. Tout en blanc,
+       l'espace restant redevient de la page, pas une boîte vide. */
+    "body.slug-account,body.slug-account .account-app-page,body.slug-account .account-app{background:#fff !important;}",
 
     /* 🔴 POLICE PAR HÉRITAGE, JAMAIS PAR `*`.
        Un `*{font-family:…}` force la police sur CHAQUE élément, y compris les
@@ -83,7 +89,12 @@
     ].join(",")+"{"+FT+"}",
 
     /* titre de page */
-    B+".account-app h2{"+FT+"font-size:38px !important;font-weight:800 !important;letter-spacing:-.025em !important;color:var(--ps-text,#1c1f26) !important;}",
+    /* 🔴 38 px au-dessus d'une barre d'onglets, c'était trop : le titre pesait
+       plus lourd que la navigation qu'il surplombe. 28 px, et la marge passe de
+       20 à 10 px — l'ensemble titre + onglets se lit comme un seul bloc. */
+    B+".account-app h2{"+FT+"font-size:28px !important;font-weight:800 !important;letter-spacing:-.02em !important;color:var(--ps-text,#1c1f26) !important;margin:0 0 10px !important;}",
+    /* 40 px de marge sous le contenu creusaient encore le bas d'une section courte. */
+    B+".account-page-content{margin-bottom:16px !important;padding-bottom:0 !important;}",
 
     /* La grande carte blanche unique s'efface : ce sont les sections qui
        portent désormais la carte (choix de Ziad). */
