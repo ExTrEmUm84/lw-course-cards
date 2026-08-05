@@ -108,7 +108,7 @@
     "--ps-accent-rgb:56,135,180",
     "--ps-accent-hover:#203866",
     "--ps-accent-tint:#edf4ff",
-    "--ps-text:#1c1f26",
+    "--ps-text:#203866",
     "--ps-text-soft:#676879",
     "--ps-surface-soft:#F7F8FB",
     "--ps-border:#E6E9EF",
