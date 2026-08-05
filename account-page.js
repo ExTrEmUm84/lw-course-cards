@@ -101,11 +101,25 @@
        trois valeurs courtes — d'où le grand vide à droite signalé par Ziad. On
        borne l'identité et on installe les pastilles dans l'espace libéré, à
        hauteur de l'avatar plutôt qu'en bas de carte. */
-    B+".personal-details{align-items:flex-start !important;gap:22px !important;}",
+    /* --- Piste A : identité compacte, la fiche part dans sa propre carte --- */
+    /* 🔴 Les trois valeurs prenaient 910 px de large pour « Ziad ». On les met
+       en grille libellé/valeur et on retire les traits de soulignement, qui
+       filaient jusqu'au bord et soulignaient du vide. */
+    B+".personal-details{align-items:center !important;gap:20px !important;}",
+    B+".personal-details-values{flex:0 1 auto !important;max-width:none !important;display:block !important;}",
+    B+".account-value-display{display:grid !important;grid-template-columns:78px minmax(0,1fr) !important;gap:0 20px !important;align-items:baseline !important;border:0 !important;border-bottom:0 !important;padding:3px 0 !important;margin:0 !important;}",
+    [B+".account-value-display:after",B+".account-value-display:before"].join(",")+"{display:none !important;}",
+    B+".account-value-display-title{margin:0 !important;padding:0 !important;font-size:12.5px !important;color:var(--ps-text-soft,#676879) !important;}",
+    B+".account-value-display-value{margin:0 !important;padding:0 !important;font-size:14.5px !important;font-weight:600 !important;border:0 !important;}",
+
+    /* --- la carte « Ma fiche d'annuaire » --- */
+    B+".ps-carte-fiche .ps-fiche-hd{margin-bottom:14px !important;}",
+    B+".ps-carte-fiche .ps-fiche-t{display:flex !important;align-items:center !important;gap:10px !important;}",
+    B+".ps-carte-fiche .ps-fiche-cta{white-space:nowrap !important;}",
     B+".personal-details-values{flex:0 1 420px !important;max-width:440px !important;}",
-    B+".ps-fpills{flex:1 1 260px !important;display:flex !important;flex-wrap:wrap !important;align-content:flex-start !important;gap:8px !important;margin:0 !important;padding:0 !important;border:0 !important;}",
+    B+".ps-fpills{display:flex !important;flex-wrap:wrap !important;gap:9px !important;margin:0 !important;padding:0 !important;border:0 !important;}",
     /* Sous 900 px la carte repasse en pile : les pastilles suivent le contenu. */
-    "@media(max-width:900px){"+B+".personal-details{flex-wrap:wrap !important;}"+B+".personal-details-values{flex:1 1 100% !important;max-width:none !important;}"+B+".ps-fpills{flex:1 1 100% !important;}}",
+    "@media(max-width:640px){"+B+".personal-details{flex-wrap:wrap !important;}"+B+".account-value-display{grid-template-columns:1fr !important;}}",
     B+".ps-fpill{display:inline-flex !important;flex-direction:column !important;align-items:flex-start !important;gap:1px !important;background:#F3F5F9 !important;border:0 !important;border-radius:var(--ps-r-btn,10px) !important;padding:7px 13px !important;"+FT+"}",
     B+".ps-fpill b{"+FT+"font-size:10px !important;font-weight:800 !important;letter-spacing:.06em !important;text-transform:uppercase !important;opacity:.72 !important;}",
     B+".ps-fpill i{"+FT+"font-style:normal !important;font-size:13.5px !important;font-weight:700 !important;line-height:1.25 !important;}",
@@ -117,7 +131,7 @@
     B+".ps-fpill.ps-lvl6{background:var(--ps-lvl6-tint,#EEF4FA) !important;color:var(--ps-lvl6,#3887b4) !important;}",
     /* état de l'opt-in : le seul qui porte une couleur, parce que c'est le seul
        qui conditionne quelque chose (apparaître ou non dans l'annuaire). */
-    B+".ps-fpill-oui,"+B+".ps-fpill-non{flex-direction:row !important;align-items:center !important;font-size:12.5px !important;font-weight:800 !important;padding:9px 14px !important;flex-basis:100% !important;}"+
+    B+".ps-fpill-oui,"+B+".ps-fpill-non{flex-direction:row !important;align-items:center !important;font-size:11.5px !important;font-weight:800 !important;padding:4px 11px !important;letter-spacing:.03em !important;text-transform:uppercase !important;}"+
     B+".ps-fpill-oui{background:var(--ps-lvl4-tint,#e4fbf6) !important;color:var(--ps-lvl4,#009e78) !important;}",
     B+".ps-fpill-non{background:#F3F5F9 !important;color:var(--ps-text-soft,#676879) !important;}",
     /* champ manquant : pointillé, cliquable — il ouvre le formulaire. */
@@ -570,6 +584,10 @@
       vues.forEach(function(v){
         var on=v.id===id;
         v.el.style.display = on ? "" : "none";
+        /* Les cartes que NOUS ajoutons à côté d'une section suivent son sort. */
+        [].slice.call(document.querySelectorAll('[data-ps-suit="'+v.id+'"]')).forEach(function(x){
+          x.style.display = on ? "" : "none";
+        });
         v.a.classList.toggle("ps-acc-on", on);
         v.a.setAttribute("aria-selected", on ? "true" : "false");
         v.a.setAttribute("tabindex", on ? "0" : "-1");
@@ -658,88 +676,83 @@
   }
 
   var obsFiche=null;
-  function pastillesFiche(){
+
+  /* ── PISTE A (choisie le 05/08) : une CARTE À PART ────────────────────────
+     La carte « Informations personnelles » mélangeait deux sujets qui n'ont ni
+     le même propriétaire ni la même action : l'identité du compte (servir à se
+     connecter) et la fiche d'annuaire (servir à être trouvé). D'où une carte
+     éclatée — avatar, champs, pastilles et bandeau d'état sans rapport de
+     poids. On sépare : la fiche a sa carte, son titre, son état et son bouton,
+     lequel ouvre NOTRE formulaire.
+     🔴 La carte suit l'onglet de son voisin. Elle n'est pas dans la navigation
+     de LearnWorlds, donc les onglets ne la connaissent pas : sans
+     `data-ps-suit`, elle resterait affichée sous « Paiements ». */
+  function carteFiche(){
     var sec=document.getElementById("personal-details");
     if(!sec) return;
-    /* 🔴 LearnWorlds reconstruit la section à chaque passage en édition : on
-       surveille, sinon les pastilles disparaissent au premier « Modifier » et
-       ne reviennent jamais (les relances de `run()` s'arrêtent à 2,5 s). */
     if(!obsFiche){
-      obsFiche=new MutationObserver(function(){
-        var s=document.getElementById("personal-details");
-        if(s && !s.querySelector("input")) pastillesFiche();
-      });
+      obsFiche=new MutationObserver(function(){ carteFiche(); });
       obsFiche.observe(sec,{childList:true,subtree:true});
     }
-    /* En mode édition la section porte des champs de saisie : on n'ajoute rien,
-       ce serait afficher deux fois la même information. */
-    if(sec.querySelector("input,select,textarea")) return;
-
     var cf=champsFiche();
-    /* 🔴🔴 SIGNATURE, PAS « DÉJÀ POSÉ ». Premier jet : on sortait si les
-       pastilles existaient. Résultat mesuré en production — « Contact à
-       compléter » et aucune pastille d'annuaire, alors que `me.custom_fields`
-       portait bien les deux valeurs : les pastilles avaient été construites
-       AVANT que LearnWorlds n'ait fini de remplir l'objet, et le garde-fou
-       d'idempotence figeait cet état faux pour toute la visite.
-       ⇒ On compare ce qu'on afficherait à ce qui est affiché, et on refait si
-       ça diffère. Une donnée qui arrive en retard se corrige toute seule. */
-    var sig=JSON.stringify(FICHE_PASTILLES.map(function(c){ return String(cf[c.cle]||""); })
-      .concat([String(cf.cf_annuaire||"")]));
-    var deja=sec.querySelector(".ps-fpills");
-    if(deja){
-      if(deja.getAttribute("data-ps-sig")===sig) return;
-      if(deja.parentNode) deja.parentNode.removeChild(deja);
-    }
-    /* 🔴 On accroche à `.personal-details` (le conteneur FLEX qui porte l'avatar
-       et les valeurs), pas à la colonne des valeurs : les pastilles deviennent
-       ainsi une troisième colonne, à hauteur de l'avatar, au lieu de tomber
-       sous les champs. C'est la demande de Ziad — « sur le côté, pas en bas ». */
-    var hote=sec.querySelector(".personal-details")||sec;
-    var boite=document.createElement("div");
-    boite.className="ps-fpills";
-    boite.setAttribute("data-ps-sig", sig);
+    var optin=String(cf.cf_annuaire||"").normalize("NFD").replace(/[\u0300-\u036f]/g,"").trim().toLowerCase();
+    var sig=JSON.stringify(FICHE_PASTILLES.map(function(c){ return String(cf[c.cle]||""); }).concat([optin]));
 
-    var optin=String(cf.cf_annuaire||"").normalize("NFD").replace(/[̀-ͯ]/g,"").trim().toLowerCase();
-    if(optin){
-      var etat=document.createElement("span");
-      var oui=optin.indexOf("oui")===0;
-      etat.className="ps-fpill "+(oui?"ps-fpill-oui":"ps-fpill-non");
-      etat.textContent = oui ? "Visible dans l'annuaire" : "Fiche masquée";
-      boite.appendChild(etat);
-    }
+    var carte=document.getElementById("ps-carte-fiche");
+    if(carte && carte.getAttribute("data-ps-sig")===sig) return;
+    if(carte && carte.parentNode) carte.parentNode.removeChild(carte);
 
-    var manquants=0;
+    carte=document.createElement("section");
+    carte.id="ps-carte-fiche";
+    carte.className="account-section ps-carte-fiche";
+    carte.setAttribute("data-ps-suit","personal-details");
+    carte.setAttribute("data-ps-sig",sig);
+
+    var oui=optin.indexOf("oui")===0;
+    var etat = optin ? '<span class="ps-fpill '+(oui?"ps-fpill-oui":"ps-fpill-non")+'">'+(oui?"Visible":"Masquée")+'</span>' : "";
+    var libelleBouton = optin ? (oui ? "Modifier" : "Réactiver") : "Compléter";
+
+    var chips="", manquants=[];
     FICHE_PASTILLES.forEach(function(c){
       var v=String(cf[c.cle]==null?"":cf[c.cle]).trim();
-      var p=document.createElement("span");
-      if(v){
-        p.className="ps-fpill ps-lvl"+c.lvl;
-        p.innerHTML='<b>'+c.nom+'</b><i>'+v.replace(/[&<>]/g,"")+'</i>';
-      }else{
-        manquants++;
-        p.className="ps-fpill ps-fpill-vide";
-        p.textContent=c.nom+" à compléter";
-        p.setAttribute("role","button"); p.setAttribute("tabindex","0");
-        var ouvrir=function(){
-          if(typeof window.PS_FICHE_OUVRIR==="function" && window.PS_FICHE_OUVRIR(true)) return;
-          var b=[].slice.call(sec.querySelectorAll("button")).filter(function(x){
-            return /modifier/i.test((x.textContent||"").trim()); })[0];
-          if(b) b.click();
-        };
-        p.addEventListener("click",ouvrir);
-        p.addEventListener("keydown",function(e){ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); ouvrir(); } });
-      }
-      boite.appendChild(p);
+      if(!v){ manquants.push(c.nom); return; }
+      /* 🔴 Le CONTACT ne s'affiche pas en clair : c'est le moyen de joindre la
+         personne, lisible par-dessus son épaule. On dit qu'il est là. */
+      var aff = c.cle==="cf_contact" ? "renseigné" : v.replace(/[&<>]/g,"");
+      chips+='<span class="ps-fpill ps-lvl'+c.lvl+'"><b>'+c.nom+'</b><i>'+aff+'</i></span>';
+    });
+    /* 🔴 UNE SEULE pastille pour tout ce qui manque : une par champ vide
+       transformait la carte en liste de reproches. */
+    if(manquants.length){
+      chips+='<span class="ps-fpill ps-fpill-vide" role="button" tabindex="0">+ '+manquants.join(", ")+'</span>';
+    }
+
+    carte.innerHTML=
+      '<div class="account-section-header ps-fiche-hd">'+
+        '<div class="ps-fiche-t"><span class="account-section-title">Ma fiche d\'annuaire</span>'+etat+'</div>'+
+        '<button type="button" class="learnworlds-button ps-fiche-cta">'+libelleBouton+'</button>'+
+      '</div>'+
+      '<div class="ps-fpills">'+(chips||'<span class="ps-fpill ps-fpill-vide" role="button" tabindex="0">+ Renseigner ma fiche</span>')+'</div>';
+
+    var ouvrir=function(){
+      if(typeof window.PS_FICHE_OUVRIR==="function" && window.PS_FICHE_OUVRIR(true)) return;
+      var b=[].slice.call(sec.querySelectorAll("button")).filter(function(x){
+        return /modifier/i.test((x.textContent||"").trim()); })[0];
+      if(b) b.click();
+    };
+    [].slice.call(carte.querySelectorAll(".ps-fiche-cta,.ps-fpill-vide")).forEach(function(e){
+      e.addEventListener("click",ouvrir);
+      e.addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); ouvrir(); } });
     });
 
-    if(!boite.children.length) return;
-    hote.appendChild(boite);
+    if(sec.parentNode) sec.parentNode.insertBefore(carte, sec.nextSibling);
+    /* Elle prend la visibilité de sa voisine dès l'insertion. */
+    carte.style.display = getComputedStyle(sec).display==="none" ? "none" : "";
   }
 
   function run(){
     if(!surLaPage()) return;
-    figtree(); styles(); blocEcole(); pastillesFiche();
+    figtree(); styles(); blocEcole(); carteFiche();
     /* Les onglets remplacent le repérage par défilement : le spy n'est appelé
        que s'ils n'ont pas pu se poser (une seule section, ou nav absente). */
     if(!onglets()) spy();
