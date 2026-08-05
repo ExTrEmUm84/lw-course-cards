@@ -36,15 +36,36 @@
   "use strict";
 
   var SLUG="inscription";                    // body.slug-inscription
-  /* 🔴 DIRECTEMENT LE PAIEMENT, pas la page du programme (Ziad, 04/08) : celui qui
-     n'a pas d'adresse d'école a déjà choisi en arrivant ici, la page intermédiaire
-     n'ajoute qu'un clic.
-     🔴 SANS `packageId`. L'URL relevée sur le site en portait un
-     (`package_1785851559453_285`), généré à la création du plan tarifaire : le
-     figer ici, c'est un lien qui casse le jour où le tarif change — et il casserait
-     à l'étape la plus chère du parcours. Vérifié : sans lui, la page affiche bien
-     30 €/mois et charge Stripe. */
-  var PAIEMENT="/payment?product_id=collection-abonnement&type=learning_program";
+  /* 📜 HISTORIQUE — le 04/08, Ziad avait demandé d'aller DIRECTEMENT au paiement :
+     « celui qui n'a pas d'adresse d'école a déjà choisi en arrivant ici, la page
+     intermédiaire n'ajoute qu'un clic ». C'était juste TANT QU'IL N'Y AVAIT QU'UNE
+     FORMULE. Ce raisonnement est devenu faux le lendemain, quand la seconde est
+     apparue : il n'y a plus « le » tarif à payer, il y a un choix à faire.
+     La consigne d'origine est gardée ici parce qu'elle explique pourquoi le code
+     ressemblait à ça — pas parce qu'elle vaut encore. */
+  /* 🔴🔴 ON N'ENVOIE PLUS DIRECTEMENT AU TUNNEL (05/08, signalé par Ziad).
+     Deux défauts se cachaient dans l'URL ci-dessous, et le second est le grave :
+
+     1. **Elle sautait le choix.** Elle a été écrite quand il n'existait qu'UNE
+        formule. Depuis le 04/08 il y en a deux (mensuel 99 €, trimestriel
+        84 €/mois), et `abonnement.js` a mesuré que **sans `packageId` le tunnel
+        sélectionne le mensuel EN SILENCE** : le raccourci choisissait donc à la
+        place de l'étudiant, et toujours la formule la plus chère au mois.
+     2. 🔴 **Elle visait un AUTRE produit.** `collection-abonnement` n'est pas le
+        programme vendu sur `/formules`. Vérifié le 05/08 en chargeant les deux
+        pages : `/program/collection-abonnement` s'intitule « Collection
+        Abonnement », tandis que `/program/collection-3-mois` s'intitule
+        « Formation PrepaStrat Conseil » — celui que `/formules` et
+        `abonnement.js` vendent réellement. Les deux répondent 200, donc rien ne
+        signalait l'erreur : **un 200 ne prouve pas qu'on est au bon endroit.**
+
+     ⇒ On oriente vers la page de choix. Elle porte les deux formules, leurs
+     `packageId` et le bon produit — une seule source, au lieu d'une URL de plus
+     à tenir à jour ici. Le clic supplémentaire est le prix d'un choix éclairé.
+     🔴 Même constante que le bandeau d'orientation et le cadenas
+     (`PS_URL_OFFRE`) : trois chemins vers l'offre, une seule adresse. */
+  var OFFRE_DEFAUT="/formules";
+  function urlOffre(){ return (window.PS_URL_OFFRE || OFFRE_DEFAUT); }
   var CLE_MAIL="psMailInscription";
 
   function slugCourant(){
@@ -492,7 +513,9 @@
          une adresse e-mail n'a rien à faire dans une barre d'adresse, ni dans les
          journaux du serveur. */
       try{ sessionStorage.setItem(CLE_MAIL, v); }catch(e){}
-      location.href=PAIEMENT;
+      /* L'adresse reste mémorisée : `tokens.js` la repose dans le tunnel, quelle
+         que soit la formule choisie entre-temps sur `/formules`. */
+      location.href=urlOffre();
     }
     box.querySelector(".ps-i-go").addEventListener("click",router);
     champ.addEventListener("keydown",function(e){ if(e.key==="Enter"){ e.preventDefault(); router(); } });
