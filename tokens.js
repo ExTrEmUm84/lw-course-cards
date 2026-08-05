@@ -731,7 +731,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-ak";
+  window.PS_TOKENS_V="2026-08-05-al";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4475,6 +4475,50 @@
      plus tard l'est toujours par un CLIC. Les deux chemins sont couverts. */
   [0,400,1200,3000,6000].forEach(function(d){ setTimeout(socialSolitaire,d); });
   document.addEventListener("click", function(){ setTimeout(socialSolitaire,300); }, true);
+
+  /* ====================================================================
+     ANTI-FLASH DE LA PAGE D'ACCUEIL  (05/08, demandé par Ziad)
+     --------------------------------------------------------------------
+     « La home met du temps à appliquer l'habillage. » Mesuré avant d'écrire
+     quoi que ce soit, sur la vraie page publique :
+        380 → 700 ms   home-page.js chargé
+            784 ms     première peinture
+            905 ms     DOMContentLoaded
+     ⇒ **Le CSS est en place AVANT la première peinture** : l'habillage n'a
+     jamais été en retard. Ce qui saute aux yeux, c'est la RECONSTRUCTION —
+     `home-page.js` refait douze sections (stats, preuve, atouts, équipe…) et
+     chaque réécriture se voit.
+
+     🔴🔴 LE HERO N'EST JAMAIS MASQUÉ, et c'est la décision qui compte. Masquer
+     toute la page donnerait un écran blanc à un prospect qui arrive : on aurait
+     remplacé un défaut visible par un défaut coûteux. On ne cache que ce qui est
+     SOUS la ligne de flottaison — donc invisible au premier écran, donc gratuit.
+     `nth-child(n+3)` = tout ce qui suit la barre de navigation et le hero, la
+     même convention que `buildPartenaire()` qui insère après la 2e section.
+
+     🔴 FILET COURT — 1,2 s, pas 3,5. L'anti-flash de juillet attendait une
+     classe que les visiteurs déconnectés ne recevaient JAMAIS : deux secondes
+     de grille masquée pour protéger d'un restylage qui n'arrivait pas. Ici la
+     mesure donne 905 ms pour tout finir ; au-delà de 1,2 s on rend la main,
+     qu'on ait reçu le signal ou non.
+     ==================================================================== */
+  if(document.body && document.body.classList.contains("slug-home") && !document.getElementById("ps-home-cloak")){
+    var _hc=document.createElement("style");
+    _hc.id="ps-home-cloak";
+    _hc.textContent="body.slug-home:not(.ps-home-pret) #pageContent > section:nth-child(n+3)"+
+      "{opacity:0 !important;}"+
+      /* La révélation est une FONDU, pas un basculement : sans transition on
+         remplace un saut par un autre. */
+      "body.slug-home #pageContent > section:nth-child(n+3){transition:opacity .28s ease !important;}";
+    var _hh=document.head||document.documentElement; _hh.insertBefore(_hc,_hh.firstChild);
+    setTimeout(function(){
+      if(document.body && !document.body.classList.contains("ps-home-pret")){
+        document.body.classList.add("ps-home-pret");
+        try{ console.warn("[PrepaStrat] home : `ps-home-pret` n'est pas arrivé en 1,2 s — "+
+          "sections révélées par le filet. Vérifier que home-page.js s'exécute."); }catch(e){}
+      }
+    },1200);
+  }
 
   /* ====================================================================
      PAGE DE PAIEMENT (paiement.js) — dernier écran avant de payer

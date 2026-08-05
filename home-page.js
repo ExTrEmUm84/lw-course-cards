@@ -1407,6 +1407,20 @@
   function build(){
     if(!surLaPage()) return;
     styles(); marquer(); cartes(); buildStats(); buildCta(); buildPreuve(); buildAtouts(); buildCabinets(); buildTimeline(); buildProfils(); buildEquipe(); heroVideoBg(); setHeroVideo(); buildFaq(); buildPartenaire();
+    /* 🔴 SIGNAL DE FIN POUR L'ANTI-FLASH (05/08, demandé par Ziad : « la home
+       met du temps à appliquer l'habillage »). `tokens.js` masque les sections
+       SOUS le hero jusqu'à cette classe — jamais le hero lui-même, qui est la
+       première impression : un hero blanc coûterait plus cher que le flash
+       qu'on répare.
+       🔴 Posé À LA FIN de la reconstruction, et non au chargement du fichier :
+       c'est la reconstruction qui saute aux yeux, pas l'arrivée du script.
+       Mesuré : le CSS est en place AVANT la première peinture (784 ms), le
+       script est là à 700 ms — donc l'habillage n'a jamais été le problème.
+       🔴 `tokens.js` révèle de toute façon au bout de 1,2 s : si cette ligne
+       n'était jamais atteinte, la page s'afficherait quand même. L'anti-flash
+       de juillet masquait 2 s en attendant un signal qui n'arrivait jamais —
+       on ne refait pas ça. */
+    try{ document.body.classList.add("ps-home-pret"); }catch(e){}
   }
 
   /* 🔴 Planif via setTimeout (PAS requestAnimationFrame) : rAF est GELÉ dans un onglet
