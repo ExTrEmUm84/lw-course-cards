@@ -32,7 +32,7 @@
      n'avait rien. Posé AVANT tout le reste : un marqueur défini en fin de
      fichier ne dit rien quand une erreur survient au milieu.
      ⇒ En console : `PS_MENU_V`. */
-  window.PS_MENU_V="2026-08-05-a";
+  window.PS_MENU_V="2026-08-05-b";
 
   /* 🔴 `PS_CSS_ONLY` : drapeau posé par le CONFIGURATEUR et par lui seul (le site
      ne le pose jamais). Sous ce drapeau, ce fichier ne fait plus rien d'autre que
@@ -212,6 +212,94 @@
   window.PS_MM_ICON=ICON;
   window.PS_MM_PICK=pick;
   if(window.PS_CSS_ONLY) return;
+
+  /* ====================================================================
+     LES DRAPEAUX DE LANGUE DE L'EN-TÊTE  (05/08, demande de Ziad)
+     --------------------------------------------------------------------
+     Ziad a posé deux drapeaux dans l'en-tête depuis le Site Builder. Ce sont
+     des ICÔNES, pas des liens : le clic ne faisait rien. On les câble sur
+     Weglot, qui est déjà là — mesuré : `Weglot.initialized` vaut `true` et
+     `getCurrentLang()` renvoie `fr` sur une page publique.
+     🔴 On NE recrée PAS de sélecteur de langue et on n'injecte AUCUN script
+     Weglot : la traduction passe par l'intégration NATIVE de LearnWorlds, et
+     un second init sur une clé vide casse tout le dispositif (piège déjà payé).
+     On ne fait qu'ajouter un écouteur.
+
+     🔴🔴 LA LANGUE EST DÉDUITE DU DESSIN, PAS DE LA POSITION. Relevé sur les
+     deux SVG servis :
+        • Union Jack  : 4 `<rect>` + **6 `<polygon>`** (les croix diagonales), 2,7 ko
+        • drapeau FR  : **3 `<rect>`, 0 `<polygon>`**, 585 octets
+     Les deux images n'ont ni `alt`, ni `title`, ni classe distinctive — la
+     position était le seul repère évident, et c'est exactement ce qu'il ne
+     fallait pas prendre : Ziad réordonne ses éléments dans le Site Builder, et
+     deux drapeaux inversés enverraient les francophones en anglais sans que
+     rien ne le signale. Le dessin, lui, ne change pas quand on déplace l'icône.
+     🔴 Repli sur la position (gauche = EN) si la lecture du SVG échoue, et on
+     le DIT en console : mieux vaut un repli annoncé qu'un silence.
+     ==================================================================== */
+  (function drapeauxLangue(){
+    if(window.__psLangBound) return;
+
+    function pretWeglot(){ try{ return !!(window.Weglot && Weglot.initialized && Weglot.switchTo); }catch(e){ return false; } }
+
+    function drapeauxDansEnTete(){
+      return [].slice.call(document.querySelectorAll("img")).filter(function(e){
+        var r=e.getBoundingClientRect();
+        return e.offsetParent!==null && r.top<110 && r.width>=16 && r.width<=44 && r.height>=9 && r.height<=28;
+      }).sort(function(a,b){ return a.getBoundingClientRect().left-b.getBoundingClientRect().left; });
+    }
+
+    function langueDuDessin(svg){
+      var poly=(svg.match(/<polygon/gi)||[]).length;
+      var rect=(svg.match(/<rect/gi)||[]).length;
+      if(poly>0) return "en";                 /* croix diagonales = Union Jack */
+      if(rect>=3) return "fr";                /* trois bandes verticales */
+      return null;                            /* on ne devine pas */
+    }
+
+    function brancher(img, lang, origine){
+      var zone=(img.closest && img.closest(".flex-item")) || img.parentElement || img;
+      if(zone.getAttribute("data-ps-lang")) return;
+      zone.setAttribute("data-ps-lang", lang);
+      zone.style.cursor="pointer";
+      zone.setAttribute("role","button");
+      zone.setAttribute("tabindex","0");
+      /* Le libellé manquait complètement : une icône cliquable sans nom n'est
+         annoncée par aucun lecteur d'écran. */
+      zone.setAttribute("aria-label", lang==="en" ? "Switch to English" : "Afficher le site en français");
+      zone.title = lang==="en" ? "English" : "Français";
+      function aller(){ try{ Weglot.switchTo(lang); }catch(e){} }
+      zone.addEventListener("click", aller);
+      zone.addEventListener("keydown", function(ev){
+        if(ev.key==="Enter" || ev.key===" "){ ev.preventDefault(); aller(); }
+      });
+      try{ console.info("[PrepaStrat] Drapeau câblé sur « "+lang+" » ("+origine+")."); }catch(e){}
+    }
+
+    function poser(){
+      if(!pretWeglot()) return false;
+      var imgs=drapeauxDansEnTete();
+      if(imgs.length<2) return false;
+      window.__psLangBound=1;
+      imgs.forEach(function(img, i){
+        fetch(img.src).then(function(r){ return r.text(); }).then(function(t){
+          var l=langueDuDessin(t);
+          if(l) return brancher(img, l, "dessin du drapeau");
+          brancher(img, i===0?"en":"fr", "REPLI par position — dessin non reconnu");
+        }).catch(function(){
+          brancher(img, i===0?"en":"fr", "REPLI par position — SVG illisible");
+        });
+      });
+      return true;
+    }
+
+    /* L'en-tête et Weglot arrivent l'un après l'autre : quelques relances
+       bornées, pas d'observateur permanent sur toutes les pages du site. */
+    if(!poser()){
+      var essais=0;
+      var t=setInterval(function(){ if(poser() || ++essais>20) clearInterval(t); }, 400);
+    }
+  })();
 
   /* (le cycle de six couleurs par `nth-child` vivait ici : supprimé le 04/08,
      la couleur est posée une seule fois sur `.ps-mm-ic`, plus haut) */
