@@ -615,14 +615,99 @@
      l'étudiant vient chercher. Changer un palier ou un libellé = 1 ligne ici.
      🔴 Les seuils sont des MINIMA, dans l'ordre croissant : `gradeDe()` prend le
      dernier atteint. Ne pas les désordonner. */
+  /* 🔴 CES VALEURS NE SONT QU'UN REPLI. Depuis le 05/08, l'échelle se règle
+     depuis le SITE BUILDER, comme les tarifs de `/formules` : Ziad doit pouvoir
+     renommer un grade ou déplacer un palier sans moi. Les noms ci-dessous
+     reprennent les 6 niveaux du MOOC, qu'il a demandés le 05/08. */
   var GRADES=[
-    {min:0,  nom:"Candidat",          mot:"Votre préparation démarre. Chaque module compte."},
-    {min:10, nom:"Analyste",          mot:"Les bases sont posées, continuez sur cette lancée."},
-    {min:25, nom:"Consultant",        mot:"Beau parcours, vous tenez le rythme."},
-    {min:45, nom:"Consultant senior", mot:"Vous maîtrisez l'essentiel, la marche suivante est proche."},
-    {min:65, nom:"Manager",           mot:"Excellent niveau, les entretiens exigeants sont à votre portée."},
-    {min:85, nom:"Partner",           mot:"Parcours complet : vous avez de quoi viser les meilleurs cabinets."}
+    {min:0,  nom:"Junior",            mot:"Votre préparation démarre. Chaque module compte."},
+    {min:10, nom:"Consultant",        mot:"Les bases sont posées, continuez sur cette lancée."},
+    {min:25, nom:"Manager",           mot:"Beau parcours, vous tenez le rythme."},
+    {min:45, nom:"Principal",         mot:"Vous maîtrisez l'essentiel, la marche suivante est proche."},
+    {min:65, nom:"Partner",           mot:"Excellent niveau, les entretiens exigeants sont à votre portée."},
+    {min:85, nom:"PrepaStrat Master", mot:"Parcours complet : vous avez de quoi viser les meilleurs cabinets."}
   ];
+
+  /* ====================================================================
+     L'ÉCHELLE SE RÈGLE DEPUIS LE SITE BUILDER  (05/08, demande de Ziad)
+     --------------------------------------------------------------------
+     Même convention que `/formules` : des lignes `clé : valeur` dans un bloc de
+     texte normal de la page. Une clé mal orthographiée garde simplement le
+     repli — le pire cas est « ma correction n'apparaît pas », jamais « la page
+     affiche autre chose ».
+
+     grade1-nom : Junior
+     grade1-seuil : 0
+     grade1-mot : Votre préparation démarre.
+
+     🔴 NI `innerText` NI `textContent` pour lire le bloc. `innerText` rend une
+     chaîne VIDE sur un élément masqué — or on masque justement ce bloc — et
+     `textContent` avale les retours à la ligne, or on découpe en lignes. On lit
+     donc le HTML en rétablissant les sauts. Ce piège a déjà coûté deux fois
+     aujourd'hui : `abonnement.js` sur une section masquée, et la page de
+     vérification où notre propre anti-flash cachait l'adresse à notre lecture.
+
+     🔴 ON TRIE PAR SEUIL. L'ancien commentaire disait « ne pas les
+     désordonner » — une consigne tenable dans un fichier relu par moi, pas dans
+     un champ de texte édité à la main entre deux réunions. Le tri rend
+     l'ordre de saisie sans importance.
+
+     🔴 UN GRADE SANS NOM EST IGNORÉ, et un seuil illisible aussi : mieux vaut
+     une échelle amputée d'un palier qu'un grade « undefined » sur le profil
+     d'un étudiant. Si RIEN n'est exploitable, on garde l'échelle par défaut.
+     ==================================================================== */
+  function texteDeBloc(el){
+    var h=(el&&el.innerHTML)||"";
+    h=h.replace(/<br\s*\/?>/gi,"\n").replace(/<\/(p|div|li|h[1-6]|section)>/gi,"\n");
+    var tmp=document.createElement("div"); tmp.innerHTML=h;
+    return tmp.textContent||"";
+  }
+
+  /* Pure et testable : c'est elle qui décide de l'échelle affichée. */
+  function lireGrades(texte){
+    var par={}, vus={};
+    String(texte||"").split(/\r?\n/).forEach(function(ligne){
+      var m=ligne.match(/^\s*grade\s*(\d{1,2})\s*-\s*(nom|seuil|mot)\s*:\s*(\S.*?)\s*$/i);
+      if(!m) return;
+      var i=m[1];
+      (par[i]=par[i]||{})[m[2].toLowerCase()]=m[3];
+      vus[i]=1;
+    });
+    var out=[];
+    Object.keys(vus).forEach(function(i){
+      var g=par[i];
+      if(!g.nom) return;                                  /* sans nom, on n'invente pas */
+      var s=parseFloat(String(g.seuil==null?"":g.seuil).replace(",","."));
+      if(!isFinite(s)) return;                            /* seuil illisible : on saute */
+      out.push({min:Math.max(0,Math.min(100,s)), nom:g.nom, mot:g.mot||""});
+    });
+    out.sort(function(a,b){ return a.min-b.min; });
+    return out;
+  }
+
+  /* Cherche les réglages dans la page, applique s'il y en a, et MASQUE le bloc.
+     🔴 Masquer est indispensable : sans ça chaque étudiant lirait
+     « grade1-nom : Junior » en clair sur son profil. C'est la même règle que le
+     bloc de tarifs de `/formules`, et pour la même raison. */
+  function appliquerGradesDuBuilder(){
+    var hote=document.getElementById("pageContent");
+    if(!hote) return false;
+    var blocs=hote.querySelectorAll(".learnworlds-main-text, .learnworlds-element");
+    for(var i=0;i<blocs.length;i++){
+      var t=texteDeBloc(blocs[i]);
+      if(!/grade\s*\d{1,2}\s*-\s*nom\s*:/i.test(t)) continue;
+      var lus=lireGrades(t);
+      /* Le bloc est masqué même si la lecture échoue : il ne doit JAMAIS
+         s'afficher, et un réglage illisible se voit en console, pas à l'écran. */
+      blocs[i].style.setProperty("display","none","important");
+      if(lus.length>=2){ GRADES=lus; return true; }
+      try{ console.warn("[PrepaStrat] /profile : bloc de grades trouvé mais "+lus.length+
+        " palier(s) exploitable(s) — échelle par défaut conservée. Chaque grade demande "+
+        "au moins `gradeN-nom` et `gradeN-seuil`."); }catch(e){}
+      return false;
+    }
+    return false;
+  }
   function gradeDe(pct){
     var g=GRADES[0], suivant=null;
     for(var i=0;i<GRADES.length;i++){
@@ -1058,6 +1143,12 @@
   function mountBoard(){
     var grandpa=document.querySelector(S+" .ps-pf-tiles");
     if(!grandpa) return;
+    /* 🔴 AVANT toute peinture : le bandeau lit `GRADES` au moment où il se
+       dessine. Appeler plus tard afficherait l'échelle par défaut puis la
+       remplacerait sous les yeux du membre — le grade de quelqu'un ne doit pas
+       changer de nom une seconde après s'être affiché. Idempotent : le bloc est
+       masqué au premier passage, mais `mountBoard` peut être rappelé. */
+    appliquerGradesDuBuilder();
     var seen={}, progs=[];
     document.querySelectorAll(S+" [class*='learning-program-card']").forEach(function(card){
       var h=card.querySelector(".learnworlds-heading3")||card.querySelector("[class*='heading']");

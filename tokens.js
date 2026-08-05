@@ -731,7 +731,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-ah";
+  window.PS_TOKENS_V="2026-08-05-ai";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4117,22 +4117,20 @@
          payant sur une page qui le renvoie ailleurs — un bouton pire
          qu'absent. C'est aussi là que vit le vrai « Renvoyer l'e-mail », câblé
          par LearnWorlds : on n'essaie pas de le refaire ici. */
-      '<div class="pf-pied"><button class="pf-lien" data-a="fin">Plus tard</button>'+
+      /* 🔴 « J'ai déjà validé » N'EST PAS UN ORNEMENT (05/08, mesuré sur le
+         compte `…+test3@boks.app`). `me` est un INSTANTANÉ posé au chargement :
+         juste après avoir cliqué le lien de vérification, la page servie dit
+         encore `pending_verification`, et un rechargement plus tard elle dit
+         `verified`. On réclamait donc une validation à quelqu'un qui venait de
+         la faire — la même faute que le « Visible » affiché après un « Non ».
+         🔴 Je n'essaie PAS de deviner l'arrivée depuis le lien : LearnWorlds
+         redirige vers `/` sans le moindre paramètre (relevé), il n'y a rien à
+         détecter. On offre donc la seule action qui règle le cas, au lieu de
+         faire semblant de le reconnaître. */
+      '<div class="pf-pied"><button class="pf-lien" data-a="deja">J\'ai déjà validé</button>'+
       '<a class="pf-ok" href="/email-verification-pending" style="text-decoration:none;display:inline-block">Renvoyer le lien</a></div></div>';
     document.body.appendChild(hote);
     function fermer(){
-      /* 🔴🔴 MÉMOIRE PROPRE, ET COURTE — les deux points ont été payés.
-         (1) J'avais réutilisé `ficheReporter`, donc la clé `psFicheVue` de la
-         popup d'annuaire : mesuré en production sur le compte de test, un
-         « Plus tard » cliqué sur l'ANNUAIRE faisait taire la demande de
-         VALIDATION jusqu'au 19/08. Reporter un message n'est pas reporter
-         l'autre : deux sollicitations, deux mémoires.
-         (2) La durée de l'annuaire (14 jours) n'a aucun sens ici : le jeton de
-         vérification de LearnWorlds expire en ~3 jours (relevé sur le compte :
-         émis le 05/08, `expires_at` au 08/08). Taire pendant 14 jours le seul
-         message qui débloque un compte, c'est le condamner en silence.
-         ⇒ `sessionStorage` : une fois par session de navigation. On informe à
-         chaque retour sur le site, sans répéter à chaque page. */
       /* 🔴🔴 UNE HEURE, ET SA PROPRE CLÉ — les deux points ont été payés.
          (1) J'avais réutilisé `ficheReporter`, donc la clé de la popup
          d'annuaire : mesuré en production, un « Plus tard » cliqué sur
@@ -4149,15 +4147,21 @@
     }
     function auClavier(e){ if(e.key==="Escape"){ e.preventDefault(); fermer(); } }
     document.addEventListener("keydown", auClavier, true);
-    /* 🔴 LES QUATRE SORTIES FONT LA MÊME CHOSE, ET C'EST VOULU (question de
-       Ziad, 05/08) : la croix, « Plus tard », Échap et le clic hors de la carte
+    /* 🔴 LES SORTIES PASSIVES FONT TOUTES LA MÊME CHOSE, ET C'EST VOULU
+       (question de Ziad, 05/08) : la croix, Échap et le clic hors de la carte
        appellent le même `fermer()`, donc posent tous le report d'une heure. Si
        la croix ne reportait pas, la popup reviendrait à chaque changement de
        page — on transformerait une fermeture en harcèlement. Le report étant
        court, un clic accidentel ne coûte qu'une heure. */
     hote.querySelector(".pf-x").onclick=fermer;
-    hote.querySelector('[data-a="fin"]').onclick=fermer;
     hote.onclick=function(ev){ if(ev.target===hote) fermer(); };
+    /* 🔴 « J'ai déjà validé » NE REPORTE PAS, il RECHARGE : c'est une
+       affirmation, pas un renoncement. Reporter d'une heure quelqu'un qui vient
+       de valider le laisserait une heure devant un site qui le croit encore en
+       attente. Le rechargement ramène un `me` frais, et la popup disparaît
+       d'elle-même — ou revient, si l'adresse n'était finalement pas validée. */
+    var deja=hote.querySelector('[data-a="deja"]');
+    if(deja) deja.onclick=function(){ location.reload(); };
   }
 
   function fichePopup(){
