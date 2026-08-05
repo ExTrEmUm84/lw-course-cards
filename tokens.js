@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-p";
+  window.PS_TOKENS_V="2026-08-05-q";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -2802,6 +2802,13 @@
   function rappelProfil(){
     var u=membrePS();
     if(!u || document.getElementById("ps-rappel")) return;
+    /* 🔴 UN SEUL SOLLICITEUR À LA FOIS. Le membre qui a un accès relève de la
+       POPUP (`fichePopup`), qui fait remplir la fiche sur place ; lui montrer en
+       plus la pastille en coin, c'est demander deux fois la même chose par deux
+       chemins différents. Le rappel garde sa place pour les autres.
+       Le test porte sur l'accès, pas sur « la popup est-elle affichée » : sinon
+       le rappel réapparaîtrait dès que la popup est reportée. */
+    if(ficheAcces(u) || document.getElementById("ps-fiche")) return;
     /* On n'interrompt ni une leçon, ni une inscription en cours de validation. */
     if(PAGES_MUETTES.test(location.pathname||"")) return;
 
@@ -3382,6 +3389,404 @@
          maintenant unique, sur le document, posé dès le chargement du fichier. */
   }
 
+  /* ════════════════════════════════════════════════════════════════════════
+     FICHE D'ANNUAIRE : UN ÉCRAN PAR QUESTION  (05/08)
+     ────────────────────────────────────────────────────────────────────────
+     Le rappel en coin (`rappelProfil`) renvoyait vers `/profile` pour compléter
+     sa fiche. 🔴 Mesuré ce jour : le bouton « Edit profile » de `/profile` mène
+     à `/account`, et `/account` ne contient AUCUN des six champs. **Le membre
+     n'avait donc aucun chemin praticable** — ce qui explique très bien les 13
+     comptes sur 17 sans réponse à l'opt-in. La popup n'est pas un confort,
+     c'est le seul chemin.
+
+     🔴 À QUI ON LA MONTRE. Ziad : « validé, et il a acheté OU a été ajouté par
+     l'école ». Or `me` n'expose aucun signal de vérification d'e-mail (mesuré le
+     04/08), et aucune liste de cours (70 clés listées le 05/08) — « au moins un
+     cours fermé » n'est donc PAS calculable depuis une page. Les deux branches
+     se rejoignent sur le seul fait observable : un accès en place.
+     ⇒ `userLearningPrograms.length > 0` OU `isPaying`.
+     ⚠️ `isPaying` ne veut PAS dire « a payé » : sur le compte de Ziad il vaut
+     `true` alors que `/account` affiche « aucun paiement effectué ». On ignore
+     ce qu'il mesure exactement ; il ne fait qu'élargir, jamais restreindre.
+
+     🔴 NOYAU COURT, PUIS LE RESTE. Quatre questions (~40 s) suffisent à publier
+     une fiche utile ; on propose ensuite de compléter. Un abandon après le
+     noyau est un succès partiel, pas un échec — c'est toute la différence avec
+     un formulaire de sept écrans qu'on quitte au troisième.
+
+     🔴 UN SEUL ENREGISTREMENT, à la fin OU à la fermeture s'il y a des réponses.
+     Le Worker exige un jeton Turnstile par requête, à USAGE UNIQUE : sauver à
+     chaque écran en consommerait sept. Et fermer en route ne doit pas jeter ce
+     qui a été saisi.
+
+     🔴 LES VALEURS SONT CELLES DE LEARNWORLDS, AU CARACTÈRE PRÈS. Les libellés
+     d'opt-in viennent de Ziad ; les quatre listes ont été relevées sur les
+     facettes RÉELLES de l'annuaire en production le 05/08. Une majuscule qui
+     diffère et l'annuaire affiche deux pastilles pour la même valeur (défaut
+     déjà corrigé le 24/07, `91d7d47`) — ou, pour l'opt-in, le membre
+     n'apparaît pas du tout.
+     ════════════════════════════════════════════════════════════════════════ */
+  var FICHE_ENDPOINT="https://annuaire-prepastrat.ziedbencheikh.workers.dev/profil";
+  var FICHE_CLE="psFicheVue";
+  var FICHE_JOURS=14;
+
+  var OPTIN_OUI="Oui, afficher ma fiche";
+  var OPTIN_NON="Non, je préfère rester discret";
+
+  /* 🔴 `noyau:true` = posé avant la publication. Le reste vient après, et on
+     peut s'arrêter là sans rien perdre. */
+  var FICHE_ECRANS=[
+    { cle:"cf_annuaire", type:"choix", vis:"annuaire", noyau:true,
+      q:"Rejoignez l'annuaire des étudiants",
+      sous:"Trouvez un partenaire pour vous entraîner aux études de cas — et laissez les autres vous trouver. Vous pouvez changer d'avis à tout moment.",
+      /* Le « Oui » d'abord : dans LearnWorlds le champ liste le refus en
+         premier, et on ne met pas le refus en tête d'une question qu'on pose.
+         Les CHAÎNES, elles, sont identiques au caractère près. */
+      options:[OPTIN_OUI, OPTIN_NON] },
+    { cle:"cf_ecole", type:"choix", vis:"ecole", noyau:true, q:"Dans quelle école êtes-vous ?",
+      sous:"Les autres pourront filtrer par école.",
+      options:["HEC Paris","ESSEC","ESCP","EM Lyon","EDHEC","SKEMA","Audencia","NEOMA","Grenoble EM",
+               "Polytechnique (X)","CentraleSupélec","Mines Paris","Ponts ParisTech","Télécom Paris",
+               "ENSAE","Arts et Métiers","Dauphine","Sciences Po Paris","ENS","Autre"] },
+    { cle:"cf_niveau", type:"choix", vis:"niveau", noyau:true, q:"Où en êtes-vous dans votre préparation ?",
+      sous:"Pour qu'on vous propose des partenaires à votre niveau.",
+      options:["Débutant","Avancé","Expert"] },
+    { cle:"cf_recherche", type:"choix", vis:"cible", noyau:true, q:"Que cherchez-vous ?",
+      options:["Stage","CDI Junior","CDI expérimenté"] },
+    { cle:"cf_langue", type:"multi", vis:"langue", q:"Dans quelle langue voulez-vous vous entraîner ?",
+      sous:"Plusieurs réponses possibles.", options:["Français","Anglais"] },
+    { cle:"bio", type:"long", vis:"plume", q:"Deux lignes sur vous",
+      sous:"Ce que vous préparez, d'où vous venez, ce qui vous motive.", max:280,
+      placeholder:"En M1 à l'ESSEC, je vise le conseil en stratégie après une prépa HEC…" },
+    { cle:"cf_contact", type:"texte", vis:"contact", q:"Comment peut-on vous joindre ?",
+      sous:"E-mail, LinkedIn, WhatsApp, Calendly — ce que vous acceptez de partager. C'est ce qui fait apparaître le bouton « Contacter » sur votre fiche.",
+      placeholder:"prenom.nom@exemple.fr" }
+  ];
+
+  function ficheAcces(u){
+    if(!u) return false;
+    if((u.userLearningPrograms||[]).length>0) return true;
+    return u.isPaying===true;
+  }
+
+  function fichePeutSAfficher(){
+    var u=membrePS();
+    if(!u || !ficheAcces(u)) return null;
+    if(PAGES_MUETTES.test(location.pathname||"")) return null;
+    if(document.getElementById("ps-fiche")) return null;
+    try{
+      var jusqua=Number(localStorage.getItem(FICHE_CLE+":"+(u.id||"?"))||0);
+      if(jusqua && Date.now()<jusqua) return null;
+    }catch(e){}
+    /* Même juge que le rappel en coin : opt-in refusé ⇒ on n'insiste jamais,
+       fiche complète ⇒ rien à demander. */
+    var etat=etatProfil(u.custom_fields);
+    return etat.afficher ? u : null;
+  }
+
+  function ficheCSS(){
+    if(document.getElementById("ps-fiche-css")) return;
+    var st=document.createElement("style"); st.id="ps-fiche-css";
+    st.textContent=
+      "#ps-fiche{position:fixed;inset:0;z-index:10000;background:rgba(15,23,42,.55);"+
+      "display:flex;align-items:center;justify-content:center;padding:20px;"+
+      "font-family:var(--ps-font,Figtree,sans-serif)}"+
+      "#ps-fiche .pf{width:min(520px,100%);background:#fff;border-radius:var(--ps-r-card,18px);"+
+      "box-shadow:0 24px 70px rgba(15,23,42,.28);overflow:hidden;position:relative}"+
+      /* Progression par SEGMENTS : on voit ce qu'il RESTE, pas seulement ce qui
+         est fait — c'est ce qui donne envie de finir. */
+      "#ps-fiche .pf-prog{display:flex;gap:4px;padding:14px 20px 0}"+
+      "#ps-fiche .pf-prog i{flex:1;height:4px;border-radius:2px;background:#E9EDF3;transition:background .35s}"+
+      "#ps-fiche .pf-prog i.on{background:var(--ps-accent,#3887b4)}"+
+      "#ps-fiche .pf-x{position:absolute;top:12px;right:12px;width:30px;height:30px;border:0;"+
+      "background:transparent;color:#b9c3d6;cursor:pointer;border-radius:50%;font-size:19px;line-height:1}"+
+      "#ps-fiche .pf-x:hover{background:#F3F5F9;color:var(--ps-text-soft,#676879)}"+
+      "#ps-fiche .pf-e{padding:22px 30px 26px;text-align:center;animation:pf-in .26s ease both}"+
+      "@keyframes pf-in{from{opacity:0;transform:translateX(18px)}to{opacity:1;transform:none}}"+
+      "#ps-fiche .pf-vis{height:126px;display:flex;align-items:center;justify-content:center}"+
+      "#ps-fiche .pf-vis svg{width:114px;height:114px;overflow:visible}"+
+      "#ps-fiche h3{margin:0 0 6px;font:800 21px/1.28 var(--ps-font,Figtree,sans-serif);color:var(--ps-text,#1c1f26)}"+
+      "#ps-fiche .pf-sous{margin:0 0 18px;font:400 13.5px/1.5 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879)}"+
+      "#ps-fiche .pf-choix{display:flex;flex-wrap:wrap;gap:9px;justify-content:center}"+
+      "#ps-fiche .pf-choix button{border:1.5px solid var(--ps-border,#E6E9EF);background:#fff;"+
+      "color:var(--ps-text,#1c1f26);border-radius:var(--ps-r-pill,999px);padding:10px 17px;"+
+      "font:600 14px var(--ps-font,Figtree,sans-serif);cursor:pointer;transition:transform .12s,border-color .18s,background .18s}"+
+      "#ps-fiche .pf-choix button:hover{border-color:var(--ps-accent,#3887b4);transform:translateY(-1px)}"+
+      "#ps-fiche .pf-choix button.on{background:var(--ps-accent,#3887b4);border-color:var(--ps-accent,#3887b4);color:#fff}"+
+      "#ps-fiche .pf-champ{width:100%;box-sizing:border-box;border:1.5px solid var(--ps-border,#E6E9EF);"+
+      "border-radius:var(--ps-r-btn,12px);padding:12px 14px;font:400 14.5px var(--ps-font,Figtree,sans-serif);"+
+      "color:var(--ps-text,#1c1f26);outline:none}"+
+      "#ps-fiche .pf-champ:focus{border-color:var(--ps-accent,#3887b4);box-shadow:0 0 0 3px rgba(56,135,180,.14)}"+
+      "#ps-fiche textarea.pf-champ{min-height:92px;resize:vertical}"+
+      "#ps-fiche .pf-cpt{font:500 11.5px var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);text-align:right;margin-top:6px}"+
+      "#ps-fiche .pf-pied{display:flex;align-items:center;justify-content:space-between;gap:12px;"+
+      "padding:14px 22px;border-top:1px solid var(--ps-border,#E6E9EF);background:#FAFBFD}"+
+      "#ps-fiche .pf-lien{border:0;background:transparent;color:var(--ps-text-soft,#676879);"+
+      "font:600 13px var(--ps-font,Figtree,sans-serif);cursor:pointer}"+
+      "#ps-fiche .pf-lien:hover{color:var(--ps-text,#1c1f26)}"+
+      "#ps-fiche .pf-ok{background:var(--ps-accent,#3887b4);color:#fff;border:0;border-radius:var(--ps-r-btn,12px);"+
+      "padding:11px 22px;font:800 14px var(--ps-font,Figtree,sans-serif);cursor:pointer}"+
+      "#ps-fiche .pf-ok:hover{background:var(--ps-accent-hover,#203866)}"+
+      "#ps-fiche .pf-carte{border:1px solid var(--ps-border,#E6E9EF);border-radius:var(--ps-r-card,18px);"+
+      "padding:18px;text-align:left;display:flex;gap:14px;align-items:flex-start}"+
+      "#ps-fiche .pf-av{width:52px;height:52px;border-radius:50%;background:var(--ps-accent,#3887b4);color:#fff;"+
+      "flex:none;display:flex;align-items:center;justify-content:center;font:800 18px var(--ps-font,Figtree,sans-serif)}"+
+      "#ps-fiche .pf-nom{font:800 15.5px var(--ps-font,Figtree,sans-serif);color:var(--ps-text,#1c1f26)}"+
+      "#ps-fiche .pf-meta{font:500 12.5px var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);margin-top:2px}"+
+      "#ps-fiche .pf-tags{display:flex;flex-wrap:wrap;gap:6px;margin-top:9px}"+
+      "#ps-fiche .pf-tags span{background:#EEF4FA;color:var(--ps-accent,#3887b4);border-radius:var(--ps-r-pill,999px);"+
+      "padding:4px 10px;font:700 11.5px var(--ps-font,Figtree,sans-serif)}"+
+      "#ps-fiche .pf-bio{font:400 12.5px/1.45 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);margin-top:9px}"+
+      "@keyframes pf-trace{to{stroke-dashoffset:0}}"+
+      "@keyframes pf-flotte{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}"+
+      "#ps-fiche .tr{stroke-dasharray:var(--l,300);stroke-dashoffset:var(--l,300);animation:pf-trace 1.1s ease forwards}"+
+      "#ps-fiche .fl{animation:pf-flotte 3.2s ease-in-out infinite}"+
+      /* 🔴 Même règle que partout ailleurs dans ce fichier. */
+      "@media(prefers-reduced-motion:reduce){#ps-fiche .pf-e,#ps-fiche .tr,#ps-fiche .fl"+
+      "{animation:none !important;stroke-dashoffset:0 !important}}";
+    (document.head||document.documentElement).appendChild(st);
+  }
+
+  var FICHE_VIS=(function(){
+    var A="var(--ps-accent,#3887b4)";
+    function s(inner){ return '<svg viewBox="0 0 120 120" fill="none" stroke="'+A+'" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">'+inner+'</svg>'; }
+    return {
+      annuaire:s('<g class="fl"><circle cx="42" cy="46" r="15" class="tr" style="--l:100"/><path d="M18 92c0-14 11-24 24-24s24 10 24 24" class="tr" style="--l:120"/><circle cx="84" cy="56" r="11" class="tr" style="--l:80" opacity=".55"/><path d="M66 92c0-11 8-19 18-19s18 8 18 19" class="tr" style="--l:100" opacity=".55"/></g>'),
+      ecole:s('<g class="fl"><path d="M60 24 18 46l42 22 42-22-42-22Z" class="tr" style="--l:200"/><path d="M34 56v26c0 8 12 14 26 14s26-6 26-14V56" class="tr" style="--l:150"/><path d="M102 46v26" class="tr" style="--l:30"/></g>'),
+      niveau:s('<g><path d="M20 96h22V70H20z" class="tr" style="--l:90"/><path d="M49 96h22V50H49z" class="tr" style="--l:120"/><path d="M78 96h22V28H78z" class="tr" style="--l:160"/><circle cx="89" cy="18" r="5" fill="'+A+'" stroke="none"/></g>'),
+      cible:s('<g class="fl"><circle cx="60" cy="60" r="34" class="tr" style="--l:220"/><circle cx="60" cy="60" r="20" class="tr" style="--l:130"/><circle cx="60" cy="60" r="6" fill="'+A+'" stroke="none"/><path d="M88 32 60 60" class="tr" style="--l:60"/></g>'),
+      langue:s('<g class="fl"><path d="M20 34h48a8 8 0 0 1 8 8v22a8 8 0 0 1-8 8H40l-14 12V72h-6a8 8 0 0 1-8-8V42a8 8 0 0 1 8-8Z" class="tr" style="--l:230"/><path d="M92 52h8a8 8 0 0 1 8 8v18a8 8 0 0 1-8 8h-4v10l-12-10H76" class="tr" style="--l:150" opacity=".55"/></g>'),
+      plume:s('<g class="fl"><path d="M26 94c0-30 22-56 52-62 6-1 10 3 9 9-6 30-32 52-61 53Z" class="tr" style="--l:230"/><path d="M26 94 60 60" class="tr" style="--l:60"/></g>'),
+      contact:s('<g class="fl"><rect x="20" y="36" width="80" height="52" rx="8" class="tr" style="--l:270"/><path d="m20 44 40 26 40-26" class="tr" style="--l:110"/></g>'),
+      fini:s('<g><circle cx="60" cy="60" r="36" class="tr" style="--l:230"/><path d="m44 61 12 12 22-26" class="tr" style="--l:70"/></g>')
+    };
+  })();
+
+  function ficheReporter(u){
+    try{ localStorage.setItem(FICHE_CLE+":"+(u.id||"?"), String(Date.now()+FICHE_JOURS*864e5)); }catch(e){}
+  }
+
+  /* ── Envoi. Un jeton Turnstile par requête, à usage unique : on n'envoie donc
+     que sur les vrais points de sortie (publication du noyau, fin, fermeture),
+     et jamais deux fois la même chose — la signature évite un second jeton pour
+     rien. */
+  var _ficheSig="", _ficheEnVol=false, _ficheTsEl=null, _ficheRendu=false, _ficheAttente=null;
+
+  function fichePayload(u, rep){
+    var champs={};
+    Object.keys(rep).forEach(function(k){
+      var v=rep[k];
+      if(Array.isArray(v)) v=v.join(", ");
+      v=String(v==null?"":v).trim();
+      if(v) champs[k]=v;
+    });
+    return { uid:String(u.id||""), email:String(u.email||""), champs:champs };
+  }
+
+  function ficheEnvoyer(u, rep, fini){
+    var charge=fichePayload(u, rep);
+    if(!Object.keys(charge.champs).length) return;
+    var sig=JSON.stringify(charge.champs);
+    if(sig===_ficheSig || _ficheEnVol) return;
+    _ficheAttente={charge:charge, sig:sig, fini:fini};
+    ficheTurnstile();
+  }
+
+  function ficheEnvoyerAvecJeton(jeton){
+    var a=_ficheAttente; if(!a) return;
+    _ficheEnVol=true;
+    fetch(FICHE_ENDPOINT,{
+      method:"POST",
+      headers:{"Content-Type":"application/json","X-Turnstile-Token":jeton},
+      body:JSON.stringify(a.charge)
+    })
+      .then(function(r){ return r.ok ? r.json() : null; })
+      /* 🔴 On exige un ACCUSÉ de ce qu'on a envoyé, jamais un `ok` générique :
+         c'est le piège du 30/07 (un Worker en retard répondait `ok:true` sans
+         rien écrire, et le collecteur ne réessayait plus jamais). */
+      .then(function(j){
+        var pris=(j && j.ok && Array.isArray(j.ecrits)) ? j.ecrits.length : 0;
+        if(pris>=Object.keys(a.charge.champs).length) _ficheSig=a.sig;
+        else try{ console.warn("[PrepaStrat] fiche : "+pris+" champ(s) enregistré(s) sur "+
+          Object.keys(a.charge.champs).length+" envoyés — on retentera."); }catch(e){}
+      })
+      .catch(function(){})
+      .then(function(){ _ficheEnVol=false; _ficheAttente=null; });
+  }
+
+  /* Widget hors écran, jamais `display:none` : caché ainsi il ne s'exécuterait
+     pas. Le jeton de l'annuaire ou du dépôt a déjà servi — il nous faut le nôtre. */
+  function ficheTurnstile(){
+    if(!_ficheTsEl){
+      _ficheTsEl=document.createElement("div");
+      _ficheTsEl.style.cssText="position:fixed;left:-9999px;top:0;width:1px;height:1px;overflow:hidden;";
+      (document.body||document.documentElement).appendChild(_ficheTsEl);
+    }
+    window.psFicheTsReady=function(){
+      try{
+        if(_ficheRendu){ window.turnstile.reset(_ficheTsEl); return; }
+        window.turnstile.render(_ficheTsEl,{
+          sitekey:DEP_SITEKEY,
+          callback:ficheEnvoyerAvecJeton,
+          "error-callback":function(){ _ficheEnVol=false; return true; },
+          "expired-callback":function(){ try{ window.turnstile.reset(_ficheTsEl); }catch(e){} }
+        });
+        _ficheRendu=true;
+      }catch(e){ _ficheEnVol=false; }
+    };
+    if(window.turnstile){ window.psFicheTsReady(); return; }
+    if(document.getElementById("ps-fiche-ts")) return;
+    var s=document.createElement("script");
+    s.id="ps-fiche-ts";
+    s.src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=psFicheTsReady&render=explicit";
+    s.async=true; s.defer=true;
+    (document.head||document.documentElement).appendChild(s);
+  }
+
+  /* ── Le formulaire lui-même ─────────────────────────────────────────────── */
+  function ficheOuvrir(u){
+    ficheCSS();
+    var rep={}, i=0, NOYAU=4;
+    var hote=document.createElement("div"); hote.id="ps-fiche";
+    hote.setAttribute("role","dialog"); hote.setAttribute("aria-modal","true");
+    document.body.appendChild(hote);
+
+    function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+
+    function fermer(enregistrer){
+      if(enregistrer) ficheEnvoyer(u, rep, false);
+      ficheReporter(u);
+      if(hote.parentNode) hote.parentNode.removeChild(hote);
+      document.removeEventListener("keydown", auClavier, true);
+    }
+    function auClavier(e){ if(e.key==="Escape"){ e.preventDefault(); fermer(true); } }
+    document.addEventListener("keydown", auClavier, true);
+
+    function carte(){
+      var n=[u.firstName||u.first_name||"", u.lastName||u.last_name||""].filter(Boolean).join(" ")||u.username||"Vous";
+      var ini=n.split(/\s+/).map(function(m){return m[0]||"";}).join("").slice(0,2).toUpperCase();
+      var tags=[rep.cf_niveau, rep.cf_recherche].filter(Boolean);
+      var meta=[rep.cf_ecole, (rep.cf_langue||[]).join(" · ")].filter(Boolean).join(" — ");
+      return '<div class="pf-carte"><div class="pf-av">'+esc(ini)+'</div><div style="flex:1">'+
+        '<div class="pf-nom">'+esc(n)+'</div>'+
+        (meta?'<div class="pf-meta">'+esc(meta)+'</div>':'')+
+        (tags.length?'<div class="pf-tags">'+tags.map(function(t){return '<span>'+esc(t)+'</span>';}).join("")+'</div>':'')+
+        (rep.bio?'<div class="pf-bio">'+esc(rep.bio)+'</div>':'')+'</div></div>';
+    }
+
+    function rendre(){
+      var segs=""; for(var k=0;k<FICHE_ECRANS.length;k++) segs+='<i class="'+(k<i?"on":"")+'"></i>';
+      var corps;
+
+      /* 🔴 Refus de l'annuaire : on s'arrête là. Continuer à demander école,
+         niveau et contact à quelqu'un qui vient de dire « je préfère rester
+         discret » serait ne pas l'avoir écouté. */
+      if(rep.cf_annuaire===OPTIN_NON){
+        corps='<div class="pf-e"><div class="pf-vis">'+FICHE_VIS.fini+'</div>'+
+          '<h3>C\'est noté</h3><p class="pf-sous">Votre fiche n\'apparaîtra pas dans l\'annuaire. '+
+          'Vous pourrez changer d\'avis depuis votre profil.</p></div>'+
+          '<div class="pf-pied"><span class="pf-lien" style="cursor:default"></span>'+
+          '<button class="pf-ok" data-a="fin">Fermer</button></div>';
+      } else if(i===NOYAU){
+        corps='<div class="pf-e"><div class="pf-vis">'+FICHE_VIS.fini+'</div>'+
+          '<h3>Votre fiche est en ligne</h3>'+
+          '<p class="pf-sous">Voici ce que les autres étudiants verront. Trois questions de plus la rendent bien plus utile.</p>'+
+          carte()+'</div>'+
+          '<div class="pf-pied"><button class="pf-lien" data-a="fin">C\'est bon pour moi</button>'+
+          '<button class="pf-ok" data-a="suite">Compléter (1 min)</button></div>';
+      } else if(i>=FICHE_ECRANS.length){
+        corps='<div class="pf-e"><div class="pf-vis">'+FICHE_VIS.fini+'</div>'+
+          '<h3>Fiche complète, merci</h3>'+
+          '<p class="pf-sous">Modifiable à tout moment depuis votre profil.</p>'+carte()+'</div>'+
+          '<div class="pf-pied"><span class="pf-lien" style="cursor:default"></span>'+
+          '<button class="pf-ok" data-a="fin">Fermer</button></div>';
+      } else {
+        var e=FICHE_ECRANS[i], champ="";
+        if(e.type==="choix"||e.type==="multi"){
+          champ='<div class="pf-choix">'+e.options.map(function(o){
+            var on=e.type==="multi" ? (rep[e.cle]||[]).indexOf(o)>=0 : rep[e.cle]===o;
+            return '<button type="button" data-o="'+esc(o)+'" class="'+(on?"on":"")+'">'+esc(o)+'</button>';
+          }).join("")+'</div>';
+        } else if(e.type==="long"){
+          champ='<textarea class="pf-champ" maxlength="'+(e.max||280)+'" placeholder="'+esc(e.placeholder||"")+'">'+esc(rep[e.cle]||"")+'</textarea>'+
+                '<div class="pf-cpt"><b>'+String(rep[e.cle]||"").length+'</b> / '+(e.max||280)+'</div>';
+        } else {
+          champ='<input class="pf-champ" type="text" placeholder="'+esc(e.placeholder||"")+'" value="'+esc(rep[e.cle]||"")+'">';
+        }
+        corps='<div class="pf-e"><div class="pf-vis">'+FICHE_VIS[e.vis]+'</div>'+
+          '<h3>'+esc(e.q)+'</h3>'+(e.sous?'<p class="pf-sous">'+esc(e.sous)+'</p>':'')+champ+'</div>'+
+          '<div class="pf-pied"><button class="pf-lien" data-a="passer">'+(i===0?"Plus tard":"Passer")+'</button>'+
+          '<button class="pf-ok" data-a="suivant">'+(i===FICHE_ECRANS.length-1?"Terminer":"Continuer")+'</button></div>';
+      }
+
+      hote.innerHTML='<div class="pf"><div class="pf-prog">'+segs+'</div>'+
+        '<button class="pf-x" aria-label="Fermer">×</button>'+corps+'</div>';
+      brancher();
+    }
+
+    function brancher(){
+      hote.querySelector(".pf-x").onclick=function(){ fermer(true); };
+      hote.onclick=function(ev){ if(ev.target===hote) fermer(true); };   // clic hors carte
+      var e=(i<FICHE_ECRANS.length && i!==NOYAU && rep.cf_annuaire!==OPTIN_NON) ? FICHE_ECRANS[i] : null;
+
+      hote.querySelectorAll("[data-a]").forEach(function(b){
+        b.onclick=function(){
+          var a=b.getAttribute("data-a");
+          if(a==="fin"){ fermer(true); return; }
+          /* Publication du noyau : on enregistre AVANT de proposer la suite —
+             celui qui ferme la fenêtre ici a déjà sa fiche. */
+          if(a==="suite"){ ficheEnvoyer(u, rep, false); i++; rendre(); return; }
+          if(a==="passer"||a==="suivant"){
+            i++;
+            if(i===NOYAU) ficheEnvoyer(u, rep, false);
+            if(i>=FICHE_ECRANS.length) ficheEnvoyer(u, rep, true);
+            rendre();
+          }
+        };
+      });
+      if(!e) return;
+
+      hote.querySelectorAll(".pf-choix button").forEach(function(b){
+        b.onclick=function(){
+          var v=b.getAttribute("data-o");
+          if(e.type==="multi"){
+            var l=rep[e.cle]||[]; var j=l.indexOf(v);
+            if(j>=0) l.splice(j,1); else l.push(v);
+            rep[e.cle]=l; rendre();
+          } else {
+            rep[e.cle]=v;
+            /* Choix unique : on avance seul. Un clic de plus par écran, c'est
+               autant d'occasions d'abandonner. */
+            setTimeout(function(){
+              i++;
+              if(i===NOYAU) ficheEnvoyer(u, rep, false);
+              rendre();
+            },190);
+          }
+        };
+      });
+      var champ=hote.querySelector(".pf-champ");
+      if(champ){
+        champ.oninput=function(){
+          rep[e.cle]=champ.value;
+          var c=hote.querySelector(".pf-cpt b"); if(c) c.textContent=champ.value.length;
+        };
+        champ.onkeydown=function(ev){
+          if(ev.key==="Enter" && e.type!=="long"){ ev.preventDefault(); i++; if(i>=FICHE_ECRANS.length) ficheEnvoyer(u,rep,true); rendre(); }
+        };
+        try{ champ.focus(); }catch(_){}
+      }
+    }
+
+    rendre();
+  }
+
+  function fichePopup(){
+    var u=fichePeutSAfficher();
+    if(u) ficheOuvrir(u);
+  }
+
   function orienterMembre(){
     var u=membrePS();
     if(!u || document.getElementById("ps-acces")) return;
@@ -3493,6 +3898,12 @@
      relances suffisent à rattraper un `me` pas encore là, sans jamais voler
      l'attention au moment où la personne cherche son cours. */
   [1500,4000].forEach(function(d){ setTimeout(rappelProfil,d); });
+  /* 🔴 La popup arrive APRÈS l'orientation et APRÈS le rappel dans le temps :
+     elle prend le plein écran, donc elle ne doit jamais couper quelqu'un qui
+     vient d'arriver et cherche encore où il est. Deux passages seulement — elle
+     est idempotente (`#ps-fiche` déjà là ⇒ sortie), et `me.custom_fields` peut
+     arriver après le premier rendu. */
+  [3500,8000].forEach(function(d){ setTimeout(fichePopup,d); });
   /* 🔴 L'orientation passe AVANT le rappel de profil dans le temps : quelqu'un
      qui n'a pas encore d'accès n'a que faire de compléter sa fiche d'annuaire.
      Elle est aussi relancée plus longtemps — juste après une inscription,
