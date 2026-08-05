@@ -112,7 +112,7 @@
     "--ps-text-soft:#676879",
     "--ps-surface-soft:#F7F8FB",
     "--ps-border:#E6E9EF",
-    "--ps-cab-logo:#507EC5",
+    "--ps-cab-logo:#007260",
     "--ps-an-avatar:56px",
     "--ps-an-col:260px",
     "--ps-pf-ring:64px",
@@ -133,18 +133,18 @@
     "--ps-lvl5-tint:#fff0f4",
     "--ps-lvl6:#203866",
     "--ps-lvl6-tint:#edf4ff",
-    "--ps-f1:var(--ps-accent)",
-    "--ps-f1-tint:var(--ps-accent-tint)",
-    "--ps-f2:#00C875",
-    "--ps-f2-tint:#E3F8EE",
-    "--ps-f3:#E2445C",
-    "--ps-f3-tint:#FDECEF",
-    "--ps-f4:#FDAB3D",
-    "--ps-f4-tint:#FFF3E0",
-    "--ps-f5:#A25DDC",
-    "--ps-f5-tint:#F3EAFB",
-    "--ps-f6:#0073EA",
-    "--ps-f6-tint:#E6F1FD"
+    "--ps-f1:#009e78",
+    "--ps-f1-tint:#e4fbf6",
+    "--ps-f2:#3887b4",
+    "--ps-f2-tint:#edf4ff",
+    "--ps-f3:#fdab3d",
+    "--ps-f3-tint:#fff3e0",
+    "--ps-f4:#ff5e5b",
+    "--ps-f4-tint:#fff0f4",
+    "--ps-f5:#c51d4a",
+    "--ps-f5-tint:#fff0f4",
+    "--ps-f6:#6b7280",
+    "--ps-f6-tint:#ecedef"
 /* <<< FIN TOKENS */
   ];
 
@@ -208,13 +208,13 @@
      faire dans le contenu. */
 /* >>> DEBUT PAGES — réécrit par le configurateur, ne rien ajouter ici */
   var PAGE_ACCENTS={
-    "fiches-cabinet":"#47ce22",
-    "fiches-secteur":"#fad54a",
+    "sentrainer":"#c51d4a",
+    "fiches-cabinet":"#009e78",
+    "fiches-secteur":"#deb125",
     "etudes-cas":"#6b7280"
   };
   var PAGE_STYLE={
-    "formation-par-modules":{"contour":1,"ep":4,"duree":1.1,"couleur":"#edf4ff"},
-    "fiches-secteur":{"contour":1,"ep":4,"duree":1.1}
+    "formation-par-modules":{"contour":1,"ep":4,"duree":1.1,"couleur":"#edf4ff"}
   };
   var REGLAGES={
     "lien_video":"https://player.vimeo.com/video/910803542?",
