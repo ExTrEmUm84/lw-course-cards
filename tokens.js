@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-t";
+  window.PS_TOKENS_V="2026-08-05-u";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3548,7 +3548,19 @@
       "#ps-fiche .pf-prog{display:flex;gap:4px;padding:14px 20px 0}"+
       "#ps-fiche .pf-prog i{flex:1;height:4px;border-radius:2px;background:#E9EDF3;transition:background .35s}"+
       "#ps-fiche .pf-prog i.on{background:var(--ps-accent,#3887b4)}"+
-      "#ps-fiche .pf-x{position:absolute;top:12px;right:12px;width:30px;height:30px;border:0;"+
+      /* 🔴🔴 `z-index` INDISPENSABLE, ET J'AI DÛ LE MESURER POUR LE VOIR.
+         Signalé par Ziad : « le bouton fermer ne fonctionne pas ». Il
+         fonctionnait — `x.click()` fermait bien la popup — mais il était
+         RECOUVERT : `elementFromPoint` au centre de la croix renvoyait
+         `.pf-e`, le panneau d'écran. Cause : l'animation d'entrée `pf-in`
+         applique un `transform` à `.pf-e`, ce qui crée un contexte
+         d'empilement ; venant APRÈS la croix dans le DOM, il passe devant un
+         élément positionné sans `z-index`.
+         🔴 La leçon : « positionné » ne suffit pas à être au-dessus dès qu'un
+         voisin porte une transformation — et une animation en est une. Un
+         bouton qui répond au clic programmatique mais pas à la souris, c'est
+         toujours un problème de recouvrement, jamais de gestionnaire. */
+      "#ps-fiche .pf-x{position:absolute;top:12px;right:12px;z-index:3;width:30px;height:30px;border:0;"+
       "background:transparent;color:#b9c3d6;cursor:pointer;border-radius:50%;font-size:19px;line-height:1}"+
       "#ps-fiche .pf-x:hover{background:#F3F5F9;color:var(--ps-text-soft,#676879)}"+
       "#ps-fiche .pf-e{padding:22px 30px 26px;text-align:center;animation:pf-in .26s ease both}"+
