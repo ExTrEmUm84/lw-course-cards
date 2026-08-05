@@ -729,7 +729,9 @@
      moment-là : le bouger fait partie du changement, pas de sa relecture. */
   /* 🔴 -z : la popup dit enfin pourquoi le Worker refuse. Marqueur bougé DANS
      le même changement — la leçon a coûté deux fois dans la journée. */
-  window.PS_TOKENS_V="2026-08-05-z";
+  /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
+     pour un compte en attente. Marqueur bougé DANS le changement. */
+  window.PS_TOKENS_V="2026-08-05-aa";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -2837,6 +2839,12 @@
        Le test porte sur l'accès, pas sur « la popup est-elle affichée » : sinon
        le rappel réapparaîtrait dès que la popup est reportée. */
     if(ficheAcces(u) || document.getElementById("ps-fiche")) return;
+    /* 🔴🔴 EFFET DE BORD À NE PAS RATER : `ficheAcces` renvoie désormais FAUX
+       pour un compte non validé — or ce test-ci fait justement apparaître le
+       rappel quand l'accès manque. Sans cette ligne, faire taire la popup
+       AURAIT ALLUMÉ LE RAPPEL EN COIN à sa place : on aurait remplacé une
+       sollicitation par une autre, et cru avoir réglé le problème. */
+    if(verifEnAttente(u)) return;
     /* On n'interrompt ni une leçon, ni une inscription en cours de validation. */
     if(PAGES_MUETTES.test(location.pathname||"")) return;
 
@@ -3492,8 +3500,41 @@
       placeholder:"prenom.nom@exemple.fr" }
   ];
 
+  /* ====================================================================
+     ADRESSE PAS ENCORE VALIDÉE : ON NE DEMANDE RIEN  (05/08, signalé par Ziad)
+     --------------------------------------------------------------------
+     🔴🔴 J'avais corrigé la MOITIÉ du problème. Le Worker refuse désormais
+     d'écrire la fiche d'un compte non validé (bug A) — mais la popup, elle,
+     continuait de s'ouvrir et de poser ses questions. Ziad s'est connecté sur
+     un compte non vérifié et l'a vue arriver : on lui faisait remplir quatre
+     écrans pour lui opposer un refus à la fin. **Refuser proprement ne
+     dispense pas de ne pas demander.**
+     🔴 La règle existait déjà, écrite le 04/08 pour `PAGES_MUETTES` : « tant
+     que le compte n'est pas utilisable, on n'essaie ni de vendre ni de faire
+     remplir un profil ». Elle portait sur des PAGES ; elle vaut tout autant
+     pour l'ÉTAT DU COMPTE, et je ne l'avais pas transposée.
+     🔴 MÊME VALEUR, MÊME RÈGLE QUE LE WORKER : on ne bloque que sur
+     `pending_verification`, mesuré (15 `skipped_verification` / 3 `pending` /
+     1 `verified` sur 19 fiches). Un statut inconnu ou absent LAISSE PASSER —
+     sinon une valeur jamais vue ferait taire la popup pour toute l'école, et
+     personne ne remplirait plus sa fiche sans qu'on comprenne pourquoi.
+     ==================================================================== */
+  function verifEnAttente(u){
+    var s = u && (
+      (u.email_config && u.email_config.verification && u.email_config.verification.status) ||
+      u.email_verification_status ||
+      u.verification_status
+    );
+    if(!s) return false;
+    return String(s).trim().toLowerCase()==="pending_verification";
+  }
+
   function ficheAcces(u){
     if(!u) return false;
+    /* 🔴 Placé AVANT les conditions d'accès : un compte non validé peut très
+       bien avoir un programme (inscription par automatisation d'école dès la
+       création). L'accès au contenu ne vaut pas autorisation à publier. */
+    if(verifEnAttente(u)) return false;
     if((u.userLearningPrograms||[]).length>0) return true;
     return u.isPaying===true;
   }
@@ -3932,9 +3973,77 @@
     rendre();
   }
 
+  /* ====================================================================
+     POPUP « VALIDEZ VOTRE ADRESSE » — à la place de celle de l'annuaire
+     --------------------------------------------------------------------
+     Idée de Ziad, meilleure que la mienne : je comptais simplement TAIRE la
+     popup d'annuaire pour un compte non validé. Se taire, c'est laisser
+     quelqu'un devant un site où rien ne marche sans lui dire pourquoi. On
+     remplace donc la demande par la seule action qui le débloque.
+     🔴 UN SEUL ÉCRAN, une seule action : cette personne n'a qu'une chose à
+     faire. C'est la règle déjà appliquée à `/email-verification-pending`.
+     🔴 Elle se reporte comme l'autre (même mémoire, clé par membre) : on
+     informe, on ne harcèle pas à chaque page.
+     ==================================================================== */
+  function verifPopupOuvrir(u){
+    if(document.getElementById("ps-fiche")) return;
+    ficheCSS();
+    var hote=document.createElement("div");
+    /* 🔴 LE MÊME ID QUE LA POPUP DE FICHE, ET C'EST VOULU. Tout l'habillage de
+       `ficheCSS()` est scopé sur `#ps-fiche` : un id à moi n'aurait hérité
+       d'AUCUN style — popup nue, en haut à gauche. Le partager donne en prime
+       la bonne propriété métier : les autres dispositifs testent déjà
+       `getElementById("ps-fiche")` pour ne pas se superposer, donc une seule
+       sollicitation s'affiche à la fois, sans nouveau test à écrire. */
+    hote.id="ps-fiche";
+    hote.setAttribute("role","dialog"); hote.setAttribute("aria-modal","true");
+    function esc(s){ return String(s==null?"":s).replace(/[&<>"]/g,function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+    var mail=(u&&u.email)||"";
+    hote.innerHTML='<div class="pf">'+
+      '<button class="pf-x" aria-label="Fermer">×</button>'+
+      '<div class="pf-e"><div class="pf-vis">'+FICHE_VIS.fini+'</div>'+
+      '<h3>Validez votre adresse e-mail</h3>'+
+      '<p class="pf-sous">Un lien de vérification vous attend'+
+        (mail?' à <b class="wg-notranslate">'+esc(mail)+'</b>':'')+
+        '. Il active votre compte et vous ouvre l\'annuaire des étudiants.<br>'+
+        'Pensez à regarder dans vos spams.</p></div>'+
+      /* 🔴 CE BOUTON N'A ÉTÉ AJOUTÉ QU'APRÈS AVOIR VÉRIFIÉ SA DESTINATION, sur
+         un vrai compte en attente (05/08) : `/email-verification-pending` REND
+         pour lui, alors qu'elle redirige un admin vers `/author/dashboard` et
+         un anonyme vers l'accueil. Sans cette mesure, on envoyait un client
+         payant sur une page qui le renvoie ailleurs — un bouton pire
+         qu'absent. C'est aussi là que vit le vrai « Renvoyer l'e-mail », câblé
+         par LearnWorlds : on n'essaie pas de le refaire ici. */
+      '<div class="pf-pied"><button class="pf-lien" data-a="fin">Plus tard</button>'+
+      '<a class="pf-ok" href="/email-verification-pending" style="text-decoration:none;display:inline-block">Renvoyer le lien</a></div></div>';
+    document.body.appendChild(hote);
+    function fermer(){
+      ficheReporter(u);
+      if(hote.parentNode) hote.parentNode.removeChild(hote);
+      document.removeEventListener("keydown", auClavier, true);
+    }
+    function auClavier(e){ if(e.key==="Escape"){ e.preventDefault(); fermer(); } }
+    document.addEventListener("keydown", auClavier, true);
+    hote.querySelector(".pf-x").onclick=fermer;
+    hote.querySelector('[data-a="fin"]').onclick=fermer;
+    hote.onclick=function(ev){ if(ev.target===hote) fermer(); };
+  }
+
   function fichePopup(){
-    var u=fichePeutSAfficher();
-    if(u) ficheOuvrir(u);
+    var u=membrePS();
+    /* 🔴 L'ORDRE COMPTE : on teste la vérification AVANT `fichePeutSAfficher()`,
+       qui renvoie null pour un compte non validé (via `ficheAcces`). Testé
+       après, ce cas serait avalé par le `null` et on n'afficherait plus rien —
+       exactement le silence qu'on cherche à éviter. */
+    if(u && verifEnAttente(u) && !PAGES_MUETTES.test(location.pathname||"")){
+      var jusqua=0;
+      try{ jusqua=Number(localStorage.getItem(FICHE_CLE+":"+(u.id||"?"))||0); }catch(e){}
+      if(!jusqua || Date.now()>=jusqua) verifPopupOuvrir(u);
+      return;
+    }
+    var v=fichePeutSAfficher();
+    if(v) ficheOuvrir(v);
   }
 
   /* Ouverture À LA DEMANDE, depuis une autre page. L'annuaire s'en sert quand il
