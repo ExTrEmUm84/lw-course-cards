@@ -731,7 +731,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-ac";
+  window.PS_TOKENS_V="2026-08-05-ad";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3475,6 +3475,10 @@
      (`cf_annuaire`) est chez LearnWorlds, et une fiche remplie ferme la popup
      partout, quel que soit le navigateur. */
   var FICHE_JOURS=3;
+  /* Popup « validez votre adresse » : mémoire distincte de celle de l'annuaire,
+     et bien plus courte — ce message-là débloque un compte payant. */
+  var VERIF_CLE="psVerifVue";
+  var VERIF_MINUTES=60;
 
   var OPTIN_OUI="Oui, afficher ma fiche";
   var OPTIN_NON="Non, je préfère rester discret";
@@ -4048,7 +4052,17 @@
          message qui débloque un compte, c'est le condamner en silence.
          ⇒ `sessionStorage` : une fois par session de navigation. On informe à
          chaque retour sur le site, sans répéter à chaque page. */
-      try{ sessionStorage.setItem("psVerifVue:"+(u&&u.id||"?"), "1"); }catch(e){}
+      /* 🔴🔴 UNE HEURE, ET SA PROPRE CLÉ — les deux points ont été payés.
+         (1) J'avais réutilisé `ficheReporter`, donc la clé de la popup
+         d'annuaire : mesuré en production, un « Plus tard » cliqué sur
+         l'ANNUAIRE faisait taire la demande de VALIDATION jusqu'au 19/08.
+         Reporter un message n'est pas reporter l'autre.
+         (2) J'avais ensuite mis « une fois par session » — trop long : une
+         session de navigation peut durer la journée (choix de Ziad : 1 h max).
+         Et le jeton de vérification de LearnWorlds expire en ~3 jours (relevé
+         sur le compte : émis le 05/08, `expires_at` au 08/08), donc chaque
+         heure perdue compte pour un compte qui a déjà PAYÉ. */
+      try{ localStorage.setItem(VERIF_CLE+":"+(u&&u.id||"?"), String(Date.now()+VERIF_MINUTES*60000)); }catch(e){}
       if(hote.parentNode) hote.parentNode.removeChild(hote);
       document.removeEventListener("keydown", auClavier, true);
     }
@@ -4066,12 +4080,13 @@
        après, ce cas serait avalé par le `null` et on n'afficherait plus rien —
        exactement le silence qu'on cherche à éviter. */
     if(u && verifEnAttente(u) && !PAGES_MUETTES.test(location.pathname||"")){
-      /* 🔴 Sa PROPRE mémoire, en session (voir `fermer()` plus bas). Lire
-         `psFicheVue` ici revenait à laisser un report d'annuaire — jusqu'à 14
-         jours — masquer le message qui débloque le compte. Mesuré en prod. */
-      var vue=false;
-      try{ vue = sessionStorage.getItem("psVerifVue:"+(u.id||"?"))==="1"; }catch(e){}
-      if(!vue) verifPopupOuvrir(u);
+      /* 🔴 Sa PROPRE mémoire, et une ÉCHÉANCE, pas une session (voir
+         `fermer()`). Lire `psFicheVue` ici revenait à laisser un report
+         d'annuaire masquer le message qui débloque le compte — mesuré en prod,
+         il courait jusqu'au 19/08. */
+      var jusqua=0;
+      try{ jusqua=Number(localStorage.getItem(VERIF_CLE+":"+(u.id||"?"))||0); }catch(e){}
+      if(!jusqua || Date.now()>=jusqua) verifPopupOuvrir(u);
       return;
     }
     var v=fichePeutSAfficher();
