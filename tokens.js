@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-l";
+  window.PS_TOKENS_V="2026-08-05-m";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -920,8 +920,54 @@
      des pages. */
   var CLE_GRILLES="psGrilles";
   var SEL_GRILLE='#pageContent [data-node-type="course-cards"]';
-  var FANT_N=3;
+  var FANT_N=3, FANT_R=1.3;
   var _fantObs=null, _fantPoll=null, _fantSurvBody=false;
+
+  /* 🔴 DÉFAUTS MESURÉS LE 05/08 SUR LES 5 PAGES À CARTES, en anonyme, fenêtre
+     1440 px. Ils servent à la TOUTE PREMIÈRE visite, avant que la mémoire de
+     l'appareil n'ait quoi que ce soit à dire. Relevé (nombre × largeur × hauteur) :
+        formation-par-modules  6×361×538 · 5×361×409 · 1×361×477
+        etudes-cas            12×445×479
+        fiches-secteur        11×361×483
+        fiches-cabinet        10×361×483
+        sentrainer             3×361×432
+     🔴🔴 ON FIGE DES RATIOS, PAS DES PIXELS. Une hauteur en dur mesurée sur un
+     écran de 1440 px serait fausse partout ailleurs — sur mobile la grille
+     passe à une colonne, la carte est deux fois plus large, donc plus haute.
+     Le ratio hauteur/largeur, lui, traverse les tailles d'écran.
+     🔴 Et je ne les ai pas pris de la première mesure venue : la première
+     récolte avait été faite avec un panneau de largeur NULLE (cartes écrasées
+     en colonnes). Deux valeurs sur cinq étaient fausses — `sentrainer` donnait
+     318 au lieu de 432. Toute hauteur relevée sur une page non mise en page est
+     à jeter, pas à arrondir. */
+  var FANT_DEFAUTS={
+    "formation-par-modules":[{n:6,r:1.49},{n:5,r:1.13},{n:1,r:1.32}],
+    "etudes-cas":[{n:12,r:1.08}],
+    "fiches-secteur":[{n:11,r:1.34}],
+    "fiches-cabinet":[{n:10,r:1.34}],
+    "sentrainer":[{n:3,r:1.20}]
+  };
+  /* Les jumelles anglaises portent un slug différent et la même grille : la
+     table est DÉRIVÉE, jamais recopiée à la main — c'est ce qui avait fait
+     rater l'anti-flash sur les pages EN. */
+  try{
+    Object.keys(FANT_DEFAUTS).forEach(function(s){
+      var en=PAGES_EN && PAGES_EN[s];
+      if(en && !FANT_DEFAUTS[en]) FANT_DEFAUTS[en]=FANT_DEFAUTS[s];
+    });
+  }catch(e){}
+
+  /* Largeur d'une colonne de la grille fantôme, pour convertir un ratio en
+     pixels. Les paliers suivent EXACTEMENT ceux de la feuille de style
+     ci-dessous : deux jeux de seuils qui divergent donneraient une hauteur
+     calculée pour une mise en page qui n'est pas celle affichée. */
+  function largeurColonneFantome(g){
+    var w=g.getBoundingClientRect().width;
+    if(!w) return 0;
+    var vw=window.innerWidth||1200;
+    var cols=vw>1024?3:(vw>640?2:1);
+    return (w-26*(cols-1))/cols;
+  }
 
   function grillesMemo(){
     try{ return JSON.parse(localStorage.getItem(CLE_GRILLES)||"{}")||{}; }catch(e){ return {}; }
@@ -934,11 +980,16 @@
     [].slice.call(gs).forEach(function(g){
       var c=g.querySelectorAll(".lw-course-card");
       if(!c.length){ liste.push(null); return; }
-      var h=Math.round(c[0].getBoundingClientRect().height);
-      /* 🔴 Une hauteur nulle ou absurde ne se mémorise pas : elle viendrait
-         d'une carte pas encore mise en page, et on la rejouerait à la visite
-         suivante en croyant l'avoir mesurée. */
-      liste.push({n:c.length, h:(h>80 && h<900)?h:0});
+      var r=c[0].getBoundingClientRect();
+      var h=Math.round(r.height), w=Math.round(r.width);
+      /* 🔴 ON MÉMORISE LA LARGEUR AVEC LA HAUTEUR, et sans elle on ne garde
+         RIEN. Une hauteur seule ne veut rien dire : elle a été relevée à une
+         certaine largeur de colonne, et rejouée sur un autre écran elle est
+         fausse. C'est le piège qui m'a fait relever 318 px au lieu de 432 sur
+         une fenêtre de largeur nulle. Pas de largeur crédible ⇒ on préfère le
+         ratio figé, qui vient d'une mesure propre. */
+      var utilisable=(h>80 && h<1200 && w>120);
+      liste.push({n:c.length, h:utilisable?h:0, w:utilisable?w:0});
       vu=true;
     });
     if(!vu) return;
@@ -975,14 +1026,21 @@
   function poserFantomes(){
     var gs=document.querySelectorAll(SEL_GRILLE);
     if(!gs.length) return false;
-    var memo=grillesMemo()[slugCourant()]||[];
+    var slug=slugCourant();
+    var memo=grillesMemo()[slug]||[];
+    var fige=FANT_DEFAUTS[slug]||[];
     cssFantomes();
     [].slice.call(gs).forEach(function(g,i){
       if(g.querySelector(".lw-course-card")) return;   /* LearnWorlds a déjà servi */
       if(g.querySelector(".ps-fantomes")) return;      /* idempotent */
-      var conf=memo[i]||null;
-      var n=Math.max(1, Math.min(12, (conf && conf.n) || FANT_N));
-      var h=(conf && conf.h) || 0;
+      var vu=memo[i]||null, ref=fige[i]||null;
+      var n=Math.max(1, Math.min(12, (vu && vu.n) || (ref && ref.n) || FANT_N));
+      /* 🔴 Le ratio VU sur cet appareil bat le ratio figé — il vient de la
+         vraie carte, sur le vrai écran. Le figé n'est là que pour la première
+         visite, quand la mémoire est encore vide. */
+      var ratio=(vu && vu.h && vu.w) ? (vu.h/vu.w) : ((ref && ref.r) || FANT_R);
+      var col=largeurColonneFantome(g);
+      var h=col ? Math.round(col*ratio) : 0;
       var boite=document.createElement("div");
       boite.className="ps-fantomes";
       /* Décor pur : rien à annoncer à un lecteur d'écran, qui lirait sinon
