@@ -104,9 +104,9 @@
 
   var VALEURS=[
 /* >>> DEBUT TOKENS — réécrit par le configurateur, ne rien ajouter ici */
-    "--ps-accent:#507EC5",
-    "--ps-accent-rgb:80,126,197",
-    "--ps-accent-hover:#486798",
+    "--ps-accent:#3887b4",
+    "--ps-accent-rgb:56,135,180",
+    "--ps-accent-hover:#203866",
     "--ps-accent-tint:#edf4ff",
     "--ps-text:#1c1f26",
     "--ps-text-soft:#676879",
