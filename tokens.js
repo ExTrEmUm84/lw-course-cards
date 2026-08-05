@@ -731,7 +731,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-ad";
+  window.PS_TOKENS_V="2026-08-05-ae";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -2330,6 +2330,41 @@
           cta:"S'inscrire à une session", url:""
         }
       ]
+    },
+
+    /* ══════════════════════════════════════════════════════════════════════
+       ENTRÉE DE TEST — PAS UNE ÉCOLE CLIENTE  (demandée par Ziad, 05/08)
+       ──────────────────────────────────────────────────────────────────────
+       Sert à observer ce que voit un étudiant d'ÉCOLE dont l'adresse n'est pas
+       encore validée : son accès vient de l'automatisation d'école (pas d'un
+       achat) ET il porte le co-branding. Cette combinaison n'était couverte par
+       aucun de nos cas.
+       🔴 `boks.app` est le domaine de Ziad : le co-branding ne s'affiche donc
+       qu'à lui et à son équipe. Il reste néanmoins EN PRODUCTION — à retirer
+       quand le test est fini, sinon une bande partenaire d'une école qui
+       n'existe pas traîne sur le site.
+       🔴 DÉTECTION PAR DOMAINE, PAS PAR TAG : il n'y a aucune automatisation
+       LearnWorlds pour ce domaine (le compte de test du 05/08 portait le tag
+       BRUT `boks.app`, pas `ecole-…`). Le repli par domaine est justement ce
+       qui permet de tester sans rien configurer côté LearnWorlds. Le tag est
+       tout de même listé au cas où Ziad créerait l'automatisation.
+       ══════════════════════════════════════════════════════════════════════ */
+    boks:{
+      nom:"Boks",
+      tags:["ecole-boks"],
+      domaines:["boks.app"],
+      logo:"",
+      pastille:"Accès offert par votre école",
+      titre:"Votre préparation au conseil, sponsorisée par Boks",
+      texte:"Entrée de démonstration : elle sert à vérifier l'affichage du co-branding et le parcours d'un étudiant d'école. Ce n'est pas une offre commerciale.",
+      puces:[
+        {t:"Catalogue complet", s:"Aucun paiement"},
+        {t:"Promo Boks",        s:"Annuaire entre étudiants"},
+        {t:"Webinars",          s:"Tous les mois"}
+      ],
+      /* Aucune offre : les 4 cartes d'accompagnement sont propres à l'ESSEC, et
+         en inventer donnerait à un écran de test l'apparence d'un vrai contrat. */
+      offres:[]
     }
   };
 
@@ -4068,6 +4103,12 @@
     }
     function auClavier(e){ if(e.key==="Escape"){ e.preventDefault(); fermer(); } }
     document.addEventListener("keydown", auClavier, true);
+    /* 🔴 LES QUATRE SORTIES FONT LA MÊME CHOSE, ET C'EST VOULU (question de
+       Ziad, 05/08) : la croix, « Plus tard », Échap et le clic hors de la carte
+       appellent le même `fermer()`, donc posent tous le report d'une heure. Si
+       la croix ne reportait pas, la popup reviendrait à chaque changement de
+       page — on transformerait une fermeture en harcèlement. Le report étant
+       court, un clic accidentel ne coûte qu'une heure. */
     hote.querySelector(".pf-x").onclick=fermer;
     hote.querySelector('[data-a="fin"]').onclick=fermer;
     hote.onclick=function(ev){ if(ev.target===hote) fermer(); };
