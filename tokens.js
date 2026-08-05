@@ -731,7 +731,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-ae";
+  window.PS_TOKENS_V="2026-08-05-af";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -2332,40 +2332,13 @@
       ]
     },
 
-    /* ══════════════════════════════════════════════════════════════════════
-       ENTRÉE DE TEST — PAS UNE ÉCOLE CLIENTE  (demandée par Ziad, 05/08)
-       ──────────────────────────────────────────────────────────────────────
-       Sert à observer ce que voit un étudiant d'ÉCOLE dont l'adresse n'est pas
-       encore validée : son accès vient de l'automatisation d'école (pas d'un
-       achat) ET il porte le co-branding. Cette combinaison n'était couverte par
-       aucun de nos cas.
-       🔴 `boks.app` est le domaine de Ziad : le co-branding ne s'affiche donc
-       qu'à lui et à son équipe. Il reste néanmoins EN PRODUCTION — à retirer
-       quand le test est fini, sinon une bande partenaire d'une école qui
-       n'existe pas traîne sur le site.
-       🔴 DÉTECTION PAR DOMAINE, PAS PAR TAG : il n'y a aucune automatisation
-       LearnWorlds pour ce domaine (le compte de test du 05/08 portait le tag
-       BRUT `boks.app`, pas `ecole-…`). Le repli par domaine est justement ce
-       qui permet de tester sans rien configurer côté LearnWorlds. Le tag est
-       tout de même listé au cas où Ziad créerait l'automatisation.
-       ══════════════════════════════════════════════════════════════════════ */
-    boks:{
-      nom:"Boks",
-      tags:["ecole-boks"],
-      domaines:["boks.app"],
-      logo:"",
-      pastille:"Accès offert par votre école",
-      titre:"Votre préparation au conseil, sponsorisée par Boks",
-      texte:"Entrée de démonstration : elle sert à vérifier l'affichage du co-branding et le parcours d'un étudiant d'école. Ce n'est pas une offre commerciale.",
-      puces:[
-        {t:"Catalogue complet", s:"Aucun paiement"},
-        {t:"Promo Boks",        s:"Annuaire entre étudiants"},
-        {t:"Webinars",          s:"Tous les mois"}
-      ],
-      /* Aucune offre : les 4 cartes d'accompagnement sont propres à l'ESSEC, et
-         en inventer donnerait à un écran de test l'apparence d'un vrai contrat. */
-      offres:[]
-    }
+    /* 🔴 L'entrée de TEST `boks` a été RETIRÉE le 05/08, le jour même où elle a
+       été ajoutée. Ziad a mappé `boks.app` vers le tag **`ecole-essec`** dans
+       l'automatisation LearnWorlds, pas vers un `ecole-boks` : un compte
+       `@boks.app` vérifié est donc reconnu comme un étudiant ESSEC et emprunte
+       la chaîne réelle, ce qui est un bien meilleur test que d'en fabriquer une
+       seconde. Garder ici une école qui n'existe pas aurait produit une
+       deuxième identité concurrente — et l'aurait laissée en production. */
   };
 
   function membrePS(){ try{ return (typeof me==="object" && me) ? me : null; }catch(e){ return null; } }
@@ -2383,7 +2356,21 @@
       for(var k in PARTENAIRES){
         var p=PARTENAIRES[k], ok=false;
         for(var i=0;i<p.tags.length && !ok;i++){ if(tags.indexOf(p.tags[i].toLowerCase())>=0) ok=true; }
-        if(!ok && domaineEstPartenaire(dom,p)) ok=true;
+        /* 🔴🔴 LE REPLI PAR DOMAINE NE VAUT PLUS POUR UNE ADRESSE NON PROUVÉE.
+           Le 05/08, Ziad a fait basculer l'automatisation LearnWorlds du
+           déclencheur « L'utilisateur s'inscrit » à « L'utilisateur vérifie son
+           adresse e-mail » : l'étiquette d'école — donc l'inscription au
+           programme — n'est plus posée sur une adresse qu'on ne possède pas.
+           Or ce repli-ci reconnaissait l'école sur le SEUL domaine de l'adresse
+           saisie. Il rouvrait donc, côté AFFICHAGE, la porte qui venait d'être
+           fermée côté ACCÈS : il suffisait de taper `moi@essec.edu` sans jamais
+           valider pour afficher « Accès offert par votre école ».
+           ⇒ Tant que l'adresse est en attente, seul le TAG compte — et un tag
+           implique désormais une adresse vérifiée.
+           🔴 On ne supprime pas le repli pour autant : il sert aux comptes
+           antérieurs à l'automatisation, dont l'adresse est vérifiée mais qui
+           n'ont jamais été étiquetés. */
+        if(!ok && !verifEnAttente(u) && domaineEstPartenaire(dom,p)) ok=true;
         if(ok){ _part=p; break; }
       }
     }
