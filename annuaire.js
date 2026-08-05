@@ -1463,7 +1463,7 @@
 
           var d = document.createElement("p");
           d.textContent = refus
-            ? "Vous avez choisi de ne pas apparaître dans l'annuaire. Vous pouvez revenir sur ce choix depuis votre profil."
+            ? "Vous avez choisi de ne pas apparaître dans l'annuaire. Vous pouvez revenir sur ce choix depuis Mon compte."
             : "Renseignez votre fiche en une minute, et vous pourrez consulter celle des autres étudiants.";
           d.style.cssText = "font:400 14px/1.6 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);margin:0 0 16px";
           empty.appendChild(t); empty.appendChild(d);
@@ -1476,8 +1476,12 @@
             /* Repli sur le profil aussi quand `tokens.js` n'a pas (encore) posé
                l'ouverture : un bouton qui ne fait rien est pire qu'un lien. */
             var a = document.createElement("a");
-            a.href = "/profile";
-            a.textContent = refus ? "Modifier ce choix" : "Ouvrir mon profil";
+            /* 🔴 `/account` ET NON `/profile` (05/08). Mesuré : les six champs
+               d'annuaire sont éditables dans « Mon compte » ; `/profile` n'en
+               montre aucun. On y envoyait donc les gens chercher un formulaire
+               qui n'y est pas. */
+            a.href = "/account";
+            a.textContent = refus ? "Modifier ce choix" : "Ouvrir mon compte";
             a.style.cssText = styleCta;
             empty.appendChild(a);
           } else {
@@ -1488,13 +1492,13 @@
             b.addEventListener("click", function () {
               /* `force` : la personne vient de cliquer, on n'applique ni
                  temporisation ni jugement sur « est-ce le bon moment ». */
-              if (window.PS_FICHE_OUVRIR(true) === false) location.href = "/profile";
+              if (window.PS_FICHE_OUVRIR(true) === false) location.href = "/account";
             });
             empty.appendChild(b);
 
             var lien = document.createElement("div");
             lien.style.cssText = "margin-top:12px;font:500 13px var(--ps-font,Figtree,sans-serif)";
-            lien.innerHTML = '<a href="/profile" style="color:var(--ps-text-soft,#676879)">ou depuis mon profil</a>';
+            lien.innerHTML = '<a href="/account" style="color:var(--ps-text-soft,#676879)">ou depuis Mon compte</a>';
             empty.appendChild(lien);
           }
           return null;

@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-v";
+  window.PS_TOKENS_V="2026-08-05-w";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -2923,7 +2923,9 @@
       });
     }else{
       cta=document.createElement("a");
-      cta.href="/profile"; cta.textContent="Compléter mon profil";
+      /* 🔴 `/account` : c'est là que vivent les champs d'annuaire (mesuré le
+         05/08). `/profile` ne les affiche pas. */
+      cta.href="/account"; cta.textContent="Compléter ma fiche";
     }
     cta.className="ps-rappel-cta";
     boite.appendChild(cta);
