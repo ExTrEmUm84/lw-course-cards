@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-g";
+  window.PS_TOKENS_V="2026-08-05-h";
 
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
@@ -2630,6 +2630,64 @@
     return MOTIF_FERME.test((c.textContent||"").replace(/\s+/g," "));
   }
 
+  /* ====================================================================
+     LA LISTE FAIT AUTORITÉ, LE LIBELLÉ N'EST QUE LE REPLI  (05/08)
+     --------------------------------------------------------------------
+     Le Worker publie sur `/cours` les identifiants des cours dont
+     l'inscription est fermée, lus dans le champ `access` de l'API — la
+     source d'autorité, pas un texte affiché.
+
+     🔴 LA JOINTURE PASSE PAR `id`, ET C'EST UNE SURPRISE MESURÉE LE 05/08.
+     Mes notes décrivaient l'identifiant d'administration comme opaque ; il
+     vaut en réalité `niveau-1`, `support-webinar`… soit exactement le
+     `courseid` des liens de cartes. `titleId`, lui, est vide sur les 61 cours.
+     🔴 Je l'avais d'ailleurs conclu de travers : mon propre script imprimait
+     la réponse trois lignes sous un verdict qui disait « jointure impossible ».
+     C'est Ziad qui a lu le tableau. Un script doit lire sa propre mesure.
+
+     🔴 LE REPLI RESTE. Si l'appel échoue — Worker indisponible, réseau coupé —
+     on retombe sur la détection par libellé. Un cadenas approximatif vaut mieux
+     qu'un catalogue entièrement déverrouillé, et l'accès reste de toute façon
+     protégé par LearnWorlds.
+     🔴 Mis en cache pour la SESSION : un statut de cours change à la main,
+     quelques fois par an. Le recharger à chaque page serait du gaspillage. */
+  var ENDPOINT_COURS="https://annuaire-prepastrat.ziedbencheikh.workers.dev/cours";
+  var CLE_FERMES="psCoursFermes";
+  var _fermes=null;              /* Set des slugs fermés, ou null si on ne sait pas */
+  var _fermesDemande=false;
+
+  function slugDeCarte(c){
+    var a=c.querySelector('a[href*="courseid="],a[href*="/course/"]');
+    var h=a ? (a.getAttribute("href")||"") : "";
+    var m=h.match(/[?&]courseid=([^&#]+)/);
+    if(m) return decodeURIComponent(m[1]);
+    m=h.match(/\/course\/([^\/?#]+)/);
+    return m ? decodeURIComponent(m[1]) : "";
+  }
+
+  function chargerCoursFermes(){
+    if(_fermes!==null || _fermesDemande) return;
+    _fermesDemande=true;
+    try{
+      var brut=sessionStorage.getItem(CLE_FERMES);
+      if(brut){
+        var o=JSON.parse(brut);
+        if(o && o.exp>Date.now() && Array.isArray(o.f)){ _fermes=new Set(o.f); return; }
+      }
+    }catch(e){}
+    try{
+      fetch(ENDPOINT_COURS,{headers:{Accept:"application/json"}})
+        .then(function(r){ return r.ok ? r.json() : null; })
+        .then(function(d){
+          if(!d || !Array.isArray(d.fermes)) return;
+          _fermes=new Set(d.fermes);
+          try{ sessionStorage.setItem(CLE_FERMES, JSON.stringify({f:d.fermes, exp:Date.now()+36e5})); }catch(e){}
+          verrouCartes();                    /* on repasse, maintenant qu'on sait */
+        })
+        .catch(function(){});                /* silence : le repli prend la main */
+    }catch(e){}
+  }
+
   function verrouCartes(){
     if(CARTES_HORS_VERROU.test(location.pathname||"")) return;
     var u=membrePS();
@@ -2656,7 +2714,14 @@
        LearnWorlds a reformulé sa mention et le cadenas vient de s'éteindre
        partout sans prévenir. On ne peut pas trancher d'ici, mais on peut le
        dire — c'est ce qui manquait à l'opt-in de l'annuaire pendant des jours. */
-    var fermees=[].slice.call(cartes).filter(carteFermee);
+    chargerCoursFermes();
+
+    /* 🔴 La liste du Worker fait autorité quand on l'a ; sinon le libellé.
+       Un cours absent de la liste reste CLIQUABLE — l'erreur penche du côté
+       qui ne bloque personne à tort, et LearnWorlds protège le contenu. */
+    var fermees = _fermes
+      ? [].slice.call(cartes).filter(function(c){ var s=slugDeCarte(c); return !!s && _fermes.has(s); })
+      : [].slice.call(cartes).filter(carteFermee);
     if(!fermees.length){
       try{ console.warn("[PrepaStrat] Aucune carte « inscription fermée » reconnue sur "+
         location.pathname+" ("+cartes.length+" cartes). Soit tout est ouvert, soit le libellé "+
