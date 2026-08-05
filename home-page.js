@@ -122,6 +122,22 @@
     H+" .ps-home-stats .learnworlds-main-text{color:#8DA0C2 !important;text-align:center !important;font-size:13px !important;max-width:760px !important;margin-left:auto !important;margin-right:auto !important;}",
 
     /* ================= 6b) HERO (section 2 : texte | vidéo) ================= */
+    /* ⚠️⚠️ CES RÈGLES DE HERO EXISTENT EN DOUBLE — LIRE AVANT DE LES TOUCHER.
+       Le 05/08, une copie du CSS critique du hero a été collée dans le Code
+       personnalisé du SITE (emplacements « logged in » ET « logged out »), pour
+       que le premier écran soit peint juste dès la première peinture : nos
+       scripts partent d'un domaine tiers et coûtent 300 ms à 1,9 s rien qu'à
+       arriver (mesuré). Le bloc collé vise `section[data-section-id^="hero"]`,
+       parce que les classes `ps-home-hero` / `ps-hero-bg` ci-dessous sont posées
+       par CE fichier — donc trop tard pour servir d'anti-flash.
+       🔴 SI TU CHANGES LE FOND, LA HAUTEUR, LA TAILLE DU TITRE OU LA COULEUR DU
+       TEXTE DU HERO ICI, il faut changer le bloc collé dans LearnWorlds à
+       l'identique. Sinon le hero s'affichera dans une version puis basculera
+       dans l'autre sous les yeux du visiteur — un flash pire que celui qu'on a
+       voulu supprimer, et invisible en local.
+       🔴 Ce dépôt a déjà deux auteurs sur `tokens.js` à cause du configurateur.
+       C'est la deuxième source de vérité du projet : elle est assumée, pour le
+       seul écran qui se voit avant tout le reste, et pas au-delà. */
     /* Section repérée en JS par la présence de la vidéo (`.ps-home-hero`). Colonnes
        centrées verticalement, titre (H4) agrandi en vrai titre hero, vidéo arrondie
        + ombre portée. */
