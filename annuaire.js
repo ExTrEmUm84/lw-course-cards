@@ -238,6 +238,9 @@
   // --- Rendu ------------------------------------------------------------
   var membres = [];
   var grid, count, empty, qEl, tsEl;
+  /* Le refus est-il actuellement à l'écran ? Sert à ne relancer la liste que
+     dans ce cas, quand le membre vient d'accepter d'y figurer. */
+  var _refuse = false;
   /* État des filtres : "" = « toutes ». Remplace les .value des anciens
      <select> — les facettes .ps-ff n'ont pas de valeur native.
      🔴 Filtres de CETTE page (annuaire partenaire de cas) : École, Niveau,
@@ -1435,6 +1438,7 @@
            compte va parfaitement bien — et qui n'aurait aucune idée de ce
            qu'il doit faire. On explique, et on dit COMMENT entrer. */
         if (r.status === 403) {
+          _refuse = true;               /* pour qu'un « oui » puisse rouvrir la page */
           grid.replaceChildren();
           count.textContent = "";
           /* 🔴 La barre de recherche et les facettes disparaissent AUSSI.
@@ -1749,7 +1753,47 @@
     }
 
     squelettes(8);
+    ecouterFiche();
     turnstile();
+  }
+
+  /* ====================================================================
+     ON VIENT DE DIRE « OUI » : L'ANNUAIRE DOIT S'OUVRIR, SANS RECHARGEMENT
+     --------------------------------------------------------------------
+     Signalé par Ziad (05/08) : il remplit sa fiche depuis cette page, répond
+     « Oui, afficher ma fiche »… et reste devant « L'annuaire est réservé aux
+     membres qui y figurent ». Il vient pourtant de faire exactement ce qu'on
+     lui demandait.
+     🔴 LA CAUSE : la liste a répondu 403 AVANT l'enregistrement, et personne
+     ne la redemande. Le correctif du matin (`ps:fiche-enregistree`) rafraîchit
+     LA CARTE du membre, pas LE VERROU de la page — deux choses différentes que
+     j'avais traitées comme une seule.
+     🔴 IL FAUT UN NOUVEAU JETON : celui de la première tentative est consommé
+     (usage unique). `turnstile.reset()` en redemande un et rappelle `charger`,
+     qui est déjà son `callback`. Rien à réécrire.
+     🔴 On ne relance QUE si le refus est à l'écran (`_refuse`) et que l'opt-in
+     vaut désormais « oui » : sans ces deux gardes, chaque enregistrement de
+     fiche — y compris un « non » — relancerait un appel réseau pour rien.
+     🔴 Repli assumé : si Turnstile n'est pas là, on recharge la page. Moins
+     élégant, mais la personne voit l'annuaire, et c'est tout ce qui compte. */
+  function ecouterFiche() {
+    if (window.__psaFicheBound) return;
+    window.__psaFicheBound = 1;
+    document.addEventListener("ps:fiche-enregistree", function (e) {
+      var ecrits = (e && e.detail && e.detail.ecrits) || [];
+      if (ecrits.indexOf("cf_annuaire") < 0) return;      /* l'accès n'a pas bougé */
+      if (!_refuse) return;                                /* on n'était pas verrouillé */
+      if (optinDuMembre().indexOf("oui") !== 0) return;    /* toujours pas dedans */
+
+      _refuse = false;
+      var barre = document.querySelector("#" + MOUNT + " .psa-bar");
+      if (barre) barre.style.display = "";                 /* le 403 l'avait masquée */
+      if (empty) { empty.hidden = true; empty.replaceChildren(); }
+      squelettes(8);
+
+      if (window.turnstile && tsEl) { try { window.turnstile.reset(tsEl); return; } catch (_) {} }
+      location.reload();
+    });
   }
 
   /* Turnstile délivre un jeton à usage unique prouvant qu'on est un vrai

@@ -731,7 +731,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-ag";
+  window.PS_TOKENS_V="2026-08-05-ah";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -2285,7 +2285,22 @@
       /* Repli de secours si l'automatisation n'a pas encore tourné (tags posés
          seulement APRÈS activation chez LearnWorlds : les comptes existants se
          traitent en lot). Le domaine est celui de l'adresse VÉRIFIÉE. */
-      domaines:["essec.edu"],
+      /* 🔴 `boks.app` EST UN DOMAINE DE TEST, et il est ici À DESSEIN.
+         Ziad a mappé `boks.app` vers le tag **`ecole-essec`** dans
+         l'automatisation LearnWorlds : pour la plateforme, un compte
+         `@boks.app` EST un étudiant ESSEC. Cette ligne dit simplement la même
+         chose côté site.
+         🔴 Je l'avais d'abord traité comme une école à part (entrée `boks`),
+         puis retiré cette entrée en la croyant morte — ce qui a cassé
+         l'aiguillage de `/inscription` : `PS_PARTENAIRE_EMAIL` parcourt CES
+         domaines, donc une adresse `@boks.app` repartait vers le tunnel de
+         paiement au lieu du formulaire d'école. Signalé par Ziad dans l'heure.
+         **Une table qui sert à trois choses ne se modifie pas en n'en regardant
+         qu'une** : ici co-branding, aiguillage d'inscription, et exemption de
+         cadenas.
+         ⏳ À RETIRER quand les tests d'école seront finis — sinon n'importe
+         quelle adresse `@boks.app` sera traitée comme une étudiante ESSEC. */
+      domaines:["essec.edu","boks.app"],
       logo:"",                       // SVG transparent à déposer dans /logos, sinon bloc typo
       pastille:"Accès offert par votre école",
       /* Texte fourni par Ziad le 29/07 — c'est du contenu commercial, il est
@@ -3446,7 +3461,17 @@
          découvre le site. Le cadenas dit « fermé », la pastille dit ce qu'il
          faut faire — et elle doit le dire en mots de client, pas en mots de
          produit. */
-      v.innerHTML="<i>"+SVG_CADENAS+"</i><b>S'abonner</b>";
+      /* 🔴🔴 LE LIBELLÉ SUIT LA RAISON DU VERROU (05/08, signalé par Ziad qui a
+         lu « S'abonner » sur le cadenas d'un compte non validé). J'avais changé
+         la DESTINATION du clic — il mène à la page de validation — sans changer
+         le TEXTE. Le cadenas continuait donc de réclamer un abonnement à
+         quelqu'un qui n'a qu'un lien à cliquer dans sa boîte mail, et à un
+         étudiant dont l'école a déjà payé.
+         **Changer où mène un bouton sans changer ce qu'il annonce, c'est mentir
+         plus proprement.** Les deux se décident au même endroit désormais. */
+      var u=membrePS();
+      var libelle=(u && verifEnAttente(u)) ? "Validez votre e-mail" : "S'abonner";
+      v.innerHTML="<i>"+SVG_CADENAS+"</i><b>"+libelle+"</b>";
       /* 🔴🔴 `display` POSÉ EN INLINE, ET C'EST INDISPENSABLE. Les scripts de
          page reconstruisent la carte et masquent tout enfant qui n'est pas à
          eux : `course-cards.js` a
