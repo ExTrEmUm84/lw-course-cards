@@ -731,7 +731,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-ab";
+  window.PS_TOKENS_V="2026-08-05-ac";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3465,7 +3465,16 @@
      ════════════════════════════════════════════════════════════════════════ */
   var FICHE_ENDPOINT="https://annuaire-prepastrat.ziedbencheikh.workers.dev/profil";
   var FICHE_CLE="psFicheVue";
-  var FICHE_JOURS=14;
+  /* 🔴 3 jours, pas 14 (décision de Ziad, 05/08). Quatorze jours partaient
+     d'une crainte de harcèlement, mais c'était l'excès inverse : un « Plus
+     tard » cliqué par réflexe en découvrant le site enterrait la demande pour
+     deux semaines, alors que l'annuaire ne sert QU'À ceux qui y figurent — on
+     se privait de la seule chose qui le remplit.
+     🔴 Le report reste par MEMBRE et par NAVIGATEUR (localStorage) : il ne
+     survit pas à un changement de poste. C'est assumé — la donnée qui compte
+     (`cf_annuaire`) est chez LearnWorlds, et une fiche remplie ferme la popup
+     partout, quel que soit le navigateur. */
+  var FICHE_JOURS=3;
 
   var OPTIN_OUI="Oui, afficher ma fiche";
   var OPTIN_NON="Non, je préfère rester discret";
@@ -3546,6 +3555,14 @@
     if(document.getElementById("ps-fiche")) return null;
     try{
       var jusqua=Number(localStorage.getItem(FICHE_CLE+":"+(u.id||"?"))||0);
+      /* 🔴 ON BORNE CE QUI EST DÉJÀ ÉCRIT. Baisser `FICHE_JOURS` ne raccourcit
+         PAS les reports posés avant : ils portent une date absolue. Sans ce
+         plafond, tous ceux qui ont cliqué « Plus tard » sous l'ancienne règle
+         resteraient muets jusqu'à leur échéance de 14 jours, et on croirait le
+         changement sans effet — mesuré sur le compte de test, reporté au 19/08
+         alors que la nouvelle règle dit 3 jours. */
+      var plafond=Date.now()+FICHE_JOURS*864e5;
+      if(jusqua>plafond){ jusqua=plafond; localStorage.setItem(FICHE_CLE+":"+(u.id||"?"), String(jusqua)); }
       if(jusqua && Date.now()<jusqua) return null;
     }catch(e){}
     /* Même juge que le rappel en coin : opt-in refusé ⇒ on n'insiste jamais,
