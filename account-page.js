@@ -97,15 +97,31 @@
     B+".account-page-content{margin-bottom:16px !important;padding-bottom:0 !important;}",
 
     /* --- pastilles de la fiche d'annuaire (hors panneau « Modifier ») --- */
-    B+".ps-fpills{display:flex !important;flex-wrap:wrap !important;gap:8px !important;margin-top:16px !important;padding-top:16px !important;border-top:1px solid var(--ps-border,#E6E9EF) !important;}",
-    B+".ps-fpill{display:inline-flex !important;align-items:center !important;gap:7px !important;background:#fff !important;border:1.5px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-pill,999px) !important;padding:7px 14px !important;"+FT+"font-size:13px !important;font-weight:600 !important;color:var(--ps-text,#1c1f26) !important;}",
-    B+".ps-fpill b{"+FT+"font-size:11px !important;font-weight:800 !important;letter-spacing:.04em !important;text-transform:uppercase !important;color:var(--ps-text-soft,#676879) !important;}",
+    /* 🔴 DEUX COLONNES. Mesuré : `.personal-details-values` prenait 910 px pour
+       trois valeurs courtes — d'où le grand vide à droite signalé par Ziad. On
+       borne l'identité et on installe les pastilles dans l'espace libéré, à
+       hauteur de l'avatar plutôt qu'en bas de carte. */
+    B+".personal-details{align-items:flex-start !important;gap:22px !important;}",
+    B+".personal-details-values{flex:0 1 420px !important;max-width:440px !important;}",
+    B+".ps-fpills{flex:1 1 260px !important;display:flex !important;flex-wrap:wrap !important;align-content:flex-start !important;gap:8px !important;margin:0 !important;padding:0 !important;border:0 !important;}",
+    /* Sous 900 px la carte repasse en pile : les pastilles suivent le contenu. */
+    "@media(max-width:900px){"+B+".personal-details{flex-wrap:wrap !important;}"+B+".personal-details-values{flex:1 1 100% !important;max-width:none !important;}"+B+".ps-fpills{flex:1 1 100% !important;}}",
+    B+".ps-fpill{display:inline-flex !important;flex-direction:column !important;align-items:flex-start !important;gap:1px !important;background:#F3F5F9 !important;border:0 !important;border-radius:var(--ps-r-btn,10px) !important;padding:7px 13px !important;"+FT+"}",
+    B+".ps-fpill b{"+FT+"font-size:10px !important;font-weight:800 !important;letter-spacing:.06em !important;text-transform:uppercase !important;opacity:.72 !important;}",
+    B+".ps-fpill i{"+FT+"font-style:normal !important;font-size:13.5px !important;font-weight:700 !important;line-height:1.25 !important;}",
+    B+".ps-fpill.ps-lvl1{background:var(--ps-lvl1-tint,#EEF4FA) !important;color:var(--ps-lvl1,#3887b4) !important;}",
+    B+".ps-fpill.ps-lvl2{background:var(--ps-lvl2-tint,#EEF4FA) !important;color:var(--ps-lvl2,#3887b4) !important;}",
+    B+".ps-fpill.ps-lvl3{background:var(--ps-lvl3-tint,#EEF4FA) !important;color:var(--ps-lvl3,#3887b4) !important;}",
+    B+".ps-fpill.ps-lvl4{background:var(--ps-lvl4-tint,#EEF4FA) !important;color:var(--ps-lvl4,#3887b4) !important;}",
+    B+".ps-fpill.ps-lvl5{background:var(--ps-lvl5-tint,#EEF4FA) !important;color:var(--ps-lvl5,#3887b4) !important;}",
+    B+".ps-fpill.ps-lvl6{background:var(--ps-lvl6-tint,#EEF4FA) !important;color:var(--ps-lvl6,#3887b4) !important;}",
     /* état de l'opt-in : le seul qui porte une couleur, parce que c'est le seul
        qui conditionne quelque chose (apparaître ou non dans l'annuaire). */
-    B+".ps-fpill-oui{background:var(--ps-accent-tint,#edf4ff) !important;border-color:var(--ps-accent,#3887b4) !important;color:var(--ps-accent,#3887b4) !important;font-weight:800 !important;}",
-    B+".ps-fpill-non{background:#F3F5F9 !important;border-color:#E6E9EF !important;color:var(--ps-text-soft,#676879) !important;font-weight:800 !important;}",
+    B+".ps-fpill-oui,"+B+".ps-fpill-non{flex-direction:row !important;align-items:center !important;font-size:12.5px !important;font-weight:800 !important;padding:9px 14px !important;flex-basis:100% !important;}"+
+    B+".ps-fpill-oui{background:var(--ps-lvl4-tint,#e4fbf6) !important;color:var(--ps-lvl4,#009e78) !important;}",
+    B+".ps-fpill-non{background:#F3F5F9 !important;color:var(--ps-text-soft,#676879) !important;}",
     /* champ manquant : pointillé, cliquable — il ouvre le formulaire. */
-    B+".ps-fpill-vide{border-style:dashed !important;color:var(--ps-text-soft,#676879) !important;cursor:pointer !important;font-weight:600 !important;}",
+    B+".ps-fpill-vide{flex-direction:row !important;align-items:center !important;background:transparent !important;border:1.5px dashed var(--ps-border,#E6E9EF) !important;color:var(--ps-text-soft,#676879) !important;cursor:pointer !important;font-size:12.5px !important;font-weight:700 !important;padding:8px 13px !important;}",
     B+".ps-fpill-vide:hover{border-color:var(--ps-accent,#3887b4) !important;color:var(--ps-accent,#3887b4) !important;}",
 
     /* La grande carte blanche unique s'efface : ce sont les sections qui
@@ -612,12 +628,17 @@
      OUVRE LE FORMULAIRE. Masquer ce qui manque, c'est laisser une fiche
      incomplète le rester — et on a justement construit la popup pour ça.
      ════════════════════════════════════════════════════════════════════════ */
+  /* 🔴 UNE COULEUR PAR CHAMP, PRISE DANS LES JETONS DE NIVEAU DÉJÀ EXISTANTS
+     (`--ps-lvl1..6` + leurs fonds clairs). Ce sont ceux des badges de cours :
+     les pastilles parlent donc la même langue que le reste du site, et une
+     retouche au configurateur les suit sans toucher à ce fichier. Inventer
+     cinq couleurs ici, c'eût été créer une seconde charte à maintenir. */
   var FICHE_PASTILLES=[
-    {cle:"cf_ecole",     nom:"École"},
-    {cle:"cf_niveau",    nom:"Niveau"},
-    {cle:"cf_recherche", nom:"Recherche"},
-    {cle:"cf_langue",    nom:"Langue"},
-    {cle:"cf_contact",   nom:"Contact"}
+    {cle:"cf_ecole",     nom:"École",     lvl:1},
+    {cle:"cf_niveau",    nom:"Niveau",    lvl:4},
+    {cle:"cf_recherche", nom:"Recherche", lvl:3},
+    {cle:"cf_langue",    nom:"Langue",    lvl:6},
+    {cle:"cf_contact",   nom:"Contact",   lvl:5}
   ];
 
   function champsFiche(){
@@ -670,6 +691,10 @@
       if(deja.getAttribute("data-ps-sig")===sig) return;
       if(deja.parentNode) deja.parentNode.removeChild(deja);
     }
+    /* 🔴 On accroche à `.personal-details` (le conteneur FLEX qui porte l'avatar
+       et les valeurs), pas à la colonne des valeurs : les pastilles deviennent
+       ainsi une troisième colonne, à hauteur de l'avatar, au lieu de tomber
+       sous les champs. C'est la demande de Ziad — « sur le côté, pas en bas ». */
     var hote=sec.querySelector(".personal-details")||sec;
     var boite=document.createElement("div");
     boite.className="ps-fpills";
@@ -689,8 +714,8 @@
       var v=String(cf[c.cle]==null?"":cf[c.cle]).trim();
       var p=document.createElement("span");
       if(v){
-        p.className="ps-fpill";
-        p.innerHTML='<b>'+c.nom+'</b>'+v.replace(/[&<>]/g,"");
+        p.className="ps-fpill ps-lvl"+c.lvl;
+        p.innerHTML='<b>'+c.nom+'</b><i>'+v.replace(/[&<>]/g,"")+'</i>';
       }else{
         manquants++;
         p.className="ps-fpill ps-fpill-vide";
