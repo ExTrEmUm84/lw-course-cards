@@ -117,6 +117,7 @@
     "--ps-an-col:260px",
     "--ps-pf-ring:64px",
     "--ps-pf-bar:8px",
+    "--ps-an-btn:#009e78",
     "--ps-font:Figtree,-apple-system,Segoe UI,Roboto,sans-serif",
     "--ps-r-card:16px",
     "--ps-r-pill:999px",
