@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-k";
+  window.PS_TOKENS_V="2026-08-05-l";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -873,6 +873,219 @@
       if(Date.now()-_aboT0>15000){ _aboObs.disconnect(); _aboObs=null; }
     });
     _aboObs.observe(document.documentElement,{childList:true,subtree:true});
+  }
+
+  /* ====================================================================
+     CARTES FANTÔMES — OCCUPER L'ATTENTE AU LIEU DE LA SUBIR  (05/08)
+     --------------------------------------------------------------------
+     Mesuré ce jour sur 6 relevés : **LearnWorlds ne demande son catalogue
+     qu'APRÈS l'événement `load`**. Les cartes n'existent donc qu'entre
+     ~1,3 s (cache chaud) et ~3,5 s (première navigation). Pendant tout ce
+     temps la grille est VIDE : la page a l'air finie et ratée, pas en train
+     de charger.
+     🔴 Ça ne gagne pas une milliseconde, et c'est assumé. La recherche du
+     jour l'a établi : personne ne documente ce délai, les plaintes publiques
+     visent l'administration, et les communications performance de
+     LearnWorlds portent sur leurs applications mobiles. **Il n'y a pas de
+     correctif à attendre.** Ce qu'on peut changer, c'est la lecture de
+     l'attente — pas sa durée.
+
+     🔴 ON VISE LE MARQUEUR DE LA PLATEFORME, PAS LA MISE EN PAGE.
+     `[data-node-type="course-cards"]` est posé par LearnWorlds sur le
+     conteneur, et il est présent dans le HTML SERVI, **vide** (mesuré au
+     curl : le conteneur existe, les cartes non). Même règle que pour
+     `MyCourses1` le 05/08 : viser l'identifiant de la plateforme, jamais le
+     contenu — variable par définition — ni un titre que Weglot traduit.
+
+     🔴 LE NOMBRE ET LA HAUTEUR SONT APPRIS, PAS DEVINÉS. Une grille fantôme
+     qui ne fait pas la taille de la vraie provoque un saut au remplacement :
+     on aurait troqué un vide contre une secousse. On mémorise donc, par page
+     ET par grille, le nombre de cartes et leur hauteur relevés à la visite
+     précédente. Première visite : 3 cartes et une hauteur proportionnelle,
+     volontairement modestes — sous-promettre plutôt que rétrécir.
+     🔴 Je n'ai PAS pu mesurer la hauteur réelle d'une carte depuis
+     l'outillage (le panneau du navigateur piloté rapporte un viewport 0×0,
+     donc largeur nulle et opacités fausses). D'où l'apprentissage côté
+     client : le navigateur de l'utilisateur, lui, sait. À faire valider à
+     l'œil par Ziad à la première visite, avant que la mémoire ne se remplisse.
+
+     🔴 LE RETRAIT NE PEUT PAS ÊTRE « QUAND LES CARTES EXISTENT ». Sur les
+     pages sous anti-flash, `cloak()` garde les vraies cartes à `opacity:0`
+     jusqu'à `ps-cards-ready` : retirer les fantômes dès que le DOM contient
+     des cartes rouvrirait le trou qu'on vient de boucher. Sur les autres
+     pages, au contraire, les cartes sont visibles tout de suite et garder les
+     fantômes afficherait les DEUX. On retire donc quand les cartes existent
+     ET qu'elles sont réellement visibles (`ps-cards-ready` ou opacité non
+     nulle) — la condition marche dans les deux cas sans connaître la liste
+     des pages. */
+  var CLE_GRILLES="psGrilles";
+  var SEL_GRILLE='#pageContent [data-node-type="course-cards"]';
+  var FANT_N=3;
+  var _fantObs=null, _fantPoll=null, _fantSurvBody=false;
+
+  function grillesMemo(){
+    try{ return JSON.parse(localStorage.getItem(CLE_GRILLES)||"{}")||{}; }catch(e){ return {}; }
+  }
+  /* Relève ce que la page a FINI par afficher, pour la visite suivante. */
+  function memoriserGrilles(){
+    var gs=document.querySelectorAll(SEL_GRILLE);
+    if(!gs.length) return;
+    var liste=[], vu=false;
+    [].slice.call(gs).forEach(function(g){
+      var c=g.querySelectorAll(".lw-course-card");
+      if(!c.length){ liste.push(null); return; }
+      var h=Math.round(c[0].getBoundingClientRect().height);
+      /* 🔴 Une hauteur nulle ou absurde ne se mémorise pas : elle viendrait
+         d'une carte pas encore mise en page, et on la rejouerait à la visite
+         suivante en croyant l'avoir mesurée. */
+      liste.push({n:c.length, h:(h>80 && h<900)?h:0});
+      vu=true;
+    });
+    if(!vu) return;
+    var m=grillesMemo(); m[slugCourant()]=liste;
+    try{ localStorage.setItem(CLE_GRILLES, JSON.stringify(m)); }catch(e){}
+  }
+
+  function cssFantomes(){
+    if(document.getElementById("ps-fant-css")) return;
+    var st=document.createElement("style"); st.id="ps-fant-css";
+    st.textContent=
+      ".ps-fantomes{display:grid;grid-template-columns:repeat(3,1fr);gap:26px;width:100%;}"+
+      "@media(max-width:1024px){.ps-fantomes{grid-template-columns:repeat(2,1fr);}}"+
+      "@media(max-width:640px){.ps-fantomes{grid-template-columns:1fr;}}"+
+      ".ps-fant{border-radius:var(--ps-r-card,16px);background:var(--ps-surface,#fff);"+
+      "border:1px solid rgba(15,23,42,.07);overflow:hidden;display:flex;flex-direction:column;}"+
+      ".ps-fant i{display:block;width:100%;aspect-ratio:16/10;background:rgba(15,23,42,.08);}"+
+      ".ps-fant span{display:block;height:12px;border-radius:6px;background:rgba(15,23,42,.08);margin:16px 18px 0;}"+
+      ".ps-fant span.ps-court{width:48%;}"+
+      ".ps-fant b{display:block;height:34px;border-radius:var(--ps-r-btn,10px);"+
+      "background:rgba(15,23,42,.05);margin:auto 18px 18px;}"+
+      /* Le battement dit « ça travaille ». Discret : une grille qui clignote
+         fort est plus agressive qu'un vide, on aurait échangé un défaut
+         contre un autre. */
+      ".ps-fant i,.ps-fant span,.ps-fant b{animation:ps-fant-bat 1.5s ease-in-out infinite;}"+
+      "@keyframes ps-fant-bat{0%,100%{opacity:1;}50%{opacity:.5;}}"+
+      /* 🔴 Respect du réglage système, comme sur la page d'abonnement :
+         quelqu'un qui a demandé moins d'animation ne doit pas subir une
+         grille qui pulse. */
+      "@media(prefers-reduced-motion:reduce){.ps-fant i,.ps-fant span,.ps-fant b{animation:none;}}";
+    (document.head||document.documentElement).appendChild(st);
+  }
+
+  function poserFantomes(){
+    var gs=document.querySelectorAll(SEL_GRILLE);
+    if(!gs.length) return false;
+    var memo=grillesMemo()[slugCourant()]||[];
+    cssFantomes();
+    [].slice.call(gs).forEach(function(g,i){
+      if(g.querySelector(".lw-course-card")) return;   /* LearnWorlds a déjà servi */
+      if(g.querySelector(".ps-fantomes")) return;      /* idempotent */
+      var conf=memo[i]||null;
+      var n=Math.max(1, Math.min(12, (conf && conf.n) || FANT_N));
+      var h=(conf && conf.h) || 0;
+      var boite=document.createElement("div");
+      boite.className="ps-fantomes";
+      /* Décor pur : rien à annoncer à un lecteur d'écran, qui lirait sinon
+         une grille de vide avant la vraie. */
+      boite.setAttribute("aria-hidden","true");
+      var html="";
+      for(var k=0;k<n;k++){
+        html+='<div class="ps-fant"'+(h?' style="min-height:'+h+'px"':'')+
+              '><i></i><span></span><span class="ps-court"></span><b></b></div>';
+      }
+      boite.innerHTML=html;
+      g.appendChild(boite);
+    });
+    return true;
+  }
+
+  /* 🔴 ON RETIRE DÈS QUE LE DÉVOILEMENT COMMENCE, PAS QUAND IL FINIT.
+     Les deux grilles sont SŒURS dans le même conteneur : tant que le fantôme
+     est là, l'espace est occupé deux fois, donc la page double de hauteur
+     puis se rétracte. Un saut de mise en page est plus violent que le fondu
+     qu'on chercherait à éviter en attendant. J'ai essayé l'inverse (attendre
+     une opacité de 0,9) et le harnais l'a montré à l'écran : deux grilles
+     empilées.
+     🔴 `ps-cards-ready` D'ABORD, l'opacité ensuite. Juste après le changement
+     de classe, la valeur calculée vaut encore 0 — la transition n'a pas
+     démarré. Tester l'opacité seule raterait donc l'instant exact du
+     dévoilement et laisserait les fantômes jusqu'au prochain réveil. La
+     classe, elle, dit « le fondu commence », ce qui est précisément le signal
+     qu'on veut. L'opacité couvre l'autre cas : les pages sans anti-flash, où
+     les cartes sont visibles d'emblée et où la classe n'arrive que plus tard. */
+  function retirerFantomes(force){
+    var boites=document.querySelectorAll(".ps-fantomes");
+    if(!boites.length) return;
+    var pret=!!(document.body && document.body.classList.contains("ps-cards-ready"));
+    [].slice.call(boites).forEach(function(b){
+      if(force){ if(b.parentNode) b.parentNode.removeChild(b); return; }
+      var g=b.parentElement;
+      var c=g && g.querySelector(".lw-course-card");
+      if(!c) return;
+      var visible=pret;
+      if(!visible){
+        try{ visible=parseFloat(getComputedStyle(c).opacity||"1")>0.02; }catch(e){ visible=true; }
+      }
+      if(visible && b.parentNode) b.parentNode.removeChild(b);
+    });
+  }
+
+  function fantomes(){
+    if(poserFantomes()){
+      if(_fantObs){ _fantObs.disconnect(); _fantObs=null; }
+    }else if(!_fantObs && document.readyState==="loading"){
+      /* Le conteneur est dans le HTML servi, mais ce fichier tourne dans le
+         `<head>` : il n'est pas encore analysé. L'observateur le prend au
+         moment exact où l'analyseur l'insère, sans attendre DOMContentLoaded. */
+      _fantObs=new MutationObserver(function(){
+        if(poserFantomes()){ _fantObs.disconnect(); _fantObs=null; }
+      });
+      _fantObs.observe(document.documentElement,{childList:true,subtree:true});
+      setTimeout(function(){ if(_fantObs){ _fantObs.disconnect(); _fantObs=null; } }, 6000);
+    }
+    /* 🔴 `document.body` n'existe pas quand ce fichier tourne dans le `<head>` :
+       l'observateur de classe ne peut donc pas être posé au premier passage.
+       Il l'est au suivant (DOMContentLoaded), d'où deux verrous distincts — un
+       seul aurait fait sauter l'installation de l'observateur manquant. */
+    if(!_fantSurvBody && document.body){
+      _fantSurvBody=true;
+      try{ new MutationObserver(function(){ retirerFantomes(false); })
+        .observe(document.body,{attributes:true,attributeFilter:["class"]}); }catch(e){}
+    }
+    if(_fantPoll) return;
+
+    /* 🔴🔴 LE RELAIS NE DOIT PAS DÉPENDRE D'UN MINUTEUR — C'EST LA MÊME FAUTE
+       QUE LE GARDE-CLIC, MESURÉE LE MÊME JOUR. Première version : un
+       `setInterval` à 250 ms chargé de retirer les fantômes. Relevé au
+       harnais, jalons posés par observateur : cartes insérées à 2394 ms,
+       dévoilement à 4403 ms, **fantômes retirés à 7267 ms** — 2,9 s pendant
+       lesquelles les DEUX grilles étaient à l'écran, page doublée en hauteur.
+       Cause : les `setInterval` sont ÉTRANGLÉS en onglet d'arrière-plan
+       (jusqu'à un appel par minute). Un onglet au premier plan ne l'aurait pas
+       montré — et j'aurais livré un défaut que seuls les utilisateurs
+       auraient vu, sur les onglets qu'ils ouvrent en fond.
+       ⇒ Deux OBSERVATEURS, qui se déclenchent sur l'événement réel :
+       l'un sur l'arrivée des cartes, l'autre sur la classe de dévoilement.
+       Ils couvrent les deux ordres possibles. Le minuteur ne reste qu'en
+       filet, à une cadence lente où l'étranglement n'a plus d'importance. */
+    try{
+      new MutationObserver(function(){ retirerFantomes(false); })
+        .observe(document.documentElement,{childList:true,subtree:true});
+    }catch(e){}
+
+    var t0=Date.now();
+    _fantPoll=setInterval(function(){
+      retirerFantomes(false);
+      if(Date.now()-t0>6000) memoriserGrilles();
+      if(Date.now()-t0>12000){
+        clearInterval(_fantPoll); _fantPoll=null;
+        /* Filet : au bout de 12 s, si LearnWorlds n'a toujours rien servi,
+           une grille de fantômes éternels serait un mensonge. On les retire
+           et la page assume qu'elle n'a pas de cartes. */
+        retirerFantomes(true);
+        memoriserGrilles();
+      }
+    }, 1000);
   }
 
   /* ====================================================================
@@ -3128,8 +3341,8 @@
     }
   }
 
-  cloak(); cloakFormules(); gardeClicCartes(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); cloakFormules(); gardeClicCartes(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader(); });
+  cloak(); cloakFormules(); gardeClicCartes(); fantomes(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); cloakFormules(); gardeClicCartes(); fantomes(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
      quelques relances pour attraper la classe active. */
   [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); setTimeout(immersivePlayer,d); setTimeout(partnerHeader,d); });
