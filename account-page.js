@@ -419,9 +419,135 @@
     sec.classList.toggle("ps-acc-paye-ecole", historiqueVide(sec.querySelector(".account-payments-view")));
   }
 
+  /* ════════════════════════════════════════════════════════════════════════
+     ONGLETS  (05/08) — demande de Ziad : « cette page est très moche, refais-la
+     avec des tabs, aux couleurs PrepaStrat ».
+     ────────────────────────────────────────────────────────────────────────
+     La page empile ses cinq sections sur ~1 000 px et la colonne de gauche ne
+     fait que les faire défiler. En onglets, une seule est visible : la page
+     tient dans un écran et la navigation devient un choix, pas un repérage.
+
+     🔴 ON RÉUTILISE LA NAVIGATION NATIVE, on ne la reconstruit pas. Ses liens
+     `a[href="#id"]` pointent déjà sur les bonnes sections — c'est LearnWorlds
+     qui les maintient. Fabriquer notre propre liste, ce serait la refaire à
+     chaque fois qu'ils ajoutent une rubrique, et rater celles qui dépendent des
+     réglages de l'école (les paiements n'apparaissent pas partout).
+
+     🔴 ON N'INSCRIT QUE LES SECTIONS RÉELLEMENT VISIBLES. « Cours et
+     programmes » est masquée par notre propre CSS depuis le 24/07 : en faire un
+     onglet ouvrirait un panneau vide, et personne ne comprendrait pourquoi.
+
+     🔴 LE SCROLL-SPY DOIT S'ARRÊTER. Il marque l'élément actif d'après ce qui
+     occupe l'écran ; avec un seul panneau affiché il désignerait toujours le
+     même et se battrait avec l'état des onglets. On le débranche.
+     ════════════════════════════════════════════════════════════════════════ */
+  function stylesOnglets(){
+    if(document.getElementById("ps-acc-tabs-css")) return;
+    var st=document.createElement("style"); st.id="ps-acc-tabs-css";
+    st.textContent=
+      ".account-section-navigation[data-ps-tabs]{display:flex !important;flex-direction:row !important;"+
+      "gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:4px 2px 14px !important;"+
+      "border:0 !important;background:transparent !important;width:100% !important;max-width:none !important}"+
+      ".account-section-navigation[data-ps-tabs]::-webkit-scrollbar{display:none}"+
+      ".account-section-navigation[data-ps-tabs] a{flex:0 0 auto;display:inline-block;white-space:nowrap;"+
+      "border:1.5px solid var(--ps-border,#E6E9EF);background:#fff;color:var(--ps-text-soft,#676879);"+
+      "border-radius:var(--ps-r-pill,999px);padding:9px 17px;text-decoration:none;"+
+      "font:700 13.5px var(--ps-font,Figtree,sans-serif);transition:background .18s,color .18s,border-color .18s}"+
+      ".account-section-navigation[data-ps-tabs] a:hover{border-color:var(--ps-accent,#3887b4);color:var(--ps-text,#1c1f26)}"+
+      ".account-section-navigation[data-ps-tabs] a.ps-acc-on{background:var(--ps-accent,#3887b4);"+
+      "border-color:var(--ps-accent,#3887b4);color:#fff}"+
+      /* La colonne devient une barre : le conteneur doit repasser en pile. */
+      ".account-cnt{flex-direction:column !important;align-items:stretch !important}"+
+      ".account-page-content{width:100% !important;max-width:none !important}"+
+      "@media(prefers-reduced-motion:reduce){.account-section-navigation[data-ps-tabs] a{transition:none}}";
+    (document.head||document.documentElement).appendChild(st);
+  }
+
+  function onglets(){
+    var nav=document.querySelector(".account-section-navigation");
+    if(!nav || nav.dataset.psTabs) return !!(nav && nav.dataset.psTabs);
+    var vues=[];
+    [].slice.call(nav.querySelectorAll("a[href^='#']")).forEach(function(a){
+      var id=(a.getAttribute("href")||"").slice(1);
+      var el=id && document.getElementById(id);
+      if(el && el.offsetParent!==null) vues.push({a:a, el:el, id:id});
+    });
+    /* Un seul panneau : des onglets n'apporteraient rien, et une barre à une
+       pastille ressemble à un bug. On laisse la page telle quelle. */
+    if(vues.length<2) return false;
+
+    stylesOnglets();
+    nav.dataset.psTabs="1";
+    nav.setAttribute("role","tablist");
+    if(io){ try{ io.disconnect(); }catch(e){} io=null; }
+
+    function activer(id, memoriser){
+      vues.forEach(function(v){
+        var on=v.id===id;
+        v.el.style.display = on ? "" : "none";
+        v.a.classList.toggle("ps-acc-on", on);
+        v.a.setAttribute("aria-selected", on ? "true" : "false");
+        v.a.setAttribute("tabindex", on ? "0" : "-1");
+        v.el.setAttribute("role","tabpanel");
+        v.el.setAttribute("aria-hidden", on ? "false" : "true");
+      });
+      /* 🔴 `replaceState` et non `location.hash` : écrire le hash ferait sauter
+         la page vers l'ancre, or c'est précisément ce qu'on remplace. */
+      if(memoriser) try{ history.replaceState(null,"","#"+id); }catch(e){}
+    }
+
+    vues.forEach(function(v){
+      v.a.setAttribute("role","tab");
+      v.a.addEventListener("click", function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        activer(v.id, true);
+      });
+    });
+
+    /* Ouverture sur l'ancre demandée — `/account#courses-programs` doit tomber
+       sur le bon onglet, pas sur le premier. */
+    var vise=(location.hash||"").slice(1);
+    var trouve=vues.filter(function(v){ return v.id===vise; })[0];
+    activer(trouve ? trouve.id : vues[0].id, false);
+
+    /* 🔴🔴 GARDE-FOU : ON VÉRIFIE QUE LA BARRE EST RÉELLEMENT UTILISABLE.
+       Mesuré le 05/08 sur la vraie page : le conteneur du menu reste large de
+       200 px, et les pastilles sont posées à x=322, 534, 703… donc rognées par
+       l'`overflow`. Une seule reste cliquable — et comme on masque les sections
+       non actives, **Sécurité, Paiements et Notifications deviendraient
+       inaccessibles**. Ce n'est pas un défaut d'apparence, c'est une perte de
+       fonction sur la page où l'on gère son mot de passe.
+       ⇒ Si le dernier onglet déborde de la boîte visible, on DÉFAIT tout et on
+       rend la page native. Un dispositif qui ne peut pas s'afficher
+       correctement doit s'effacer, pas s'imposer à moitié. */
+    var boite=nav.getBoundingClientRect();
+    var dernier=vues[vues.length-1].a.getBoundingClientRect();
+    var deborde = dernier.right > boite.right + 1;
+    if(deborde){
+      vues.forEach(function(v){
+        v.el.style.display="";
+        v.a.classList.remove("ps-acc-on");
+        ["role","aria-selected","tabindex"].forEach(function(k){ v.a.removeAttribute(k); });
+        ["role","aria-hidden"].forEach(function(k){ v.el.removeAttribute(k); });
+      });
+      nav.removeAttribute("data-ps-tabs");
+      nav.removeAttribute("role");
+      var css=document.getElementById("ps-acc-tabs-css");
+      if(css && css.parentNode) css.parentNode.removeChild(css);
+      try{ console.warn("[PrepaStrat] /account : la barre d'onglets déborde de son conteneur ("+
+        Math.round(boite.width)+" px), la page reste en sections empilées. "+
+        "Élargir la chaîne .account-menu-content avant de réactiver."); }catch(e){}
+      return false;
+    }
+    return true;
+  }
+
   function run(){
     if(!surLaPage()) return;
-    figtree(); styles(); spy(); blocEcole();
+    figtree(); styles(); blocEcole();
+    /* Les onglets remplacent le repérage par défilement : le spy n'est appelé
+       que s'ils n'ont pas pu se poser (une seule section, ou nav absente). */
+    if(!onglets()) spy();
     /* progression() n'est PLUS appelée : la section « Cours et programmes » est
        masquée (cf. CSS), donc inutile d'aller chercher l'avancement via le
        Worker/Turnstile. Le code de progression est conservé plus haut au cas où
