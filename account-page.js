@@ -57,8 +57,12 @@
   var FT="font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;";
 
   var CSS=[
-    /* fond de page : le gris clair du site, pour que les cartes se détachent */
-    "body.slug-account .account-app-page{background:#F5F6F8 !important;}",
+    /* 🔴 FOND BLANC (05/08). C'était `#F5F6F8` — un gris posé par NOUS, pas par
+       LearnWorlds, pour détacher les cartes. Ziad : « retire-moi ce fond taupe
+       moche ». Relevé sur l'annuaire, qui sert de référence : ses sections sont
+       sur du BLANC PUR, et ses cartes se détachent par une bordure fine, sans
+       ombre ni fond coloré. On aligne. */
+    "body.slug-account .account-app-page,body.slug-account .account-app{background:#fff !important;}",
 
     /* 🔴 POLICE PAR HÉRITAGE, JAMAIS PAR `*`.
        Un `*{font-family:…}` force la police sur CHAQUE élément, y compris les
@@ -86,7 +90,10 @@
     B+".lw-body-bg.border-radius.account-cnt{background:transparent !important;border-radius:0 !important;box-shadow:none !important;}",
 
     /* --- une carte par section --- */
-    B+"section.account-section{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;padding:26px 28px !important;margin:0 0 20px !important;box-shadow:none !important;transition:box-shadow .2s ease !important;}",
+    /* 🔴 Espacements resserrés (05/08, demande de Ziad : « c'est trop »).
+       20 px entre les cartes + le blanc autour donnaient une page qui respire
+       trop pour son contenu ; sur fond blanc, la bordure suffit à séparer. */
+    B+"section.account-section{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;padding:22px 24px !important;margin:0 0 12px !important;box-shadow:none !important;transition:box-shadow .2s ease !important;}",
     B+"section.account-section:hover{box-shadow:0 6px 20px rgba(15,23,42,.05) !important;}",
     B+".account-section-header{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;margin-bottom:18px !important;}",
     B+".account-section-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:21px !important;font-weight:800 !important;letter-spacing:-.015em !important;color:#243B6B !important;}",
@@ -446,8 +453,14 @@
     var st=document.createElement("style"); st.id="ps-acc-tabs-css";
     st.textContent=
       ".account-section-navigation[data-ps-tabs]{display:flex !important;flex-direction:row !important;"+
-      "gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:4px 2px 14px !important;"+
-      "border:0 !important;background:transparent !important;width:100% !important;max-width:none !important}"+
+      "gap:8px;flex-wrap:nowrap;overflow-x:auto;scrollbar-width:none;padding:0 2px 10px !important;"+
+      "margin:0 !important;border:0 !important;background:transparent !important;width:100% !important;max-width:none !important}"+
+      /* 🔴 Le menu était `sticky` avec 24 px de décalage : en colonne ça se
+         justifiait, en barre horizontale ça creusait un vide au-dessus des
+         cartes. On le remet dans le flux, sans marge. */
+      ".account-menu-content{position:static !important;top:auto !important;margin:0 !important;padding:0 !important}"+
+      ".account-menu{margin:0 !important;padding:0 !important}"+
+      ".account-page-content{padding-top:0 !important;margin-top:0 !important}"+
       ".account-section-navigation[data-ps-tabs]::-webkit-scrollbar{display:none}"+
       ".account-section-navigation[data-ps-tabs] a{flex:0 0 auto;display:inline-block;white-space:nowrap;"+
       "border:1.5px solid var(--ps-border,#E6E9EF);background:#fff;color:var(--ps-text-soft,#676879);"+
@@ -478,82 +491,44 @@
     (document.head||document.documentElement).appendChild(st);
   }
 
+  /* 🔴🔴 LEARNWORLDS FAIT DÉJÀ LES ONGLETS — MESURÉ LE 05/08, APRÈS AVOIR
+     ÉCRIT LE CONTRAIRE. Avec `#personal-details` dans l'URL, cette section est
+     en `display:block` et les QUATRE autres en `display:none`. Le comportement
+     existe : seule l'APPARENCE manquait, la navigation étant rendue en colonne
+     étroite à gauche.
+     ⇒ Ce code ne masque plus rien et n'intercepte plus aucun clic. Il ne fait
+     que deux choses : déverrouiller la largeur, et marquer la pastille active.
+     C'était la bonne façon depuis le début — ma version précédente
+     réimplémentait le mécanisme par-dessus le leur, avec le risque de rendre
+     Sécurité et Paiements inaccessibles si la barre débordait. Moins de code,
+     et plus rien à casser. */
   function onglets(){
     var nav=document.querySelector(".account-section-navigation");
-    if(!nav || nav.dataset.psTabs) return !!(nav && nav.dataset.psTabs);
-    var vues=[];
-    [].slice.call(nav.querySelectorAll("a[href^='#']")).forEach(function(a){
-      var id=(a.getAttribute("href")||"").slice(1);
-      var el=id && document.getElementById(id);
-      if(el && el.offsetParent!==null) vues.push({a:a, el:el, id:id});
-    });
-    /* Un seul panneau : des onglets n'apporteraient rien, et une barre à une
-       pastille ressemble à un bug. On laisse la page telle quelle. */
-    if(vues.length<2) return false;
-
+    if(!nav) return false;
+    var liens=[].slice.call(nav.querySelectorAll("a[href^='#']"));
+    if(liens.length<2) return false;
     stylesOnglets();
-    nav.dataset.psTabs="1";
-    nav.setAttribute("role","tablist");
-    if(io){ try{ io.disconnect(); }catch(e){} io=null; }
+    nav.setAttribute("data-ps-tabs","1");
 
-    function activer(id, memoriser){
-      vues.forEach(function(v){
-        var on=v.id===id;
-        v.el.style.display = on ? "" : "none";
-        v.a.classList.toggle("ps-acc-on", on);
-        v.a.setAttribute("aria-selected", on ? "true" : "false");
-        v.a.setAttribute("tabindex", on ? "0" : "-1");
-        v.el.setAttribute("role","tabpanel");
-        v.el.setAttribute("aria-hidden", on ? "false" : "true");
+    /* La section active est celle que LearnWorlds affiche, pas celle qu'on
+       croit : on lit le DOM plutôt que de suivre les clics — c'est vrai aussi
+       après un retour arrière ou un lien externe portant une ancre. */
+    function marquer(){
+      liens.forEach(function(a){
+        var id=(a.getAttribute("href")||"").slice(1);
+        var el=id && document.getElementById(id);
+        var actif=!!(el && el.offsetParent!==null);
+        a.classList.toggle("ps-acc-on", actif);
       });
-      /* 🔴 `replaceState` et non `location.hash` : écrire le hash ferait sauter
-         la page vers l'ancre, or c'est précisément ce qu'on remplace. */
-      if(memoriser) try{ history.replaceState(null,"","#"+id); }catch(e){}
     }
-
-    vues.forEach(function(v){
-      v.a.setAttribute("role","tab");
-      v.a.addEventListener("click", function(ev){
-        ev.preventDefault(); ev.stopPropagation();
-        activer(v.id, true);
-      });
-    });
-
-    /* Ouverture sur l'ancre demandée — `/account#courses-programs` doit tomber
-       sur le bon onglet, pas sur le premier. */
-    var vise=(location.hash||"").slice(1);
-    var trouve=vues.filter(function(v){ return v.id===vise; })[0];
-    activer(trouve ? trouve.id : vues[0].id, false);
-
-    /* 🔴🔴 GARDE-FOU : ON VÉRIFIE QUE LA BARRE EST RÉELLEMENT UTILISABLE.
-       Mesuré le 05/08 sur la vraie page : le conteneur du menu reste large de
-       200 px, et les pastilles sont posées à x=322, 534, 703… donc rognées par
-       l'`overflow`. Une seule reste cliquable — et comme on masque les sections
-       non actives, **Sécurité, Paiements et Notifications deviendraient
-       inaccessibles**. Ce n'est pas un défaut d'apparence, c'est une perte de
-       fonction sur la page où l'on gère son mot de passe.
-       ⇒ Si le dernier onglet déborde de la boîte visible, on DÉFAIT tout et on
-       rend la page native. Un dispositif qui ne peut pas s'afficher
-       correctement doit s'effacer, pas s'imposer à moitié. */
-    var boite=nav.getBoundingClientRect();
-    var dernier=vues[vues.length-1].a.getBoundingClientRect();
-    var deborde = dernier.right > boite.right + 1;
-    if(deborde){
-      vues.forEach(function(v){
-        v.el.style.display="";
-        v.a.classList.remove("ps-acc-on");
-        ["role","aria-selected","tabindex"].forEach(function(k){ v.a.removeAttribute(k); });
-        ["role","aria-hidden"].forEach(function(k){ v.el.removeAttribute(k); });
-      });
-      nav.removeAttribute("data-ps-tabs");
-      nav.removeAttribute("role");
-      var css=document.getElementById("ps-acc-tabs-css");
-      if(css && css.parentNode) css.parentNode.removeChild(css);
-      try{ console.warn("[PrepaStrat] /account : la barre d'onglets déborde de son conteneur ("+
-        Math.round(boite.width)+" px), la page reste en sections empilées. "+
-        "Élargir la chaîne .account-menu-content avant de réactiver."); }catch(e){}
-      return false;
+    if(!nav.dataset.psTabsCable){
+      nav.dataset.psTabsCable="1";
+      /* Pas de `preventDefault` : c'est LearnWorlds qui change de section. On
+         se contente de repasser après lui. */
+      liens.forEach(function(a){ a.addEventListener("click", function(){ setTimeout(marquer,0); setTimeout(marquer,120); }); });
+      window.addEventListener("hashchange", marquer);
     }
+    marquer();
     return true;
   }
 
@@ -562,7 +537,7 @@
     figtree(); styles(); blocEcole();
     /* Les onglets remplacent le repérage par défilement : le spy n'est appelé
        que s'ils n'ont pas pu se poser (une seule section, ou nav absente). */
-    if(!onglets()) spy();
+    onglets();
     /* progression() n'est PLUS appelée : la section « Cours et programmes » est
        masquée (cf. CSS), donc inutile d'aller chercher l'avancement via le
        Worker/Turnstile. Le code de progression est conservé plus haut au cas où
