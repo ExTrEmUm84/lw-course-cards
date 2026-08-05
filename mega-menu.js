@@ -25,6 +25,15 @@
 (function(){
   "use strict";
 
+  /* 🔴 MARQUEUR DE VERSION, ET IL MANQUAIT. Deux fois dans la seule journée du
+     05/08 j'ai été incapable de dire si une page exécutait mon correctif ou une
+     copie en cache — GitHub Pages garde le fichier ~10 minutes. `tokens.js` a
+     `PS_TOKENS_V` et c'est ce qui permet de trancher en une seconde ; ce fichier
+     n'avait rien. Posé AVANT tout le reste : un marqueur défini en fin de
+     fichier ne dit rien quand une erreur survient au milieu.
+     ⇒ En console : `PS_MENU_V`. */
+  window.PS_MENU_V="2026-08-05-a";
+
   /* 🔴 `PS_CSS_ONLY` : drapeau posé par le CONFIGURATEUR et par lui seul (le site
      ne le pose jamais). Sous ce drapeau, ce fichier ne fait plus rien d'autre que
      PUBLIER ses pictos et sa feuille — il ne construit aucun menu, n'observe rien
@@ -125,6 +134,22 @@
     /* ---------- barre de nav : typo moderne ---------- */
     NAV+".lw-topbar-option-link-lbl{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:15px !important;font-weight:600 !important;letter-spacing:-.01em !important;color:var(--ps-text,#1c1f26) !important;transition:color .15s ease !important;}",
     NAV+".lw-topbar-option:hover > .lw-topbar-option-link .lw-topbar-option-link-lbl{color:var(--ps-accent,#507EC5) !important;}",
+    /* 🔴🔴 LE LIBELLÉ POSÉ SUR UN BOUTON PLEIN DOIT ÊTRE BLANC (05/08, signalé
+       par Ziad). La règle du dessus colore TOUS les libellés de la barre en
+       marine — y compris celui de « Sign up », qui est un bouton plein à
+       l'accent. Résultat : marine sur bleu, presque illisible, sur le seul
+       bouton qui compte pour un visiteur non connecté.
+       🔴 CE QUI M'A FAIT PERDRE DU TEMPS, et c'est une leçon de mesure : je
+       lisais `getComputedStyle` sur le `<a>`, qui EST blanc — le texte, lui,
+       vit dans un `<span class="lw-topbar-option-link-lbl">` enfant, avec sa
+       propre couleur. J'ai donc conclu trois fois « il est déjà blanc » face à
+       quelqu'un qui le voyait marine. **Mesurer l'ancêtre, ce n'est pas mesurer
+       le texte** : lire la couleur sur l'élément qui porte réellement les mots.
+       🔴 Le survol aussi : sans cette seconde règle, il passerait à l'accent,
+       c'est-à-dire à la couleur du fond du bouton — le libellé disparaîtrait. */
+    NAV+".lw-topbar-option-link.learnworlds-button-solid-brand .lw-topbar-option-link-lbl,"+
+    NAV+".lw-topbar-option:hover > .lw-topbar-option-link.learnworlds-button-solid-brand .lw-topbar-option-link-lbl"+
+    "{color:#fff !important;}",
     NAV+".lw-topbar-option > .lw-topbar-option-link svg{transition:transform .2s ease !important;}",
     /* le chevron ne pivote plus au survol : il indique l'état OUVERT, et
        l'ouverture se fait maintenant au clic (cf. .ps-mm-on plus bas) */
