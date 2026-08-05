@@ -721,7 +721,13 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-x";
+  /* 🔴 -y : branchement de `verification-page.js`. Et la faute décrite juste
+     au-dessus a été COMMISE UNE SECONDE FOIS, le même jour : poussé sans
+     bouger ce marqueur, donc la vraie page annonçait `-x` et je ne pouvais pas
+     distinguer « mon code ne se déclenche pas » de « le cache sert l'ancien
+     fichier ». La réponse était le cache. Le marqueur ne sert QUE dans ce
+     moment-là : le bouger fait partie du changement, pas de sa relecture. */
+  window.PS_TOKENS_V="2026-08-05-y";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
