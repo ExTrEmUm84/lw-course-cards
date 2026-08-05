@@ -218,8 +218,8 @@
     "fiches-secteur":{"contour":1,"ep":4,"duree":1.1}
   };
   var REGLAGES={
-    "lien_video":"https://player.vimeo.com/video/910833393?h=94064c722b",
-    "lien_video_background":"https://player.vimeo.com/video/910833393?h=94064c722b"
+    "lien_video":"https://player.vimeo.com/video/910803542?",
+    "lien_video_background":"https://player.vimeo.com/video/910803542?"
   };
 /* <<< FIN PAGES */
   window.PS_REGLAGES=REGLAGES;                  // lu par home-page.js
