@@ -32,7 +32,7 @@
      n'avait rien. Posé AVANT tout le reste : un marqueur défini en fin de
      fichier ne dit rien quand une erreur survient au milieu.
      ⇒ En console : `PS_MENU_V`. */
-  window.PS_MENU_V="2026-08-05-c";
+  window.PS_MENU_V="2026-08-05-d";
 
   /* 🔴 `PS_CSS_ONLY` : drapeau posé par le CONFIGURATEUR et par lui seul (le site
      ne le pose jamais). Sous ce drapeau, ce fichier ne fait plus rien d'autre que
@@ -115,11 +115,18 @@
        langue existe. Et le soulignement est en `box-shadow` plutôt qu'en
        `border-bottom` : une bordure ajouterait 2 px à la hauteur de l'élément et
        décalerait la barre de navigation d'un cheveu au changement de langue. */
-    "[data-ps-lang]{opacity:.45 !important;transition:opacity .15s ease, box-shadow .15s ease !important;"+
-      "border-radius:4px !important;}",
+    /* 🔴🔴 LE TRAIT SE POSE SUR L'IMAGE, PAS SUR LA BOÎTE. Première version :
+       `box-shadow` sur le conteneur — or il fait **50×55 px** pour un drapeau de
+       **26×16** (mesuré). Le trait se dessinait donc 19 px SOUS le drapeau, seul
+       au milieu du vide, et Ziad l'a signalé dans la minute avec une capture.
+       Un indicateur doit toucher ce qu'il indique. */
+    "[data-ps-lang]{opacity:.45 !important;transition:opacity .15s ease !important;}",
     "[data-ps-lang]:hover{opacity:.85 !important;}",
-    "[data-ps-lang].ps-lang-on{opacity:1 !important;"+
-      "box-shadow:inset 0 -2px 0 0 var(--ps-accent,#507EC5) !important;}",
+    "[data-ps-lang].ps-lang-on{opacity:1 !important;}",
+    "[data-ps-lang] img{transition:box-shadow .15s ease !important;border-radius:2px !important;}",
+    /* 2 px sous l'image, avec 3 px de respiration : assez pour se voir, assez
+       près pour appartenir au drapeau. */
+    "[data-ps-lang].ps-lang-on img{box-shadow:0 5px 0 -3px var(--ps-accent,#507EC5) !important;}",
     "[data-ps-lang]:focus-visible{outline:2px solid var(--ps-accent,#507EC5) !important;outline-offset:2px !important;}",
 
     /* ---------- menu centré, drapeaux inchangés ----------
@@ -300,7 +307,14 @@
 
     function brancher(img, lang, origine){
       var zone=(img.closest && img.closest(".flex-item")) || img.parentElement || img;
+      /* 🔴 IDEMPOTENCE PAR L'ANCÊTRE AUTANT QUE PAR SOI-MÊME. Sans ça, si le
+         fichier est exécuté deux fois — un rechargement de script, une relance
+         du configurateur — on peut marquer un conteneur PUIS un de ses parents,
+         et l'indicateur se dessine deux fois. C'est ce que montrait la capture
+         de Ziad : deux traits empilés sous le même drapeau. */
       if(zone.getAttribute("data-ps-lang")) return;
+      if(zone.querySelector && zone.querySelector("[data-ps-lang]")) return;
+      if(zone.parentElement && zone.parentElement.closest("[data-ps-lang]")) return;
       zone.setAttribute("data-ps-lang", lang);
       zone.style.cursor="pointer";
       zone.setAttribute("role","button");

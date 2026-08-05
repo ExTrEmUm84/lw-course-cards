@@ -21,7 +21,7 @@
 (function () {
   "use strict";
 
-  window.PS_PLAYER_V = "2026-08-05-a";
+  window.PS_PLAYER_V = "2026-08-05-b";
 
   /* ====================================================================
      NOS LIBELLÉS SUIVENT LA LANGUE  (05/08 — piste trouvée par Ziad)
@@ -44,6 +44,39 @@
     fr: { prev:"Leçon précédente", next:"Leçon suivante" },
     en: { prev:"Previous lesson",  next:"Next lesson" }
   };
+
+  /* 🔴 LE BOUTON DE RETOUR EST LA DERNIÈRE CHAÎNE NON TRADUITE (Ziad, 05/08 :
+     « il ne reste que le bouton retour »). Elle vient de LearnWorlds, pas de
+     nous — c'est un texte SYSTÈME, rendu côté serveur dans la langue
+     d'interface de l'école, et Weglot ne le voit pas.
+     🔴 On ne remplace QUE si on reconnaît la chaîne française exacte. Si
+     LearnWorlds la traduit un jour, ou si Ziad la réécrit dans Paramètres →
+     Langue du site, l'appariement échoue et on ne touche à rien : le pire cas
+     est « ma traduction ne s'applique pas », jamais « le bouton dit autre
+     chose ». Même règle que la page de vérification et la page de paiement. */
+  var RETOURS = [
+    { fr:"retour à la page du cours", en:"Back to course page" },
+    { fr:"retour au cours",           en:"Back to course" }
+  ];
+
+  function traduireRetour(){
+    if(langue()!=="en") return;
+    var cibles=document.querySelectorAll(".-default-course-player-back,[class*='player-back']");
+    [].slice.call(cibles).forEach(function(el){
+      if(el.getAttribute("data-ps-trad")) return;
+      var t=(el.textContent||"").replace(/\s+/g," ").trim().toLowerCase();
+      for(var i=0;i<RETOURS.length;i++){
+        if(t===RETOURS[i].fr){
+          el.setAttribute("data-ps-trad","1");
+          /* 🔴 On écrit dans le nœud de TEXTE et pas en `innerHTML` : ce bouton
+             porte une icône, la réécrire la supprimerait. */
+          var n=[].slice.call(el.childNodes).filter(function(x){ return x.nodeType===3 && x.nodeValue.trim(); })[0];
+          if(n) n.nodeValue=" "+RETOURS[i].en+" "; else el.textContent=RETOURS[i].en;
+          return;
+        }
+      }
+    });
+  }
   function langue(){
     try{
       var l = (window.Weglot && Weglot.getCurrentLang) ? Weglot.getCurrentLang() : "";
@@ -197,6 +230,7 @@
       if (nextBtn && next) { nextLbl.innerHTML = "<small>" + MOT("next") + "</small>" + next; }
     }
     update();
-    setInterval(update, 800);
+    setInterval(function(){ update(); traduireRetour(); }, 800);
+    traduireRetour();
   })();
 })();
