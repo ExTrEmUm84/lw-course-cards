@@ -44,6 +44,14 @@
 (function () {
   "use strict";
 
+  /* 🔴 UN MARQUEUR, PARCE QUE SON ABSENCE COÛTE UNE HEURE. Sans lui, quand la
+     page ne change pas, on ne peut pas distinguer « le code ne se déclenche
+     pas » de « le cache de GitHub Pages sert encore l'ancien fichier ». Les
+     deux se ressemblent exactement à l'écran — le 05/08 j'ai cru au premier,
+     c'était le second. `window.PS_VERIF_V` en console tranche en une seconde.
+     -b : cibles de traduction nommées (le paragraphe « spams » restait anglais). */
+  window.PS_VERIF_V = "2026-08-05-b";
+
   var SLUG = "email-verification-pending";
 
   /* Le littéral que LearnWorlds laisse passer tel quel. On ne suppose PAS
@@ -215,18 +223,30 @@
   function passer() {
     var sec = document.querySelector("#pageContent section[data-section-id]");
     if (!sec) return false;
-    var blocs = sec.querySelectorAll(".learnworlds-main-text, .learnworlds-heading, button span, button");
-    if (!blocs.length) return false;
+    /* 🔴🔴 CIBLES NOMMÉES, PAS UN GARDE-FOU NÉGATIF.
+       Première version : je prenais large (`button`, `span`, textes…) puis
+       j'excluais « tout bloc contenant un span/strong/a », pour ne pas écraser
+       le libellé interne des boutons ni l'icône flèche. Ce filtre sautait AUSSI
+       le paragraphe « check your spam folder », qui contient un `<strong>` :
+       la page est restée à moitié anglaise EN PRODUCTION, et le harnais ne l'a
+       pas dit parce qu'aucune assertion ne portait sur ce paragraphe.
+       ⇒ On désigne ce qu'on traduit. Pour les boutons on vise le `span` de
+       LIBELLÉ (`data-node-type="text"` / `.js-can-edit-element`), jamais le
+       `<button>` : l'icône flèche est un span FRÈRE, qu'un `textContent` sur le
+       bouton supprimerait.
+       🔴 La leçon vaut plus que le correctif : **un filtre par exclusion
+       protège ce qu'on a prévu et mange ce qu'on a oublié.** */
+    var cibles = [];
+    [].push.apply(cibles, sec.querySelectorAll(".learnworlds-heading"));
+    [].push.apply(cibles, sec.querySelectorAll(".learnworlds-main-text"));
+    [].push.apply(cibles, sec.querySelectorAll("button span[data-node-type='text'], button span.js-can-edit-element"));
+    if (!cibles.length) return false;
 
     var phraseFaite = false, n = 0;
     [].slice.call(sec.querySelectorAll(".learnworlds-main-text")).forEach(function (b) {
       if (poserPhrase(b)) { phraseFaite = true; n++; }
     });
-    [].slice.call(blocs).forEach(function (b) {
-      /* Un `<button>` contient un `<span>` qui porte le même texte : on
-         traduit le plus PROFOND, sinon `textContent` sur le bouton effacerait
-         le span et, avec lui, l'icône flèche du second bouton. */
-      if (b.querySelector && b.querySelector("span,strong,a")) return;
+    cibles.forEach(function (b) {
       if (traduireUn(b)) n++;
     });
     styler();
