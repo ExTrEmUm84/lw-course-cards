@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-j";
+  window.PS_TOKENS_V="2026-08-05-k";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -2771,8 +2771,13 @@
      on retombe sur la détection par libellé. Un cadenas approximatif vaut mieux
      qu'un catalogue entièrement déverrouillé, et l'accès reste de toute façon
      protégé par LearnWorlds.
-     🔴 Mis en cache pour la SESSION : un statut de cours change à la main,
-     quelques fois par an. Le recharger à chaque page serait du gaspillage. */
+     🔴 Mis en cache pour UNE HEURE, et dans `localStorage` — pas
+     `sessionStorage` comme au premier jet. Un statut de cours change à la main,
+     quelques fois par an ; le garder d'un onglet à l'autre fait disparaître la
+     fenêtre où l'on ne sait pas encore quoi verrouiller, et c'est précisément
+     cette fenêtre qui laissait passer les clics. La liste est école-wide, jamais
+     propre à un membre : rien à cloisonner par compte (contrairement à
+     `psLpProgress`, dont l'absence de clé par membre était un vrai défaut). */
   var ENDPOINT_COURS="https://annuaire-prepastrat.ziedbencheikh.workers.dev/cours";
   var CLE_FERMES="psCoursFermes";
   var _fermes=null;              /* Set des slugs fermés, ou null si on ne sait pas */
@@ -2791,7 +2796,7 @@
     if(_fermes!==null || _fermesDemande) return;
     _fermesDemande=true;
     try{
-      var brut=sessionStorage.getItem(CLE_FERMES);
+      var brut=localStorage.getItem(CLE_FERMES);
       if(brut){
         var o=JSON.parse(brut);
         if(o && o.exp>Date.now() && Array.isArray(o.f)){ _fermes=new Set(o.f); return; }
@@ -2803,18 +2808,71 @@
         .then(function(d){
           if(!d || !Array.isArray(d.fermes)) return;
           _fermes=new Set(d.fermes);
-          try{ sessionStorage.setItem(CLE_FERMES, JSON.stringify({f:d.fermes, exp:Date.now()+36e5})); }catch(e){}
+          try{ localStorage.setItem(CLE_FERMES, JSON.stringify({f:d.fermes, exp:Date.now()+36e5})); }catch(e){}
           verrouCartes();                    /* on repasse, maintenant qu'on sait */
         })
         .catch(function(){});                /* silence : le repli prend la main */
     }catch(e){}
   }
 
-  function verrouCartes(){
-    if(CARTES_HORS_VERROU.test(location.pathname||"")) return;
-    var u=membrePS();
-    if(accesOuvert(u)) return;                             /* rien à verrouiller */
+  /* ====================================================================
+     LE CLIC EST GARDÉ AVANT QUE LE CADENAS SOIT DESSINÉ  (05/08, reprise)
+     --------------------------------------------------------------------
+     Bug signalé par Ziad : « on a le temps de cliquer sur la carte au
+     chargement de la page ». Exact, et c'était structurel : le garde-clic
+     était posé CARTE PAR CARTE dans `verrouCartes()`.
 
+     🔴 CHRONOLOGIE RÉELLE, relevée sur `/formation-par-modules` en anonyme
+     (`performance.getEntriesByType('resource')`) — Ziad a demandé si « 5 à 8 s »
+     n'était pas exagéré ; c'était une valeur recopiée de mes notes, la vraie
+     mesure est différente et le trou est quand même de trois secondes :
+        832 ms   DOMContentLoaded
+       2168 ms   /api/learner/products  →  les cartes apparaissent vers 2,4-3 s
+       2552 ms   /api/courses           (fin 3020 ms)
+       4154 ms   notre /cours           (fin 4320 ms)  ← la liste arrivait ici
+       ~6000 ms  premier passage de `verrouCartes()` qui trouve des cartes
+     ⇒ **entre ~2,5 s et ~6 s, la carte était peinte, cliquable et sans
+     gardien.** Le premier passage à 1 s ne servait à rien : il sortait sur
+     `!cartes.length` AVANT même de demander la liste, ce qui repoussait la
+     requête au passage suivant. Le garde partait donc APRÈS le problème.
+     🔴🔴 UN VERROU DESSINÉ N'EST PAS UN VERROU. Le cadenas est un signal
+     visuel, c'est le gestionnaire de clic qui décide. Les deux n'ont aucune
+     raison d'arriver ensemble — et j'avais fait dépendre le second du premier.
+     ⇒ UN SEUL écouteur, délégué au `document`, en phase de CAPTURE, posé dès
+     l'exécution de ce fichier. Il n'attend aucune carte : il remonte du point
+     cliqué jusqu'à `.lw-course-card`. Les écouteurs par carte ont disparu — en
+     garder deux, c'était garder celui qui arrive trop tard.
+
+     🔴 CE QUI REND LA DÉCISION POSSIBLE À t=0, mesuré et non supposé :
+     `var me=` est défini à l'offset 1505 du HTML, dans le `<head>`, donc bien
+     AVANT nos loaders. Savoir si la personne a déjà un accès ne demande donc
+     aucune attente — c'était la seule inconnue qui aurait pu envoyer un membre
+     payant vers l'offre au lieu de son cours.
+     🔴 EN REVANCHE, le HTML servi ne contient **aucune carte** : ni élément
+     `.lw-course-card`, ni lien de cours (mesuré au `curl`). Tout est construit
+     en JS après `/api/learner/products`. Conséquence utile : quand un clic
+     arrive, la carte EXISTE forcément — et son texte porte alors « Inscription
+     fermée » (relevé : « Inscription fermée Niveau #1 — … »), même si notre CSS
+     masque le calque qui l'affiche, car `textContent` ignore `display`.
+     ⇒ Le repli par libellé tranche donc le plus souvent tout seul, sans
+     attendre le Worker. L'attente bornée ci-dessous ne sert qu'au cas résiduel :
+     carte présente, libellé pas encore rendu.
+     🔴 Et les liens sont de la forme `/course/<slug>`, PAS `?courseid=` (0 lien
+     de cette forme sur la page mesurée) — `slugDeCarte()` couvre les deux, il
+     ne faut pas retirer la seconde branche en croyant qu'elle ne sert plus.
+     🔴 Et si la liste n'arrive jamais, on suit le lien d'origine : l'erreur
+     penche du côté qui ne bloque personne à tort. C'est déjà la règle du
+     verrou, et le contenu reste protégé par LearnWorlds. */
+  var ATTENTE_LISTE=1200;
+  var _gardePosee=false;
+
+  /* La même question pour le peintre et pour le garde : « faut-il verrouiller
+     pour CETTE personne, sur CETTE page ? ». Une seule fonction, sinon les deux
+     règles divergent au premier changement. */
+  function modeVerrou(){
+    if(CARTES_HORS_VERROU.test(location.pathname||"")) return false;
+    var u=membrePS();
+    if(accesOuvert(u)) return false;                       /* rien à verrouiller */
     /* 🔴🔴 UN ÉTUDIANT D'ÉCOLE PARTENAIRE NE VOIT JAMAIS « S'ABONNER ».
        Même règle que le bandeau d'orientation, et pour la même raison : entre
        son inscription et le passage de l'automatisation, il n'a aucun programme
@@ -2826,8 +2884,77 @@
        pire il tombe sur l'écran d'accès de LearnWorlds, qui lui, ne lui réclame
        pas d'argent. */
     try{
-      if(u && window.PS_PARTENAIRE_EMAIL && window.PS_PARTENAIRE_EMAIL(u.email)) return;
+      if(u && window.PS_PARTENAIRE_EMAIL && window.PS_PARTENAIRE_EMAIL(u.email)) return false;
     }catch(e){}
+    return true;
+  }
+
+  /* Verdict pour UNE carte. `null` = on ne sait pas ENCORE — c'est un troisième
+     état, pas un « non ». Le confondre avec « ouvert » est exactement ce qui
+     laissait passer les clics. */
+  function carteVerrouillee(c){
+    if(_fermes){ var s=slugDeCarte(c); return !!s && _fermes.has(s); }
+    if(carteFermee(c)) return true;
+    return null;
+  }
+
+  function versOffre(){ location.href = window.PS_URL_OFFRE || URL_OFFRE_DEFAUT; }
+
+  function attendreListe(cb){
+    if(_fermes){ cb(); return; }
+    var t0=Date.now();
+    (function boucle(){
+      if(_fermes || Date.now()-t0>ATTENTE_LISTE){ cb(); return; }
+      setTimeout(boucle, 60);
+    })();
+  }
+
+  function reagirVerrou(c){
+    poserVerrou(c);                  /* le cadenas peut n'être pas encore dessiné */
+    /* 🔴 Au doigt il n'existe pas de survol : le premier appui révèle le
+       cadenas, le second suit vers l'offre. Sans ça, l'utilisateur mobile
+       n'aurait jamais l'explication — juste une carte qui « saute ». */
+    var tactile=false;
+    try{ tactile=window.matchMedia("(hover:none)").matches; }catch(_){}
+    if(tactile && !c.classList.contains("ps-verrou-on")){
+      c.classList.add("ps-verrou-on");
+      return;
+    }
+    versOffre();
+  }
+
+  function gardeClicCartes(){
+    if(_gardePosee) return;
+    _gardePosee=true;
+    chargerCoursFermes();            /* la liste au plus tôt : c'est elle qui tranche */
+    /* 🔴 En phase de CAPTURE, et sur le document : les liens sont à l'intérieur
+       des cartes et LearnWorlds pose ses propres gestionnaires dessus. Attendre
+       le bouillonnement, c'est arriver après le début de la navigation. */
+    document.addEventListener("click", function(e){
+      if(!modeVerrou()) return;
+      var t=e.target;
+      var c=(t && t.closest) ? t.closest(".lw-course-card") : null;
+      if(!c) return;
+
+      var verdict=carteVerrouillee(c);
+      if(verdict===false) return;                          /* cours ouvert : on ne touche à rien */
+
+      var lien=c.querySelector('a[href*="courseid="],a[href*="/course/"]');
+      var cible=lien ? lien.getAttribute("href") : "";
+      e.preventDefault(); e.stopPropagation();
+
+      if(verdict===true){ reagirVerrou(c); return; }
+      attendreListe(function(){
+        if(carteVerrouillee(c)===true){ reagirVerrou(c); return; }
+        if(cible) location.href=cible;
+      });
+    }, true);
+  }
+
+  /* Le PEINTRE. Il ne décide plus rien sur le clic — `gardeClicCartes()` s'en
+     charge depuis t=0 — il ne fait que rendre le verrou visible. */
+  function verrouCartes(){
+    if(!modeVerrou()) return;
     var cartes=document.querySelectorAll(".lw-course-card");
     if(!cartes.length) return;
 
@@ -2852,8 +2979,16 @@
     }
 
     cssVerrou();
-    fermees.forEach(function(c){
+    fermees.forEach(poserVerrou);
+  }
+
+  /* Dessine le cadenas sur UNE carte. Appelée par le peintre, et aussi par le
+     garde-clic quand quelqu'un clique avant que la carte ait été traitée : dans
+     ce cas le cadenas apparaît au moment du clic, ce qui vaut mieux qu'un clic
+     qui ne produit rien de visible. */
+  function poserVerrou(c){
       if(c.getAttribute("data-ps-verrou")) return;         /* idempotent */
+      cssVerrou();
       c.setAttribute("data-ps-verrou","1");
       c.classList.add("ps-verrouille");
 
@@ -2898,23 +3033,9 @@
         v.style.setProperty(p,"0","important");
       });
       c.appendChild(v);
-
-      /* 🔴 En phase de CAPTURE : le lien est à l'intérieur de la carte, et
-         LearnWorlds pose ses propres gestionnaires dessus. Attendre la phase
-         de bouillonnement, c'est arriver après que la navigation a commencé. */
-      c.addEventListener("click", function(e){
-        var tactile=false;
-        try{ tactile=window.matchMedia("(hover:none)").matches; }catch(_){}
-        if(tactile && !c.classList.contains("ps-verrou-on")){
-          /* Premier appui : on montre, on ne va nulle part. */
-          c.classList.add("ps-verrou-on");
-          e.preventDefault(); e.stopPropagation();
-          return;
-        }
-        e.preventDefault(); e.stopPropagation();
-        location.href = window.PS_URL_OFFRE || URL_OFFRE_DEFAUT;
-      }, true);
-    });
+      /* 🔴 PLUS D'ÉCOUTEUR PAR CARTE ICI. Il y en avait un, et c'était le bug :
+         il n'existait qu'une fois la carte peinte ET traitée. Le garde est
+         maintenant unique, sur le document, posé dès le chargement du fichier. */
   }
 
   function orienterMembre(){
@@ -3007,8 +3128,8 @@
     }
   }
 
-  cloak(); cloakFormules(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); cloakFormules(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader(); });
+  cloak(); cloakFormules(); gardeClicCartes(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); cloakFormules(); gardeClicCartes(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
      quelques relances pour attraper la classe active. */
   [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); setTimeout(immersivePlayer,d); setTimeout(partnerHeader,d); });
