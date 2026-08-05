@@ -21,6 +21,37 @@
 (function () {
   "use strict";
 
+  window.PS_PLAYER_V = "2026-08-05-a";
+
+  /* ====================================================================
+     NOS LIBELLÉS SUIVENT LA LANGUE  (05/08 — piste trouvée par Ziad)
+     --------------------------------------------------------------------
+     Ziad : « on a refait le design du player, ça joue ? » — oui, en partie, et
+     la mesure l'a confirmé. « Leçon précédente » et « Leçon suivante » sont
+     écrites EN DUR par ce fichier, donc **injectées après le passage de
+     Weglot** : il ne peut pas les voir, et elles restent françaises même quand
+     `Weglot.getCurrentLang()` vaut `en` (relevé en direct sur le lecteur).
+     🔴 Ce n'est pas TOUT le problème : « Retour à la page du cours » et les
+     titres d'activités viennent de LearnWorlds et ne sont pas traduits non plus
+     — ça, c'est hors de notre portée, et la documentation LearnWorlds annonce
+     pourtant l'inverse. Question posée à leur support.
+     ⇒ Ici on répare CE QUI EST À NOUS. Trois chaînes, pas une table à
+     maintenir : dès qu'on écrit un texte dans le DOM, il doit connaître la
+     langue, sinon on annule la traduction du site sans s'en rendre compte.
+     🔴 Repli sur le français si Weglot est absent : le site est francophone,
+     et une langue inconnue ne doit pas produire un libellé vide. */
+  var TEXTES = {
+    fr: { prev:"Leçon précédente", next:"Leçon suivante" },
+    en: { prev:"Previous lesson",  next:"Next lesson" }
+  };
+  function langue(){
+    try{
+      var l = (window.Weglot && Weglot.getCurrentLang) ? Weglot.getCurrentLang() : "";
+      return TEXTES[l] ? l : "fr";
+    }catch(e){ return "fr"; }
+  }
+  function MOT(cle){ return TEXTES[langue()][cle]; }
+
   var MARINE = "#243B6B";                 // couleur du chrome (barres, burger)
   var ACCENT = "#507EC5";                 // bleu de marque (leçon active, progression)
   var FONT = "Figtree,-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif";
@@ -160,10 +191,10 @@
       if (prevBtn) {
         if (prev) {
           prevBtn.style.visibility = "visible"; prevBtn.style.pointerEvents = "auto";
-          prevLbl.innerHTML = "<small>Leçon précédente</small>" + prev;   // textContent des noms vient du DOM natif
+          prevLbl.innerHTML = "<small>" + MOT("prev") + "</small>" + prev;   // textContent des noms vient du DOM natif
         } else { prevBtn.style.visibility = "hidden"; }
       }
-      if (nextBtn && next) { nextLbl.innerHTML = "<small>Leçon suivante</small>" + next; }
+      if (nextBtn && next) { nextLbl.innerHTML = "<small>" + MOT("next") + "</small>" + next; }
     }
     update();
     setInterval(update, 800);
