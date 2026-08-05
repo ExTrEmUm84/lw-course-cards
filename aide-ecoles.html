@@ -24,6 +24,18 @@
   nombre de cours qu'il contient, et le format des noms de champs. Si l'un de
   ces éléments change côté LearnWorlds, CETTE PAGE NE LE SAURA PAS — elle est
   écrite à la main. La relire à chaque nouvelle école.
+
+  🔴🔴 MISE À JOUR DU 05/08 — LE DÉCLENCHEUR A CHANGÉ. L'automatisation qui
+  pose l'étiquette est passée de « User signs up » à « User verifies their
+  email ». Ce n'est pas un détail de vocabulaire : le trou entre l'inscription
+  et l'ouverture de l'accès se comptait en secondes, il peut désormais durer
+  indéfiniment (un compte jamais validé n'a jamais rien). Trois endroits de
+  cette page le disent maintenant — la chaîne en 4 temps (§2), l'encadré de la
+  §3, et la liste des pièges (§7). Les garder cohérents si le réglage rebouge.
+
+  🔴 LE CAS PAYANT N'EST PAS ICI. Il vit dans `aide-parcours.html`, ajoutée le
+  05/08 : cette page-ci ne décrit que le chemin gratuit des écoles. Le partage
+  est délibéré — tout l'intérêt de la page d'entrée est de séparer les deux.
   ============================================================
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -186,6 +198,9 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     <a href="#modifier">Modifier ou retirer</a>
     <a href="#vigilance">Ce qui peut casser</a>
     <a href="#quifaitquoi">Qui fait quoi</a>
+    <div style="height:1px;background:var(--ps-border);margin:12px 4px"></div>
+    <a href="aide-parcours.html" style="font-size:13px;color:#98a1b3">→ Le parcours d'inscription</a>
+    <a href="aide-annuaire.html" style="font-size:13px;color:#98a1b3">→ L'annuaire des étudiants</a>
   </nav>
 
   <main>
@@ -217,21 +232,29 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
-        <p>Quatre écrans, moins d'une minute.</p>
+        <p>Quatre écrans, moins d'une minute — à condition qu'il ouvre bien l'e-mail de confirmation.</p>
         <div class="chain">
           <div class="c"><div class="n">1</div><h4>Il saisit son adresse</h4>
-            <p>Sur la page d'inscription, un seul champ&nbsp;: son adresse e-mail.</p></div>
+            <p>Sur la page d'entrée, un seul champ&nbsp;: son adresse e-mail.</p></div>
           <div class="c"><div class="n">2</div><h4>Il est reconnu</h4>
             <p>Le domaine correspond à une école partenaire&nbsp;: le formulaire s'ouvre, adresse déjà
-              remplie. Sinon, il part vers l'abonnement payant.</p></div>
+              remplie. Sinon, il part vers la page des formules.</p></div>
           <div class="c"><div class="n">3</div><h4>Il confirme son e-mail</h4>
-            <p>L'étape qui prouve que l'adresse est bien la sienne. C'est elle qui déclenche le reste.</p></div>
+            <p><strong>L'étape décisive</strong>&nbsp;: c'est elle, et elle seule, qui fait poser
+              l'étiquette de son école.</p></div>
           <div class="c"><div class="n">4</div><h4>Il entre, tout est ouvert</h4>
             <p>Le catalogue est accessible et le site affiche les couleurs de son école.</p></div>
         </div>
-        <div class="box info" style="margin-top:22px">La page d'inscription <strong>oriente, elle
+        <div class="box info" style="margin-top:22px">La page d'entrée <strong>oriente, elle
           n'autorise pas</strong>. Contourner cet écran ne donne aucun accès&nbsp;: c'est l'adresse
-          vérifiée qui décide, pas le formulaire.</div>
+          vérifiée qui décide, pas le formulaire.
+          <br><br>Le détail des quatre pages — entrée, formules, paiement, validation — est décrit dans
+          <a href="aide-parcours.html" style="color:var(--ps-accent);font-weight:700">l'aide « parcours
+          d'inscription »</a>.</div>
+        <div class="box warn"><strong>Tant qu'il n'a pas confirmé son e-mail, il n'a rien.</strong>
+          Écran 3 franchi&nbsp;= accès ouvert&nbsp;; écran 3 ignoré&nbsp;= un site entièrement verrouillé,
+          sans limite de temps. À dire aux écoles au moment du lancement&nbsp;: c'est le seul geste que
+          l'on demande à leurs étudiants.</div>
       </div>
     </details>
 
@@ -258,7 +281,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
               </tr>
               <tr>
                 <td class="nom">Tag users based on their registration email</td>
-                <td><span class="lw-chip">User signs up</span></td>
+                <td><span class="lw-chip">User verifies their email</span></td>
                 <td><span class="lw-chip">Add user email …</span></td>
                 <td>—</td>
                 <td><span class="lw-on"></span></td>
@@ -269,8 +292,18 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         </figure>
 
         <p style="margin-top:24px"><strong>Automatisation 1 — elle pose l'étiquette.</strong>
-          À l'inscription, l'adresse est examinée. Si le domaine est celui d'une école partenaire,
-          l'étiquette de cette école est posée sur le compte — pour l'ESSEC, <code>ecole-essec</code>.</p>
+          Quand l'étudiant <em>valide son adresse</em>, celle-ci est examinée. Si le domaine est celui
+          d'une école partenaire, l'étiquette de cette école est posée sur le compte — pour l'ESSEC,
+          <code>ecole-essec</code>.</p>
+
+        <div class="box warn"><strong>Le déclencheur a changé le 5 août&nbsp;: c'est désormais la
+          <em>validation</em> de l'adresse, plus la création du compte.</strong> On ne donne plus l'accès
+          d'une école payante à une adresse que personne n'a prouvée.
+          <br><br><strong>Conséquence à connaître&nbsp;:</strong> un étudiant qui ne clique jamais le lien
+          reçu par e-mail n'a <em>aucun accès</em>, même avec une adresse universitaire — et le délai
+          n'est plus de quelques secondes, il peut durer indéfiniment. C'est aujourd'hui la première
+          cause de « ça ne marche pas pour certains ». En attendant, le site lui montre des cours
+          verrouillés dont le clic mène à l'écran de validation, jamais à un paiement.</div>
 
         <p><strong>Automatisation 2 — elle ouvre l'accès.</strong> Dès que l'étiquette apparaît,
           l'étudiant est inscrit au programme qui contient les cours auxquels son école a droit.</p>
@@ -382,8 +415,11 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             <div class="n">4</div>
             <div>
               <h4>Tester avec un vrai compte avant d'annoncer</h4>
-              <p>Créer un compte avec une adresse du nouveau domaine, vérifier que l'accès s'ouvre et que
-                l'école s'affiche. Cinq minutes qui évitent une promo bloquée le jour du lancement.</p>
+              <p>Créer un compte avec une adresse du nouveau domaine, <strong>ouvrir l'e-mail de
+                confirmation et cliquer le lien</strong>, puis vérifier que l'accès s'ouvre et que l'école
+                s'affiche. Cinq minutes qui évitent une promo bloquée le jour du lancement.</p>
+              <p style="font-size:14.5px;color:#6b7280">⚠️ Un test qui s'arrête avant le clic sur le lien
+                ne prouve rien&nbsp;: c'est précisément l'étape qui déclenche tout.</p>
               <span class="who vous">Vous et nous</span>
             </div>
           </div>
@@ -448,9 +484,14 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
           <li><strong>Le nom de l'étiquette doit être exact.</strong> <code>ecole-essec</code> est le mot
             qui relie l'automatisation, l'accès et l'affichage. Une majuscule ou un accent de plus, et le
             lien est rompu — <em>sans aucun message d'erreur</em>.</li>
-          <li><strong>La vérification de l'e-mail est indispensable.</strong> C'est elle qui prouve que
-            l'adresse appartient à l'étudiant. Sans elle, n'importe qui pourrait se déclarer d'une école
-            partenaire.</li>
+          <li><strong>La vérification de l'e-mail n'est plus seulement indispensable&nbsp;: c'est le
+            déclencheur.</strong> Depuis le 5 août, l'étiquette est posée à la <em>validation</em> de
+            l'adresse, pas à la création du compte. Un compte jamais validé reste sans accès, et rien
+            ne le signale côté administration&nbsp;: pensez-y avant de conclure à une panne.</li>
+          <li><strong>Un domaine de test est traité comme une école partenaire.</strong> Il permet de
+            vérifier tout le parcours gratuit sans compte universitaire — il est mappé sur l'étiquette
+            de l'ESSEC, donc un compte de test voit le site aux couleurs de cette école.
+            <strong>À nous demander de le retirer avant une ouverture large.</strong></li>
           <li><strong>L'école déclarée dans le profil ne compte pas.</strong> Le champ « votre école » du
             formulaire est déclaratif&nbsp;: l'étudiant y met ce qu'il veut. L'accès ne s'appuie jamais
             dessus, uniquement sur l'adresse vérifiée.</li>
@@ -489,8 +530,9 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
 
 <footer>
   Aide PrepaStrat — écoles partenaires. Contenu relevé dans l'administration LearnWorlds le
-  4&nbsp;août&nbsp;2026. Les reconstitutions d'écran ci-dessus sont dessinées à la main&nbsp;: elles
-  illustrent, elles ne remplacent pas l'écran réel.
+  4&nbsp;août&nbsp;2026, mis à jour le 5&nbsp;août (le déclencheur des étiquettes est passé de
+  l'inscription à la validation de l'adresse). Les reconstitutions d'écran ci-dessus sont dessinées
+  à la main&nbsp;: elles illustrent, elles ne remplacent pas l'écran réel.
 </footer>
 
 </body>

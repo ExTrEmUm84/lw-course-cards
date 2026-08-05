@@ -184,6 +184,119 @@ body.ps-verrou .ps-porte{display:grid}
 .pv-an-b{display:inline-flex;align-items:center;gap:7px;align-self:flex-start;margin-top:16px;
   padding:9px 15px;border-radius:var(--ps-r-btn);background:var(--ps-an-btn,var(--ps-accent));color:#fff;
   font-size:13.5px;font-weight:600;text-decoration:none}
+/* ---- LE PARCOURS D'INSCRIPTION : quatre écrans, une seule chaîne ------
+   Ajouté le 05/08, après la semaine où ces quatre pages sont apparues :
+   `/inscription` (l'aiguillage), `/formules` (l'offre), `/payment` (le tunnel)
+   et `/email-verification-pending` (la validation d'adresse). Elles ne se
+   comprennent pas isolément — régler la couleur du tunnel de paiement sans voir
+   d'où l'étudiant arrive, c'est régler un écran hors de son parcours. Le bandeau
+   ci-dessous est donc affiché sur les QUATRE onglets et marque celui qu'on règle.
+   🔴 CE SONT DES MAQUETTES, comme tout l'aperçu : ces pages sont servies par
+   LearnWorlds, et deux d'entre elles (`/payment`, la validation) ne sont même pas
+   construites dans le Site Builder. Elles portent en revanche les mêmes tokens
+   que la production — c'est ce qui rend le réglage de couleur honnête.
+   🔴 LES PAGES DU PARCOURS N'ONT PAS DE CARTES : leur onglet n'affiche donc pas
+   le réglage de contour. C'est la règle déjà posée pour la home et le profil —
+   une case qui ne fait rien est pire qu'une case absente. */
+.pv-parc{display:flex;align-items:stretch;flex-wrap:wrap;gap:14px}
+.pv-parc-s{flex:1 1 160px;min-width:0;border:1px solid var(--ps-border);background:#fff;border-radius:12px;
+  padding:12px 14px;font-family:var(--ps-font);position:relative;opacity:.5;transition:.15s}
+.pv-parc-s + .pv-parc-s::before{content:"›";position:absolute;left:-12px;top:50%;transform:translateY(-50%);
+  color:#c3cad6;font-size:20px;line-height:1}
+.pv-parc-s.on{opacity:1;border-color:var(--ps-accent);box-shadow:0 0 0 3px var(--ps-accent-tint)}
+.pv-parc-u{font:700 9.5px var(--ps-font);letter-spacing:.09em;text-transform:uppercase;color:var(--ps-accent)}
+.pv-parc-t{font:800 13.5px var(--ps-font);color:var(--ps-text);margin:4px 0 3px}
+.pv-parc-d{font-size:11.5px;line-height:1.45;color:var(--ps-text-soft)}
+/* Le cadre d'écran : il DIT que ce qu'il entoure est une page, pas un composant
+   posé dans le vide. Les quatre maquettes du parcours sont des pages entières. */
+.pv-scr{border:1px solid var(--ps-border);border-radius:14px;overflow:hidden;background:var(--ps-surface-soft)}
+.pv-scr-bar{display:flex;align-items:center;gap:6px;padding:8px 12px;background:#F3F5F9;border-bottom:1px solid var(--ps-border)}
+.pv-scr-bar i{width:8px;height:8px;border-radius:50%;background:#d3d8e2;display:block}
+.pv-scr-bar span{margin-left:6px;font:700 10.5px ui-monospace,Menlo,monospace;color:#98a1b3}
+.pv-scr-in{padding:26px 24px}
+/* écran 1 — l'aiguillage par l'adresse e-mail */
+.pv-ins{max-width:430px;margin:0 auto;background:#fff;border:1px solid var(--ps-border);
+  border-radius:var(--ps-r-card);padding:26px;font-family:var(--ps-font);text-align:center}
+.pv-ins h4{font:800 20px var(--ps-font);color:var(--ps-text);margin:0 0 6px;letter-spacing:-.015em}
+.pv-ins p{font-size:13.5px;color:var(--ps-text-soft);margin:0 0 18px;line-height:1.55}
+.pv-ins-f{display:flex;gap:8px}
+.pv-ins-f input{flex:1;min-width:0;padding:11px 13px;border:1px solid var(--ps-border);
+  border-radius:var(--ps-r-btn);font:14px var(--ps-font);background:#fff;color:var(--ps-text)}
+.pv-ins-f b{display:grid;place-items:center;padding:0 18px;border-radius:var(--ps-r-btn);
+  background:var(--ps-accent);color:#fff;font:700 14px var(--ps-font);white-space:nowrap}
+.pv-ins-r{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:18px;text-align:left}
+.pv-ins-r div{border:1px dashed var(--ps-border);border-radius:11px;padding:11px 12px}
+.pv-ins-r u{display:block;font:700 9.5px var(--ps-font);letter-spacing:.08em;text-transform:uppercase;
+  text-decoration:none;color:var(--ps-accent);margin-bottom:4px}
+.pv-ins-r em{display:block;font-style:normal;font-size:11.5px;line-height:1.45;color:var(--ps-text-soft)}
+/* écran 2 — les deux formules. `abonnement.js` peint TOUT en var(--ps-accent) :
+   la couleur de page repeint donc prix, badge, boutons et liseré d'un coup. */
+.pv-abo{display:grid;grid-template-columns:repeat(auto-fit,minmax(228px,1fr));gap:16px;max-width:560px;margin:0 auto}
+.pv-abo-c{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
+  padding:22px 20px;font-family:var(--ps-font);position:relative}
+.pv-abo-c.hot{border-color:var(--ps-accent);box-shadow:0 10px 30px rgba(var(--ps-accent-rgb),.16)}
+.pv-abo-b{position:absolute;top:-10px;left:20px;background:var(--ps-accent);color:#fff;
+  border-radius:var(--ps-r-pill);padding:4px 11px;font:700 10.5px var(--ps-font);letter-spacing:.04em}
+.pv-abo-n{font:800 11px var(--ps-font);color:var(--ps-accent);text-transform:uppercase;letter-spacing:.08em}
+.pv-abo-p{font:800 30px var(--ps-font);color:var(--ps-text);margin:9px 0 2px;line-height:1}
+.pv-abo-p small{font:600 13px var(--ps-font);color:var(--ps-text-soft)}
+.pv-abo-m{font-size:12px;color:var(--ps-text-soft);min-height:17px}
+.pv-abo-l{list-style:none;padding:0;margin:15px 0 0;font-size:12.5px;color:var(--ps-text-soft)}
+.pv-abo-l li{padding-left:19px;position:relative;margin-top:7px;line-height:1.45}
+.pv-abo-l li::before{content:"✓";position:absolute;left:0;top:0;color:var(--ps-accent);font-weight:800}
+.pv-abo-go{display:block;text-align:center;margin-top:17px;padding:11px;border-radius:var(--ps-r-btn);
+  background:var(--ps-accent);color:#fff;font:700 13.5px var(--ps-font);text-decoration:none}
+.pv-abo-go.ghost{background:transparent;color:var(--ps-accent);border:1px solid var(--ps-accent)}
+/* écran 3 — le tunnel. Le bloc de carte bancaire vit dans une IFRAME Stripe :
+   `paiement.js` n'habille QUE ce qui l'entoure, et cette maquette dit la même
+   chose — le rectangle « Stripe » n'est pas un champ que l'on redessine. */
+.pv-pay{display:grid;grid-template-columns:1.55fr 1fr;gap:18px;align-items:start}
+.pv-pay-c{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);
+  padding:20px;font-family:var(--ps-font);box-shadow:0 10px 30px rgba(32,56,102,.06)}
+.pv-pay-h{font:800 11px var(--ps-font);letter-spacing:.08em;text-transform:uppercase;color:var(--ps-accent);margin-bottom:13px}
+.pv-pay-f{height:38px;border:1px solid var(--ps-border);border-radius:var(--ps-r-btn);background:#fff;margin-bottom:9px}
+.pv-pay-2{display:flex;gap:9px}
+.pv-pay-2 .pv-pay-f{flex:1}
+.pv-pay-ifr{border:1px dashed var(--ps-border);border-radius:var(--ps-r-btn);height:78px;display:grid;
+  place-items:center;color:#9AA0B0;font:600 11.5px var(--ps-font);margin-bottom:9px;background:#FBFCFE}
+.pv-pay-go{margin-top:8px;padding:12px;border-radius:var(--ps-r-btn);background:var(--ps-accent);
+  color:#fff;font:700 14px var(--ps-font);text-align:center}
+.pv-pay-img{height:92px;border-radius:11px;background:var(--ps-accent-tint);display:grid;place-items:center;
+  color:var(--ps-accent);font:700 11.5px var(--ps-font);margin-bottom:14px;text-align:center;padding:0 12px}
+.pv-pay-r{display:flex;justify-content:space-between;gap:10px;font-size:13px;color:var(--ps-text-soft);margin-top:9px}
+.pv-pay-r b{color:var(--ps-text);font-weight:700}
+.pv-pay-tot{border-top:1px solid var(--ps-border);margin-top:13px;padding-top:12px;
+  display:flex;justify-content:space-between;align-items:baseline;font:800 19px var(--ps-font);color:var(--ps-text)}
+/* écran 4 — la validation d'adresse. Premier écran après l'inscription. */
+.pv-ver{max-width:440px;margin:0 auto;text-align:center;font-family:var(--ps-font)}
+.pv-ver-i{width:66px;height:66px;border-radius:50%;background:var(--ps-accent-tint);color:var(--ps-accent);
+  display:grid;place-items:center;margin:0 auto 16px}
+.pv-ver-i svg{width:30px;height:30px;fill:none;stroke:currentColor;stroke-width:1.7}
+.pv-ver h4{font:800 22px var(--ps-font);color:var(--ps-text);margin:0 0 8px;letter-spacing:-.015em}
+.pv-ver p{font-size:13.5px;color:var(--ps-text-soft);line-height:1.6;margin:0}
+.pv-ver-mail{display:inline-block;background:var(--ps-accent-tint);color:var(--ps-accent);
+  border-radius:var(--ps-r-pill);padding:5px 14px;font:700 13px var(--ps-font);margin:10px 0 16px}
+.pv-ver-b{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:8px}
+.pv-ver-b b{padding:10px 18px;border-radius:var(--ps-r-btn);background:var(--ps-accent);color:#fff;font:700 13.5px var(--ps-font)}
+.pv-ver-b i{padding:10px 18px;border-radius:var(--ps-r-btn);border:1px solid var(--ps-border);
+  color:var(--ps-text-soft);font:600 13.5px var(--ps-font);font-style:normal}
+/* ---- Le cadenas des cours fermés, montré là où il se pose --------------
+   Il n'a AUCUN réglage : ni couleur, ni rayon propre. Ce bloc est une
+   explication, pas un panneau de contrôle — mais sa place est ici, sur les
+   onglets des pages où l'étudiant le rencontre. */
+.pv-cad{display:flex;gap:14px;align-items:center;flex-wrap:wrap}
+.pv-cad-c{flex:0 0 190px;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);background:#fff;
+  padding:14px;font-family:var(--ps-font);position:relative;overflow:hidden}
+.pv-cad-c .ph{height:64px;border-radius:10px;background:linear-gradient(100deg,#EEF1F6,#F7F8FB)}
+.pv-cad-c .ti{height:9px;width:78%;border-radius:5px;background:#E6E9EF;margin-top:11px}
+.pv-cad-c .ti.s{width:52%;margin-top:7px}
+.pv-cad-c .voile{position:absolute;inset:0;background:rgba(255,255,255,.62);backdrop-filter:blur(2.5px);
+  display:grid;place-items:center}
+.pv-cad-c .voile b{display:flex;align-items:center;gap:7px;background:var(--ps-accent);color:#fff;
+  border-radius:var(--ps-r-pill);padding:8px 14px;font:700 12px var(--ps-font)}
+.pv-cad-c .voile svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2}
+.pv-cad-t{flex:1 1 260px;min-width:0;font-size:12px;line-height:1.55;color:var(--ps-text-soft)}
+.pv-cad-t b{color:var(--ps-text)}
 /* ================= L'APERÇU — maquette des vrais composants ========= */
 /* 🔴 `>` ET NON UN DESCENDANT QUELCONQUE. Les titres de section de l'aperçu sont
    des enfants DIRECTS de la scène ; en visant tous les `h3` on attrapait aussi le
@@ -296,7 +409,7 @@ body.ps-verrou .ps-porte{display:grid}
   <!-- ================= CONTRÔLES ================= -->
   <div class="panel">
     <h1>Design system PrepaStrat</h1>
-    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-04-n</span></p>
+    <p class="sub" style="margin-bottom:6px"><span style="display:inline-block;background:#EEF1F6;color:#5A6478;border-radius:6px;padding:2px 7px;font:700 10.5px ui-monospace,Menlo,monospace">version 2026-08-05-a</span></p>
     <!-- 🔴 TEXTE REFAIT (04/08) : il datait du temps où publier voulait dire
          « copier le bloc de code en bas et le coller dans tokens.js ». Ce bloc a été
          retiré le 03/08 et c'est le Worker qui écrit désormais — la phrase promettait
@@ -318,7 +431,9 @@ body.ps-verrou .ps-porte{display:grid}
          silence — les curseurs auraient bougé sans que rien ne suive. -->
     <div class="note" style="margin:0 0 4px">Tous les réglages sont dans le bloc à onglets, à droite&nbsp;:
       <strong>Général</strong> pour ce qui s'applique à tout le site (marque, typographie, arrondis, menu),
-      puis un onglet par page.</div>
+      puis un onglet par page. Les quatre derniers onglets forment le
+      <strong>parcours d'inscription</strong> — entrée, formules, paiement, validation d'adresse&nbsp;;
+      ils sont livrés sans couleur propre et suivent donc la marque.</div>
 
     <!-- 🔴 L'AIDE EST UN LIEN, PAS UN PANNEAU DÉPLIABLE DANS CETTE COLONNE.
          Elle explique un dispositif qui ne vit pas ici (les automatisations
@@ -333,6 +448,17 @@ body.ps-verrou .ps-porte{display:grid}
     <a class="ps-aide" href="aide-annuaire.html" target="_blank" rel="noopener">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>
       <span><strong>Annuaire des étudiants</strong> — qui y figure, quels champs nourrissent une fiche</span>
+    </a>
+    <!-- 🔴 TROISIÈME AIDE (05/08). Le parcours d'inscription touche quatre pages,
+         deux automatisations LearnWorlds, deux tarifs et un cadenas : c'est le
+         sujet qui a le plus bougé cette semaine, et celui dont les réglages sont
+         le plus SOUS le configurateur (les prix s'écrivent dans le Site Builder,
+         pas ici). Le loger dans l'aide « écoles » aurait mélangé le cas gratuit
+         et le cas payant, alors que tout l'intérêt de la page d'entrée est
+         justement de les séparer. -->
+    <a class="ps-aide" href="aide-parcours.html" target="_blank" rel="noopener">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h4l3-7 4 14 3-7h4"/></svg>
+      <span><strong>Parcours d'inscription</strong> — qui entre gratuitement, qui paie, et où ça se règle</span>
     </a>
 
     <!-- 🔴🔴 « Tout réinitialiser » RAMENAIT AUX VALEURS ÉCRITES EN DUR, pas à
@@ -512,8 +638,18 @@ body.ps-verrou .ps-porte{display:grid}
       </div>
     </div>
 
-    <h3 data-p="*">Hero</h3>
-    <div class="bloc" data-p="*">
+    <!-- 🔴 CE BLOC ÉTAIT EN `*` (= partout), ET C'EST DEVENU FAUX LE 05/08.
+         L'approximation tenait tant que tous les onglets étaient des pages de
+         catalogue. Les quatre pages du parcours n'ont AUCUN hero : deux d'entre
+         elles (`/payment`, la validation d'adresse) ne sont même pas construites
+         dans le Site Builder. Montrer un grand titre de marque sur l'onglet
+         Paiement, c'était annoncer un composant que la page n'a pas — le défaut
+         corrigé le 04/08 sur les cartes, en sens inverse.
+         🔴 `__general` EST DANS LA LISTE À DESSEIN. C'est la clé de l'onglet
+         Général, pas une page ; le hero y est le meilleur témoin de la couleur de
+         marque et de la police, qui sont précisément ce qu'on y règle. -->
+    <h3 data-p="__general home formation-par-modules sentrainer fiches-cabinet fiches-secteur etudes-cas formation-par-thematiques profile annuaire-partenaire-de-cas">Hero</h3>
+    <div class="bloc" data-p="__general home formation-par-modules sentrainer fiches-cabinet fiches-secteur etudes-cas formation-par-thematiques profile annuaire-partenaire-de-cas">
       <h1 class="pv-h1">Nos formations pour <span class="pv-tw">le conseil</span><span class="pv-cur"></span></h1>
       <p class="pv-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed in metus vulputate, imperdiet tortor imperdiet, pulvinar metus.</p>
     </div>
@@ -829,6 +965,206 @@ body.ps-verrou .ps-porte{display:grid}
 
     <h3 data-p="fiches-secteur etudes-cas">Pastilles de champs (fiches secteur / études de cas)</h3>
     <div class="bloc" data-p="fiches-secteur etudes-cas"><div class="pv-champs" id="champs"></div></div>
+
+    <!-- ================= LE CADENAS DES COURS FERMÉS =================
+         🔴 IL N'A AUCUN RÉGLAGE, ET C'EST VOULU. Il n'apparaît pas non plus
+         dans la liste des onglets : ce n'est pas une page, c'est un état posé
+         sur les cartes de CINQ pages. Sa place est donc ici, sur l'onglet de
+         chacune d'elles, en explication.
+         POURQUOI L'AFFICHER QUAND MÊME : depuis que tout le catalogue est en
+         inscription clôturée, c'est ce que voit un visiteur sans abonnement sur
+         presque chaque carte du site. Un client qui règle les couleurs de la
+         page Cours doit savoir que ses cartes sont floutées pour la moitié de
+         ses visiteurs — sinon il règle une page qu'il est seul à voir ainsi. -->
+    <h3 data-p="formation-par-modules sentrainer fiches-secteur fiches-cabinet etudes-cas">Cours fermés <span style="text-transform:none;font-weight:600;color:#B4BAC8">— ce que voit un visiteur sans accès</span></h3>
+    <div class="bloc" data-p="formation-par-modules sentrainer fiches-secteur fiches-cabinet etudes-cas">
+      <div class="pv-cad">
+        <div class="pv-cad-c">
+          <div class="ph"></div><div class="ti"></div><div class="ti s"></div>
+          <div class="voile"><b>
+            <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="4" y="10.5" width="16" height="10" rx="2.2"/><path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9"/></svg>
+            S'abonner</b></div>
+        </div>
+        <div class="pv-cad-t">
+          <b>La carte est floutée, pas remplacée.</b> On reconnaît le cours, on ne peut pas l'ouvrir&nbsp;:
+          le clic mène à l'offre au lieu de l'écran d'accès refusé de LearnWorlds.<br><br>
+          <b>Trois personnes ne le voient jamais&nbsp;:</b> un abonné, un étudiant d'école partenaire dont
+          l'adresse est validée, et n'importe qui sur un cours réellement ouvert — le webinaire gratuit
+          reste cliquable.<br><br>
+          <b>Un compte dont l'adresse n'est pas validée</b> voit le cadenas, mais le clic l'envoie vers la
+          page de validation, pas vers le paiement&nbsp;: il n'a rien à acheter, il a un lien à cliquer.
+        </div>
+      </div>
+    </div>
+
+    <!-- ====================================================================
+         LE PARCOURS D'INSCRIPTION — quatre pages ajoutées les 04 et 05/08
+         --------------------------------------------------------------------
+         🔴 POURQUOI CE BANDEAU EST SUR LES QUATRE ONGLETS. Ces pages forment une
+         chaîne : l'aiguillage envoie vers l'offre, l'offre vers le tunnel, et
+         l'inscription gratuite vers la validation d'adresse. Régler la couleur de
+         l'une sans voir les trois autres, c'est régler un écran hors de son
+         parcours — le même défaut que les blocs de cartes affichés sur tous les
+         onglets avant le 04/08, qui faisaient croire que les fiches secteur
+         appartenaient à la home.
+         🔴 LA MARQUE DE L'ÉTAPE COURANTE EST POSÉE EN JS (`blocsPage`), par
+         `data-s`. Écrire quatre bandeaux, un par onglet, aurait multiplié par
+         quatre le texte à tenir à jour le jour où le parcours change. ==== -->
+    <h3 data-p="inscription formules payment email-verification-pending">Le parcours d'inscription <span style="text-transform:none;font-weight:600;color:#B4BAC8">— quatre pages qui se passent le relais</span></h3>
+    <div class="bloc" data-p="inscription formules payment email-verification-pending">
+      <div class="pv-parc" id="pvParc">
+        <div class="pv-parc-s" data-s="inscription">
+          <div class="pv-parc-u">/inscription</div>
+          <div class="pv-parc-t">L'adresse décide</div>
+          <div class="pv-parc-d">Domaine d'école partenaire&nbsp;→ formulaire gratuit. Toute autre adresse&nbsp;→ l'offre.</div>
+        </div>
+        <div class="pv-parc-s" data-s="formules">
+          <div class="pv-parc-u">/formules</div>
+          <div class="pv-parc-t">Le choix</div>
+          <div class="pv-parc-d">Deux formules, deux boutons. C'est le seul endroit où la trimestrielle est atteignable.</div>
+        </div>
+        <div class="pv-parc-s" data-s="payment">
+          <div class="pv-parc-u">/payment</div>
+          <div class="pv-parc-t">Le paiement</div>
+          <div class="pv-parc-d">Page de LearnWorlds, habillée à la charte. Le compte se crée ici, pas avant.</div>
+        </div>
+        <div class="pv-parc-s" data-s="email-verification-pending">
+          <div class="pv-parc-u">/email-verification-pending</div>
+          <div class="pv-parc-t">La validation</div>
+          <div class="pv-parc-d">L'adresse doit être prouvée. C'est elle qui déclenche l'accès d'une école.</div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:16px;border-left-color:#507EC5">
+        🔴 <strong>Ces quatre pages n'ont que leur COULEUR de réglable ici</strong> — pas de contour&nbsp;:
+        aucune ne porte de cartes, sauf Formules dont les deux offres en acceptent un.
+        Les <strong>textes et les prix</strong> de la page Formules ne se règlent pas ici non plus&nbsp;:
+        ils s'écrivent en lignes <code style="font-family:ui-monospace,Menlo,monospace">clé : valeur</code>
+        dans un bloc de texte de la page, depuis le Site Builder de LearnWorlds.
+      </div>
+      <div class="note" style="border-left-color:#E2445C;background:#FDF2F4;color:#8A2233">
+        ⚠️ <strong>Renommer l'une de ces pages casse la chaîne en silence.</strong> Les slugs
+        <code style="font-family:ui-monospace,Menlo,monospace">inscription</code> et
+        <code style="font-family:ui-monospace,Menlo,monospace">formules</code> sont écrits dans le code du
+        site&nbsp;: une page renommée perd sa couleur, son habillage, et les liens qui y mènent tombent en
+        404. Le bandeau d'alerte au-dessus du bouton « Publier » signale les slugs devenus introuvables.
+      </div>
+    </div>
+
+    <h3 data-p="inscription">Page d'entrée <span style="text-transform:none;font-weight:600;color:#B4BAC8">— maquette&nbsp;: la vraie page est servie par LearnWorlds</span></h3>
+    <div class="bloc" data-p="inscription">
+      <div class="pv-scr">
+        <div class="pv-scr-bar"><i></i><i></i><i></i><span>prepastrat.learnworlds.com/inscription</span></div>
+        <div class="pv-scr-in">
+          <div class="pv-ins">
+            <h4>Rejoindre PrepaStrat</h4>
+            <p>Entrez votre adresse e-mail&nbsp;: si votre école est partenaire, votre accès est déjà ouvert.</p>
+            <div class="pv-ins-f"><input type="text" value="prenom.nom@essec.edu" readonly><b>Continuer</b></div>
+            <div class="pv-ins-r">
+              <div><u>Adresse d'école partenaire</u><em>Le formulaire d'inscription s'ouvre, adresse déjà remplie. Aucun paiement.</em></div>
+              <div><u>Toute autre adresse</u><em>Direction la page des formules. Le compte se créera pendant le paiement.</em></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:14px">
+        <strong>Cette page oriente, elle n'autorise pas.</strong> Aller directement au formulaire ne donne
+        aucun accès&nbsp;: c'est l'étiquette posée sur l'adresse <em>validée</em> qui ouvre les cours.
+      </div>
+    </div>
+
+    <h3 data-p="formules">Les deux formules <span style="text-transform:none;font-weight:600;color:#B4BAC8">— tout y est peint à la couleur de la page</span></h3>
+    <div class="bloc" data-p="formules">
+      <div class="pv-scr">
+        <div class="pv-scr-bar"><i></i><i></i><i></i><span>prepastrat.learnworlds.com/formules</span></div>
+        <div class="pv-scr-in">
+          <div class="pv-abo">
+            <div class="pv-abo-c">
+              <div class="pv-abo-n">Mensuel</div>
+              <div class="pv-abo-p">99&nbsp;€<small> / mois</small></div>
+              <div class="pv-abo-m">Sans engagement</div>
+              <ul class="pv-abo-l"><li>Accès à tout le catalogue</li><li>Résiliable à tout moment</li></ul>
+              <span class="pv-abo-go ghost">Choisir</span>
+            </div>
+            <div class="pv-abo-c hot">
+              <span class="pv-abo-b">−15&nbsp;%</span>
+              <div class="pv-abo-n">Trimestriel</div>
+              <div class="pv-abo-p">84&nbsp;€<small> / mois</small></div>
+              <div class="pv-abo-m">252&nbsp;€ tous les 3&nbsp;mois</div>
+              <ul class="pv-abo-l"><li>Accès à tout le catalogue</li><li>Le tarif le plus bas</li></ul>
+              <span class="pv-abo-go">Choisir</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:14px;border-left-color:#E2445C;background:#FDF2F4;color:#8A2233">
+        ⚠️ <strong>Les prix affichés ci-dessus ne sont pas lus dans LearnWorlds</strong>&nbsp;: la plateforme
+        ne permet pas de les récupérer depuis une autre page. Ils s'écrivent dans le bloc de texte de la page
+        Formules. <strong>Changer un tarif dans LearnWorlds sans corriger ce bloc fait mentir la page</strong>
+        — l'étudiant verra toutefois le vrai prix à l'écran de paiement avant de valider.
+      </div>
+      <div class="note">
+        Le bouton de chaque formule porte son <strong>identifiant de plan</strong>. Sans lui, LearnWorlds
+        sélectionne la formule mensuelle en silence et la trimestrielle devient inatteignable&nbsp;:
+        si un plan est recréé côté LearnWorlds, son identifiant change et le bouton mène à la mauvaise offre.
+      </div>
+    </div>
+
+    <h3 data-p="payment">Dernier écran avant de payer <span style="text-transform:none;font-weight:600;color:#B4BAC8">— page de LearnWorlds, seulement habillée</span></h3>
+    <div class="bloc" data-p="payment">
+      <div class="pv-scr">
+        <div class="pv-scr-bar"><i></i><i></i><i></i><span>prepastrat.learnworlds.com/payment</span></div>
+        <div class="pv-scr-in">
+          <div class="pv-pay">
+            <div class="pv-pay-c">
+              <div class="pv-pay-h">Vos informations</div>
+              <div class="pv-pay-2"><div class="pv-pay-f"></div><div class="pv-pay-f"></div></div>
+              <div class="pv-pay-f"></div>
+              <div class="pv-pay-h" style="margin-top:16px">Paiement</div>
+              <div class="pv-pay-ifr">bloc bancaire — cadre Stripe, intouché</div>
+              <div class="pv-pay-go">Payer 99&nbsp;€</div>
+            </div>
+            <div class="pv-pay-c">
+              <div class="pv-pay-img">Formation<br>PrepaStrat Conseil</div>
+              <div class="pv-pay-r"><span>Formule</span><b>Mensuel</b></div>
+              <div class="pv-pay-r"><span>Renouvellement</span><b>chaque mois</b></div>
+              <div class="pv-pay-tot"><span style="font-size:13px;font-weight:600;color:var(--ps-text-soft)">Total</span><span>99&nbsp;€</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:14px">
+        <strong>Rien n'est touché au paiement lui-même.</strong> Le bloc bancaire vit dans un cadre fourni
+        par le prestataire&nbsp;: on habille ce qui l'entoure, jamais lui. Ce qui a été retiré de cet écran&nbsp;:
+        les boutons de connexion sociale (proposer de se ré-authentifier au moment où l'on sort sa carte),
+        un cadre d'image produit vide, et deux polices étrangères à la charte.
+      </div>
+    </div>
+
+    <h3 data-p="email-verification-pending">Validation de l'adresse <span style="text-transform:none;font-weight:600;color:#B4BAC8">— le premier écran après l'inscription</span></h3>
+    <div class="bloc" data-p="email-verification-pending">
+      <div class="pv-scr">
+        <div class="pv-scr-bar"><i></i><i></i><i></i><span>prepastrat.learnworlds.com/email-verification-pending</span></div>
+        <div class="pv-scr-in">
+          <div class="pv-ver">
+            <div class="pv-ver-i">
+              <svg viewBox="0 0 24 24" aria-hidden="true"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 6 9 6.5L21 6"/></svg>
+            </div>
+            <h4>Vérifiez votre adresse e-mail</h4>
+            <p>Nous venons d'envoyer un lien de confirmation à</p>
+            <span class="pv-ver-mail">prenom.nom@essec.edu</span>
+            <p>Ouvrez-le pour activer votre compte. Pensez à regarder dans les indésirables.</p>
+            <div class="pv-ver-b"><b>Renvoyer l'e-mail</b><i>J'ai déjà validé</i></div>
+          </div>
+        </div>
+      </div>
+      <div class="note" style="margin-top:14px">
+        <strong>C'est l'écran le plus important du parcours d'école.</strong> L'étiquette qui ouvre l'accès
+        d'un étudiant est posée à la <em>validation</em> de l'adresse, pas à l'inscription&nbsp;: tant que ce
+        lien n'est pas cliqué, un compte <code style="font-family:ui-monospace,Menlo,monospace">@essec.edu</code>
+        n'a aucun cours. « J'ai déjà validé » recharge la page&nbsp;: juste après le clic sur le lien reçu,
+        la page servie annonce encore un compte en attente pendant quelques instants.
+      </div>
+    </div>
   </div>
 </div>
 
@@ -887,8 +1223,14 @@ body.ps-verrou .ps-porte{display:grid}
     /* Couleur dominante par page + réglages libres. Clé = slug LearnWorlds
        (la classe `slug-…` posée sur le <body>). Vide = la page reprend l'accent
        de la marque. */
+    /* 🔴 LES QUATRE PAGES DU PARCOURS SONT LIVRÉES SANS COULEUR PROPRE (05/08).
+       Elles n'en ont jamais eu : les ajouter avec une teinte les ferait changer
+       d'apparence au premier « Annuler mes changements », alors qu'elles suivent
+       aujourd'hui la marque. Un réglage neuf ne modifie pas l'existant en
+       s'installant — même règle que le contour livré éteint le 03/08. */
     pages:{"home":"","profile":"","annuaire-partenaire-de-cas":"","fiches-secteur":"#fad54a","etudes-cas":"#6b7280","fiches-cabinet":"#007260",
-           "formation-par-modules":"","sentrainer":"","formation-par-thematiques":""},
+           "formation-par-modules":"","sentrainer":"","formation-par-thematiques":"",
+           "inscription":"","formules":"","payment":"","email-verification-pending":""},
     reglages:{"lien_video":"","lien_video_background":""},
     /* Couleur du picto de chaque entrée du méga menu. Clé = le CHEMIN que vise le
        lien (pas le libellé : Weglot le traduit). Vide = l'entrée retombe sur
@@ -910,7 +1252,14 @@ body.ps-verrou .ps-porte{display:grid}
            "fiches-cabinet":{contour:false,ep:4,duree:1.1,couleur:""},
            "fiches-secteur":{contour:false,ep:4,duree:1.1,couleur:""},
            "etudes-cas":{contour:false,ep:4,duree:1.1,couleur:""},
-           "formation-par-thematiques":{contour:false,ep:4,duree:1.1,couleur:""}}
+           "formation-par-thematiques":{contour:false,ep:4,duree:1.1,couleur:""},
+           /* Seule `formules` a des cartes que le liseré sait atteindre — les
+              trois autres n'en ont pas du tout, et leur entrée n'existe ici que
+              pour que « Annuler mes changements » ait quelque chose à restaurer. */
+           "formules":{contour:false,ep:4,duree:1.1,couleur:""},
+           "inscription":{contour:false,ep:4,duree:1.1,couleur:""},
+           "payment":{contour:false,ep:4,duree:1.1,couleur:""},
+           "email-verification-pending":{contour:false,ep:4,duree:1.1,couleur:""}}
   };
   /* 🔴 Les LIBELLÉS vivent ici et non dans tokens.js : le bloc y est réécrit par
      ce fichier, donc tout commentaire posé entre les marqueurs serait effacé à la
@@ -929,10 +1278,29 @@ body.ps-verrou .ps-porte{display:grid}
        configuration — le board n'est pas reproduit dans la maquette. */
     ["profile",                 "Profil"],
     ["annuaire-partenaire-de-cas","Annuaire"],
+    /* ---- LE PARCOURS D'INSCRIPTION, dans l'ordre où l'étudiant le traverse ----
+       Les quatre onglets sont volontairement EN FIN DE LISTE et groupés : ce ne
+       sont pas des pages de catalogue, ce sont les écrans d'entrée. Les mettre
+       dans l'ordre du parcours plutôt que par ordre d'ajout est le seul classement
+       qui se retienne — c'est aussi celui du bandeau d'étapes de l'aperçu. */
+    /* Page d'aiguillage (04/08) : l'adresse e-mail décide du chemin. Slug
+       `inscription`, écrit AUSSI dans le code du site — la renommer coupe
+       l'aiguillage. */
+    ["inscription",             "Inscription"],
     /* Page d'offre (04/08). Ses deux cartes sont construites par
        `abonnement.js` et utilisent `var(--ps-accent)` partout : la couleur de
        page les repeint donc en entier, prix, badge, boutons et liseré compris. */
-    ["formules",                "Formules"]
+    ["formules",                "Formules"],
+    /* 🔴 `payment` N'EST PAS UN SLUG LEARNWORLDS. Cette page est servie par la
+       plateforme, pas construite dans le Site Builder : son `<body>` ne porte
+       aucune classe `slug-…`. La couleur de page l'atteint quand même, parce que
+       `tokens.js` retombe sur le dernier segment de l'URL (`/payment`) quand la
+       classe manque — ce repli, écrit le 03/08 contre le clignotement de marque,
+       est ce qui rend cet onglet possible. Le retirer casserait CETTE page. */
+    ["payment",                 "Paiement"],
+    /* Page de validation d'adresse. Servie par LearnWorlds elle aussi, mais elle
+       porte bien `body.slug-email-verification-pending` (mesuré le 05/08). */
+    ["email-verification-pending","Vérification"]
   ];
 
   /* ====================================================================
@@ -1128,6 +1496,14 @@ body.ps-verrou .ps-porte{display:grid}
     document.querySelectorAll('.stage [data-p]').forEach(function(el){
       var l=el.getAttribute("data-p");
       el.style.display=(l==="*"||l.split(" ").indexOf(pageActive)>=0)?"":"none";
+    });
+    /* 🔴 LE BANDEAU DU PARCOURS EST UNIQUE, ET C'EST LUI QUI SE MARQUE.
+       Quatre bandeaux — un par onglet — auraient quadruplé le texte à corriger
+       le jour où le parcours change, et rien n'aurait signalé la divergence.
+       Il n'existe que sur les quatre onglets du parcours ; ailleurs la boucle
+       ne trouve rien et ne fait rien. */
+    document.querySelectorAll("#pvParc .pv-parc-s").forEach(function(s){
+      s.classList.toggle("on", s.getAttribute("data-s")===pageActive);
     });
     /* Les deux corps du bloc à onglets s'échangent : réglages globaux ou réglages
        de la page. 🔴 On les MASQUE, on ne les reconstruit pas — les contrôles du
@@ -1716,6 +2092,20 @@ body.ps-verrou .ps-porte{display:grid}
       "La cocher impose une seule couleur à toutes les tuiles.");
     ligneCurseur(d,"Diamètre des anneaux","pfRing",40,120,2,"px");
     ligneCurseur(d,"Épaisseur des barres","pfBar",4,20,1,"px");
+    /* 🔴 CE RÉGLAGE N'EST PAS ICI, ET IL FAUT LE DIRE (05/08). L'échelle des
+       grades du bandeau (Junior → PrepaStrat Master) se règle depuis le SITE
+       BUILDER, en lignes `gradeN-nom / gradeN-seuil / gradeN-mot` dans un bloc
+       de texte de la page — même convention que les tarifs de `/formules`.
+       Sans cette mention, on cherche le réglage dans le seul endroit qui
+       ressemble à un panneau de configuration, et on ne le trouve jamais :
+       un réglage introuvable équivaut à un réglage absent. */
+    var n=document.createElement("div"); n.className="note"; n.style.marginTop="10px";
+    n.innerHTML="Les <strong>noms et paliers des grades</strong> ne se règlent pas ici mais dans le "+
+      "<strong>Site Builder</strong>, en lignes <code style=\"font-family:ui-monospace,Menlo,monospace\">grade1-nom : Junior</code>, "+
+      "<code style=\"font-family:ui-monospace,Menlo,monospace\">grade1-seuil : 0</code> posées dans un bloc de texte de la page. "+
+      "Le bloc est masqué automatiquement sur le site. "+
+      "<a href=\"aide-parcours.html#reglages\" target=\"_blank\" rel=\"noopener\" style=\"color:#3466A8;font-weight:700\">Voir l'aide</a>";
+    d.appendChild(n);
     return d;
   }
 
@@ -2056,8 +2446,24 @@ body.ps-verrou .ps-porte{display:grid}
     var vivant={}, hors={};
     j.pages.forEach(function(p){ vivant[p]=1; });
     (j.horsSitemap||[]).forEach(function(p){ hors[p]=1; });
+    /* 🔴🔴 LES PAGES SYSTÈME NE SONT PAS DANS LE SITEMAP, ET C'EST NORMAL.
+       Trouvé le 05/08 en ajoutant les onglets du parcours : `/payment` et
+       `/email-verification-pending` sont servies par LearnWorlds, pas construites
+       dans le Site Builder — elles ne figurent donc dans aucun sitemap, et cette
+       fonction les aurait signalées comme « renommées » à chaque ouverture de
+       l'outil. Un avertissement qui se déclenche à tort apprend à être ignoré :
+       c'est écrit dix lignes plus haut, et l'ajout des onglets l'aurait rendu
+       faux le jour même.
+       🔴 LA LISTE VIT AUSSI CÔTÉ WORKER (`SLUGS_HORS_SITEMAP`), qui a le même
+       besoin au moment de publier. Celle-ci ne la remplace pas : elle protège
+       l'outil même quand le Worker n'est pas à jour, ce qui est exactement le cas
+       tant que la version déployée ne connaît pas ces deux pages.
+       🔴 NE PAS Y METTRE `inscription` NI `formules` : ce sont de VRAIES pages du
+       Site Builder. Elles doivent rester surveillées — ce sont même les deux
+       dont un renommage casse le plus de choses. */
+    var PAGES_SYSTEME={"payment":1,"email-verification-pending":1};
     var douteux=[];
-    PAGES_LIB.forEach(function(p){ if(!vivant[p[0]] && !hors[p[0]]) douteux.push(p[1]+" <code>"+p[0]+"</code>"); });
+    PAGES_LIB.forEach(function(p){ if(!PAGES_SYSTEME[p[0]] && !vivant[p[0]] && !hors[p[0]]) douteux.push(p[1]+" <code>"+p[0]+"</code>"); });
     MENU_LIB.forEach(function(e){ if(!vivant[e[0]] && !hors[e[0]]) douteux.push("menu : "+e[1]+" <code>"+e[0]+"</code>"); });
     if(!douteux.length) return;
     peindreNote(el,"⚠️ <strong>"+douteux.length+" réglage(s) visent une page qui ne figure plus dans le sitemap du site.</strong> "+

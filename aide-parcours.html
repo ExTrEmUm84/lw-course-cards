@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Aide — Le parcours d'inscription · PrepaStrat</title>
+<!--
+  ============================================================
+  AIDE : LE PARCOURS D'INSCRIPTION ET DE PAIEMENT
+  https://extremum84.github.io/lw-course-cards/aide-parcours.html
+  ------------------------------------------------------------
+  Ouverte depuis le configurateur (troisième lien d'aide, colonne de gauche).
+
+  🔴 POURQUOI UNE TROISIÈME AIDE PLUTÔT QU'UNE SECTION DE PLUS DANS
+  `aide-ecoles.html` : tout l'intérêt de la page d'entrée est de SÉPARER le
+  cas gratuit (école) du cas payant (indépendant). Les documenter au même
+  endroit aurait reproduit le mélange que le dispositif défait. L'aide
+  « écoles » garde donc la mécanique des étiquettes et des automatisations ;
+  celle-ci décrit le chemin que suit une personne, quel que soit son cas.
+
+  🔴 LES « CAPTURES » SONT DES RECONSTITUTIONS EN HTML, PAS DES IMAGES.
+  Même règle que les deux autres aides : une capture se périme en silence le
+  jour où LearnWorlds change son interface. Chaque bloc porte la mention.
+
+  🔴 CONTENU MESURÉ LES 04 ET 05/08/2026 sur le site et dans l'admin : les
+  deux tarifs et leurs identifiants de plan, les quatre pages du parcours et
+  leurs slugs, le déclencheur des automatisations (passé de « s'inscrit » à
+  « vérifie son adresse » le 05/08), et la liste des clés de réglage.
+  ⚠️ LES TARIFS CITÉS ICI SONT DONC DATÉS. Ils vivent en trois endroits :
+  LearnWorlds (qui facture), le bloc de texte de la page Formules (qui
+  affiche), et cette page (qui explique). Un changement de prix doit passer
+  par les trois — c'est écrit en toutes lettres dans la section 4.
+  ============================================================
+-->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Figtree:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ps-accent:#507EC5;
+  --ps-accent-hover:#486798;
+  --ps-accent-tint:#edf4ff;
+  --ps-navy:#243B6B;
+  --ps-text:#1c1f26;
+  --ps-text-soft:#676879;
+  --ps-surface-soft:#F7F8FB;
+  --ps-border:#E6E9EF;
+  --ps-font:Figtree,-apple-system,Segoe UI,Roboto,sans-serif;
+  --ps-r-card:16px;
+  --ps-ok:#217A52; --ps-ok-tint:#E4F5EC;
+  --ps-no:#B0432C; --ps-no-tint:#FBE9E6;
+  --ps-warn:#8A5320; --ps-warn-tint:#FFF6ED; --ps-warn-border:#f6ddc0;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{font-family:var(--ps-font);color:var(--ps-text);background:var(--ps-surface-soft);line-height:1.55;-webkit-font-smoothing:antialiased}
+
+/* ---------- en-tête ---------- */
+.hero{background:var(--ps-navy);color:#fff;padding:56px 40px 60px}
+.hero-in{max-width:1180px;margin:0 auto}
+.hero .kicker{font-size:12px;font-weight:800;letter-spacing:.2em;text-transform:uppercase;color:#7fa3d8;margin-bottom:18px}
+.hero h1{font-size:clamp(30px,4.2vw,46px);font-weight:800;letter-spacing:-.02em;line-height:1.12;max-width:22ch}
+.hero p{margin-top:16px;font-size:clamp(16px,1.8vw,19px);color:#c3cee4;max-width:62ch}
+.hero .back{display:inline-flex;align-items:center;gap:8px;margin-top:26px;font-size:14px;font-weight:700;color:#a9c0e5;text-decoration:none;border:1px solid #3c568d;padding:9px 16px;border-radius:999px;transition:.15s}
+.hero .back:hover{background:#2c477d;color:#fff}
+
+/* ---------- gabarit ---------- */
+.page{max-width:1180px;margin:0 auto;padding:0 40px 90px;display:grid;grid-template-columns:236px 1fr;gap:52px;align-items:start}
+nav.toc{position:sticky;top:28px;margin-top:-28px;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);padding:20px 18px;box-shadow:0 6px 22px rgba(15,23,42,.05)}
+nav.toc h2{font-size:11px;font-weight:800;letter-spacing:.14em;text-transform:uppercase;color:var(--ps-accent);margin-bottom:14px}
+nav.toc a{display:block;font-size:14px;font-weight:600;color:var(--ps-text-soft);text-decoration:none;padding:7px 10px;border-radius:8px;transition:.13s}
+nav.toc a:hover{background:var(--ps-accent-tint);color:var(--ps-navy)}
+nav.toc .sep{height:1px;background:var(--ps-border);margin:12px 4px}
+nav.toc .ext{font-size:13px;color:#98a1b3}
+main{padding-top:36px;min-width:0}
+
+/* ---------- sections dépliables ---------- */
+details{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);margin-bottom:16px;box-shadow:0 6px 22px rgba(15,23,42,.05);overflow:hidden}
+details[open]{border-color:#d7e2f3}
+summary{list-style:none;cursor:pointer;padding:22px 26px;display:flex;align-items:center;gap:16px;font-size:19px;font-weight:800;color:var(--ps-navy);transition:.13s}
+summary::-webkit-details-marker{display:none}
+summary:hover{background:var(--ps-accent-tint)}
+summary .chev{margin-left:auto;flex:none;width:22px;height:22px;color:#b9c3d6;transition:transform .2s}
+details[open] summary .chev{transform:rotate(90deg);color:var(--ps-accent)}
+summary .idx{flex:none;width:30px;height:30px;border-radius:50%;background:var(--ps-accent-tint);color:var(--ps-accent);display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
+.inner{padding:4px 26px 28px}
+.inner > * + *{margin-top:16px}
+.inner p{font-size:16px;color:#4b5262}
+.inner strong{font-weight:700;color:var(--ps-navy)}
+.inner ul{padding-left:20px;font-size:16px;color:#4b5262}
+.inner li + li{margin-top:9px}
+code{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.87em;background:var(--ps-accent-tint);color:var(--ps-navy);padding:2px 8px;border-radius:6px;font-weight:600;white-space:nowrap}
+
+/* ---------- encadrés ---------- */
+.box{border-radius:12px;padding:16px 20px;font-size:15.5px;border:1px solid}
+.box.info{background:var(--ps-accent-tint);border-color:#d3e2f8;color:var(--ps-navy)}
+.box.warn{background:var(--ps-warn-tint);border-color:var(--ps-warn-border);color:var(--ps-warn)}
+.box.warn strong{color:#6f4118}
+.box.no{background:var(--ps-no-tint);border-color:#f4cec6;color:#8A2233}
+.box.no strong{color:#6d1c2b}
+
+/* ---------- reconstitutions d'écran ---------- */
+figure{margin:20px 0 0;border:1px solid var(--ps-border);border-radius:14px;background:#fff;overflow:hidden}
+figure .bar{display:flex;align-items:center;gap:7px;padding:10px 14px;background:#F3F5F9;border-bottom:1px solid var(--ps-border)}
+figure .bar i{width:9px;height:9px;border-radius:50%;background:#d3d8e2;display:block}
+figure .bar span{margin-left:8px;font-size:11.5px;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:#98a1b3}
+figure .shot{padding:22px;overflow-x:auto;background:var(--ps-surface-soft)}
+figcaption{padding:11px 18px;font-size:13px;color:#8d95a6;background:#FAFBFD;border-top:1px solid var(--ps-border);font-style:italic}
+
+/* écran 1 : l'aiguillage */
+.sc-ins{max-width:410px;margin:0 auto;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);padding:24px;text-align:center}
+.sc-ins h4{font-size:19px;font-weight:800;color:var(--ps-navy);margin-bottom:6px}
+.sc-ins p{font-size:13.5px;color:var(--ps-text-soft);margin-bottom:16px;line-height:1.5}
+.sc-f{display:flex;gap:8px}
+.sc-f .inp{flex:1;min-width:0;padding:10px 12px;border:1px solid var(--ps-border);border-radius:10px;font-size:13.5px;color:var(--ps-text);text-align:left;background:#fff}
+.sc-f .btn{display:grid;place-items:center;padding:0 16px;border-radius:10px;background:var(--ps-accent);color:#fff;font-size:13.5px;font-weight:700;white-space:nowrap}
+.sc-split{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px;text-align:left}
+.sc-split div{border:1px dashed var(--ps-border);border-radius:11px;padding:11px 12px}
+.sc-split b{display:block;font-size:10px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;color:var(--ps-accent);margin-bottom:4px}
+.sc-split span{font-size:12px;line-height:1.45;color:var(--ps-text-soft)}
+
+/* écran 2 : les deux formules */
+.sc-abo{display:grid;grid-template-columns:1fr 1fr;gap:14px;max-width:520px;margin:0 auto}
+.sc-abo .c{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);padding:20px 18px;position:relative}
+.sc-abo .c.hot{border-color:var(--ps-accent);box-shadow:0 10px 28px rgba(80,126,197,.16)}
+.sc-abo .bdg{position:absolute;top:-10px;left:18px;background:var(--ps-accent);color:#fff;border-radius:999px;padding:4px 11px;font-size:10.5px;font-weight:700}
+.sc-abo .nm{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.08em;color:var(--ps-accent)}
+.sc-abo .pr{font-size:28px;font-weight:800;color:var(--ps-navy);margin:8px 0 2px;line-height:1}
+.sc-abo .pr small{font-size:13px;font-weight:600;color:var(--ps-text-soft)}
+.sc-abo .dt{font-size:12px;color:var(--ps-text-soft);min-height:34px}
+.sc-abo .go{display:block;text-align:center;margin-top:12px;padding:10px;border-radius:10px;background:var(--ps-accent);color:#fff;font-size:13px;font-weight:700}
+.sc-abo .go.gh{background:transparent;color:var(--ps-accent);border:1px solid var(--ps-accent)}
+
+/* écran 3 : la validation d'adresse */
+.sc-ver{max-width:420px;margin:0 auto;text-align:center;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);padding:26px 24px}
+.sc-ver .ic{width:58px;height:58px;border-radius:50%;background:var(--ps-accent-tint);color:var(--ps-accent);display:grid;place-items:center;margin:0 auto 14px}
+.sc-ver .ic svg{width:26px;height:26px;fill:none;stroke:currentColor;stroke-width:1.7}
+.sc-ver h4{font-size:20px;font-weight:800;color:var(--ps-navy);margin-bottom:7px}
+.sc-ver p{font-size:13.5px;color:var(--ps-text-soft);line-height:1.55}
+.sc-ver .ml{display:inline-block;background:var(--ps-accent-tint);color:var(--ps-accent);border-radius:999px;padding:5px 14px;font-size:13px;font-weight:700;margin:10px 0}
+.sc-ver .bs{display:flex;gap:9px;justify-content:center;flex-wrap:wrap;margin-top:10px}
+.sc-ver .bs b{padding:9px 16px;border-radius:10px;background:var(--ps-accent);color:#fff;font-size:13px}
+.sc-ver .bs i{padding:9px 16px;border-radius:10px;border:1px solid var(--ps-border);color:var(--ps-text-soft);font-size:13px;font-style:normal;font-weight:600}
+
+/* écran 4 : le cadenas sur une carte */
+.sc-lock{display:flex;gap:16px;align-items:center;flex-wrap:wrap;justify-content:center}
+.sc-lock .card{flex:0 0 190px;background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);padding:14px;position:relative;overflow:hidden}
+.sc-lock .card .ph{height:62px;border-radius:10px;background:linear-gradient(100deg,#EEF1F6,#F7F8FB)}
+.sc-lock .card .ln{height:9px;width:78%;border-radius:5px;background:#E6E9EF;margin-top:11px}
+.sc-lock .card .ln.s{width:52%;margin-top:7px}
+.sc-lock .card .vo{position:absolute;inset:0;background:rgba(255,255,255,.62);backdrop-filter:blur(2.5px);display:grid;place-items:center}
+.sc-lock .card .vo b{display:flex;align-items:center;gap:7px;background:var(--ps-accent);color:#fff;border-radius:999px;padding:8px 14px;font-size:12px;font-weight:700}
+.sc-lock .card .vo svg{width:13px;height:13px;fill:none;stroke:currentColor;stroke-width:2.2}
+
+/* ---------- chaîne en 4 temps ---------- */
+.chain{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:20px}
+.chain .c{background:#fff;border:1px solid var(--ps-border);border-radius:12px;padding:16px 14px;position:relative}
+.chain .c .n{width:26px;height:26px;border-radius:50%;background:var(--ps-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:800;margin-bottom:10px}
+.chain .c h4{font-size:14.5px;font-weight:800;color:var(--ps-navy);margin-bottom:6px;line-height:1.3}
+.chain .c p{font-size:13.5px;color:#5b6272;line-height:1.45}
+.chain .c .sl{display:block;font-size:11px;font-family:ui-monospace,Menlo,monospace;color:#98a1b3;margin-top:8px;word-break:break-all}
+.chain .c:not(:last-child)::after{content:"›";position:absolute;right:-9px;top:50%;transform:translateY(-50%);color:#c3cad6;font-size:22px;z-index:1}
+
+/* ---------- tableaux ---------- */
+.tab{width:100%;border-collapse:collapse;font-size:15px;margin-top:6px}
+.tab th{text-align:left;background:var(--ps-navy);color:#fff;padding:12px 16px;font-size:13.5px;font-weight:700}
+.tab th:first-child{border-radius:10px 0 0 0}
+.tab th:last-child{border-radius:0 10px 0 0}
+.tab td{padding:13px 16px;border-bottom:1px solid #EDEFF4;vertical-align:top;color:#4b5262}
+.tab td:first-child{font-weight:700;color:var(--ps-navy)}
+.tab tr:last-child td{border-bottom:none}
+.pill{display:inline-block;padding:4px 12px;border-radius:999px;font-size:13px;font-weight:700}
+.pill.ok{background:var(--ps-ok-tint);color:var(--ps-ok)}
+.pill.no{background:var(--ps-no-tint);color:var(--ps-no)}
+.pill.nous{background:var(--ps-accent-tint);color:#3466A8}
+.scroll{overflow-x:auto}
+.scroll .tab{min-width:560px}
+
+/* ---------- bloc de réglage à recopier ---------- */
+.kv{background:#1E2433;border-radius:12px;padding:18px 20px;font-family:ui-monospace,'SF Mono',Menlo,monospace;
+  font-size:13px;line-height:1.75;color:#D8DEE9;overflow-x:auto}
+.kv .k{color:#8FB8F0}
+.kv .v{color:#E8D9A8}
+.kv .cm{color:#6E7789;font-style:italic}
+
+/* ---------- étapes numérotées ---------- */
+.steps{margin-top:6px}
+.stp{display:flex;gap:16px;padding:18px 0;border-bottom:1px solid #F0F2F6}
+.stp:last-child{border-bottom:none;padding-bottom:0}
+.stp .n{flex:none;width:32px;height:32px;border-radius:50%;background:var(--ps-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14.5px;font-weight:800}
+.stp h4{font-size:16.5px;font-weight:800;color:var(--ps-navy);margin-bottom:5px}
+.stp p{font-size:15.5px;color:#4b5262}
+.who{display:inline-block;margin-top:9px;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase;padding:4px 11px;border-radius:999px}
+.who.vous{background:var(--ps-ok-tint);color:var(--ps-ok)}
+.who.nous{background:var(--ps-accent-tint);color:#3466A8}
+
+footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;color:#98a1b3;border-top:1px solid var(--ps-border)}
+
+@media(max-width:900px){
+  .page{grid-template-columns:1fr;gap:0;padding:0 22px 70px}
+  nav.toc{position:static;margin:26px 0 0}
+  main{padding-top:24px}
+  .hero{padding:40px 22px 44px}
+  .chain{grid-template-columns:1fr 1fr}
+  .chain .c:not(:last-child)::after{display:none}
+  .sc-abo,.sc-split{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="hero-in">
+    <div class="kicker">PrepaStrat · Aide</div>
+    <h1>Le parcours d'inscription</h1>
+    <p>Qui entre gratuitement, qui paie, ce que chacun voit — et où se règlent les tarifs
+       sans passer par nous.</p>
+    <a class="back" href="configurateur.html">← Retour au configurateur</a>
+  </div>
+</div>
+
+<div class="page">
+
+  <nav class="toc">
+    <h2>Sommaire</h2>
+    <a href="#principe">Le principe</a>
+    <a href="#chemins">Les trois chemins</a>
+    <a href="#ecrans">Écran par écran</a>
+    <a href="#formules">La page Formules</a>
+    <a href="#validation">La validation d'adresse</a>
+    <a href="#cadenas">Le cadenas</a>
+    <a href="#reglages">Ce que vous réglez seul</a>
+    <a href="#vigilance">Ce qui peut casser</a>
+    <a href="#quifaitquoi">Qui fait quoi</a>
+    <div class="sep"></div>
+    <a href="aide-ecoles.html" class="ext">→ Les écoles partenaires</a>
+    <a href="aide-annuaire.html" class="ext">→ L'annuaire des étudiants</a>
+  </nav>
+
+  <main>
+
+    <!-- 1 -->
+    <details id="principe" open>
+      <summary><span class="idx">1</span> Le principe, en une phrase
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <div class="box info"><strong>Créer un compte n'ouvre plus rien.</strong> Tout le catalogue est en
+          inscription clôturée&nbsp;: l'accès vient d'une seule de deux portes — l'étiquette d'une école
+          partenaire, ou un abonnement payé. La page d'entrée ne fait que diriger chacun vers la sienne.</div>
+        <p>Ce que ça change, concrètement&nbsp;:</p>
+        <ul>
+          <li><strong>Un indépendant n'a plus de raison de créer un compte gratuit</strong> — il n'y
+            trouverait rien, et son compte se crée de toute façon pendant le paiement.</li>
+          <li><strong>Un étudiant d'école partenaire, lui, doit s'inscrire</strong>&nbsp;: c'est son
+            inscription qui déclenche l'ouverture de son accès.</li>
+          <li><strong>Le tri se fait sur l'adresse e-mail</strong>, avant même le formulaire. Personne
+            ne saisit de code, personne ne choisit son statut dans un menu.</li>
+        </ul>
+        <div class="box warn"><strong>La page d'entrée oriente, elle n'autorise pas.</strong> Quelqu'un
+          qui contournerait cet écran — en allant droit au formulaire d'inscription — n'obtiendrait
+          rien&nbsp;: pas d'étiquette, pas de cours. C'est ce qui permet d'afficher ce tri sans créer
+          de faille.</div>
+      </div>
+    </details>
+
+    <!-- 2 -->
+    <details id="chemins">
+      <summary><span class="idx">2</span> Les trois chemins
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <div class="scroll">
+          <table class="tab">
+            <tr><th>Qui arrive</th><th>Ce qu'il saisit</th><th>Où il est envoyé</th><th>Ce qu'il paie</th></tr>
+            <tr>
+              <td>Étudiant d'une école partenaire</td>
+              <td>Son adresse universitaire</td>
+              <td>Le formulaire d'inscription, adresse déjà remplie</td>
+              <td><span class="pill ok">Rien</span></td>
+            </tr>
+            <tr>
+              <td>Étudiant indépendant</td>
+              <td>Une adresse personnelle</td>
+              <td>La page des formules, puis le paiement</td>
+              <td><span class="pill no">99&nbsp;€ ou 84&nbsp;€ / mois</span></td>
+            </tr>
+            <tr>
+              <td>Visiteur non connecté</td>
+              <td>Rien&nbsp;: il navigue</td>
+              <td>Il voit le catalogue, cartes floutées&nbsp;; un clic mène à l'offre</td>
+              <td><span class="pill no">Rien tant qu'il ne s'abonne pas</span></td>
+            </tr>
+          </table>
+        </div>
+        <div class="box info"><strong>Un même compte ne change jamais de chemin.</strong> Ce qui décide,
+          c'est le domaine de l'adresse <em>validée</em>. Un étudiant qui s'inscrirait avec son adresse
+          personnelle alors que son école est partenaire n'obtiendra pas l'accès de son école — il faudra
+          qu'il recommence avec son adresse universitaire.</div>
+      </div>
+    </details>
+
+    <!-- 3 -->
+    <details id="ecrans">
+      <summary><span class="idx">3</span> Écran par écran
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Quatre pages, qui se passent le relais.</p>
+        <div class="chain">
+          <div class="c"><div class="n">1</div><h4>L'adresse décide</h4>
+            <p>Un seul champ. Le domaine de l'adresse choisit la suite.</p>
+            <span class="sl">/inscription</span></div>
+          <div class="c"><div class="n">2</div><h4>Le choix de la formule</h4>
+            <p>Deux offres, deux boutons. Uniquement pour qui n'a pas d'adresse d'école.</p>
+            <span class="sl">/formules</span></div>
+          <div class="c"><div class="n">3</div><h4>Le paiement</h4>
+            <p>Page de LearnWorlds, habillée à votre charte. Le compte se crée ici.</p>
+            <span class="sl">/payment</span></div>
+          <div class="c"><div class="n">4</div><h4>La validation</h4>
+            <p>Le lien reçu par e-mail. C'est lui qui ouvre l'accès d'une école.</p>
+            <span class="sl">/email-verification-pending</span></div>
+        </div>
+
+        <figure>
+          <div class="bar"><i></i><i></i><i></i><span>Reconstitution · /inscription</span></div>
+          <div class="shot">
+            <div class="sc-ins">
+              <h4>Rejoindre PrepaStrat</h4>
+              <p>Entrez votre adresse e-mail&nbsp;: si votre école est partenaire, votre accès est déjà ouvert.</p>
+              <div class="sc-f"><div class="inp">prenom.nom@essec.edu</div><div class="btn">Continuer</div></div>
+              <div class="sc-split">
+                <div><b>Adresse d'école</b><span>Le formulaire s'ouvre, adresse déjà remplie. Aucun paiement.</span></div>
+                <div><b>Toute autre adresse</b><span>Direction les formules. Le compte se créera au paiement.</span></div>
+              </div>
+            </div>
+          </div>
+          <figcaption>Reconstitution dessinée à la main — l'écran réel peut différer dans le détail.</figcaption>
+        </figure>
+
+        <div class="box warn" style="margin-top:20px"><strong>Cette page ne doit pas être chargée depuis
+          le code d'une page.</strong> Son public est fait de gens <em>non connectés</em>, et LearnWorlds
+          ne leur envoie que le code du site. Chargée au mauvais endroit, elle resterait blanche pour
+          exactement ceux à qui elle s'adresse. C'est un réglage de notre côté&nbsp;: à ne pas déplacer.</div>
+      </div>
+    </details>
+
+    <!-- 4 -->
+    <details id="formules">
+      <summary><span class="idx">4</span> La page Formules, et les prix
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <figure style="margin-top:0">
+          <div class="bar"><i></i><i></i><i></i><span>Reconstitution · /formules</span></div>
+          <div class="shot">
+            <div class="sc-abo">
+              <div class="c">
+                <div class="nm">Mensuel</div>
+                <div class="pr">99&nbsp;€<small> / mois</small></div>
+                <div class="dt">Sans engagement, résiliable à tout moment.</div>
+                <div class="go gh">Choisir le mensuel</div>
+              </div>
+              <div class="c hot">
+                <span class="bdg">−15 % par mois</span>
+                <div class="nm">3 mois</div>
+                <div class="pr">84&nbsp;€<small> / mois</small></div>
+                <div class="dt">Facturé 252&nbsp;€ tous les 3&nbsp;mois. Vous économisez 45&nbsp;€.</div>
+                <div class="go">Choisir les 3 mois</div>
+              </div>
+            </div>
+          </div>
+          <figcaption>Reconstitution. Les deux cartes prennent la couleur réglée pour cette page dans le configurateur.</figcaption>
+        </figure>
+
+        <div class="box no"><strong>Le prix affiché ici n'est pas lu dans LearnWorlds.</strong>
+          La plateforme ne permet pas de récupérer un tarif depuis une autre page&nbsp;: les boutons
+          d'achat sont des blocs sans lien, et le prix n'apparaît qu'à l'écran de paiement.
+          Il est donc <strong>écrit</strong> — dans le bloc de texte de la page (voir §7).
+          <br><br><strong>Changer un tarif dans LearnWorlds sans corriger ce bloc fait mentir la page.</strong>
+          Le garde-fou n'est pas technique, il est humain. L'étudiant verra toutefois le vrai prix
+          à l'écran de paiement avant de valider&nbsp;: l'écart se voit, il n'est jamais facturé.</div>
+
+        <div class="box warn"><strong>Chaque bouton porte l'identifiant de son plan.</strong> Sans lui,
+          LearnWorlds sélectionne <em>la formule mensuelle</em> en silence, et la trimestrielle devient
+          inatteignable. Conséquence pratique&nbsp;: <strong>si un plan est supprimé puis recréé côté
+          LearnWorlds, son identifiant change</strong> et le bouton mène à la mauvaise offre — sans
+          aucun message d'erreur. À nous signaler à chaque changement de tarification.</div>
+
+        <p><strong>Un piège déjà rencontré&nbsp;:</strong> deux programmes de noms voisins coexistent
+          (« Collection Abonnement » et « Formation PrepaStrat Conseil »). Les deux répondent normalement
+          quand on ouvre leur page&nbsp;: <strong>une page qui s'affiche ne prouve pas qu'on est au bon
+          endroit.</strong> C'est le second qui est vendu ici.</p>
+      </div>
+    </details>
+
+    <!-- 5 -->
+    <details id="validation">
+      <summary><span class="idx">5</span> La validation d'adresse, devenue le pivot
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <div class="box info"><strong>L'étiquette d'école est posée quand l'adresse est validée, plus
+          quand le compte est créé.</strong> C'est un changement de réglage fait le 5 août&nbsp;: on ne
+          donne plus l'accès d'une école payante à une adresse que personne n'a prouvée.</div>
+
+        <figure style="margin-top:0">
+          <div class="bar"><i></i><i></i><i></i><span>Reconstitution · l'écran d'attente de validation</span></div>
+          <div class="shot">
+            <div class="sc-ver">
+              <div class="ic"><svg viewBox="0 0 24 24"><rect x="2.5" y="4.5" width="19" height="15" rx="2.5"/><path d="m3 6 9 6.5L21 6"/></svg></div>
+              <h4>Vérifiez votre adresse e-mail</h4>
+              <p>Nous venons d'envoyer un lien de confirmation à</p>
+              <span class="ml">prenom.nom@essec.edu</span>
+              <p>Ouvrez-le pour activer votre compte. Pensez à regarder dans les indésirables.</p>
+              <div class="bs"><b>Renvoyer l'e-mail</b><i>J'ai déjà validé</i></div>
+            </div>
+          </div>
+          <figcaption>Reconstitution. Cette page était livrée en anglais par LearnWorlds et affichait un
+            code technique à la place de l'adresse&nbsp;: elle a été retraduite et remise à la charte.</figcaption>
+        </figure>
+
+        <p><strong>Ce que ça implique pour une promo&nbsp;:</strong> un étudiant d'école partenaire qui
+          ne clique jamais le lien reçu <em>n'a aucun accès</em>, quelle que soit son adresse. Il voit un
+          site verrouillé sans comprendre pourquoi. C'est le premier point à vérifier quand une école
+          signale « ça ne marche pas pour certains ».</p>
+
+        <ul>
+          <li><strong>« J'ai déjà validé » recharge la page.</strong> Juste après le clic sur le lien reçu,
+            la page servie annonce encore un compte en attente pendant quelques instants&nbsp;: sans ce
+            bouton, on réclamait une validation à quelqu'un qui venait de la faire.</li>
+          <li><strong>« Retour au site » déconnecte</strong> — c'est un bouton de LearnWorlds, dont le
+            libellé a été corrigé pour dire ce qu'il fait.</li>
+          <li><strong>Nos rappels se taisent tant que le compte n'est pas validé.</strong> On ne demande
+            pas à quelqu'un de compléter sa fiche d'annuaire avant qu'il ait un compte utilisable.</li>
+        </ul>
+
+        <h4 style="font-size:15px;font-weight:800;color:var(--ps-navy);margin-top:24px">Le bandeau d'orientation, en haut du site</h4>
+        <p>Un membre connecté qui n'a pas encore d'accès voit un bandeau, en tête de page. Il en existe
+          <strong>trois versions</strong>, et la bonne se choisit toute seule — il n'y a aucun réglage.</p>
+        <div class="scroll">
+          <table class="tab">
+            <tr><th>Situation du compte</th><th>Ce que dit le bandeau</th><th>Le bouton</th></tr>
+            <tr><td>Adresse non validée</td>
+              <td>« Validez votre adresse e-mail pour ouvrir votre accès »</td>
+              <td>Renvoyer le lien — <strong>aucune offre</strong></td></tr>
+            <tr><td>École partenaire, en attente d'ouverture</td>
+              <td>« Votre accès est pris en charge par &lt;École&gt; »</td>
+              <td>Nous écrire — <strong>aucune offre</strong></td></tr>
+            <tr><td>Aucun accès, aucune école</td>
+              <td>« Il vous reste une étape pour ouvrir le catalogue »</td>
+              <td>Voir les formules</td></tr>
+          </table>
+        </div>
+        <div class="box info"><strong>On ne propose jamais de payer à quelqu'un qui n'a rien à
+          acheter.</strong> C'est la règle qui gouverne ces trois versions&nbsp;: un étudiant dont
+          l'école a payé, ou dont l'adresse attend simplement d'être validée, ne doit pas se voir
+          réclamer 99&nbsp;€. Les bandeaux restent d'ailleurs silencieux sur les pages du parcours
+          lui-même — inutile de proposer l'offre à quelqu'un qui la lit déjà.</div>
+      </div>
+    </details>
+
+    <!-- 6 -->
+    <details id="cadenas">
+      <summary><span class="idx">6</span> Le cadenas sur les cours fermés
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <figure style="margin-top:0">
+          <div class="bar"><i></i><i></i><i></i><span>Reconstitution · une carte de cours verrouillée</span></div>
+          <div class="shot">
+            <div class="sc-lock">
+              <div class="card">
+                <div class="ph"></div><div class="ln"></div><div class="ln s"></div>
+                <div class="vo"><b><svg viewBox="0 0 24 24"><rect x="4" y="10.5" width="16" height="10" rx="2.2"/><path d="M8 10.5V7.6a4 4 0 0 1 8 0v2.9"/></svg> S'abonner</b></div>
+              </div>
+              <div class="card">
+                <div class="ph"></div><div class="ln"></div><div class="ln s"></div>
+              </div>
+            </div>
+          </div>
+          <figcaption>Reconstitution. À gauche&nbsp;: un cours fermé, flouté. À droite&nbsp;: un cours
+            réellement ouvert — le webinaire gratuit, par exemple, reste cliquable.</figcaption>
+        </figure>
+
+        <p><strong>La carte est floutée, pas remplacée&nbsp;:</strong> on reconnaît le cours, on ne peut
+          pas l'ouvrir. Sans ce cadenas, le clic menait à l'écran d'accès refusé de LearnWorlds — un
+          cul-de-sac qui ne propose rien.</p>
+
+        <div class="scroll">
+          <table class="tab">
+            <tr><th>Qui</th><th>Voit le cadenas&nbsp;?</th><th>Où mène son clic</th></tr>
+            <tr><td>Abonné</td><td><span class="pill ok">Non</span></td><td>Dans le cours</td></tr>
+            <tr><td>Étudiant d'école, adresse validée</td><td><span class="pill ok">Non</span></td>
+              <td>Dans le cours (ou l'écran d'accès de LearnWorlds pendant les quelques minutes
+                que met l'inscription automatique)</td></tr>
+            <tr><td>Étudiant d'école, adresse <strong>non validée</strong></td><td><span class="pill no">Oui</span></td>
+              <td>Vers la page de validation — <strong>jamais vers le paiement</strong>&nbsp;: son école
+                a déjà payé</td></tr>
+            <tr><td>Visiteur ou compte sans abonnement</td><td><span class="pill no">Oui</span></td>
+              <td>Vers la page des formules</td></tr>
+          </table>
+        </div>
+
+        <div class="box info">Le cadenas n'a <strong>aucun réglage</strong>&nbsp;: ni couleur propre, ni
+          texte modifiable. Il suit la couleur de la page sur laquelle il apparaît. Le configurateur le
+          montre, à titre d'information, sur l'onglet de chacune des pages concernées.</div>
+      </div>
+    </details>
+
+    <!-- 7 -->
+    <details id="reglages">
+      <summary><span class="idx">7</span> Ce que vous réglez seul, sans nous
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Deux pages lisent leurs textes dans un <strong>bloc de texte normal, écrit dans le Site
+          Builder</strong>. Vous corrigez un prix ou un libellé comme vous corrigeriez n'importe quel
+          paragraphe&nbsp;; le site le reprend au chargement suivant.</p>
+
+        <div class="box info"><strong>Le bloc est ensuite masqué automatiquement.</strong> Sans ça,
+          chaque visiteur lirait <code>f1-prix : 99 €</code> en clair au milieu de la page. Vous le voyez
+          dans l'éditeur, personne ne le voit sur le site.</div>
+
+        <p><strong>La convention&nbsp;:</strong> une ligne par réglage, sous la forme
+          <code>clé : valeur</code>. L'ordre des lignes n'a aucune importance — c'est la clé qui compte.
+          Une clé mal orthographiée ne casse rien&nbsp;: la valeur d'origine est conservée. Le pire cas
+          est «&nbsp;ma correction n'apparaît pas&nbsp;», jamais «&nbsp;la page affiche autre chose&nbsp;».</p>
+
+        <h4 style="font-size:15px;font-weight:800;color:var(--ps-navy);margin-top:22px">Page Formules — le bloc de tarifs</h4>
+        <div class="kv"><span class="cm"># bloc de texte posé sur la page /formules</span>
+<span class="k">titre</span> : <span class="v">Choisissez votre formule</span>
+<span class="k">f1-nom</span> : <span class="v">Mensuel</span>
+<span class="k">f1-prix</span> : <span class="v">99 €</span>
+<span class="k">f1-unite</span> : <span class="v">par mois</span>
+<span class="k">f1-detail</span> : <span class="v">Sans engagement, résiliable à tout moment.</span>
+<span class="k">f1-bouton</span> : <span class="v">Choisir le mensuel</span>
+<span class="k">f2-nom</span> : <span class="v">3 mois</span>
+<span class="k">f2-prix</span> : <span class="v">84 €</span>
+<span class="k">f2-detail</span> : <span class="v">Facturé 252 € tous les 3 mois.</span>
+<span class="k">f2-badge</span> : <span class="v">−15 % par mois</span></div>
+        <p style="font-size:14.5px;color:#6b7280;margin-top:10px">Clés disponibles&nbsp;:
+          <code>surtitre</code> <code>titre</code> <code>description</code> <code>produit</code>,
+          puis pour chaque formule <code>f1-…</code> / <code>f2-…</code>
+          (<code>nom</code>, <code>prix</code>, <code>unite</code>, <code>detail</code>,
+          <code>bouton</code>, <code>package</code>, <code>lien</code>, et <code>f2-badge</code>),
+          la liste des avantages (<code>inclus-titre</code>, puis <code>inclus1-titre</code> /
+          <code>inclus1-detail</code> jusqu'à <code>inclus4-…</code>) et <code>pied</code>.</p>
+        <div class="box warn"><code>f1-package</code> et <code>f2-package</code> portent les
+          <strong>identifiants de plan</strong>. Ne les modifiez que si un plan a été recréé dans
+          LearnWorlds — une valeur fausse envoie l'étudiant vers la mauvaise formule.</div>
+
+        <h4 style="font-size:15px;font-weight:800;color:var(--ps-navy);margin-top:26px">Page Profil — l'échelle des grades</h4>
+        <p>Même mécanique sur le tableau de bord du membre&nbsp;: le grade affiché selon l'avancement
+          se règle en lignes, dans un bloc de texte de la page.</p>
+        <div class="kv"><span class="cm"># bloc de texte posé sur la page /profile</span>
+<span class="k">grade1-nom</span> : <span class="v">Junior</span>
+<span class="k">grade1-seuil</span> : <span class="v">0</span>
+<span class="k">grade1-mot</span> : <span class="v">Votre préparation démarre.</span>
+<span class="k">grade2-nom</span> : <span class="v">Consultant</span>
+<span class="k">grade2-seuil</span> : <span class="v">10</span>
+<span class="cm"># … jusqu'à grade6</span></div>
+        <ul style="margin-top:14px">
+          <li>Le <strong>seuil</strong> est un pourcentage d'avancement, à partir duquel le grade est
+            atteint. L'ordre de saisie n'a pas d'importance&nbsp;: les paliers sont triés tout seuls.</li>
+          <li>Un grade <strong>sans nom ou sans seuil lisible est ignoré</strong> — mieux vaut une
+            échelle amputée d'un palier qu'un grade vide sur le profil d'un étudiant.</li>
+          <li>Si rien n'est exploitable, l'échelle par défaut (Junior → PrepaStrat Master) est conservée.</li>
+        </ul>
+
+        <div class="box info" style="margin-top:20px"><strong>Tout le reste se règle dans le
+          configurateur</strong>&nbsp;: couleurs de marque et de page, police, arrondis, couleurs du menu.
+          Les quatre pages de ce parcours y ont chacune leur onglet.</div>
+      </div>
+    </details>
+
+    <!-- 8 -->
+    <details id="vigilance">
+      <summary><span class="idx">8</span> Ce qui peut casser, et comment l'éviter
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <div class="box no"><strong>Renommer une page casse la chaîne en silence.</strong> L'adresse
+          d'une page (<code>/inscription</code>, <code>/formules</code>) est écrite dans le code du
+          site&nbsp;: une page renommée perd son habillage et sa couleur, et les liens qui y menaient
+          tombent en 404 — <em>sans aucun message</em>. C'est arrivé quatre fois en une semaine début
+          août, dont un lien de pied de page cassé sur tout le site.
+          <br><br><strong>Le configurateur surveille ce point&nbsp;:</strong> un bandeau au-dessus du
+          bouton « Publier » signale les pages devenues introuvables. Le lire avant de publier.</div>
+        <ul>
+          <li><strong>Un tarif se change à trois endroits.</strong> Dans LearnWorlds (qui facture), dans
+            le bloc de texte de la page Formules (qui affiche), et dans nos notes. Les deux premiers sont
+            obligatoires&nbsp;; sauter le second fait mentir la page.</li>
+          <li><strong>Un plan recréé change d'identifiant.</strong> Supprimer puis recréer une formule
+            dans LearnWorlds casse le bouton correspondant, qui mènera à l'autre formule.</li>
+          <li><strong>Un compte non validé n'a rien</strong>, même avec une adresse d'école. C'est
+            volontaire depuis le 5 août&nbsp;; c'est aussi la première cause de « ça ne marche pas ».</li>
+          <li><strong>Un nouveau cours n'entre pas tout seul dans l'offre.</strong> L'abonnement comme
+            l'accès des écoles passent par un programme&nbsp;: un cours créé et non ajouté à ce programme
+            reste invisible pour les abonnés comme pour les étudiants d'écoles.</li>
+          <li><strong>Le domaine de test reste actif.</strong> Une adresse de test est aujourd'hui traitée
+            comme une adresse d'école partenaire, pour pouvoir vérifier le parcours gratuit sans compte
+            universitaire. À nous demander de le retirer avant une ouverture large.</li>
+        </ul>
+      </div>
+    </details>
+
+    <!-- 9 -->
+    <details id="quifaitquoi">
+      <summary><span class="idx">9</span> Qui fait quoi
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <div class="scroll">
+          <table class="tab">
+            <tr><th>Ce qu'il y a à faire</th><th>Qui</th><th>Où</th></tr>
+            <tr><td>Créer ou modifier une formule, un tarif</td><td><span class="pill ok">Vous</span></td>
+              <td>LearnWorlds → Produits, puis le bloc de texte de la page Formules</td></tr>
+            <tr><td>Corriger un texte, un argument, un libellé de bouton</td><td><span class="pill ok">Vous</span></td>
+              <td>Le bloc de texte de la page Formules (Site Builder)</td></tr>
+            <tr><td>Régler l'échelle des grades du profil</td><td><span class="pill ok">Vous</span></td>
+              <td>Le bloc de texte de la page Profil (Site Builder)</td></tr>
+            <tr><td>Couleurs, police, arrondis de ces pages</td><td><span class="pill ok">Vous</span></td>
+              <td>Le configurateur — un onglet par page</td></tr>
+            <tr><td>Le déclencheur des étiquettes d'école</td><td><span class="pill ok">Vous</span></td>
+              <td>LearnWorlds → Utilisateurs → Automatisations</td></tr>
+            <tr><td>L'aiguillage par domaine, le cadenas, l'habillage du tunnel</td><td><span class="pill nous">Nous</span></td>
+              <td>Le code du site — nous signaler tout renommage de page</td></tr>
+            <tr><td>Vérifier le parcours avant une ouverture</td><td><span class="pill ok">Vous et nous</span></td>
+              <td>Un compte de test, du premier écran jusqu'au cours ouvert</td></tr>
+          </table>
+        </div>
+      </div>
+    </details>
+
+  </main>
+</div>
+
+<footer>
+  Aide PrepaStrat — le parcours d'inscription. Tarifs, identifiants de plan et réglages relevés les
+  4 et 5&nbsp;août&nbsp;2026. Les reconstitutions d'écran ci-dessus sont dessinées à la main&nbsp;:
+  elles illustrent, elles ne remplacent pas l'écran réel. <strong>Les tarifs cités sont ceux de cette
+  date</strong> — le site fait foi.
+</footer>
+
+</body>
+</html>
