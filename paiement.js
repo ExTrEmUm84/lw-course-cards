@@ -30,7 +30,7 @@
 (function () {
   "use strict";
 
-  window.PS_PAIEMENT_V = "2026-08-05-b";
+  window.PS_PAIEMENT_V = "2026-08-05-c";
 
   /* 🔴 Le test porte sur le CHEMIN et pas sur `body.slug-…` : cette page est
      servie par LearnWorlds, pas construite dans le Site Builder, et elle ne
@@ -243,6 +243,26 @@
          ligne vide qui garderait sa marge, et le prix ne remonterait pas. */
       var cible = (s.parentElement && s.parentElement.children.length === 1) ? s.parentElement : s;
       cible.style.setProperty("display", "none", "important");
+      /* 🔴 ALIGNER LE PRIX À GAUCHE (Ziad, 05/08). La ligne est un flex en
+         `space-between` : le libellé à gauche, le montant à droite. En retirant
+         le libellé, le montant restait plaqué au bord droit, seul et décentré —
+         retirer un élément ne suffit pas, il faut reprendre la mise en page
+         qu'il tenait. On aligne sur le conteneur RÉELLEMENT trouvé (`a`), pas
+         sur une classe supposée : celui-ci n'en porte aucune. */
+      try {
+        a.style.setProperty("justify-content", "flex-start", "important");
+        a.style.setProperty("text-align", "left", "important");
+        /* 🔴 ET IL FAUT DESCENDRE JUSQU'AU PRIX. Aligner le conteneur ne
+           suffisait pas : mesuré, le `<p>` qui porte le montant a son PROPRE
+           `text-align:right`, hérité de LearnWorlds. Le montant restait donc
+           collé à droite d'une boîte alignée à gauche. On remonte du prix
+           jusqu'au conteneur en redressant chaque niveau — il y en a trois. */
+        var pr = a.querySelector(".weglot-exclude"), m = pr, garde = 0;
+        while (m && m !== a && garde < 5) {
+          m.style.setProperty("text-align", "left", "important");
+          m = m.parentElement; garde++;
+        }
+      } catch (e) {}
       fait = true;
     });
     return fait;
