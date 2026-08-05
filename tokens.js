@@ -121,18 +121,18 @@
     "--ps-r-card:16px",
     "--ps-r-pill:999px",
     "--ps-r-btn:10px",
-    "--ps-lvl1:var(--ps-accent-hover)",
-    "--ps-lvl1-tint:var(--ps-accent-tint)",
-    "--ps-lvl2:#12A85F",
-    "--ps-lvl2-tint:#E6F9F0",
-    "--ps-lvl3:#009257",
-    "--ps-lvl3-tint:#E1F7EC",
-    "--ps-lvl4:#D22B45",
-    "--ps-lvl4-tint:#FDECEF",
-    "--ps-lvl5:#D98500",
-    "--ps-lvl5-tint:#FFF3E0",
-    "--ps-lvl6:#8A45C9",
-    "--ps-lvl6-tint:#F3EAFB",
+    "--ps-lvl1:#3887b4",
+    "--ps-lvl1-tint:#edf4ff",
+    "--ps-lvl2:#ff5e5b",
+    "--ps-lvl2-tint:#fdecef",
+    "--ps-lvl3:#deb125",
+    "--ps-lvl3-tint:#fff3e0",
+    "--ps-lvl4:#009e78",
+    "--ps-lvl4-tint:#e4fbf6",
+    "--ps-lvl5:#c51d4a",
+    "--ps-lvl5-tint:#fff0f4",
+    "--ps-lvl6:#203866",
+    "--ps-lvl6-tint:#edf4ff",
     "--ps-f1:var(--ps-accent)",
     "--ps-f1-tint:var(--ps-accent-tint)",
     "--ps-f2:#00C875",
@@ -208,13 +208,12 @@
      faire dans le contenu. */
 /* >>> DEBUT PAGES — réécrit par le configurateur, ne rien ajouter ici */
   var PAGE_ACCENTS={
-    "formation-par-modules":"#12d380",
     "fiches-cabinet":"#47ce22",
     "fiches-secteur":"#fad54a",
     "etudes-cas":"#6b7280"
   };
   var PAGE_STYLE={
-    "formation-par-modules":{"contour":1,"ep":4,"duree":1.1},
+    "formation-par-modules":{"contour":1,"ep":4,"duree":1.1,"couleur":"#edf4ff"},
     "fiches-secteur":{"contour":1,"ep":4,"duree":1.1}
   };
   var REGLAGES={
