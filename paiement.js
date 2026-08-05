@@ -30,7 +30,7 @@
 (function () {
   "use strict";
 
-  window.PS_PAIEMENT_V = "2026-08-05-a";
+  window.PS_PAIEMENT_V = "2026-08-05-b";
 
   /* 🔴 Le test porte sur le CHEMIN et pas sur `body.slug-…` : cette page est
      servie par LearnWorlds, pas construite dans le Site Builder, et elle ne
@@ -121,11 +121,28 @@
        les pastilles, l'autre le mot « ou ». N'en masquer qu'un laisserait un
        « ou » suspendu au-dessus de rien. */
     S + ".payment-section .pm-form-social-buts{display:none !important;}",
-    /* 🔴 L'IMAGE PRODUIT est un cadre VIDE : aucune illustration n'est
-       renseignée sur le programme, LearnWorlds affiche donc son motif de
-       rayures grises. Un espace réservé à une image absente n'informe personne
-       et occupe le tiers du récapitulatif. */
-    S + ".payment-section .col.span_4_of_12 .learnworlds-image{display:none !important;}",
+    /* 🔴 L'IMAGE PRODUIT EST REMISE (Ziad, 05/08). Je l'avais masquée parce
+       qu'elle affichait le motif de rayures grises de LearnWorlds — le
+       placeholder d'une illustration non renseignée sur le programme. Ziad la
+       veut : voir ce qu'on achète vaut mieux qu'un récapitulatif purement
+       textuel, et le cadre se remplira dès qu'une image sera posée sur le
+       programme. On l'habille donc au lieu de la retirer.
+       ⏳ Tant qu'aucune illustration n'est renseignée, ce cadre reste rayé :
+       c'est un réglage du PROGRAMME dans LearnWorlds, pas du code. */
+    S + ".payment-section .col.span_4_of_12 .learnworlds-image{"+
+      "border-radius:var(--ps-r-card,14px) !important;overflow:hidden !important;"+
+      "border:1px solid var(--ps-border,#E6E9EF) !important;margin-bottom:18px !important;}",
+
+    /* 🔴 LE MENU DÉROULANT « Cours inclus : » EST NEUTRALISÉ (Ziad, 05/08).
+       Le survol de « 56 Cours inclus » ouvrait un panneau listant les 56 cours,
+       qui recouvrait le prix et le bouton — sur l'écran de paiement, il cachait
+       exactement ce qu'on vient y lire.
+       🔴 On coupe le DÉCLENCHEUR (`pointer-events`), on ne masque pas le
+       panneau : celui-ci n'existe dans le DOM qu'au survol, donc viser sa
+       classe reviendrait à parier sur un nœud que je n'ai jamais mesuré. Couper
+       l'interaction est vérifiable tout de suite, et le texte reste lisible. */
+    S + ".payment-section .col.span_4_of_12 span.cursor-pointer{"+
+      "pointer-events:none !important;cursor:default !important;}",
 
     /* ---------- récapitulatif ---------- */
     S + ".payment-section .col.span_4_of_12{position:sticky !important;top:92px !important;}",
@@ -188,7 +205,50 @@
     return n > 0;
   }
 
-  function passer() { poser(); traduire(); }
+  /* ====================================================================
+     « ABONNEMENT » ÉTAIT ÉCRIT DEUX FOIS, ET ÇA CASSAIT LA LIGNE DE PRIX
+     --------------------------------------------------------------------
+     Le récapitulatif affichait « Abonnement Trimestriel », puis juste en
+     dessous « **Abonnement**  €252 chaque 3 mois ». Le mot revenait à deux
+     lignes d'intervalle, et surtout son libellé mangeait la moitié de la
+     largeur : le prix passait à la ligne, « €252 chaque 3 / mois ». Signalé
+     par Ziad — c'est le chiffre le plus important de la page.
+
+     🔴 ON NE PEUT PAS MASQUER TOUS LES `<strong>` du récapitulatif : « Total dû
+     aujourd'hui » et le montant en sont aussi, et ce sont les lignes qui
+     comptent le plus.
+
+     🔴 MA PREMIÈRE CONDITION N'A RIEN ATTRAPÉ, et la mesure a dit pourquoi.
+     J'avais supposé « le libellé et le prix sont dans le même parent ». Relevé :
+     le libellé est SEUL dans son propre `<p>`, et le montant vit dans un élément
+     FRÈRE, sous un `div` commun sans classe. On remonte donc jusqu'à trois
+     niveaux à la recherche du montant — reconnaissable à `weglot-exclude`, que
+     LearnWorlds pose pour que Weglot ne traduise pas un prix.
+     ⇒ Deux conditions mesurées : le mot exact, et un montant au-dessus de lui.
+     Sans la seconde, on masquerait « Abonnement Trimestriel », qui est la seule
+     mention utile.
+     ==================================================================== */
+  function degrouperPrix() {
+    var recap = document.querySelector(".payment-section .col.span_4_of_12");
+    if (!recap) return false;
+    var fait = false;
+    [].slice.call(recap.querySelectorAll("strong")).forEach(function (s) {
+      if (s.getAttribute("data-ps-prix")) return;
+      if (norm(s.textContent) !== "abonnement") return;
+      var a = s.parentElement, k = 0, trouve = false;
+      while (a && k < 3) { if (a.querySelector(".weglot-exclude")) { trouve = true; break; } a = a.parentElement; k++; }
+      if (!trouve) return;                       /* pas la ligne de prix : on laisse */
+      s.setAttribute("data-ps-prix", "1");
+      /* On masque le `<p>` quand le libellé y est seul : sinon il resterait une
+         ligne vide qui garderait sa marge, et le prix ne remonterait pas. */
+      var cible = (s.parentElement && s.parentElement.children.length === 1) ? s.parentElement : s;
+      cible.style.setProperty("display", "none", "important");
+      fait = true;
+    });
+    return fait;
+  }
+
+  function passer() { poser(); traduire(); degrouperPrix(); }
 
   passer();
   if (document.readyState === "loading") {
