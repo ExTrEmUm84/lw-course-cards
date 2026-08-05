@@ -4065,4 +4065,50 @@
     _ab.async=true;
     (document.head||document.documentElement).appendChild(_ab);
   }
+
+  /* ====================================================================
+     PAGE DE VÉRIFICATION D'E-MAIL (verification-page.js)
+     --------------------------------------------------------------------
+     Page servie juste après l'inscription. Elle affiche
+     `{{user.email_to_verify}}` EN CLAIR — du code à la place de l'adresse, au
+     moment précis où on demande à quelqu'un de nous faire confiance.
+
+     🔴 ON NE MASQUE QUE L'ADRESSE, PAS LA PAGE. Sur `/formules` on masque tout
+     jusqu'à reconstruction, parce que le contenu natif y est un bloc de
+     réglages illisible : mieux vaut une page sobre. Ici c'est l'inverse — le
+     contenu natif est une page correcte, seulement en anglais. Si
+     `verification-page.js` ne chargeait jamais, la masquer donnerait un écran
+     BLANC à quelqu'un qui attend une consigne, alors que la laisser donne une
+     page anglaise qui fonctionne. On ne cache donc que le seul morceau qui ne
+     doit jamais s'afficher : le littéral.
+     🔴 `visibility`, pas `display` : la ligne garde sa place, donc pas de saut
+     de mise en page quand l'adresse arrive.
+     🔴 `span.bold` est UNIQUE dans cette section (mesuré le 05/08 : 1 seul, et
+     le « spam folder » en gras est un `<strong>` dans un autre bloc). Le jour
+     où un second apparaîtrait, le pire cas est un mot masqué 4 s — le filet
+     ci-dessous le rend dans tous les cas, y compris si le script ne vient pas. */
+  if(/email-verification-pending/.test(location.pathname||"") ||
+     (document.body && document.body.classList.contains("slug-email-verification-pending"))){
+    if(!document.getElementById("ps-verif-cloak")){
+      var _vc=document.createElement("style");
+      _vc.id="ps-verif-cloak";
+      _vc.textContent="body.slug-email-verification-pending:not(.ps-verif-pret) #pageContent span.bold{visibility:hidden !important;}";
+      var _vh=document.head||document.documentElement; _vh.insertBefore(_vc,_vh.firstChild);
+      setTimeout(function(){
+        if(document.body && !document.body.classList.contains("ps-verif-pret")){
+          document.body.classList.add("ps-verif-pret");
+          try{ console.warn("[PrepaStrat] /email-verification-pending : verification-page.js n'a rien fait "+
+            "au bout de 6 s. La page reste en anglais avec le littéral {{user.email_to_verify}} visible. "+
+            "Vérifier https://extremum84.github.io/lw-course-cards/verification-page.js"); }catch(e){}
+        }
+      },6000);
+    }
+    if(!document.getElementById("ps-verif-js")){
+      var _vj=document.createElement("script");
+      _vj.id="ps-verif-js";
+      _vj.src="https://extremum84.github.io/lw-course-cards/verification-page.js";
+      _vj.async=true;
+      (document.head||document.documentElement).appendChild(_vj);
+    }
+  }
 })();
