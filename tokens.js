@@ -720,7 +720,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-n";
+  window.PS_TOKENS_V="2026-08-05-o";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3200,11 +3200,27 @@
 
   /* Verdict pour UNE carte. `null` = on ne sait pas ENCORE — c'est un troisième
      état, pas un « non ». Le confondre avec « ouvert » est exactement ce qui
-     laissait passer les clics. */
+     laissait passer les clics.
+
+     🔴🔴 LA LISTE NE FAIT AUTORITÉ QUE SI LA JOINTURE EST POSSIBLE. Défaut
+     mesuré le 05/08 sur la page **Cas** : ses cartes n'ont pas de lien de
+     cours, leurs `<a>` valent `javascript:void(0)` (LearnWorlds navigue en JS).
+     Le slug ressortait donc VIDE — et comme je faisais confiance à la liste dès
+     qu'elle était chargée, sans vérifier que la carte était identifiable,
+     `_fermes.has("")` répondait « non » et **aucune des 12 cartes n'était
+     verrouillée**. En silence, sur une page entière.
+     🔴 L'ironie : le libellé « Inscription fermée » est bien présent sur ces
+     cartes. Le repli existait, il n'était simplement plus atteignable. **Une
+     source d'autorité ne doit prendre la main que là où elle sait répondre.**
+     🔴 Pourquoi ça n'a pas sauté aux yeux : la page Cours, elle, a de vrais
+     liens `/course/<slug>` — j'y ai vu 11 cartes verrouillées sur 12 et j'ai
+     généralisé à tout le site. Une page vérifiée n'est pas cinq pages
+     vérifiées. */
   function carteVerrouillee(c){
-    if(_fermes){ var s=slugDeCarte(c); return !!s && _fermes.has(s); }
-    if(carteFermee(c)) return true;
-    return null;
+    var s=slugDeCarte(c);
+    if(_fermes && s) return _fermes.has(s);   /* jointure possible : la liste tranche */
+    if(carteFermee(c)) return true;           /* sinon le libellé reprend la main */
+    return _fermes ? false : null;
   }
 
   function versOffre(){ location.href = window.PS_URL_OFFRE || URL_OFFRE_DEFAUT; }
@@ -3274,12 +3290,12 @@
        dire — c'est ce qui manquait à l'opt-in de l'annuaire pendant des jours. */
     chargerCoursFermes();
 
-    /* 🔴 La liste du Worker fait autorité quand on l'a ; sinon le libellé.
-       Un cours absent de la liste reste CLIQUABLE — l'erreur penche du côté
-       qui ne bloque personne à tort, et LearnWorlds protège le contenu. */
-    var fermees = _fermes
-      ? [].slice.call(cartes).filter(function(c){ var s=slugDeCarte(c); return !!s && _fermes.has(s); })
-      : [].slice.call(cartes).filter(carteFermee);
+    /* 🔴 UNE SEULE FONCTION DE DÉCISION, partagée avec le garde-clic.
+       Le peintre avait sa propre copie de la règle — et c'est ainsi que le
+       défaut de la page Cas est passé : la copie du garde a été corrigée, pas
+       celle-ci, jusqu'à ce que la mesure les mette côte à côte. Deux endroits
+       qui décident de la même chose finissent toujours par diverger. */
+    var fermees = [].slice.call(cartes).filter(function(c){ return carteVerrouillee(c)===true; });
     if(!fermees.length){
       try{ console.warn("[PrepaStrat] Aucune carte « inscription fermée » reconnue sur "+
         location.pathname+" ("+cartes.length+" cartes). Soit tout est ouvert, soit le libellé "+
