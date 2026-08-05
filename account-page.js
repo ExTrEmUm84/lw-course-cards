@@ -454,10 +454,25 @@
       "border-radius:var(--ps-r-pill,999px);padding:9px 17px;text-decoration:none;"+
       "font:700 13.5px var(--ps-font,Figtree,sans-serif);transition:background .18s,color .18s,border-color .18s}"+
       ".account-section-navigation[data-ps-tabs] a:hover{border-color:var(--ps-accent,#3887b4);color:var(--ps-text,#1c1f26)}"+
-      ".account-section-navigation[data-ps-tabs] a.ps-acc-on{background:var(--ps-accent,#3887b4);"+
-      "border-color:var(--ps-accent,#3887b4);color:#fff}"+
-      /* La colonne devient une barre : le conteneur doit repasser en pile. */
+      /* 🔴 CLASSE DOUBLÉE, ET C'EST VOULU. `a.ps-acc-on` seul perdait contre la
+         règle d'état actif de LearnWorlds : la pastille restait bleu pâle au
+         lieu de prendre l'accent PrepaStrat. Répéter la classe monte la
+         spécificité sans partir à la chasse au sélecteur natif — qui changera
+         au prochain déploiement de leur part, alors que ceci tiendra. */
+      ".account-section-navigation[data-ps-tabs] a.ps-acc-on.ps-acc-on{background:var(--ps-accent,#3887b4) !important;"+
+      "border-color:var(--ps-accent,#3887b4) !important;color:#fff !important}"+
+      /* 🔴 LE VERROU ÉTAIT ICI, ET TROIS NIVEAUX PLUS HAUT QUE LÀ OÙ JE
+         CHERCHAIS. Chaîne relevée le 05/08 sur la vraie page :
+            .account-section-navigation  200 px
+            .account-menu-content        200 px
+            .account-menu                250 px  ← min-width ET max-width
+         Élargir les deux premiers ne servait à rien : `width:100%` vaut 100 %
+         d'un parent lui-même bridé. C'est `.account-menu` qu'il faut déverrouiller,
+         et il faut lever `min-width` autant que `max-width` — l'un des deux
+         suffit à tout retenir. */
       ".account-cnt{flex-direction:column !important;align-items:stretch !important}"+
+      ".account-menu{width:100% !important;min-width:0 !important;max-width:none !important}"+
+      ".account-menu-content{width:100% !important;max-width:none !important}"+
       ".account-page-content{width:100% !important;max-width:none !important}"+
       "@media(prefers-reduced-motion:reduce){.account-section-navigation[data-ps-tabs] a{transition:none}}";
     (document.head||document.documentElement).appendChild(st);
