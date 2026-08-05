@@ -721,16 +721,16 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-i";
+  window.PS_TOKENS_V="2026-08-05-j";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
      effet : `cloak()` ne masque que `.cards-grandpa .lw-course-card`, pas une
      section de texte. Un réglage qui ne fait rien est pire qu'un réglage
      absent, il fait croire que le problème est traité. Retiré.
-     ⏳ Le flash reste OUVERT : il faudra masquer la section de réglages depuis
-     `tokens.js` (chargé en premier) avec un observateur, et non depuis
-     `abonnement.js` qui arrive 400 ms trop tard. */
+     ✅ Le flash est traité plus bas, par `cloakFormules()` : même intention
+     (masquer avant la peinture), mais un mécanisme à lui, parce que ce qu'il
+     y a à masquer n'est pas une carte. */
   var CLOAK_SLUGS=["formation-par-modules","etudes-cas","fiches-secteur","fiches-cabinet","sentrainer"];
   /* 🔴 L'anti-flash DOIT couvrir les jumelles : une page EN porte un slug
      différent (`…-clone-en`), donc `body.slug-…` ne matchait pas et le flash
@@ -759,6 +759,120 @@
     if(_revObs) return;
     _revObs=new MutationObserver(function(){ if(document.querySelector(READY_SEL)){ reveal(); _revObs.disconnect(); } });
     _revObs.observe(document.documentElement,{childList:true,subtree:true});
+  }
+
+  /* ====================================================================
+     ANTI-FLASH DE LA PAGE /formules — le bloc de réglages EN CLAIR
+     --------------------------------------------------------------------
+     Ziad écrit ses prix et ses libellés dans une section de texte normale
+     (`titre : …`, `f1-prix : 99 €`, `f1-package : tier_…`). `abonnement.js`
+     la lit puis la masque — mais il est INJECTÉ par ce fichier, en `async` :
+     le temps que github.io réponde, le navigateur a déjà peint les réglages,
+     identifiants de tarif Stripe compris. C'est le flash signalé le 05/08.
+     🔴 Ce n'est pas un défaut d'`abonnement.js` : il ne peut pas être plus
+     rapide que son propre téléchargement. Le seul code présent AVANT la
+     peinture est celui-ci, servi dans le HTML de la page.
+
+     Deux mécanismes, deux rôles — et c'est volontaire :
+     1. une FEUILLE DE STYLE posée tout de suite : elle masque les sections
+        de contenu tant que la page n'est pas construite. Elle ne dépend
+        d'aucun minutage, donc le premier rendu est propre à coup sûr ;
+     2. un OBSERVATEUR qui, dès que la section de réglages existe, lui pose
+        `display:none` EN INLINE. C'est le masquage durable : il survit à la
+        révélation, et il rattrape une section qui arriverait tard (le Site
+        Builder peint par étapes, jusqu'à 8 s mesurées sur ce site).
+     🔴 La règle de reconnaissance est ici volontairement plus LÂCHE que dans
+     `abonnement.js` (préfixes de clés, pas la liste exacte) : les deux ne
+     font pas le même travail. Ici on décide quoi CACHER — trop large est
+     sans conséquence sur cette page. Là-bas on décide quoi AFFICHER, et une
+     clé inconnue doit garder son repli. Copier la liste ici, c'est se
+     garantir qu'elle divergera.
+     🔴 CE QUI SE PASSE SI `abonnement.js` NE CHARGE JAMAIS — mesuré au
+     harnais (`?panne=1`), pas supposé : le masquage inline a déjà eu lieu, donc
+     la page garde sa navigation et son pied de page, et ne montre RIEN entre
+     les deux. J'avais d'abord écrit ici qu'elle montrerait « le texte brut,
+     moche mais jamais vide » : c'était faux, et le harnais l'a dit tout de
+     suite. C'est un choix assumé — afficher `f1-package : tier_…` à un
+     prospect est pire qu'une page sobre, et ni l'un ni l'autre ne permet
+     d'acheter. Pour que la panne reste DIAGNOSTICABLE, on le dit en console.
+     🔴 FILET des 6 s : il ne fait pas réapparaître les réglages (ils sont
+     masqués en inline), il rend leur visibilité à toute AUTRE section que
+     Ziad ajouterait un jour sur cette page. Sans lui, une section éditoriale
+     resterait invisible pour toujours si la construction échouait. */
+  var _aboObs=null, _aboT0=0;
+  function estPageFormules(){
+    return /^\/formules(\/|$)/.test(location.pathname||"") ||
+           !!(document.body && document.body.classList.contains("slug-formules"));
+  }
+  /* Pure et testable : c'est elle qui décide ce qu'on masque. Une section de
+     réglages, c'est au moins TROIS lignes `clé : valeur` dont la clé porte un
+     des préfixes du gabarit. Trois, parce qu'une phrase isolée contenant deux
+     points ne doit jamais suffire à faire disparaître un paragraphe. */
+  function ressembleAuxReglages(texte){
+    var n=0;
+    String(texte||"").split(/\r?\n/).forEach(function(l){
+      var m=l.match(/^\s*([a-z0-9_-]{2,20})\s*:\s*\S/i);
+      if(m && /^(surtitre|titre|description|produit|pied|f\d|inclus)/i.test(m[1])) n++;
+    });
+    return n>=3;
+  }
+  /* 🔴 NI `innerText` NI `textContent` — pour la même raison qu'`abonnement.js`
+     (documentée là-bas) : `innerText` rend une chaîne VIDE sur un élément
+     masqué, or on masque justement, et `textContent` avale les retours à la
+     ligne, or on découpe justement en lignes. */
+  function texteSection(el){
+    var h=(el&&el.innerHTML)||"";
+    h=h.replace(/<br\s*\/?>/gi,"\n").replace(/<\/(p|div|li|h[1-6]|section)>/gi,"\n");
+    var tmp=document.createElement("div"); tmp.innerHTML=h;
+    return tmp.textContent||"";
+  }
+  function masquerReglages(){
+    var hote=document.getElementById("pageContent");
+    if(!hote) return false;
+    var vu=false;
+    [].slice.call(hote.children).forEach(function(sec){
+      if(sec.id==="ps-abo" || sec.style.display==="none") return;
+      var id=sec.getAttribute&&sec.getAttribute("data-section-id")||"";
+      if(/^(topbar|footer)/i.test(id)) return;
+      if(!ressembleAuxReglages(texteSection(sec))) return;
+      sec.style.display="none";
+      vu=true;
+    });
+    return vu;
+  }
+  function revelerFormules(){ if(document.body) document.body.classList.add("ps-abo-pret"); }
+  function cloakFormules(){
+    if(!estPageFormules()) return;
+    if(!document.getElementById("ps-abo-cloak")){
+      /* 🔴 Trop tard ? Si la page est DÉJÀ construite, masquer maintenant
+         ferait clignoter — jamais pire que l'existant, même garde-fou que
+         `cloak()` au-dessus. */
+      if(document.getElementById("ps-abo")) return;
+      var st=document.createElement("style"); st.id="ps-abo-cloak";
+      st.textContent="body.slug-formules:not(.ps-abo-pret) #pageContent > section:not([data-section-id^=\"topbar\"]):not([data-section-id^=\"footer\"]){display:none !important;}";
+      var head=document.head||document.documentElement; head.insertBefore(st, head.firstChild);
+      _aboT0=Date.now();
+      setTimeout(function(){
+        revelerFormules();
+        if(!document.getElementById("ps-abo")){
+          try{ console.warn("[PrepaStrat] /formules : abonnement.js n'a rien construit au bout de 6 s. "+
+            "Le bloc de réglages reste masqué (il ne doit pas s'afficher tel quel), donc la page est "+
+            "vide entre l'en-tête et le pied. Vérifier le chargement de "+
+            "https://extremum84.github.io/lw-course-cards/abonnement.js"); }catch(e){}
+        }
+      }, 6000);
+    }
+    if(masquerReglages()) revelerFormules();
+    else if(document.getElementById("ps-abo")) revelerFormules();
+    if(_aboObs || !document.documentElement) return;
+    _aboObs=new MutationObserver(function(){
+      if(masquerReglages() || document.getElementById("ps-abo")) revelerFormules();
+      /* L'observateur reste en place le temps que le Site Builder finisse de
+         peindre (dernière relance d'`abonnement.js` : 12 s), puis se retire :
+         un observateur oublié sur `subtree` coûte à chaque mutation. */
+      if(Date.now()-_aboT0>15000){ _aboObs.disconnect(); _aboObs=null; }
+    });
+    _aboObs.observe(document.documentElement,{childList:true,subtree:true});
   }
 
   /* ====================================================================
@@ -2893,8 +3007,8 @@
     }
   }
 
-  cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader(); });
+  cloak(); cloakFormules(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); cloakFormules(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
      quelques relances pour attraper la classe active. */
   [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); setTimeout(immersivePlayer,d); setTimeout(partnerHeader,d); });
