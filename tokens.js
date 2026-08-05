@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-r";
+  window.PS_TOKENS_V="2026-08-05-s";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3480,8 +3480,38 @@
     }catch(e){}
     /* Même juge que le rappel en coin : opt-in refusé ⇒ on n'insiste jamais,
        fiche complète ⇒ rien à demander. */
-    var etat=etatProfil(u.custom_fields);
+    var etat=etatProfil(ficheChamps(u));
     return etat.afficher ? u : null;
+  }
+
+  /* 🔴🔴 `me.custom_fields` N'EST PAS FIABLE HORS `/profile` — mesuré le 05/08
+     sur UN SEUL compte, ce qui lève l'ambiguïté d'une première tentative où
+     j'avais comparé deux comptes différents et conclu trop vite : sur une page
+     catalogue, `cf_annuaire` ressortait VIDE alors que le Worker, qui lit l'API
+     d'administration, voyait ce même membre inscrit à l'annuaire.
+     ⇒ Sans ce correctif, un membre à la fiche COMPLÈTE aurait vu la popup
+     s'ouvrir sur chaque page catalogue : on aurait harcelé exactement ceux qui
+     avaient déjà fait ce qu'on leur demandait.
+     🟢 Les TAGS, eux, sont garnis partout : LearnWorlds fabrique
+     `cf_<champ>_<valeur>` pour chaque champ rempli (pépite du 29/07). Ils ne
+     disent pas la valeur exacte d'un texte libre, mais ils disent qu'il est
+     REMPLI — c'est tout ce dont `etatProfil` a besoin. */
+  function ficheChamps(u){
+    var cf={}, k;
+    var src=u.custom_fields||{};
+    for(k in src) if(Object.prototype.hasOwnProperty.call(src,k)) cf[k]=src[k];
+    [].slice.call(u.tags||[]).forEach(function(t){
+      var s=String(typeof t==="string" ? t : (t && t.name) || "");
+      if(s.indexOf("cf_")!==0) return;
+      /* `cf_<champ>_<valeur>` : le champ est le segment AVANT le premier `_`
+         qui suit `cf_`. On ne remplace jamais une valeur déjà connue — le
+         champ réel fait foi quand il est là. */
+      var reste=s.slice(3), i=reste.indexOf("_");
+      if(i<=0) return;
+      var cle="cf_"+reste.slice(0,i), val=reste.slice(i+1);
+      if(!cf[cle] && val) cf[cle]=val;
+    });
+    return cf;
   }
 
   function ficheCSS(){
