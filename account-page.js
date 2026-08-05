@@ -762,6 +762,12 @@
        la section serait ré-affichée. */
   }
 
+  /* 🔴 La popup prévient quand elle a enregistré : la carte se refait sans
+     rechargement. Sans ça, choisir « Non » laissait la pastille sur « Visible »
+     jusqu'à la prochaine visite — l'inverse de ce que la personne venait de
+     décider, sur un sujet de confidentialité. */
+  document.addEventListener("ps:fiche-enregistree", function(){ if(surLaPage()) carteFiche(); });
+
   if(document.readyState!=="loading") run(); else document.addEventListener("DOMContentLoaded",run);
   window.addEventListener("load",run);
   /* l'app compte est rendue en JS : les sections n'existent pas au 1er passage.

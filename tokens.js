@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-u";
+  window.PS_TOKENS_V="2026-08-05-v";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3668,7 +3668,26 @@
          rien écrire, et le collecteur ne réessayait plus jamais). */
       .then(function(j){
         var pris=(j && j.ok && Array.isArray(j.ecrits)) ? j.ecrits.length : 0;
-        if(pris>=Object.keys(a.charge.champs).length) _ficheSig=a.sig;
+        if(pris>=Object.keys(a.charge.champs).length){
+          _ficheSig=a.sig;
+          /* 🔴🔴 ON MET À JOUR `me` ET ON PRÉVIENT LA PAGE. Signalé par Ziad :
+             après avoir choisi « Non, je préfère rester discret », la carte
+             continuait d'afficher « Visible ». L'écriture était pourtant bonne
+             — mais `me.custom_fields` est une photo prise au chargement, et
+             rien ne la rafraîchissait. La personne voyait donc l'inverse de ce
+             qu'elle venait de décider, sur un sujet de confidentialité.
+             ⇒ On recopie ce que le Worker a ACCEPTÉ (jamais ce qu'on a envoyé :
+             c'est sa réponse qui fait foi) et on émet un événement pour que
+             tout affichage dérivé se refasse, sans rechargement. */
+          try{
+            var u2=membrePS();
+            if(u2){
+              if(!u2.custom_fields) u2.custom_fields={};
+              j.ecrits.forEach(function(k){ u2.custom_fields[k]=a.charge.champs[k]; });
+            }
+            document.dispatchEvent(new CustomEvent("ps:fiche-enregistree",{detail:{ecrits:j.ecrits}}));
+          }catch(e){}
+        }
         else try{ console.warn("[PrepaStrat] fiche : "+pris+" champ(s) enregistré(s) sur "+
           Object.keys(a.charge.champs).length+" envoyés — on retentera."); }catch(e){}
       })
