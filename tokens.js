@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-s";
+  window.PS_TOKENS_V="2026-08-05-t";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -1455,6 +1455,26 @@
         "border-radius:var(--ps-r-card,16px) !important;"+
         "box-shadow:0 18px 50px rgba(0,0,0,.10) !important;}",
       "#animatedModal #signUpForm{width:min(820px,92vw) !important;max-width:none !important;}",
+      /* 🔴🔴 LA CROIX DE FERMETURE FAIT 6 × 6 PIXELS (05/08, signalé par Ziad :
+         « le bouton fermer ne fonctionne pas »). Elle n'est pas cassée — elle
+         est INVISABLE. Le glyphe a pourtant 16 px de police et Font Awesome est
+         bien chargée ; c'est la boîte du bouton qui reste à 6 px.
+         🔴 CE N'EST PAS NOUS : mesuré à 6 × 6 avec notre feuille de style
+         ACTIVÉE puis DÉSACTIVÉE. Rendu natif de LearnWorlds.
+         🔴 PIÈGE DE MESURE À NE PAS REFAIRE : le DOM contient DIX boutons de
+         fermeture (cinq modales × deux éléments), dont huit invisibles.
+         `querySelector` renvoie le premier, donc un exemplaire caché — d'où des
+         relevés qui se contredisaient (0×0, 6×6, 0×0) et un premier A/B
+         entièrement faux. Toujours filtrer sur `offsetParent !== null`.
+         ⇒ On porte la cible à 38 px, taille minimale confortable au doigt, et on
+         centre le glyphe. Purement additif : au pire ça ne change rien. */
+      "#animatedModal .close-animatedModal{width:38px !important;height:38px !important;"+
+        "min-width:38px !important;display:inline-flex !important;align-items:center !important;"+
+        "justify-content:center !important;border-radius:50% !important;cursor:pointer !important;"+
+        "padding:0 !important;}",
+      "#animatedModal .close-animatedModal:hover{background:rgba(15,23,42,.07) !important;}",
+      "#animatedModal .login-form-close{font-size:19px !important;line-height:1 !important;"+
+        "width:auto !important;height:auto !important;}",
       "#animatedModal .landing-form-title{font:800 27px/1.25 var(--ps-font,Figtree,sans-serif) !important;color:var(--ps-text,#1c1f26) !important;letter-spacing:-.02em !important;}",
       /* ---------- deux colonnes, inscription seulement ---------- */
       "#animatedModal #signUpForm .-form-inputs{display:grid !important;grid-template-columns:repeat(2,minmax(0,1fr)) !important;gap:2px 22px !important;}",
