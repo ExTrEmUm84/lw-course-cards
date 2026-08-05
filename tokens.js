@@ -731,7 +731,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-al";
+  window.PS_TOKENS_V="2026-08-05-am";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4502,7 +4502,21 @@
      mesure donne 905 ms pour tout finir ; au-delà de 1,2 s on rend la main,
      qu'on ait reçu le signal ou non.
      ==================================================================== */
-  if(document.body && document.body.classList.contains("slug-home") && !document.getElementById("ps-home-cloak")){
+  /* 🔴🔴 TESTER LE CHEMIN, PAS SEULEMENT LA CLASSE — ET LE FICHIER LE DISAIT
+     DÉJÀ, deux blocs plus bas : « la classe `slug-*` arrive avec le rendu de
+     LearnWorlds, le chemin est disponible tout de suite ». Ma première version
+     ne testait que `body.slug-home` : au moment où `tokens.js` s'exécute, la
+     classe n'est pas encore posée, donc l'anti-flash n'a JAMAIS été installé.
+     Mesuré en production après déploiement — `cloakPose:false` — pendant que je
+     croyais le correctif en service.
+     🔴 Poser la feuille sur le seul chemin est sans risque : sa règle est
+     scopée `body.slug-home`, donc elle ne s'applique que si la page est bien
+     la home. Le test large décide QUAND on écrit, le sélecteur décide SUR QUOI.
+     🔴 `/pages/home` est inclus : c'est l'URL servie à un admin connecté. */
+  var _estHome = /^\/(pages\/)?home\/?$/.test(location.pathname||"") ||
+                 (location.pathname||"")==="/" ||
+                 (document.body && document.body.classList.contains("slug-home"));
+  if(_estHome && !document.getElementById("ps-home-cloak")){
     var _hc=document.createElement("style");
     _hc.id="ps-home-cloak";
     _hc.textContent="body.slug-home:not(.ps-home-pret) #pageContent > section:nth-child(n+3)"+
