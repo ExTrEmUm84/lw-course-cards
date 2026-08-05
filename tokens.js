@@ -731,7 +731,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-ai";
+  window.PS_TOKENS_V="2026-08-05-aj";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4390,6 +4390,91 @@
     _ab.async=true;
     (document.head||document.documentElement).appendChild(_ab);
   }
+
+  /* ====================================================================
+     LA PASTILLE SOCIALE ORPHELINE DE L'ÉCRAN D'APRÈS-OAUTH  (05/08)
+     --------------------------------------------------------------------
+     Signalé par un CLIENT de Ziad, capture à l'appui. Après s'être authentifié
+     par LinkedIn (ou Google), LearnWorlds affiche un écran de FINALISATION —
+     prénom, nom, e-mail pré-rempli, CGU, pas de mot de passe — et y réaffiche
+     un bloc social réduit au SEUL fournisseur utilisé. On propose donc de se
+     connecter avec LinkedIn à quelqu'un qui vient de se connecter avec LinkedIn.
+
+     🔴 LA RÈGLE EXISTAIT DÉJÀ, MAIS SCOPÉE `body.slug-inscription`
+     (`inscription.js`, `modaleSansSocial`). Ce fichier-là n'est chargé que sur
+     la page d'entrée : un client arrivé sur cet écran depuis le pied de page ou
+     le menu gardait sa pastille. **Une règle juste, posée au mauvais endroit,
+     ne s'applique jamais où le problème se produit.** Elle vit donc ici,
+     dans le fichier chargé partout.
+
+     🔴🔴 MA PREMIÈRE RÈGLE ÉTAIT FAUSSE, ET SEULE LA MESURE L'A DIT. J'avais
+     retenu deux marqueurs : « un seul fournisseur visible » ET « aucun champ
+     mot de passe dans le formulaire ». Ziad a mis le vrai écran dans l'onglet
+     piloté (05/08) et le relevé est sans appel : le formulaire de finalisation
+     `#signUpForm` **contient un champ mot de passe** (la page en porte quatre).
+     Le second marqueur ne se serait donc JAMAIS vérifié : j'aurais poussé un
+     correctif inopérant en croyant le problème réglé. **Une règle écrite sur
+     une capture n'est pas une règle mesurée.**
+
+     🔴 CE QUE LA MESURE DONNE VRAIMENT :
+       • l'URL porte `?signup=linkedin` (le fournisseur utilisé) — marqueur
+         explicite, posé par LearnWorlds, qu'aucune autre page ne porte ;
+       • le bloc orphelin est `.-form-social-register-buttons`, avec
+         **1 enfant visible sur 6** (les autres en `display:none`).
+     On exige LES DEUX : sur la vraie modale, ce même bloc montre tous les
+     fournisseurs actifs, et aucune URL ne porte `signup=`.
+
+     🔴🔴 COMPTER LES BOUTONS **VISIBLES**, PAS LES BOUTONS PRÉSENTS. LearnWorlds
+     livre le gabarit COMPLET (Google, Facebook, LinkedIn, Apple, X) et masque
+     en `display:none` ceux qui ne sont pas configurés — c'est écrit dans
+     `inscription.js`, et compter les enfants donnerait 5 partout, donc la règle
+     ne se serait jamais déclenchée. Le piège était posé, je ne l'ai évité qu'en
+     relisant le fichier voisin.
+
+     ⚠️ ÉCRIT SUR UNE CAPTURE, PAS SUR UNE MESURE : atteindre cet écran demande
+     une vraie authentification LinkedIn sur un compte que je n'ai pas. On le
+     DIT en console quand la règle se déclenche, pour que Ziad puisse confirmer
+     qu'elle vise juste — et, si elle se trompait, le coût est un bouton social
+     masqué, jamais un accès perdu.
+     ==================================================================== */
+  /* 🔴 `signup=` SANS LISTE DE FOURNISSEURS. Ziad a confirmé le même écran
+     pour Google, et il y aura Facebook et Apple. Énumérer les fournisseurs,
+     c'est se garantir d'en oublier un le jour où il en active un autre. */
+  function apresOAuth(){ return /[?&]signup=[^&]+/i.test(location.search||""); }
+
+  function socialSolitaire(){
+    if(!apresOAuth()) return;
+    var blocs=document.querySelectorAll(".-form-social-register-buttons");
+    for(var i=0;i<blocs.length;i++){
+      var bloc=blocs[i];
+      if(bloc.getAttribute("data-ps-social")) continue;      /* déjà traité */
+      /* 🔴🔴 COMPTER LES VISIBLES, PAS LES PRÉSENTS. Mesuré sur le vrai écran :
+         6 enfants livrés, **1 seul visible**. LearnWorlds fournit le gabarit
+         complet et masque les fournisseurs non configurés — un comptage naïf
+         aurait trouvé 6 et la règle ne se serait jamais déclenchée. */
+      var visibles=[].slice.call(bloc.children).filter(function(b){
+        try{ return getComputedStyle(b).display!=="none"; }catch(e){ return true; }
+      });
+      if(visibles.length>1) continue;   /* bloc social normal : on n'y touche pas */
+
+      bloc.setAttribute("data-ps-social","1");
+      bloc.style.setProperty("display","none","important");
+      /* Le séparateur « ou » n'a plus rien à séparer — mais seulement CELUI de
+         ce bloc : la page en porte trois, et masquer les autres retirerait le
+         séparateur de la vraie modale d'inscription. */
+      var p=bloc.parentElement;
+      var ou=p && p.querySelector(".-or");
+      if(ou) ou.style.setProperty("display","none","important");
+      try{ console.info("[PrepaStrat] Écran d'après-connexion sociale : pastille solitaire masquée "+
+        "(on ne propose pas de se connecter avec un fournisseur à quelqu'un qui vient d'arriver par lui)."); }catch(e){}
+    }
+  }
+  /* 🔴 Pas d'observateur permanent sur `subtree` — il coûterait à chaque
+     mutation de toutes les pages du site. L'écran d'après-OAuth arrive avec un
+     CHARGEMENT DE PAGE (quelques relances suffisent), et une modale ouverte
+     plus tard l'est toujours par un CLIC. Les deux chemins sont couverts. */
+  [0,400,1200,3000,6000].forEach(function(d){ setTimeout(socialSolitaire,d); });
+  document.addEventListener("click", function(){ setTimeout(socialSolitaire,300); }, true);
 
   /* ====================================================================
      PAGE DE VÉRIFICATION D'E-MAIL (verification-page.js)
