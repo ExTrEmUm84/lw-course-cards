@@ -727,7 +727,9 @@
      distinguer « mon code ne se déclenche pas » de « le cache sert l'ancien
      fichier ». La réponse était le cache. Le marqueur ne sert QUE dans ce
      moment-là : le bouger fait partie du changement, pas de sa relecture. */
-  window.PS_TOKENS_V="2026-08-05-y";
+  /* 🔴 -z : la popup dit enfin pourquoi le Worker refuse. Marqueur bougé DANS
+     le même changement — la leçon a coûté deux fois dans la journée. */
+  window.PS_TOKENS_V="2026-08-05-z";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3640,6 +3642,10 @@
      et jamais deux fois la même chose — la signature évite un second jeton pour
      rien. */
   var _ficheSig="", _ficheEnVol=false, _ficheTsEl=null, _ficheRendu=false, _ficheAttente=null;
+  /* Refus MOTIVÉ du Worker (adresse non validée) + moyen de repeindre la popup
+     ouverte. Les deux vivent ici, et pas dans la closure de `ficheOuvrir` : la
+     réponse arrive après, parfois alors que la popup a déjà changé d'écran. */
+  var _ficheRefus="", _ficheRendre=null;
 
   function fichePayload(u, rep){
     var champs={};
@@ -3669,7 +3675,30 @@
       headers:{"Content-Type":"application/json","X-Turnstile-Token":jeton},
       body:JSON.stringify(a.charge)
     })
-      .then(function(r){ return r.ok ? r.json() : null; })
+      /* 🔴🔴 ON LIT LE CORPS MÊME QUAND LA RÉPONSE N'EST PAS `ok`. Avant, un
+         `r.ok ? r.json() : null` transformait tout refus en SILENCE : l'étudiant
+         remplissait le formulaire, validait, et il ne se passait rien — pas même
+         un message. Or le Worker refuse désormais d'écrire tant que l'adresse
+         n'est pas validée (bug A) : ce refus est légitime, et il n'est utile que
+         s'il est DIT. */
+      .then(function(r){
+        return r.json().catch(function(){ return null; })
+          .then(function(j){ return {ok:r.ok, j:j}; });
+      })
+      .then(function(res){
+        if(res.ok) return res.j;
+        var j=res.j;
+        if(j && j.detail==="verification_en_attente"){
+          _ficheRefus = j.message || "Validez votre adresse e-mail pour publier votre fiche.";
+          /* 🔴 On fige la signature : sans ça le collecteur retenterait en
+             boucle un envoi que le Worker refusera à l'identique tant que
+             l'adresse n'est pas validée. Ce n'est pas un échec transitoire. */
+          _ficheSig = a.sig;
+          if(_ficheRendre) try{ _ficheRendre(); }catch(e){}
+          try{ document.dispatchEvent(new CustomEvent("ps:fiche-refusee",{detail:{raison:"verification_en_attente"}})); }catch(e){}
+        }
+        return null;
+      })
       /* 🔴 On exige un ACCUSÉ de ce qu'on a envoyé, jamais un `ok` générique :
          c'est le piège du 30/07 (un Worker en retard répondait `ok:true` sans
          rien écrire, et le collecteur ne réessayait plus jamais). */
@@ -3763,9 +3792,42 @@
         (rep.bio?'<div class="pf-bio">'+esc(rep.bio)+'</div>':'')+'</div></div>';
     }
 
+    /* 🔴 La popup se laisse repeindre DE L'EXTÉRIEUR. Sans ça, une réponse du
+       Worker arrivée après coup ne peut rien corriger à l'écran — et c'est
+       exactement le défaut signalé par Ziad sur l'opt-in : la page affichait
+       l'inverse de ce qui venait de se produire. */
+    _ficheRendre = rendre;
+    var _fermerOrig = fermer;
+    fermer = function(enregistrer){ _ficheRendre = null; _fermerOrig(enregistrer); };
+
     function rendre(){
       var segs=""; for(var k=0;k<FICHE_ECRANS.length;k++) segs+='<i class="'+(k<i?"on":"")+'"></i>';
       var corps;
+
+      /* 🔴🔴 LE WORKER A REFUSÉ — ET ON NE PEUT PAS LAISSER « VOTRE FICHE EST EN
+         LIGNE » À L'ÉCRAN. Cet écran s'affiche AVANT la réponse du serveur : il
+         annonce donc une publication qui n'a pas eu lieu. Un compte dont
+         l'adresse n'est pas validée se voyait promettre une fiche publiée,
+         alors que rien n'était écrit et que personne ne le lui disait.
+         🔴 Le message vient du Worker, jamais d'ici : c'est lui qui sait
+         pourquoi il refuse, et un texte recopié des deux côtés diverge. */
+      /* 🔴 On REMPLIT `corps` et on laisse la suite faire son travail. Ma
+         première version posait son propre `innerHTML` puis sortait par un
+         `return` : elle sautait `brancher()`, deux lignes plus bas, et le
+         bouton « J'ai compris » n'écoutait personne. L'écran s'affichait
+         parfaitement et ne se fermait jamais. **Un chemin qui court-circuite la
+         fin d'une fonction perd tout ce qu'elle faisait après.** */
+      if(_ficheRefus){
+        corps='<div class="pf-e"><div class="pf-vis">'+FICHE_VIS.fini+'</div>'+
+          '<h3>Encore une étape</h3>'+
+          '<p class="pf-sous">'+esc(_ficheRefus)+'</p></div>'+
+          '<div class="pf-pied"><span class="pf-lien" style="cursor:default"></span>'+
+          '<button class="pf-ok" data-a="fin">J\'ai compris</button></div>';
+        hote.innerHTML='<div class="pf"><div class="pf-prog">'+segs+'</div>'+
+          '<button class="pf-x" aria-label="Fermer">×</button>'+corps+'</div>';
+        brancher();
+        return;
+      }
 
       /* 🔴 Refus de l'annuaire : on s'arrête là. Continuer à demander école,
          niveau et contact à quelqu'un qui vient de dire « je préfère rester
