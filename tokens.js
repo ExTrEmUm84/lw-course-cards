@@ -721,7 +721,7 @@
      C'est précisément le service que ce marqueur rend, et la règle est écrite deux
      lignes plus haut. Un marqueur qu'on oublie de bouger est pire qu'absent :
      il donne une réponse, et elle est fausse. */
-  window.PS_TOKENS_V="2026-08-05-w";
+  window.PS_TOKENS_V="2026-08-05-x";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -2906,25 +2906,24 @@
       pct.textContent=etat.pct+" % complété"; boite.appendChild(pct);
     }
 
-    /* 🔴 Sur /profile, le lien ne sert à rien : on y est déjà. On ouvre alors
-       le formulaire natif — et s'il a changé de nom, le bouton se contente de
-       ne rien faire plutôt que de renvoyer la personne sur la même page. */
-    var surProfil=/^\/profile/.test(location.pathname||"");
+    /* 🔴 LE RAPPEL OUVRE LE FORMULAIRE, IL NE DÉPLACE PLUS. Trois versions se
+       sont succédé et les deux premières envoyaient vers `/profile` — page qui
+       n'affiche AUCUN des six champs (mesuré le 05/08). On y expédiait donc les
+       gens chercher un formulaire absent : c'est le meilleur candidat pour
+       expliquer les 13 comptes sur 17 sans réponse à l'opt-in.
+       ⇒ On ouvre la popup sur place quand elle est disponible ; sinon on va sur
+       `/account`, où les champs existent vraiment. Plus de branche « suis-je
+       déjà sur la bonne page » : ouvrir le formulaire marche partout. */
     var cta;
-    if(surProfil){
+    if(typeof window.PS_FICHE_OUVRIR==="function"){
       cta=document.createElement("button");
-      cta.type="button"; cta.textContent="Modifier mon profil";
+      cta.type="button"; cta.textContent="Compléter ma fiche";
       cta.addEventListener("click",function(){
-        var b=[].slice.call(document.querySelectorAll("a,button")).filter(function(e){
-          return /edit\s*profile|modifier\s*(mon\s*)?profil/i.test((e.textContent||"").trim());
-        })[0];
-        if(b) b.click();
         boite.remove();
+        if(window.PS_FICHE_OUVRIR(true)===false) location.href="/account";
       });
     }else{
       cta=document.createElement("a");
-      /* 🔴 `/account` : c'est là que vivent les champs d'annuaire (mesuré le
-         05/08). `/profile` ne les affiche pas. */
       cta.href="/account"; cta.textContent="Compléter ma fiche";
     }
     cta.className="ps-rappel-cta";
