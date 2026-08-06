@@ -32,7 +32,7 @@
      n'avait rien. Posé AVANT tout le reste : un marqueur défini en fin de
      fichier ne dit rien quand une erreur survient au milieu.
      ⇒ En console : `PS_MENU_V`. */
-  window.PS_MENU_V="2026-08-05-e";
+  window.PS_MENU_V="2026-08-06-a";
 
   /* 🔴 `PS_CSS_ONLY` : drapeau posé par le CONFIGURATEUR et par lui seul (le site
      ne le pose jamais). Sous ce drapeau, ce fichier ne fait plus rien d'autre que
@@ -80,6 +80,34 @@
   }
 
   var NAV=" nav.lw-topbar-menu ";           // scope desktop
+  /* Scope du TIROIR MOBILE. Il est disjoint de NAV : LearnWorlds construit
+     deux menus distincts, et le tiroir n'apparaît dans le DOM qu'en dessous
+     du point de bascule (mesuré : peuplé à 614px, VIDÉ à 1565px — il est
+     détruit et reconstruit au redimensionnement, d'où l'importance de
+     l'observateur de mutations qui rejoue `build()`). */
+  var DRW=" .js-lw-topbar-hamburger-wrapper ";
+
+  /* 🔴 LA LANGUE SE LIT DANS LE DESSIN DU DRAPEAU, PAS DANS SA POSITION.
+     Relevé sur les deux SVG servis, et revérifié dans le tiroir mobile le
+     06/08 (mêmes fichiers) :
+        • Union Jack : 4 `<rect>` + **6 `<polygon>`** (les croix diagonales), 2,7 ko
+        • drapeau FR : **3 `<rect>`, 0 `<polygon>`**, 585 octets
+     Les images n'ont ni `alt`, ni `title`, ni classe distinctive. La position
+     était le seul repère évident, et c'est exactement ce qu'il ne fallait pas
+     prendre : Ziad réordonne ses éléments dans le Site Builder, et deux
+     drapeaux inversés enverraient les francophones en anglais sans que rien
+     ne le signale. Le dessin, lui, ne change pas quand on déplace l'icône.
+     🔴 Remontée au niveau du fichier le 06/08 : l'en-tête ET le tiroir en ont
+     besoin. En laisser une copie dans chacun, c'est se garantir qu'un jour
+     l'une des deux ne connaîtra pas un drapeau que l'autre reconnaît. */
+  function langueDuDessin(svg){
+    var poly=(svg.match(/<polygon/gi)||[]).length;
+    var rect=(svg.match(/<rect/gi)||[]).length;
+    if(poly>0) return "en";                 /* croix diagonales = Union Jack */
+    if(rect>=3) return "fr";                /* trois bandes verticales */
+    return null;                            /* on ne devine pas */
+  }
+
   var CSS=[
     /* ---------- pictos + libellés (desktop ET tiroir mobile) ---------- */
     /* 🔴🔴 CHAQUE PICTO PORTE LA COULEUR DE LA PAGE QU'IL VISE (Ziad, 04/08).
@@ -109,6 +137,81 @@
     ".ps-mm-t{font-size:14.5px !important;}",
     ".lw-topbar-submenu-item.ps-mm-hide{display:none !important;}",
     ".lw-topbar-submenu.ps-mm-empty{display:none !important;}",
+
+    /* ================================================================
+       TIROIR MOBILE (burger) — 06/08, demande de Ziad : « il est très
+       moche, y a pas de hiérarchie »
+       ----------------------------------------------------------------
+       🔴🔴 CE TIROIR N'EST PAS LE MENU DE BUREAU, ET RIEN NE LE TOUCHAIT.
+       Mesuré en session connectée : il vit dans
+       `.js-lw-topbar-hamburger-wrapper`, HORS de `nav.lw-topbar-menu`, et
+       utilise des classes à lui (`mobile-nav-menu`, `mobile-nav-subMenu`)
+       qui ne croisent JAMAIS `.lw-topbar-submenu-item`. `build()` ne
+       pouvait donc pas l'atteindre — d'où zéro picto, zéro couleur, et
+       cinq libellés gris centrés dans du blanc.
+
+       🔴 CE QU'ON NE TOUCHE PAS, ET POURQUOI :
+       • `max-height` / `overflow` de `ul.mobile-nav-subMenu` — c'est
+         LearnWorlds qui anime l'accordéon avec (mesuré : `0px` fermé,
+         `none` ouvert, via la classe `.subMenu-open` sur le `li`). Une
+         règle à nous dessus fige les sous-menus ouverts ou fermés.
+       • Le CONTENU de `a.subMenu-toggle` — c'est un nœud de texte nu
+         suivi de `<span class="chevron">`. Un `innerHTML` comme celui du
+         bureau supprimerait le chevron de LearnWorlds.
+       • Le bouton burger/croix — le MÊME élément sert aux deux états.
+         Le lecteur de cours a déjà coûté un aller-retour sur ce piège
+         exact (`427595f` → `6b08e3c`) : on n'y touche pas sans mesurer
+         les deux états.
+
+       🔴 Les PICTOS vont sur les FEUILLES, pas sur les rubriques — même
+       règle que le bureau, où ils vivent sur `.lw-topbar-submenu-item`.
+       Une rubrique est un intertitre, pas une destination : dans le
+       tiroir LearnWorlds lui met d'ailleurs `href="javascript:void(0)"`.
+       ================================================================ */
+    /* la colonne : alignée à gauche, largeur bornée, respiration */
+    DRW+".lw-topbar-hamburger-menu{justify-content:flex-start !important;text-align:left !important;padding:4px 0 28px !important;}",
+    DRW+"ul.mobile-nav-menu{width:100% !important;max-width:520px !important;margin:0 auto !important;padding:0 20px !important;text-align:left !important;list-style:none !important;}",
+    /* 🔴 `align-items:stretch` — SANS LUI, RIEN N'EST ALIGNÉ À GAUCHE.
+       LearnWorlds met `display:flex` sur le `li`. Notre lien devient donc un
+       ÉLÉMENT de flex, se réduit à son contenu (mesuré : 199px dans un `li` de
+       480) et se retrouve centré. Le `space-between` de la ligne ci-dessous
+       n'avait tout simplement aucune largeur où s'exercer, et j'ai d'abord cru
+       ma règle ignorée. Elle s'appliquait : c'est la BOÎTE qui était fausse. */
+    DRW+"li.mobile-nav-menu-item{text-align:left !important;align-items:stretch !important;}",
+    /* un filet entre rubriques : c'est lui qui crée la hiérarchie, pas une taille de police */
+    DRW+"ul.mobile-nav-menu > li.mobile-nav-menu-item + li.mobile-nav-menu-item{border-top:1px solid var(--ps-border,#E6E9EF) !important;}",
+
+    /* rubrique = ligne pleine largeur, libellé à gauche, chevron à droite.
+       🔴 52px : en dessous de ~44px une cible tactile se rate. Mesuré
+       avant correctif : 36px. */
+    DRW+"ul.mobile-nav-menu > li > a.mobile-nav-menu-link{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:12px !important;min-height:52px !important;padding:6px 2px !important;text-align:left !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;font-weight:700 !important;letter-spacing:-.01em !important;color:var(--ps-text,#1c1f26) !important;text-decoration:none !important;}",
+    /* 🔴🔴 LES DEUX `color` DE CE BLOC NE SUFFISENT PAS, ET C'EST MESURÉ.
+       Le 06/08 : `font-size` et `font-weight` de cette même règle passent, mais
+       `color` reste à `#676879`. LearnWorlds colore ces liens depuis une règle
+       ancrée sur **`#pageContainer`** — un sélecteur à ID bat une classe quel
+       que soit le `!important` ET quel que soit l'ordre des feuilles. Seul
+       l'inline gagne (vérifié en direct : la couleur bascule à la pose inline).
+       ⇒ La vraie couleur est posée par `peindreRubriques()`, plus bas.
+       Ces deux règles restent comme REPLI, pour le jour où LearnWorlds
+       abandonnerait sa règle à ID — pas comme mécanisme principal. Même piège
+       que les titres de widget de l'annuaire (25/07). */
+    DRW+"li.subMenu-open > a.subMenu-toggle{color:var(--ps-accent,#507EC5) !important;}",
+    DRW+".chevron{flex:none !important;opacity:.5 !important;transition:opacity .15s ease !important;}",
+    DRW+"li.subMenu-open > a.subMenu-toggle .chevron{opacity:1 !important;}",
+
+    /* sous-liste : jamais de max-height ici (cf. ci-dessus) */
+    DRW+"ul.mobile-nav-subMenu{margin:0 !important;padding:0 0 12px !important;list-style:none !important;}",
+    DRW+"ul.mobile-nav-subMenu > li.mobile-nav-menu-item{border:0 !important;}",
+    DRW+"ul.mobile-nav-subMenu a.mobile-nav-menu-link{display:flex !important;align-items:center !important;gap:13px !important;min-height:48px !important;padding:4px 2px !important;text-align:left !important;text-decoration:none !important;border-radius:12px !important;transition:background .15s ease !important;}",
+    DRW+"ul.mobile-nav-subMenu a.mobile-nav-menu-link:active{background:var(--ps-tint,#edf4ff) !important;}",
+    /* le libellé d'une feuille est un peu plus grand qu'au bureau : on lit
+       un menu de téléphone à bout de bras, pas à 60 cm d'un écran. */
+    DRW+".ps-mm-t{font-size:15.5px !important;font-weight:600 !important;}",
+
+    /* drapeaux : deux lignes centrées, séparées du menu par un filet.
+       L'état actif/atténué vient des règles `[data-ps-lang]` déjà posées
+       plus bas — rien à dupliquer ici. */
+    DRW+".hamburger-icon-component{display:flex !important;align-items:center !important;justify-content:center !important;min-height:44px !important;min-width:44px !important;text-decoration:none !important;}",
 
     /* ---------- drapeaux de langue : état actif ----------
        🔴 Le drapeau INACTIF est atténué, pas masqué : on doit voir qu'une autre
@@ -304,6 +407,12 @@
       });
     }
 
+    /* 🔴 Exposée pour le TIROIR MOBILE (06/08), qui câble ses propres drapeaux
+       et doit pouvoir demander la mise à jour de l'indicateur. Sans ça, un
+       drapeau du tiroir serait actif sans jamais le montrer — et l'indicateur
+       de langue est justement ce qui manquait à l'en-tête avant le 05/08. */
+    window.__psMarquerLangue=marquerActif;
+
     /* Weglot prévient quand la langue change — y compris quand le changement ne
        vient pas de nous. Repli : on repasse après le clic, au cas où cette
        version de l'API n'exposerait pas `on()`. */
@@ -316,13 +425,8 @@
       }).sort(function(a,b){ return a.getBoundingClientRect().left-b.getBoundingClientRect().left; });
     }
 
-    function langueDuDessin(svg){
-      var poly=(svg.match(/<polygon/gi)||[]).length;
-      var rect=(svg.match(/<rect/gi)||[]).length;
-      if(poly>0) return "en";                 /* croix diagonales = Union Jack */
-      if(rect>=3) return "fr";                /* trois bandes verticales */
-      return null;                            /* on ne devine pas */
-    }
+    /* (`langueDuDessin` est remontée au niveau du fichier : le tiroir mobile
+       s'en sert aussi.) */
 
     function brancher(img, lang, origine){
       var zone=(img.closest && img.closest(".flex-item")) || img.parentElement || img;
@@ -447,8 +551,13 @@
      bord : on repose la même valeur.
      🔴 `important` obligatoire : la règle `.ps-mm-ic` du fichier porte
      `background:… !important`, qu'un style inline ordinaire ne bat pas. */
+  /* 🔴 Le tiroir mobile est dans CE sélecteur, et pas dans une fonction à lui :
+     sa couleur obéit exactement à la même règle (slug -> teinte) et doit être
+     reposée dans les mêmes conditions — notamment quand `tokens.js` se charge
+     APRÈS `mega-menu.js`, ordre sur lequel nous n'avons pas la main. Deux
+     chemins séparés, c'est la garantie qu'un jour l'un des deux sera oublié. */
   function couleurs(){
-    document.querySelectorAll(".lw-topbar-submenu-item > .lw-topbar-option-link").forEach(function(link){
+    document.querySelectorAll(".lw-topbar-submenu-item > .lw-topbar-option-link,"+DRW+"ul.mobile-nav-subMenu a.mobile-nav-menu-link").forEach(function(link){
       var ic=link.querySelector(".ps-mm-ic");
       if(!ic) return;
       var c=couleurLien(link);
@@ -470,12 +579,141 @@
                    + '<span class="ps-mm-t">'+label+'</span>';
       link.dataset.psMm="1";
     });
+    tiroir();                   /* le menu mobile, avant la passe de couleurs */
     couleurs();                 /* après la construction : les pictos existent */
     /* panneaux sans aucune entrée réelle : ne pas afficher de boîte vide */
     document.querySelectorAll(".lw-topbar-submenu").forEach(function(s){
       s.classList.toggle("ps-mm-empty", s.querySelectorAll(".lw-topbar-submenu-item:not(.ps-mm-hide)").length===0);
     });
     openMenus();
+  }
+
+  /* ====================================================================
+     TIROIR MOBILE — pictos sur les feuilles, et drapeaux désamorcés
+     --------------------------------------------------------------------
+     Appelée depuis `build()`, donc rejouée par l'observateur de mutations :
+     indispensable ici, parce que LearnWorlds DÉTRUIT et RECONSTRUIT tout le
+     tiroir quand la fenêtre franchit son point de bascule (mesuré : 17 items
+     à 614px, 0 à 1565px). Une décoration posée une seule fois disparaîtrait
+     à la première rotation de téléphone.
+     ==================================================================== */
+  function tiroir(){
+    var w=document.querySelector(".js-lw-topbar-hamburger-wrapper");
+    if(!w) return;
+
+    /* --- 1. Pastille + libellé sur les FEUILLES uniquement ---
+       Le libellé est LU dans le DOM, jamais écrit en dur : Ziad doit pouvoir
+       ajouter, renommer ou réordonner ses entrées depuis le Site Builder sans
+       que personne ne touche à ce fichier. Une entrée inédite tombe sur le
+       glyphe par défaut de `pick()` — jamais sur du vide. */
+    w.querySelectorAll("ul.mobile-nav-subMenu a.mobile-nav-menu-link").forEach(function(link){
+      if(link.dataset.psMm) return;
+      var label=(link.textContent||"").replace(/\s+/g," ").trim();
+      if(!label || /^submenu link$/i.test(label)) return;   // gabarit LW non rempli
+      link.innerHTML='<span class="ps-mm-ic">'+(ICON[pick(label)]||ICON.def)+'</span>'
+                   + '<span class="ps-mm-t">'+label+'</span>';
+      link.dataset.psMm="1";
+    });
+
+    /* --- 2. Les drapeaux du tiroir ---
+       🔴🔴 ILS MÈNENT À DES 404. Mesuré le 06/08 en session connectée : dans
+       le tiroir ce sont des `<a href="/courses-clone">` et
+       `<a href="/courses-clone-clone">` — les liens fantômes déjà relevés le
+       25/07 sur l'en-tête — et les deux répondent **HTTP 404**. Le correctif
+       de bureau ne les a jamais atteints : `drapeauxDansEnTete()` ne retient
+       que les images à `top < 110`, or dans un tiroir déroulant elles sont à
+       443 et 483. Sur téléphone, toucher un drapeau EXPULSE donc l'utilisateur
+       vers une page d'erreur, au lieu de changer de langue — et c'est le seul
+       sélecteur de langue disponible, le panneau flottant de Weglot étant
+       masqué site-wide depuis le 28/07.
+       🔴 On DÉSARME plutôt qu'on ne remplace : retirer le `href` et arrêter
+       l'événement suffit à tuer la navigation, là où remplacer le `<a>` par un
+       `<span>` ferait perdre les accroches de LearnWorlds sur un élément qu'il
+       reconstruit lui-même. */
+    w.querySelectorAll("a.hamburger-icon-component, .hamburger-icon-component").forEach(function(zone){
+      if(zone.getAttribute("data-ps-lang")) return;
+      if(zone.closest("[data-ps-lang]")) return;
+      var img=zone.querySelector("img");
+      if(!img || !img.src) return;
+
+      /* La langue se lit dans le DESSIN, jamais dans la position : Ziad
+         réordonne ses éléments dans le Site Builder, et deux drapeaux inversés
+         enverraient les francophones en anglais sans que rien ne le signale.
+         Même méthode que l'en-tête, mêmes signatures (FR : 3 rect / 0 polygon,
+         585 octets — EN : 4 rect / 6 polygon, 2,7 ko), revérifiées dans le
+         tiroir le 06/08. */
+      fetch(img.src).then(function(r){ return r.text(); }).then(function(t){
+        var l=langueDuDessin(t);
+        /* 🔴 Pas de repli par position ICI. Dans l'en-tête il y a exactement
+           deux images et le repli est raisonnable ; dans le tiroir, n'importe
+           quelle icône de LearnWorlds porte la même classe. Deviner reviendrait
+           à câbler « changer de langue » sur un pictogramme quelconque. Sans
+           dessin reconnu, on ne fait rien — mais on désarme quand même le lien
+           mort, qui, lui, est mesuré. */
+        desarmer(zone);
+        if(l) brancherTiroir(zone, l);
+      }).catch(function(){ desarmer(zone); });
+    });
+
+    /* --- 3. Couleur des rubriques : EN INLINE, sinon LearnWorlds gagne ---
+       Voir la mise en garde de la feuille : `color` est la seule propriété que
+       notre règle ne remporte pas, la faute à un sélecteur ancré sur un ID.
+       🔴 L'état vient de LA CLASSE POSÉE PAR LEARNWORLDS (`.subMenu-open`), lue
+       après coup — on ne tient aucune variable d'état à nous. C'est la même
+       règle que pour la langue active : un état qu'on recopie finit par
+       diverger de celui qui commande réellement l'affichage.
+       🔴 Repeint APRÈS le clic, avec un léger décalage : c'est LearnWorlds qui
+       bascule la classe, et la lire dans le même souffle que le clic donnerait
+       l'ancien état — piège déjà payé deux fois en août. */
+    function jeton(nom, repli){
+      var v="";
+      try{ v=getComputedStyle(document.documentElement).getPropertyValue(nom).trim(); }catch(e){}
+      return v||repli;
+    }
+    function peindreRubriques(){
+      w.querySelectorAll("ul.mobile-nav-menu > li.mobile-nav-menu-item").forEach(function(li){
+        var a=li.querySelector("a.mobile-nav-menu-link");
+        if(!a || a.parentElement!==li) return;          /* pas les feuilles */
+        var ouverte=li.classList.contains("subMenu-open");
+        a.style.setProperty("color", ouverte ? jeton("--ps-accent","#507EC5") : jeton("--ps-text","#1c1f26"), "important");
+        if(!a.dataset.psRepeint){
+          a.dataset.psRepeint="1";
+          a.addEventListener("click", function(){ setTimeout(peindreRubriques, 80); });
+        }
+      });
+    }
+    peindreRubriques();
+
+    function desarmer(zone){
+      var a=(zone.tagName==="A") ? zone : zone.querySelector("a");
+      if(!a) return;
+      var h=a.getAttribute("href");
+      if(h && h!=="javascript:void(0)"){
+        a.setAttribute("data-ps-href-mort", h);   // trace : on saura ce qu'on a retiré
+        a.removeAttribute("href");
+      }
+      if(!a.dataset.psStop){
+        a.dataset.psStop="1";
+        a.addEventListener("click", function(e){ e.preventDefault(); e.stopPropagation(); });
+      }
+    }
+
+    function brancherTiroir(zone, lang){
+      if(zone.getAttribute("data-ps-lang")) return;
+      zone.setAttribute("data-ps-lang", lang);
+      zone.setAttribute("role","button");
+      zone.setAttribute("tabindex","0");
+      zone.style.cursor="pointer";
+      zone.setAttribute("aria-label", lang==="en" ? "Switch to English" : "Afficher le site en français");
+      zone.title = lang==="en" ? "English" : "Français";
+      function aller(){ try{ Weglot.switchTo(lang); }catch(e){} }
+      zone.addEventListener("click", function(e){ e.preventDefault(); aller(); });
+      zone.addEventListener("keydown", function(e){
+        if(e.key==="Enter" || e.key===" "){ e.preventDefault(); aller(); }
+      });
+      try{ if(window.__psMarquerLangue) window.__psMarquerLangue(); }catch(e){}
+      try{ console.info("[PrepaStrat] Drapeau du tiroir mobile câblé sur « "+lang+" » (lien mort désarmé)."); }catch(e){}
+    }
   }
 
   /* ------------------------------------------------------------------
