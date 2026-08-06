@@ -145,7 +145,9 @@
     "--ps-f5:#c51d4a",
     "--ps-f5-tint:#fff0f4",
     "--ps-f6:#6b7280",
-    "--ps-f6-tint:#ecedef"
+    "--ps-f6-tint:#ecedef",
+    "--ps-mob-pad:40px",
+    "--ps-mob-h1:36px"
 /* <<< FIN TOKENS */
   ];
 
@@ -162,6 +164,51 @@
       document.head.insertBefore(st, document.head.firstChild);
     }
     if(st.textContent!==TOKENS) st.textContent=TOKENS;
+  }
+
+  /* ====================================================================
+     RESPIRATION MOBILE — le contenu arrive plus vite sur téléphone
+     --------------------------------------------------------------------
+     Demande de Ziad le 06/08, capture à l'appui : « sur mobile, les pages sont
+     trop longues avant l'arrivée du contenu ». Mesuré sur `/formation-par-modules` :
+     l'en-tête finit à y=75, le titre commence à y=**165** — 90px de vide pur,
+     et le même rembourrage se répète à chaque section.
+
+     🔴🔴 PAS DE `!important` ICI, ET C'EST TOUT LE MÉCANISME.
+     Les 90px viennent de la classe `.learnworlds-size-normal` (spécificité
+     0-1-0, SANS `!important` — vérifié en lisant la règle). Mais les sections
+     que Ziad a réglées à 0 dans le Site Builder le sont par une règle à l'**ID
+     de section** (`#section_…`, spécificité 1-0-0).
+     ⇒ Une règle en `!important` écrasait les DEUX : mesuré, les sections
+     `Courses1` passaient de **0 à 40px**, ajoutant du vide là où il n'y en avait
+     pas — exactement l'inverse de la demande.
+     ⇒ On vise donc `section.learnworlds-section.learnworlds-size-normal`
+     (0-2-1) : assez fort pour battre la classe, trop faible pour battre un
+     réglage par section. **La spécificité est le réglage, pas la force.**
+     Mesuré après correctif : hero 90→40, sections à 0 **restées à 0**,
+     titre remonté de y=165 à **y=115**.
+     🔴 L'en-tête n'a PAS `learnworlds-size-normal` : elle est épargnée sans
+     qu'on ait besoin d'un `:not()`, donc rien à maintenir si LW la renomme.
+     🔴 Le seuil est 768px et non 820 comme les feuilles de cartes : ici on
+     parle de téléphones, pas du basculement des grilles.
+
+     ⚠️ `--ps-mob-h1` ne sert PAS ici : la taille mobile du titre est écrite
+     `!important` dans les six feuilles de cartes (une règle de `tokens.js` ne
+     les battrait pas). Le jeton y est injecté À LEUR PLACE, avec 36px en repli.
+     C'est pour ça qu'il n'apparaît pas dans le bloc ci-dessous alors qu'il se
+     règle dans le même volet du configurateur.
+     ==================================================================== */
+  var MOBILE_CSS="@media(max-width:768px){"
+    + "section.learnworlds-section.learnworlds-size-normal{"
+    + "padding-top:var(--ps-mob-pad,40px);padding-bottom:var(--ps-mob-pad,40px);}"
+    + "}";
+  function poserMobile(){
+    var st=document.getElementById("ps-mobile");
+    if(!st){
+      st=document.createElement("style"); st.id="ps-mobile";
+      (document.head||document.documentElement).appendChild(st);
+    }
+    if(st.textContent!==MOBILE_CSS) st.textContent=MOBILE_CSS;
   }
 
   /* ====================================================================
@@ -732,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-05-am";
+  window.PS_TOKENS_V="2026-08-06-a";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4302,8 +4349,8 @@
     }
   }
 
-  cloak(); cloakFormules(); gardeClicCartes(); fantomes(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
-  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); cloakFormules(); gardeClicCartes(); fantomes(); poser(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader(); });
+  cloak(); cloakFormules(); gardeClicCartes(); fantomes(); poser(); poserMobile(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader();
+  if(document.readyState==="loading") document.addEventListener("DOMContentLoaded",function(){ cloak(); cloakFormules(); gardeClicCartes(); fantomes(); poser(); poserMobile(); accentPage(); heroBtns(); watchReveal(); playerBack(); immersivePlayer(); playerFlag(); partnerHeader(); });
   /* Les boutons peuvent être rendus après nous (Site Builder progressif) :
      quelques relances pour attraper la classe active. */
   [300,800,1600].forEach(function(d){ setTimeout(heroBtns,d); setTimeout(playerBack,d); setTimeout(immersivePlayer,d); setTimeout(partnerHeader,d); });

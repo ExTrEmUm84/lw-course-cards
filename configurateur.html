@@ -571,6 +571,22 @@ body.ps-verrou .ps-porte{display:grid}
             <div class="row"><label>Boutons</label><input type="range" id="rBtn" min="0" max="28" step="1"><span class="val" id="rBtnV"></span></div>
           </div>
 
+          <!-- 🔴 Deux réglages qui n'agissent QUE sous 768px de large. L'aperçu de
+               droite est en pleine largeur : il ne les montrera donc PAS bouger.
+               C'est assumé et c'est dit dans la note — mieux vaut un réglage
+               honnêtement muet qu'un aperçu qui ferait croire à un effet sur
+               ordinateur. -->
+          <div class="card">
+            <h4>Téléphone — respiration</h4>
+            <p class="expl">Sur téléphone, LearnWorlds garde les mêmes grands espaces que sur ordinateur :
+              le contenu arrive très bas. Ces deux réglages resserrent, <strong>uniquement sous 768&nbsp;px</strong>.</p>
+            <div class="row"><label>Espace des sections</label><input type="range" id="mobPad" min="0" max="90" step="4"><span class="val" id="mobPadV"></span></div>
+            <div class="lien">↳ mesuré sur la page Formations&nbsp;: 90&nbsp;px d'origine, le titre commençait 50&nbsp;px plus bas</div>
+            <div class="row"><label>Taille des titres</label><input type="range" id="mobH1" min="22" max="48" step="1"><span class="val" id="mobH1V"></span></div>
+            <div class="note">⚠️ Les sections que tu as réglées à <strong>0</strong> dans le Site Builder ne bougent pas&nbsp;:
+              ton réglage par section reste prioritaire. Ce curseur ne touche que les sections restées au format par défaut.</div>
+          </div>
+
           <!-- 🔴 Le menu est le même sur toutes les pages : sa place est ici, et non
                dans un onglet de page. Ses couleurs se choisissent ENSEMBLE — les
                répartir par page aurait obligé à naviguer pour comparer deux teintes
@@ -1212,6 +1228,10 @@ body.ps-verrou .ps-porte{display:grid}
     text:"#1c1f26", textSoft:"#676879", border:"#E6E9EF", surfaceSoft:"#F7F8FB",
     font:"Figtree,-apple-system,Segoe UI,Roboto,sans-serif",
     rCard:16, rPill:999, rBtn:10, deriv:true, cabLogo:"#507EC5",
+    /* Respiration mobile (06/08). 40 = ce que la mesure a validé sur la page
+       Formations ; 36 = la valeur EXACTE qui était en dur dans les six feuilles
+       de cartes, pour que poser le jeton ne change rien tant que Ziad n'y touche pas. */
+    mobPad:40, mobH1:36,
     anAvatar:56, anCol:260, pfRing:64, pfBar:8, anBtn:"", pfBtn:"",
     /* Niveau 1 et champ 1 SUIVENT la marque (cases cochées) : ces deux valeurs ne
        servent que si Ziad décoche le lien. Elles doivent donc valoir ce que le
@@ -2190,6 +2210,8 @@ body.ps-verrou .ps-porte{display:grid}
     R.setProperty("--ps-r-card",S.rCard+"px");
     R.setProperty("--ps-r-pill",S.rPill+"px");
     R.setProperty("--ps-r-btn",S.rBtn+"px");
+    R.setProperty("--ps-mob-pad",S.mobPad+"px");
+    R.setProperty("--ps-mob-h1",S.mobH1+"px");
     for(var i=0;i<6;i++){
       var lien1 = (i===0 && S.lvl1Link);
       R.setProperty("--ps-lvl"+(i+1), lien1?"var(--ps-accent-hover)":S.lvl[i][0]);
@@ -2204,6 +2226,8 @@ body.ps-verrou .ps-porte{display:grid}
     document.getElementById("rCardV").textContent=S.rCard+"px";
     document.getElementById("rPillV").textContent=S.rPill+"px";
     document.getElementById("rBtnV").textContent=S.rBtn+"px";
+    document.getElementById("mobPadV").textContent=S.mobPad+"px";
+    document.getElementById("mobH1V").textContent=S.mobH1+"px";
     sortie();
   }
 
@@ -2233,6 +2257,8 @@ body.ps-verrou .ps-porte{display:grid}
     L.push(["--ps-r-card",S.rCard+"px"]);
     L.push(["--ps-r-pill",S.rPill+"px"]);
     L.push(["--ps-r-btn",S.rBtn+"px"]);
+    L.push(["--ps-mob-pad",S.mobPad+"px"]);
+    L.push(["--ps-mob-h1",S.mobH1+"px"]);
     for(var i=0;i<6;i++){
       var l1=(i===0&&S.lvl1Link);
       L.push(["--ps-lvl"+(i+1), l1?"var(--ps-accent-hover)":S.lvl[i][0]]);
@@ -2278,7 +2304,7 @@ body.ps-verrou .ps-porte{display:grid}
   document.getElementById("deriv").onchange=function(){
     S.deriv=this.checked; if(S.deriv){ deduire(); rendre(); }
   };
-  ["rCard","rPill","rBtn"].forEach(function(k){
+  ["rCard","rPill","rBtn","mobPad","mobH1"].forEach(function(k){
     var el=document.getElementById(k); el.value=S[k];
     el.oninput=function(){ S[k]=+el.value; rendre(); };
   });
@@ -2329,6 +2355,8 @@ body.ps-verrou .ps-porte{display:grid}
     var f=document.getElementById("rCard"); if(f) f.value=S.rCard;
     f=document.getElementById("rPill");     if(f) f.value=S.rPill;
     f=document.getElementById("rBtn");      if(f) f.value=S.rBtn;
+    f=document.getElementById("mobPad");    if(f) f.value=S.mobPad;
+    f=document.getElementById("mobH1");     if(f) f.value=S.mobH1;
     f=document.getElementById("fontTxt");   if(f) f.value=S.font;
     f=document.getElementById("deriv");     if(f) f.checked=!!S.deriv;
     /* 🔴 `menuUI()` RECONSTRUIT ses lignes à partir de `S` : sans cet appel,
@@ -2604,6 +2632,8 @@ body.ps-verrou .ps-porte{display:grid}
           else if(nom==="--ps-r-card") S.rCard=parseInt(val,10);
           else if(nom==="--ps-r-pill") S.rPill=parseInt(val,10);
           else if(nom==="--ps-r-btn")  S.rBtn=parseInt(val,10);
+          else if(nom==="--ps-mob-pad") S.mobPad=parseInt(val,10);
+          else if(nom==="--ps-mob-h1")  S.mobH1=parseInt(val,10);
           else if(nom==="--ps-an-avatar") S.anAvatar=parseInt(val,10);
           else if(nom==="--ps-an-col")    S.anCol=parseInt(val,10);
           else if(nom==="--ps-pf-ring")   S.pfRing=parseInt(val,10);

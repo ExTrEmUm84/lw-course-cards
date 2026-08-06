@@ -168,8 +168,26 @@
        Une rubrique est un intertitre, pas une destination : dans le
        tiroir LearnWorlds lui met d'ailleurs `href="javascript:void(0)"`.
        ================================================================ */
-    /* la colonne : alignée à gauche, largeur bornée, respiration */
-    DRW+".lw-topbar-hamburger-menu{justify-content:flex-start !important;text-align:left !important;padding:4px 0 28px !important;}",
+    /* la colonne : alignée à gauche, largeur bornée, respiration.
+       🔴🔴 LES 64px DU HAUT DÉGAGENT LA CROIX DE FERMETURE, et ce défaut n'est
+       apparu que sur un VRAI TÉLÉPHONE (capture de Ziad, 06/08 : « la croix
+       vient sur le sélecteur »). La croix est en `position:absolute`,
+       `z-index:101`, calée à **15px du bord droit** et haute de 27px à partir
+       de y=24 — donc elle chevauche verticalement la première ligne quelle que
+       soit la largeur. Ce qui change avec la largeur, c'est l'axe X :
+         • à 614px (le minimum que Chrome accepte) la croix est à 559-599 et le
+           chevron de la 1re rubrique à 536-545 → aucun recouvrement ;
+         • à 375px la croix glisse à ~320-360 et le chevron à ~344-353 → ils se
+           SUPERPOSENT, le chevron disparaît, et toute la zone droite de la
+           première ligne FERME le menu au lieu de la déplier.
+       🔴 **Mon banc d'essai était trop large pour révéler le défaut.** Chrome ne
+       réduit pas sa fenêtre sous ~614px : j'avais noté « non mesuré sous 614 »
+       comme une réserve mineure, c'était en réalité l'angle mort qui comptait.
+       Un élément positionné par rapport au BORD DROIT doit être vérifié à la
+       largeur la plus ÉTROITE, jamais à la plus commode.
+       (La croix elle-même n'est pas touchée : c'est le même élément que le
+       burger, et le lecteur de cours a déjà coûté un aller-retour sur ce piège.) */
+    DRW+".lw-topbar-hamburger-menu{justify-content:flex-start !important;text-align:left !important;padding:64px 0 28px !important;}",
     DRW+"ul.mobile-nav-menu{width:100% !important;max-width:520px !important;margin:0 auto !important;padding:0 20px !important;text-align:left !important;list-style:none !important;}",
     /* 🔴 `align-items:stretch` — SANS LUI, RIEN N'EST ALIGNÉ À GAUCHE.
        LearnWorlds met `display:flex` sur le `li`. Notre lien devient donc un
@@ -184,7 +202,7 @@
     /* rubrique = ligne pleine largeur, libellé à gauche, chevron à droite.
        🔴 52px : en dessous de ~44px une cible tactile se rate. Mesuré
        avant correctif : 36px. */
-    DRW+"ul.mobile-nav-menu > li > a.mobile-nav-menu-link{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:12px !important;min-height:52px !important;padding:6px 2px !important;text-align:left !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;font-weight:700 !important;letter-spacing:-.01em !important;color:var(--ps-text,#1c1f26) !important;text-decoration:none !important;}",
+    DRW+"ul.mobile-nav-menu > li > .mobile-nav-menu-link{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:12px !important;min-height:52px !important;padding:6px 2px !important;text-align:left !important;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;font-weight:700 !important;letter-spacing:-.01em !important;color:var(--ps-text,#1c1f26) !important;text-decoration:none !important;}",
     /* 🔴🔴 LES DEUX `color` DE CE BLOC NE SUFFISENT PAS, ET C'EST MESURÉ.
        Le 06/08 : `font-size` et `font-weight` de cette même règle passent, mais
        `color` reste à `#676879`. LearnWorlds colore ces liens depuis une règle
@@ -202,8 +220,8 @@
     /* sous-liste : jamais de max-height ici (cf. ci-dessus) */
     DRW+"ul.mobile-nav-subMenu{margin:0 !important;padding:0 0 12px !important;list-style:none !important;}",
     DRW+"ul.mobile-nav-subMenu > li.mobile-nav-menu-item{border:0 !important;}",
-    DRW+"ul.mobile-nav-subMenu a.mobile-nav-menu-link{display:flex !important;align-items:center !important;gap:13px !important;min-height:48px !important;padding:4px 2px !important;text-align:left !important;text-decoration:none !important;border-radius:12px !important;transition:background .15s ease !important;}",
-    DRW+"ul.mobile-nav-subMenu a.mobile-nav-menu-link:active{background:var(--ps-tint,#edf4ff) !important;}",
+    DRW+"ul.mobile-nav-subMenu .mobile-nav-menu-link{display:flex !important;align-items:center !important;gap:13px !important;min-height:48px !important;padding:4px 2px !important;text-align:left !important;text-decoration:none !important;border-radius:12px !important;transition:background .15s ease !important;}",
+    DRW+"ul.mobile-nav-subMenu .mobile-nav-menu-link:active{background:var(--ps-tint,#edf4ff) !important;}",
     /* le libellé d'une feuille est un peu plus grand qu'au bureau : on lit
        un menu de téléphone à bout de bras, pas à 60 cm d'un écran. */
     DRW+".ps-mm-t{font-size:15.5px !important;font-weight:600 !important;}",
@@ -557,7 +575,7 @@
      APRÈS `mega-menu.js`, ordre sur lequel nous n'avons pas la main. Deux
      chemins séparés, c'est la garantie qu'un jour l'un des deux sera oublié. */
   function couleurs(){
-    document.querySelectorAll(".lw-topbar-submenu-item > .lw-topbar-option-link,"+DRW+"ul.mobile-nav-subMenu a.mobile-nav-menu-link").forEach(function(link){
+    document.querySelectorAll(".lw-topbar-submenu-item > .lw-topbar-option-link,"+DRW+"ul.mobile-nav-subMenu .mobile-nav-menu-link").forEach(function(link){
       var ic=link.querySelector(".ps-mm-ic");
       if(!ic) return;
       var c=couleurLien(link);
@@ -606,7 +624,7 @@
        ajouter, renommer ou réordonner ses entrées depuis le Site Builder sans
        que personne ne touche à ce fichier. Une entrée inédite tombe sur le
        glyphe par défaut de `pick()` — jamais sur du vide. */
-    w.querySelectorAll("ul.mobile-nav-subMenu a.mobile-nav-menu-link").forEach(function(link){
+    w.querySelectorAll("ul.mobile-nav-subMenu .mobile-nav-menu-link").forEach(function(link){
       if(link.dataset.psMm) return;
       var label=(link.textContent||"").replace(/\s+/g," ").trim();
       if(!label || /^submenu link$/i.test(label)) return;   // gabarit LW non rempli
@@ -672,7 +690,7 @@
     }
     function peindreRubriques(){
       w.querySelectorAll("ul.mobile-nav-menu > li.mobile-nav-menu-item").forEach(function(li){
-        var a=li.querySelector("a.mobile-nav-menu-link");
+        var a=li.querySelector(".mobile-nav-menu-link");
         if(!a || a.parentElement!==li) return;          /* pas les feuilles */
         var ouverte=li.classList.contains("subMenu-open");
         a.style.setProperty("color", ouverte ? jeton("--ps-accent","#507EC5") : jeton("--ps-text","#1c1f26"), "important");

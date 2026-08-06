@@ -150,7 +150,7 @@
     "@keyframes ps-blink{50%{opacity:0}}",
 
     "@media(max-width:1040px){"+GRID+"{grid-template-columns:1fr 1fr !important;}}",
-    "@media(max-width:820px){"+S+" h1.learnworlds-heading{font-size:36px !important;}"+S+" h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}"+S+" .ps-desc{padding-right:0 !important;}}",
+    "@media(max-width:820px){"+S+" h1.learnworlds-heading{font-size:var(--ps-mob-h1,36px) !important;}"+S+" h2.learnworlds-subheading{font-size:27px !important;}.ps-tw{white-space:normal !important;}"+S+" .ps-desc{padding-right:0 !important;}}",
     "@media(max-width:700px){"+GRID+"{grid-template-columns:1fr !important;}}"
   ].join("\n");
 
