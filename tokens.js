@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-06-a";
+  window.PS_TOKENS_V="2026-08-06-b";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -2917,19 +2917,30 @@
   function rappelProfil(){
     var u=membrePS();
     if(!u || document.getElementById("ps-rappel")) return;
-    /* 🔴 UN SEUL SOLLICITEUR À LA FOIS. Le membre qui a un accès relève de la
-       POPUP (`fichePopup`), qui fait remplir la fiche sur place ; lui montrer en
-       plus la pastille en coin, c'est demander deux fois la même chose par deux
-       chemins différents. Le rappel garde sa place pour les autres.
-       Le test porte sur l'accès, pas sur « la popup est-elle affichée » : sinon
-       le rappel réapparaîtrait dès que la popup est reportée. */
-    if(ficheAcces(u) || document.getElementById("ps-fiche")) return;
-    /* 🔴🔴 EFFET DE BORD À NE PAS RATER : `ficheAcces` renvoie désormais FAUX
-       pour un compte non validé — or ce test-ci fait justement apparaître le
-       rappel quand l'accès manque. Sans cette ligne, faire taire la popup
-       AURAIT ALLUMÉ LE RAPPEL EN COIN à sa place : on aurait remplacé une
-       sollicitation par une autre, et cru avoir réglé le problème. */
-    if(verifEnAttente(u)) return;
+    /* 🔴🔴🔴 CONDITION INVERSÉE LE 06/08 — SIGNALÉ PAR ZIAD, MESURÉ SUR PIÈCE.
+       Elle disait `if(ficheAcces(u) || …) return;` : le rappel était donc
+       réservé aux membres qui n'ont **PAS** d'accès, au motif que « le membre
+       qui a un accès relève de la popup, le rappel garde sa place pour les
+       autres ». C'était l'inverse de ce qu'il fallait.
+       Mesuré en direct sur un compte créé par Google puis validé — `verified`,
+       **0 programme, `isPaying:false`**, donc aucun accès : `#ps-rappel`
+       s'affichait et réclamait « Rejoignez l'annuaire des étudiants /
+       Compléter ma fiche » AVANT tout achat et tout choix de programme.
+       On demandait une fiche pour un annuaire où ce membre ne peut pas figurer,
+       pendant que `#ps-acces` portait, deux lignes plus haut, la seule action
+       utile : « Il vous reste une étape — Voir les formules ».
+       ⇒ Le rappel ne s'adresse plus qu'aux membres QUI ONT un accès et dont la
+       popup est en report. Sans accès : silence, `#ps-acces` suffit.
+       🔴 Et ça condamne le « durcissement » que j'allais livrer le même jour
+       (exiger un programme dans `ficheAcces`) : il aurait envoyé DAVANTAGE de
+       comptes vers ce rappel. Corriger une sollicitation en en allumant une
+       autre, c'est la faute que la note du 05/08 décrivait déjà. */
+    if(!ficheAcces(u)) return;
+    /* La popup est le chemin principal ; le rappel ne double jamais. */
+    if(document.getElementById("ps-fiche")) return;
+    /* (`verifEnAttente` n'est plus testé ici : `ficheAcces` le fait déjà et
+       renvoie faux pour un compte en attente de validation. Le retester serait
+       une seconde source de vérité pour la même règle.) */
     /* On n'interrompt ni une leçon, ni une inscription en cours de validation. */
     if(PAGES_MUETTES.test(location.pathname||"")) return;
 
@@ -3570,7 +3581,9 @@
      04/08), et aucune liste de cours (70 clés listées le 05/08) — « au moins un
      cours fermé » n'est donc PAS calculable depuis une page. Les deux branches
      se rejoignent sur le seul fait observable : un accès en place.
-     ⇒ `userLearningPrograms.length > 0` OU `isPaying`.
+     ⇒ `userLearningPrograms.length > 0`. **`isPaying` a été retiré le 06/08**
+     (voir `ficheAcces`) : il élargissait vers les comptes SANS aucun accès,
+     exactement ceux qu'il ne faut pas solliciter.
      ⚠️ `isPaying` ne veut PAS dire « a payé » : sur le compte de Ziad il vaut
      `true` alors que `/account` affiche « aucun paiement effectué ». On ignore
      ce qu'il mesure exactement ; il ne fait qu'élargir, jamais restreindre.
@@ -3677,8 +3690,19 @@
        bien avoir un programme (inscription par automatisation d'école dès la
        création). L'accès au contenu ne vaut pas autorisation à publier. */
     if(verifEnAttente(u)) return false;
-    if((u.userLearningPrograms||[]).length>0) return true;
-    return u.isPaying===true;
+    /* 🔴🔴 `isPaying` RETIRÉ LE 06/08. Il ne veut PAS dire « a payé » : mesuré
+       sur le compte admin de Ziad, il vaut `true` alors que `/account` affiche
+       « aucun paiement effectué ». La note du 05/08 le savait déjà et l'avait
+       jugé sans danger — « il ne fait qu'élargir, jamais restreindre ». C'est
+       vrai, et c'est justement le problème : il élargit vers la population
+       qu'il ne faut PAS solliciter, celle qui n'a encore aucun accès.
+       ⇒ Le seul signal fiable est l'accès lui-même. Depuis la validation du
+       pivot (05/08), acheter le programme y INSCRIT : `userLearningPrograms`
+       couvre donc aussi bien le client que l'étudiant d'école.
+       🔴 Ce durcissement ne vaut QU'AVEC l'inversion de `rappelProfil` faite
+       le même jour. Seul, il aurait envoyé davantage de comptes vers le rappel
+       en coin — c'est-à-dire aggravé le défaut qu'il prétend corriger. */
+    return (u.userLearningPrograms||[]).length>0;
   }
 
   function fichePeutSAfficher(){
