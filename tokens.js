@@ -212,7 +212,8 @@
     "sentrainer":"#c51d4a",
     "fiches-cabinet":"#009e78",
     "fiches-secteur":"#deb125",
-    "etudes-cas":"#6b7280"
+    "etudes-cas":"#6b7280",
+    "email-verification-pending":"#203866"
   };
   var PAGE_STYLE={
     "formation-par-modules":{"contour":1,"ep":4,"duree":1.1}
