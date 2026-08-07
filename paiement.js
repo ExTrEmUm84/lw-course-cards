@@ -30,7 +30,7 @@
 (function () {
   "use strict";
 
-  window.PS_PAIEMENT_V = "2026-08-08-b";
+  window.PS_PAIEMENT_V = "2026-08-08-c";
 
   /* 🔴 Le test porte sur le CHEMIN et pas sur `body.slug-…` : cette page est
      servie par LearnWorlds, pas construite dans le Site Builder, et elle ne
@@ -486,6 +486,32 @@
     document.addEventListener("animationstart", function (e) {
       if (e.animationName === "ps-autofill") effacerFantome(e.target);
     }, true);
+
+    /* 4e chemin — LE REMPLISSAGE AU CHARGEMENT, SANS AUCUN CLIC. Observé APRÈS
+       déploiement, et c'est le genre de trou qu'on ne voit qu'en production :
+       une capture prise plusieurs secondes après l'ouverture montrait encore le
+       fantôme, alors que le champ portait déjà `psEfface=1` — notre code avait
+       agi, mais TARD, sur une relance de `passer()`.
+       🔴 Le défaut est STRUCTUREL même s'il est intermittent : sans focus, la
+       rafale ci-dessus ne part jamais, et passé la dernière relance (6 s) plus
+       rien ne surveille. Un remplissage tardif resterait à l'écran pour de bon.
+       Veille BORNÉE, dans l'esprit du reste du fichier (pas d'observateur
+       permanent sur un écran de paiement) : on attend que le champ existe —
+       LearnWorlds le peint tardivement —, puis on surveille encore 2 s, et
+       jamais au-delà de 12 s. */
+    (function veilleDemarrage() {
+      var debut = Date.now(), vuA = 0;
+      (function encore() {
+        var el = champMdpChoisi();
+        if (el) {
+          if (!vuA) vuA = Date.now();
+          effacerFantome(el);
+        }
+        if (Date.now() - debut < 12000 && (!vuA || Date.now() - vuA < 2000)) {
+          requestAnimationFrame(encore);
+        }
+      })();
+    })();
   }
 
   function passer() {
