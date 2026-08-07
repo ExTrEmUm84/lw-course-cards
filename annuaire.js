@@ -186,6 +186,29 @@
       "font-size:13.5px;font-weight:600;text-decoration:none !important;transition:background .15s ease;}",
     R + ".psa-contact:hover{background:var(--ps-accent-hover,#486798) !important;color:#fff !important;}",
     R + ".psa-contact:focus-visible{outline:2px solid var(--ps-accent,#507EC5);outline-offset:2px;}",
+    /* Menu « Contacter » (08/08) — mêmes formes que le menu des filtres.
+       🔴 `border:0` et `font` explicites : c'est un <button>, il n'hérite ni de
+       la police ni des marges d'un <a>, et LearnWorlds l'habillerait sinon. */
+    R + ".psa-ct{position:relative;}",
+    R + ".psa-ct-btn{border:0;cursor:pointer;font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);}",
+    R + ".psa-ct-arrow{width:8px;height:8px;border-right:2px solid currentColor;border-bottom:2px solid currentColor;" +
+      "transform:rotate(45deg) translateY(-2px);transition:transform .18s ease;margin-left:2px;}",
+    R + ".psa-ct.psa-ct-open .psa-ct-arrow{transform:rotate(-135deg) translateY(2px);}",
+    R + ".psa-ct-menu{display:none;position:absolute;top:calc(100% + 8px);left:0;z-index:50;min-width:210px;" +
+      "margin:0;padding:8px;list-style:none;text-align:left;border-radius:14px;border:1px solid var(--ps-border,#E6E9EF);" +
+      "background:#fff;box-shadow:0 16px 40px rgba(15,23,42,.14);}",
+    R + ".psa-ct.psa-ct-open .psa-ct-menu{display:block;}",
+    R + ".psa-ct-li{list-style:none;margin:0;padding:0;}",
+    /* 🔴 `display:block` : un <a> en ligne ne prendrait que la largeur de son
+       texte, et la moitié de la ligne ne serait pas cliquable. */
+    R + ".psa-ct-item{display:block;padding:9px 14px;border-radius:9px;font-size:14px;font-weight:600;" +
+      "color:#323338 !important;text-decoration:none !important;white-space:nowrap;transition:background .12s ease,color .12s ease;}",
+    R + ".psa-ct-item:hover{background:#F3F9FC;color:var(--ps-accent,#3887B4) !important;}",
+    R + ".psa-ct-item:focus-visible{outline:2px solid var(--ps-accent,#507EC5);outline-offset:-2px;}",
+    /* Dans le menu, WhatsApp garde sa couleur de marque — mais en TEXTE : un
+       fond vert plein y referait la rangée de gros boutons qu'on vient d'ôter. */
+    R + ".psa-ct-item.psa-contact-whatsapp{background:transparent !important;color:#1DA851 !important;}",
+    R + ".psa-ct-item.psa-contact-whatsapp:hover{background:#EAF9F0 !important;}",
     R + ".psa-links{display:flex;gap:14px;}",
     /* Mêmes <a>, même écrasement LW : on force la couleur violette. */
     R + ".psa-link{font-size:13px;font-weight:600;color:var(--ps-accent,#507EC5) !important;text-decoration:none !important;}",
@@ -358,19 +381,71 @@
        🔴 On n ouvre un nouvel onglet que pour le web : `mailto:` et `tel:`
        restent dans le contexte courant, sinon un onglet blanc s ouvre et se
        referme aussitot. */
-    var canaux = (m.contacts && m.contacts.length) ? m.contacts
-               : (m.contact && m.contact.href ? [m.contact] : []);
-    canaux.forEach(function (c) {
-      if (!c || !c.href) return;
-      var cta = el("a", "psa-contact" + (c.type ? " psa-contact-" + c.type : ""), c.label);
-      cta.href = c.href;
+    var canaux = ((m.contacts && m.contacts.length) ? m.contacts
+               : (m.contact && m.contact.href ? [m.contact] : []))
+                 .filter(function (c) { return c && c.href; });
+
+    /* 🔴🔴 UN SEUL BOUTON QUAND IL Y A PLUSIEURS CANAUX (08/08, Ziad : « trop
+       de boutons, tu peux me faire un menu déroulant ? »).
+       Depuis le contact en quatre champs, une fiche complète empilait QUATRE
+       boutons pleins — plus hauts à eux seuls que l'identité de la personne,
+       et tous de la même couleur, donc sans hiérarchie : la carte ne disait
+       plus qui on regarde, elle disait comment le joindre.
+       🔴 À UN SEUL CANAL, PAS DE MENU : dérouler pour une seule ligne ajoute un
+       clic et cache l'action. La règle porte sur le NOMBRE, pas sur le type.
+       🔴 On réutilise le dispositif des filtres (`.ps-ff`) : même apparence,
+       même fermeture (clic dehors / Échap), même façon de faire. En écrire un
+       second aurait donné deux menus à corriger le jour où l'un cloche. */
+    function lienContact(c, cls) {
+      var a = el("a", cls + (c.type ? " psa-contact-" + c.type : ""), c.label);
+      a.href = c.href;
+      /* On n'ouvre un nouvel onglet que pour le web : `mailto:` et `tel:`
+         restent dans le contexte courant, sinon un onglet blanc s'ouvre et se
+         referme aussitôt. */
       if (/^https?:/i.test(c.href)) {
-        cta.target = "_blank";
-        cta.rel = "noopener noreferrer nofollow";
+        a.target = "_blank";
+        a.rel = "noopener noreferrer nofollow";
       }
-      cta.setAttribute("aria-label", c.label + " — " + m.name);
-      foot.appendChild(cta);
-    });
+      a.setAttribute("aria-label", c.label + " — " + m.name);
+      return a;
+    }
+
+    if (canaux.length === 1) {
+      foot.appendChild(lienContact(canaux[0], "psa-contact"));
+    } else if (canaux.length > 1) {
+      var boite = el("div", "psa-ct");
+      var btn = el("button", "psa-contact psa-ct-btn", "Contacter");
+      btn.type = "button";
+      btn.setAttribute("aria-haspopup", "menu");
+      btn.setAttribute("aria-expanded", "false");
+      btn.setAttribute("aria-label", "Contacter " + m.name);
+      btn.appendChild(el("span", "psa-ct-arrow"));
+
+      var menu = el("ul", "psa-ct-menu");
+      menu.setAttribute("role", "menu");
+      canaux.forEach(function (c) {
+        var li = el("li", "psa-ct-li");
+        li.setAttribute("role", "none");
+        var a = lienContact(c, "psa-ct-item");
+        a.setAttribute("role", "menuitem");
+        li.appendChild(a);
+        menu.appendChild(li);
+      });
+
+      btn.addEventListener("click", function (e) {
+        /* `stopPropagation` : sans lui, le listener posé sur `document`
+           refermerait le menu dans la foulée du même clic. */
+        e.stopPropagation();
+        var ouvert = boite.classList.contains("psa-ct-open");
+        fermerFacettes(); fermerContacts();
+        if (!ouvert) boite.classList.add("psa-ct-open");
+        btn.setAttribute("aria-expanded", ouvert ? "false" : "true");
+      });
+
+      boite.appendChild(btn);
+      boite.appendChild(menu);
+      foot.appendChild(boite);
+    }
 
     var links = el("div", "psa-links");
     [[m.linkedin, "LinkedIn"], [m.website, "Site web"]].forEach(function (p) {
@@ -440,6 +515,22 @@
   function fermerFacettes() {
     var els = grid.ownerDocument.querySelectorAll("#" + MOUNT + " .ps-ff.ps-ff-open");
     for (var i = 0; i < els.length; i++) els[i].classList.remove("ps-ff-open");
+  }
+
+  /* Le pendant pour les menus « Contacter » des cartes (08/08). Séparé de
+     `fermerFacettes` parce que les deux dispositifs n'ont ni la même classe ni
+     le même bouton — mais les DEUX sont appelés aux mêmes endroits, sinon on
+     obtiendrait deux menus ouverts en même temps, chacun ignorant l'autre.
+     🔴 `aria-expanded` se remet à `false` ICI : le remettre au seul endroit qui
+     ouvre laisserait mentir le lecteur d'écran à chaque fermeture par clic
+     dehors ou par Échap. */
+  function fermerContacts() {
+    var els = grid.ownerDocument.querySelectorAll("#" + MOUNT + " .psa-ct.psa-ct-open");
+    for (var i = 0; i < els.length; i++) {
+      els[i].classList.remove("psa-ct-open");
+      var b = els[i].querySelector(".psa-ct-btn");
+      if (b) b.setAttribute("aria-expanded", "false");
+    }
   }
 
   /** Crée la pilule d'une facette. Le contenu (label, options) est (re)peint
@@ -1764,9 +1855,14 @@
       window.__psaFacetBound = 1;
       document.addEventListener("click", function (e) {
         if (!e.target.closest || !e.target.closest("#" + MOUNT + " .ps-ff")) fermerFacettes();
+        /* 🔴 Le menu « Contacter » se ferme au clic dehors — mais PAS quand on
+           clique un de ses liens : `mailto:`/`tel:` ne quittent pas la page, et
+           refermer sous le doigt donnerait l'impression que le clic a raté. Le
+           navigateur suit le lien, le menu peut rester le temps de partir. */
+        if (!e.target.closest || !e.target.closest("#" + MOUNT + " .psa-ct")) fermerContacts();
       });
       document.addEventListener("keydown", function (e) {
-        if (e.key === "Escape") fermerFacettes();
+        if (e.key === "Escape") { fermerFacettes(); fermerContacts(); }
       });
     }
 
