@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-08-b";
+  window.PS_TOKENS_V="2026-08-08-c";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3709,9 +3709,13 @@
     { cle:"cf_contactlinkedin", type:"texte", vis:"contact", q:"Votre profil LinkedIn",
       sous:"L'adresse de votre page, pour que les autres puissent vous situer.",
       placeholder:"linkedin.com/in/prenom-nom" },
-    { cle:"cf_contacttel", type:"texte", vis:"contact", q:"Votre numéro de téléphone",
+    /* 🔴 `tel` et non `texte` : le pays se CHOISIT (08/08). Un champ libre
+       laissait saisir « 06 65 59 40 40 », qui fabrique un lien WhatsApp mort —
+       mesuré en production. Le placeholder disait pourtant « +33 6 12 34 56 78 » :
+       **un exemple n'est pas une contrainte**, personne ne le recopie. */
+    { cle:"cf_contacttel", type:"tel", vis:"contact", q:"Votre numéro de téléphone",
       sous:"⚠️ Il sera visible des autres membres de l'annuaire. Laissez vide si vous préférez.",
-      placeholder:"+33 6 12 34 56 78" },
+      placeholder:"6 12 34 56 78" },
     { cle:"cf_contactwhatsapp", type:"choix", vis:"contact", q:"Êtes-vous joignable sur WhatsApp ?",
       sous:"On ajoutera un bouton WhatsApp à partir du numéro ci-dessus.",
       options:["Oui","Non"] }
@@ -3842,6 +3846,97 @@
      🔴 On VALIDE avant d'annoncer : un e-mail malformé ou un numéro à six
      chiffres ne produit aucune pastille. Annoncer un bouton que l'annuaire ne
      posera pas, c'est faire croire à quelqu'un qu'il est joignable. */
+  /* ====================================================================
+     INDICATIFS PAYS  (08/08, demande de Ziad)
+     --------------------------------------------------------------------
+     🔴🔴 CE N'EST PAS UN CONFORT, C'EST LE CORRECTIF D'UN BOUTON MORT.
+     Mesuré le 08/08 sur un vrai lien de l'annuaire : un numéro saisi « 06 65
+     59 40 40 » produisait `wa.me/0665594040` — WhatsApp EXIGE le format
+     international, et affichait « Discuter avec le 0665594040 », qui ne joint
+     personne. `numeroWhatsApp()` (Worker) dit « E.164 » en commentaire mais ne
+     COMPTE que les chiffres : un numéro national passe et fabrique un lien
+     mort. On répare donc à la SOURCE — le membre choisit son pays, et la
+     valeur enregistrée porte l'indicatif.
+     🔴 `garde0` : la plupart des pays retirent le 0 de préfixe une fois
+     l'indicatif posé, l'Italie le CONSERVE. Retirer le zéro partout aurait
+     cassé les numéros italiens en silence — on ne devine pas une règle
+     nationale, on la note.
+     🔴 La France en tête ET par défaut : l'école est française. C'est une
+     hypothèse ASSUMÉE et visible à l'écran (le sélecteur affiche le pays), pas
+     une déduction cachée dans le code. */
+  var PS_INDICATIFS=[
+    {c:"+33", n:"France", f:"🇫🇷"},
+    {c:"+32", n:"Belgique", f:"🇧🇪"},
+    {c:"+41", n:"Suisse", f:"🇨🇭"},
+    {c:"+352", n:"Luxembourg", f:"🇱🇺"},
+    {c:"+377", n:"Monaco", f:"🇲🇨"},
+    {c:"+49", n:"Allemagne", f:"🇩🇪"},
+    {c:"+34", n:"Espagne", f:"🇪🇸"},
+    {c:"+39", n:"Italie", f:"🇮🇹", garde0:true},
+    {c:"+351", n:"Portugal", f:"🇵🇹"},
+    {c:"+44", n:"Royaume-Uni", f:"🇬🇧"},
+    {c:"+353", n:"Irlande", f:"🇮🇪"},
+    {c:"+31", n:"Pays-Bas", f:"🇳🇱"},
+    {c:"+43", n:"Autriche", f:"🇦🇹"},
+    {c:"+45", n:"Danemark", f:"🇩🇰"},
+    {c:"+46", n:"Suède", f:"🇸🇪"},
+    {c:"+47", n:"Norvège", f:"🇳🇴"},
+    {c:"+48", n:"Pologne", f:"🇵🇱"},
+    {c:"+30", n:"Grèce", f:"🇬🇷"},
+    {c:"+1",  n:"États-Unis / Canada", f:"🇺🇸"},
+    {c:"+212", n:"Maroc", f:"🇲🇦"},
+    {c:"+216", n:"Tunisie", f:"🇹🇳"},
+    {c:"+213", n:"Algérie", f:"🇩🇿"},
+    {c:"+221", n:"Sénégal", f:"🇸🇳"},
+    {c:"+225", n:"Côte d'Ivoire", f:"🇨🇮"},
+    {c:"+237", n:"Cameroun", f:"🇨🇲"},
+    {c:"+961", n:"Liban", f:"🇱🇧"},
+    {c:"+971", n:"Émirats arabes unis", f:"🇦🇪"},
+    {c:"+65", n:"Singapour", f:"🇸🇬"},
+    {c:"+852", n:"Hong Kong", f:"🇭🇰"},
+    {c:"+86", n:"Chine", f:"🇨🇳"},
+    {c:"+81", n:"Japon", f:"🇯🇵"},
+    {c:"+91", n:"Inde", f:"🇮🇳"},
+    {c:"+61", n:"Australie", f:"🇦🇺"},
+    {c:"+55", n:"Brésil", f:"🇧🇷"}
+  ];
+  var PS_IND_DEFAUT="+33";
+
+  /* Sépare une valeur enregistrée en `{indicatif, national}`.
+     🔴 On cherche l'indicatif LE PLUS LONG d'abord : sinon `+1` gagnerait sur
+     `+1…` de tout autre pays, et surtout `+3` capterait `+33`, `+34`, `+39`.
+     C'est l'erreur classique du préfixe le plus court. */
+  function psSeparerTel(v){
+    var s=String(v==null?"":v).trim();
+    if(s.charAt(0)==="+"){
+      var tri=PS_INDICATIFS.slice().sort(function(a,b){ return b.c.length-a.c.length; });
+      for(var i=0;i<tri.length;i++){
+        if(s.indexOf(tri[i].c)===0){
+          return { ind:tri[i].c, nat:s.slice(tri[i].c.length).replace(/[^\d]/g,"") };
+        }
+      }
+    }
+    /* Pas d'indicatif reconnu : on garde les chiffres et on laisse le pays par
+       défaut — c'est le cas des numéros saisis AVANT ce sélecteur. */
+    return { ind:PS_IND_DEFAUT, nat:s.replace(/[^\d]/g,"") };
+  }
+
+  function psPaysDe(ind){
+    for(var i=0;i<PS_INDICATIFS.length;i++) if(PS_INDICATIFS[i].c===ind) return PS_INDICATIFS[i];
+    return PS_INDICATIFS[0];
+  }
+
+  /* `+33` + `0665594040` -> `+33 665594040`. Vide si aucun chiffre : un champ
+     laissé vide ne doit pas produire un « +33 » orphelin, qui vaudrait un
+     numéro pour `numeroWhatsApp()` sans en être un. */
+  function psComposerTel(ind, national){
+    var d=String(national==null?"":national).replace(/[^\d]/g,"");
+    if(!d) return "";
+    if(!psPaysDe(ind).garde0) d=d.replace(/^0+/,"");
+    if(!d) return "";
+    return ind+" "+d;
+  }
+
   function psNumeroWhatsApp(tel){
     var chiffres=String(tel==null?"":tel).replace(/[^\d]/g,"");
     return (chiffres.length>=8 && chiffres.length<=15) ? chiffres : "";
@@ -3945,6 +4040,15 @@
       /* Les boutons de contact de l'aperçu : MÊME allure que ceux de l'annuaire,
          mais INERTES — c'est un aperçu de ce que les autres verront, pas un
          moyen de s'écrire à soi-même. */
+      /* Sélecteur d'indicatif + numéro : une seule ligne, le pays ne prenant
+         que sa largeur utile. `min-width:0` sur l'input, sinon il refuse de
+         rétrécir sous sa largeur intrinsèque et déborde sur mobile. */
+      "#ps-fiche .pf-tel{display:flex;gap:8px;align-items:stretch}"+
+      "#ps-fiche .pf-tel .pf-champ{flex:1;min-width:0}"+
+      "#ps-fiche .pf-ind{flex:0 0 auto;max-width:44%;border:1.5px solid var(--ps-border,#E6E9EF);"+
+      "border-radius:var(--ps-r-btn,12px);padding:11px 10px;background:#fff;cursor:pointer;"+
+      "font:600 13.5px var(--ps-font,Figtree,sans-serif);color:var(--ps-text,#203866)}"+
+      "#ps-fiche .pf-ind:focus{outline:2px solid var(--ps-accent,#3887b4);outline-offset:1px}"+
       "#ps-fiche .pf-cts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}"+
       "#ps-fiche .pf-cts span{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--ps-border,#E6E9EF);"+
       "border-radius:var(--ps-r-pill,999px);padding:4px 11px;font:700 11.5px var(--ps-font,Figtree,sans-serif);"+
@@ -4368,6 +4472,20 @@
             var on=e.type==="multi" ? (rep[e.cle]||[]).indexOf(o)>=0 : rep[e.cle]===o;
             return '<button type="button" data-o="'+esc(o)+'" class="'+(on?"on":"")+'">'+esc(o)+'</button>';
           }).join("")+'</div>';
+        } else if(e.type==="tel"){
+          /* 🔴 Le `<select>` porte l'indicatif, l'`<input>` le reste. On repart
+             de la valeur DÉJÀ enregistrée : un membre qui revient doit
+             retrouver son pays, pas la France par défaut par-dessus son +32. */
+          var t=psSeparerTel(rep[e.cle]);
+          champ='<div class="pf-tel">'+
+            '<select class="pf-ind" aria-label="Indicatif du pays">'+
+              PS_INDICATIFS.map(function(p){
+                return '<option value="'+esc(p.c)+'"'+(p.c===t.ind?" selected":"")+'>'+
+                       esc(p.f+" "+p.c)+' · '+esc(p.n)+'</option>';
+              }).join("")+
+            '</select>'+
+            '<input class="pf-champ pf-tel-num" type="tel" inputmode="tel" placeholder="'+esc(e.placeholder||"")+'" value="'+esc(t.nat)+'">'+
+          '</div>';
         } else if(e.type==="long"){
           champ='<textarea class="pf-champ" maxlength="'+(e.max||280)+'" placeholder="'+esc(e.placeholder||"")+'">'+esc(rep[e.cle]||"")+'</textarea>'+
                 '<div class="pf-cpt"><b>'+String(rep[e.cle]||"").length+'</b> / '+(e.max||280)+'</div>';
@@ -4476,8 +4594,16 @@
         };
       });
       var champ=hote.querySelector(".pf-champ");
+      /* 🔴 L'indicatif est un SECOND contrôle pour UNE seule valeur : sans ce
+         branchement, `.pf-champ` (le numéro) écrasait `rep` avec la partie
+         nationale seule — donc sans indicatif, donc le lien WhatsApp mort
+         qu'on vient de corriger, réintroduit par la porte de derrière. */
+      var indic=hote.querySelector(".pf-ind");
       if(champ){
+        var majTel=function(){ rep[e.cle]=psComposerTel(indic.value, champ.value); };
+        if(indic) indic.onchange=majTel;
         champ.oninput=function(){
+          if(indic){ majTel(); return; }
           rep[e.cle]=champ.value;
           var c=hote.querySelector(".pf-cpt b"); if(c) c.textContent=champ.value.length;
         };
