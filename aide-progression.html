@@ -26,11 +26,15 @@
   8 fiches secteur, 12 études de cas, 4 parcours, 3 modules d'entraînement)
   sont de l'ORDRE de grandeur du vrai site, pas son inventaire exact.
 
-  🔴 LES SIX DÉCISIONS SONT INDÉPENDANTES et se combinent (192 réglages
-  possibles). Ne pas les présenter comme un menu de trois formules toutes
-  faites : le client doit pouvoir prendre le périmètre de l'une et la
-  pondération de l'autre. Les boutons de présélection ne sont que des
-  raccourcis vers des combinaisons remarquables.
+  🔴 LES SIX DÉCISIONS SONT INDÉPENDANTES et se combinent (96 réglages
+  livrables — 192 sur le papier, mais deux des quatre barèmes de la décision B
+  sont indisponibles, cf. `indispo`). Ne pas les présenter comme un menu de
+  trois formules toutes faites : le client doit pouvoir prendre le périmètre de
+  l'une et la pondération de l'autre. Les boutons de présélection ne sont que
+  des raccourcis vers des combinaisons remarquables.
+  🔴 Le chiffre affiché à l'écran est CALCULÉ par `ecartMax()`, jamais écrit en
+  dur : il suit donc les options réellement disponibles. Ce commentaire, lui,
+  est à la main — c'est le seul endroit à corriger si la liste bouge.
 
   🔴 ÉTAT DES LIEUX MESURÉ LE 07/08/2026 dans le code du site (course-cards.js,
   case-cards.js, sector-cards.js, cabinet-cards.js, program-cards.js,
@@ -123,6 +127,10 @@ code{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.87em;backgrou
 .pill.no{background:var(--ps-no-tint);color:var(--ps-no)}
 .pill.nous{background:var(--ps-accent-tint);color:#3466A8}
 .pill.warn{background:var(--ps-warn-tint);color:var(--ps-warn)}
+/* Ligne de tableau écartée : atténuée, jamais barrée. On veut que la RAISON se
+   lise, or un texte barré ne se lit pas — il se saute. */
+.tab tr.ko td{background:#FAFAFB;color:#6b7180}
+.tab tr.ko td:first-child{font-weight:700}
 .scroll{overflow-x:auto}
 .scroll .tab{min-width:600px}
 
@@ -164,6 +172,14 @@ figcaption{padding:11px 18px;font-size:13px;color:#8d95a6;background:#FAFBFD;bor
 .sim-opt span{font-size:13.5px;line-height:1.42;color:#4b5262}
 .sim-opt span em{display:block;font-style:normal;font-weight:700;color:var(--ps-navy);margin-bottom:1px}
 .sim-opt.sel{border-color:var(--ps-accent);background:var(--ps-accent-tint)}
+/* Option écartée : lisible, mais visiblement hors service. On garde le texte
+   noir sur le titre — c'est la RAISON qu'on veut faire lire, pas l'option. */
+.sim-opt.indispo{cursor:not-allowed;background:#FAFAFB;border-style:dashed}
+.sim-opt.indispo:hover{border-color:var(--ps-border);background:#FAFAFB}
+.sim-opt.indispo span,.sim-opt.indispo span em{color:#8A8F9C}
+.sim-opt .pourquoi{display:block;font-style:normal;margin-top:5px;font-size:12.5px;line-height:1.4;
+  color:#8a5a00;background:#fff8e6;border:1px solid #f0dca8;border-radius:8px;padding:6px 9px}
+.sim-opt .pourquoi b{color:#7a4f00}
 
 .sim-out{padding:20px}
 .sim-head{display:flex;align-items:center;gap:20px;flex-wrap:wrap;background:var(--ps-navy);border-radius:14px;padding:20px 24px;color:#fff}
@@ -375,7 +391,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             <tr><td>Le périmètre</td><td>Ce qui entre au dénominateur — tout le catalogue, ou
               seulement ce à quoi il a accès</td><td><a href="#perimetre" style="color:#3466A8;font-weight:700">A</a></td></tr>
             <tr><td>Le barème</td><td>Combien vaut un contenu&nbsp;: la même chose pour tous, ou
-              une valeur par volume, par famille, par difficulté</td>
+              une valeur par famille de contenu</td>
               <td><a href="#bareme" style="color:#3466A8;font-weight:700">B</a></td></tr>
             <tr><td>L'acquisition</td><td>Si les points tombent au prorata de l'avancement, par
               paliers, ou seulement à 100&nbsp;%</td>
@@ -441,8 +457,9 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
       </summary>
       <div class="inner">
         <p>Aujourd'hui, tous les contenus valent la même chose. Une fiche cabinet de 3&nbsp;pages
-        compte autant qu'un module de 22&nbsp;leçons. Quatre barèmes possibles, du plus simple au
-        plus éditorial&nbsp;:</p>
+        compte autant qu'un module de 22&nbsp;leçons. Quatre barèmes sont imaginables&nbsp;;
+        <strong>deux seulement sont réalisables</strong>. Les deux autres restent dans le tableau,
+        avec la raison qui les écarte&nbsp;— vous devez pouvoir vérifier qu'on y a pensé&nbsp;:</p>
 
         <div class="scroll">
           <table class="tab">
@@ -455,14 +472,17 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
                 6&nbsp;fiches courtes rapporte plus que finir le module le plus lourd du site&nbsp;:
                 ça <strong>récompense le survol</strong>.</td>
             </tr>
-            <tr>
-              <td>Par volume</td>
-              <td><strong>1&nbsp;point par leçon.</strong> Un module de 22&nbsp;leçons vaut
-                22&nbsp;points, une fiche de 3&nbsp;pages en vaut 3. La jauge suit le
+            <tr class="ko">
+              <td>Par volume <span class="pill no">Indisponible</span></td>
+              <td><strong>1&nbsp;point par leçon.</strong> Un module de 22&nbsp;leçons vaudrait
+                22&nbsp;points, une fiche de 3&nbsp;pages en vaudrait 3. La jauge suivrait le
                 <strong>temps passé</strong>.</td>
-              <td><span class="pill ok">Personne</span> Le nombre de leçons est déjà affiché sur
-                chaque carte — aucune saisie. Mais un long module facile pèse autant qu'un long
-                module exigeant.</td>
+              <td><span class="pill no">Impossible aujourd'hui</span> <strong>Le nombre de leçons
+                n'est fourni par aucune API LearnWorlds.</strong> Là où il s'affiche, il est
+                <strong>tapé à la main dans la description du cours</strong>, et seule la page
+                Cours sait le relire. Les fiches cabinet, les fiches secteur, les études de cas et
+                les parcours n'ont <strong>aucun compteur</strong> — ce barème ne pourrait donc
+                noter qu'un sixième du catalogue.</td>
             </tr>
             <tr>
               <td>Par famille</td>
@@ -472,14 +492,16 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
               <td><span class="pill nous">Vous, une fois</span> Cinq nombres à fixer, et c'est tenu
                 pour toujours&nbsp;: un nouveau contenu hérite du barème de sa famille.</td>
             </tr>
-            <tr>
-              <td>Par difficulté</td>
+            <tr class="ko">
+              <td>Par difficulté <span class="pill no">Indisponible</span></td>
               <td>Une valeur par <strong>niveau</strong>&nbsp;: 6&nbsp;points par cran de difficulté
-                (1&nbsp;à&nbsp;5). Un Niveau&nbsp;6 rapporte quatre fois plus qu'une fiche
-                d'introduction. C'est le barème le plus proche d'un vrai parcours de progression.</td>
-              <td><span class="pill warn">Vous, contenu par contenu</span> Le plus juste et le plus
-                exigeant&nbsp;: chaque nouveau contenu demande qu'on lui attribue une difficulté,
-                sinon il vaut 0.</td>
+                (1&nbsp;à&nbsp;5). Un Niveau&nbsp;6 rapporterait quatre fois plus qu'une fiche
+                d'introduction. Ce serait le barème le plus proche d'un vrai parcours.</td>
+              <td><span class="pill no">Impossible aujourd'hui</span> <strong>La difficulté
+                n'existe nulle part</strong>&nbsp;: ni dans LearnWorlds, ni dans les descriptions,
+                ni dans les catégories. Il faudrait la saisir <strong>contenu par contenu</strong>,
+                puis la tenir à chaque publication — sans quoi tout nouveau contenu vaudrait 0.
+                C'est un chantier éditorial, pas un réglage.</td>
             </tr>
           </table>
         </div>
@@ -490,10 +512,13 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         titre. L'afficher ou non est une question d'interface, pas de calcul — et les deux se
         défendent.</div>
 
-        <div class="box warn"><strong>Un barème se tient dans la durée.</strong> « Identique » et
-        « par volume » se calculent tout seuls à partir de ce que le site sait déjà. « Par famille »
-        et « par difficulté » demandent une décision éditoriale par contenu ou par type&nbsp;: à
-        choisir seulement si quelqu'un s'engage à la tenir quand le catalogue grandira.</div>
+        <div class="box warn"><strong>Un barème se tient dans la durée — et c'est ce critère qui
+        en écarte deux.</strong> « Identique » se calcule tout seul. « Par famille » se calcule
+        tout seul lui aussi&nbsp;: la famille d'un contenu se déduit de la page où il se trouve,
+        vous n'avez que <strong>cinq nombres à fixer une fois</strong>. Les deux autres demandent
+        une donnée que personne ne produit&nbsp;: un compteur de leçons que LearnWorlds n'expose
+        pas, ou une difficulté à saisir contenu par contenu. Ce ne sont pas des réglages plus
+        ambitieux, ce sont des <strong>saisies manuelles à perpétuité</strong>.</div>
       </div>
     </details>
 
@@ -555,7 +580,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
               <td>Le grade est <strong>relatif</strong>&nbsp;: il dit quelle part du site l'étudiant
                 a couverte.</td></tr>
             <tr><td>Total de points</td>
-              <td>« Manager à partir de <strong>55&nbsp;points</strong> »</td>
+              <td>« Manager à partir de <strong>87&nbsp;points</strong> »</td>
               <td>Le grade est <strong>absolu</strong>&nbsp;: il dit combien de travail a été
                 accompli, quel que soit le reste.</td></tr>
           </table>
@@ -572,7 +597,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         « <strong>le catalogue grandit</strong> » ajoute 10&nbsp;études de cas et montre l'effet sur
         les deux échelles, sans que Camille ait ouvert une seule leçon de plus. Prenez le
         préréglage <strong>« Pourcentage pondéré »</strong> et cochez la case&nbsp;: elle tombe de
-        <strong>28&nbsp;% à 23&nbsp;%</strong> et <strong>perd son titre de Manager</strong> — parce
+        <strong>29&nbsp;% à 22&nbsp;%</strong> et <strong>perd son titre de Manager</strong> — parce
         que vous avez publié. Le même essai avec le préréglage « Recommandée », qui lit les points&nbsp;:
         elle reste à 87&nbsp;points et garde son grade.</p>
 
@@ -586,8 +611,8 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             <tr><td>Comparable entre étudiants</td><td><span class="pill ok">Oui</span></td>
               <td><span class="pill ok">Oui</span></td></tr>
             <tr><td>Se comprend sans explication</td><td><span class="pill ok">Oui</span></td>
-              <td><span class="pill warn">Il faut donner une échelle</span> — « 55&nbsp;points »
-                ne veut rien dire sans le « sur 221 » d'à côté.</td></tr>
+              <td><span class="pill warn">Il faut donner une échelle</span> — « 87&nbsp;points »
+                ne veut rien dire sans le « sur 348 » d'à côté.</td></tr>
             <tr><td>Une jauge reste possible</td><td><span class="pill ok">Oui</span></td>
               <td><span class="pill ok">Oui</span> — remplie jusqu'au <em>prochain grade</em>,
                 pas jusqu'à 100&nbsp;% du catalogue. C'est même plus motivant.</td></tr>
@@ -772,12 +797,13 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             <div class="n">B</div>
             <div>
               <h4>Le barème</h4>
-              <p>Identique pour tous, par volume, par famille de contenu, ou par difficulté&nbsp;?</p>
+              <p>Identique pour tous, ou une valeur par famille de contenu&nbsp;? (Les barèmes
+              par volume et par difficulté sont écartés&nbsp;: la donnée n'existe pas.)</p>
               <div class="mine"><b>Notre avis&nbsp;:</b> <strong>par famille</strong> — module 20,
               étude de cas 10, parcours 12, entraînement 8, fiche 4. C'est le seul barème qui dise
               ce que <em>vous</em> jugez structurant, et il se tient tout seul&nbsp;: un nouveau
-              contenu hérite du barème de sa famille. « Par difficulté » est plus juste mais
-              demande un arbitrage à chaque publication.</div>
+              contenu hérite du barème de sa famille, déduite de la page où il se trouve. Le choix
+              se joue donc entre lui et « identique », qui récompense le survol.</div>
             </div>
           </div>
           <div class="r">
@@ -968,11 +994,21 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
       {v:"tout",  t:"Tout le catalogue", d:"Y compris ce à quoi elle n'a pas accès. Comparable entre étudiants."},
       {v:"acces", t:"Seulement ses accès", d:"Le maximum devient atteignable, mais recule après un achat."}
     ]},
+    /* 🔴🔴 DEUX BARÈMES SONT INDISPONIBLES, ET ILS RESTENT AFFICHÉS.
+       Les retirer purement et simplement ferait croire qu'on n'y a pas pensé :
+       ils sont donc montrés, désactivés, AVEC leur raison. Un client doit
+       pouvoir vérifier qu'on a exploré la piste avant de l'écarter.
+       🔴 `indispo` n'est pas décoratif : il désactive la case ET sort l'option
+       du dénombrement des combinaisons (`ecartMax`). Un réglage qu'on ne peut
+       pas livrer n'a rien à faire dans une amplitude qu'on présente comme
+       réelle — ce serait vendre un écart qui n'existe pas. */
     {cle:"bareme", eti:"Décision B", q:"Combien vaut un contenu&nbsp;?", opts:[
       {v:"identique",  t:"Identique — 10 pts chacun", d:"Le plus simple à expliquer. Récompense le survol."},
-      {v:"volume",     t:"Par volume — 1 pt par leçon", d:"Suit le temps passé. Aucune saisie : la donnée est sur les cartes."},
+      {v:"volume",     t:"Par volume — 1 pt par leçon", d:"Suivrait le temps passé.",
+       indispo:"le nombre de leçons n'est fourni par aucune API LearnWorlds. Il est tapé à la main dans la description du cours, et seule la page Cours sait le lire. Les fiches cabinet, les fiches secteur, les études de cas et les parcours n'ont aucun compteur."},
       {v:"famille",    t:"Par famille — module 20, cas 10, fiche 4…", d:"Vous fixez cinq nombres, et c'est tenu pour toujours."},
-      {v:"difficulte", t:"Par difficulté — 6 pts par cran", d:"Le plus juste, le plus exigeant à tenir contenu par contenu."}
+      {v:"difficulte", t:"Par difficulté — 6 pts par cran", d:"Serait le plus juste.",
+       indispo:"aucune difficulté n'existe aujourd'hui, nulle part. Il faudrait noter chaque contenu à la main, puis tenir cette note à chaque publication."}
     ]},
     {cle:"acquisition", eti:"Décision C", q:"Quand les points tombent&nbsp;?", opts:[
       {v:"prorata", t:"Au prorata de l'avancement", d:"La jauge bouge à chaque leçon. Entamer dix cours vaut en finir cinq."},
@@ -981,7 +1017,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     ]},
     {cle:"echelle", eti:"Décision D", q:"Le grade se lit sur&nbsp;?", opts:[
       {v:"pct",    t:"Un pourcentage du catalogue", d:"« Manager à 25 % ». Publier de nouveaux contenus fait rétrograder tout le monde."},
-      {v:"points", t:"Un total de points", d:"« Manager à 55 points ». Les seuils sont gelés : personne ne rétrograde jamais."}
+      {v:"points", t:"Un total de points", d:"« Manager à 87 points ». Les seuils sont gelés : personne ne rétrograde jamais."}
     ]},
     {cle:"inconnu", eti:"Décision E", q:"Et ce qu'on n'a pas mesuré&nbsp;?", opts:[
       {v:"zero",  t:"Ça compte pour 0", d:"Une page jamais visitée tire le grade vers le bas."},
@@ -995,15 +1031,24 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
 
   /* 🔴 `pctpond` EST LÀ POUR LA DÉMONSTRATION DE LA DÉCISION D, pas pour faire
      nombre : c'est la combinaison où « +10 études de cas publiées » fait passer
-     Camille de Manager à Consultant sans qu'elle ait rien fait (28 % → 23 %,
-     le seuil Manager étant à 25 %). Déplacer ses valeurs casse l'exemple cité
-     en toutes lettres dans la section D — vérifier les deux ensemble. */
+     Camille de Manager à Consultant sans qu'elle ait rien fait, le seuil
+     Manager étant à 25 %. Déplacer ses valeurs casse l'exemple cité en toutes
+     lettres dans la section D — vérifier les deux ensemble.
+     🔴🔴 LES TROIS PRÉRÉGLAGES PONDÉRÉS SONT PASSÉS À « PAR FAMILLE ».
+     `pctpond` et `motiv` reposaient sur « par volume », `strict` sur « par
+     difficulté » : deux barèmes désormais indisponibles (voir `indispo`
+     ci-dessus). Un préréglage qui pose un réglage désactivé donnerait un
+     simulateur qui calcule ce que ses propres cases interdisent.
+     ⇒ « Par famille » est le seul barème pondéré livrable, et il conserve ce
+     que chaque préréglage veut montrer : un contenu lourd vaut plus qu'une
+     fiche. 🔴 Les CHIFFRES de la section D changent avec ce barème — ils ont
+     été relevés à nouveau dans le simulateur, pas recopiés. */
   var PRESETS={
     today:  {perimetre:"tout",  bareme:"identique",  acquisition:"prorata", echelle:"pct",    inconnu:"zero",  global:"pages"},
     reco:   {perimetre:"tout",  bareme:"famille",    acquisition:"paliers", echelle:"points", inconnu:"exclu", global:"contenus"},
-    pctpond:{perimetre:"tout",  bareme:"volume",     acquisition:"prorata", echelle:"pct",    inconnu:"exclu", global:"contenus"},
-    motiv:  {perimetre:"acces", bareme:"volume",     acquisition:"prorata", echelle:"pct",    inconnu:"exclu", global:"contenus"},
-    strict: {perimetre:"tout",  bareme:"difficulte", acquisition:"tout",    echelle:"points", inconnu:"exclu", global:"contenus"}
+    pctpond:{perimetre:"tout",  bareme:"famille",    acquisition:"prorata", echelle:"pct",    inconnu:"exclu", global:"contenus"},
+    motiv:  {perimetre:"acces", bareme:"famille",    acquisition:"prorata", echelle:"pct",    inconnu:"exclu", global:"contenus"},
+    strict: {perimetre:"tout",  bareme:"famille",    acquisition:"tout",    echelle:"points", inconnu:"exclu", global:"contenus"}
   };
 
   var etat={perimetre:"tout", bareme:"identique", acquisition:"prorata", echelle:"pct", inconnu:"zero", global:"pages"};
@@ -1104,6 +1149,17 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
       lab.appendChild(inp);
       var sp=document.createElement("span");
       sp.innerHTML="<em>"+op.t+"</em>"+op.d;
+      /* 🔴 Désactivé À LA SOURCE (`input.disabled`), pas seulement grisé : un
+         style qui a l'air inerte mais reste cliquable produit un simulateur qui
+         calcule un réglage qu'on ne sait pas livrer. */
+      if(op.indispo){
+        lab.classList.add("indispo");
+        inp.disabled=true;
+        var pk=document.createElement("i");
+        pk.className="pourquoi";
+        pk.innerHTML="<b>Indisponible</b> — "+op.indispo;
+        sp.appendChild(pk);
+      }
       lab.appendChild(sp);
       box.appendChild(lab);
     });
@@ -1242,14 +1298,20 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
   /* L'argument le plus parlant : l'amplitude sur TOUTES les combinaisons.
      🔴 On compare des GRADES, pas des nombres : « 20 % » et « 62 points » ne
      sont pas commensurables, alors que le titre affiché à l'étudiant, si. */
+  /* 🔴 On ne dénombre QUE le livrable. Compter les barèmes indisponibles
+     gonflerait l'amplitude annoncée avec des réglages qu'on ne sait pas
+     produire : la phrase « sur les N combinaisons possibles » deviendrait une
+     promesse fausse, et c'est justement l'argument central de la page. */
+  function dispo(q){ return q.opts.filter(function(o){ return !o.indispo; }); }
+
   function ecartMax(){
     var min=null, max=null, n=0, pcts=[];
-    QUESTIONS[0].opts.forEach(function(a){
-    QUESTIONS[1].opts.forEach(function(b){
-    QUESTIONS[2].opts.forEach(function(c){
-    QUESTIONS[3].opts.forEach(function(e){
-    QUESTIONS[4].opts.forEach(function(f){
-    QUESTIONS[5].opts.forEach(function(g){
+    dispo(QUESTIONS[0]).forEach(function(a){
+    dispo(QUESTIONS[1]).forEach(function(b){
+    dispo(QUESTIONS[2]).forEach(function(c){
+    dispo(QUESTIONS[3]).forEach(function(e){
+    dispo(QUESTIONS[4]).forEach(function(f){
+    dispo(QUESTIONS[5]).forEach(function(g){
       var o={perimetre:a.v, bareme:b.v, acquisition:c.v, echelle:e.v, inconnu:f.v, global:g.v};
       var rr=calculer(o,croissance), ll=lecture(rr,o);
       if(ll===null) return;
