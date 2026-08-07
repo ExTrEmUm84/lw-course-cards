@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-06-b";
+  window.PS_TOKENS_V="2026-08-07-a";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4406,6 +4406,164 @@
      `me.userLearningPrograms` peut arriver après le premier rendu, et conclure
      trop tôt afficherait un paywall à quelqu'un qui vient d'obtenir son accès. */
   [900,2200,5000,9000].forEach(function(d){ setTimeout(orienterMembre,d); });
+
+  /* ════════════════════════════════════════════════════════════════════════
+     BLOCAGE DU PARCOURS  (07/08, demande de Ziad)
+     ------------------------------------------------------------------------
+     Jusqu'ici on ORIENTAIT (bandeau `#ps-acces`) et on verrouillait LES CARTES
+     (`modeVerrou`). Ziad veut un cran de plus : que le site soit **bloqué** tant
+     que l'étape en cours n'est pas franchie.
+
+     🔴🔴 CE N'EST PAS UNE SÉCURITÉ, ET C'EST ASSUMÉ (validé par Ziad). Un écran
+     posé par du JS de page s'enlève en dix secondes depuis la console. La vraie
+     barrière reste l'inscription au programme côté LearnWorlds : les cours sont
+     `enrollment_closed`, le lecteur refuse. Ceci est du PARCOURS, pas du
+     contrôle d'accès — ne jamais compter dessus pour protéger du contenu.
+
+     ── LES QUATRE ÉTATS QUI BLOQUENT ────────────────────────────────────────
+     1. école + adresse en attente  → valider l'adresse (son école a payé, on ne
+        lui parle JAMAIS d'argent)
+     2. hors école + aucun programme → choisir sa formule
+     3. hors école + accès + adresse en attente depuis PLUS DE 48 H → valider
+     Tout le reste passe. En particulier **école + vérifiée + 0 programme** :
+     c'est l'attente entre la validation et le passage de l'automatisation, et
+     `orienterMembre` y affiche déjà un message d'attente. Bloquer là serait
+     punir quelqu'un qui n'a rien à faire.
+
+     ── CE QUI EXISTE DÉJÀ ET QU'ON NE DOUBLE PAS ────────────────────────────
+     La popup « Validez votre adresse e-mail » NON bloquante (05/08, clé
+     `psVerifVue`) couvre déjà les 48 premières heures. On n'ajoute donc que le
+     BLOCAGE qui prend le relais après. Écrire une seconde popup aurait fait
+     deux sources pour un même message.
+
+     ── LES TROIS PIÈGES QUI ENFERMERAIENT DE VRAIS CLIENTS ──────────────────
+     🔴 **`me` est INCOMPLET sur les écrans d'administration** : mesuré le 06/08,
+     `/author/dashboard` renvoie `userLearningPrograms` VIDE et `email_config`
+     à `null` pour un compte qui a 12 programmes. Bloquer là-dessus mettrait un
+     écran devant l'admin. ⇒ `/author/` est hors périmètre, et `is_admin` sort.
+     🔴 **`userLearningPrograms` peut arriver APRÈS le premier rendu.** Un
+     tableau absent n'est pas un tableau vide : c'est « on ne sait pas encore ».
+     On exige `Array.isArray` avant de conclure à l'absence d'accès — même
+     discipline que le troisième état des cartes.
+     🔴 **On ne bloque que sur `pending_verification` EXPLICITE.** Mesuré le
+     05/08 : 15 comptes sur 19 sont `skipped_verification` et un seul
+     `verified`. Bloquer « tout ce qui n'est pas vérifié » enfermerait
+     18 membres sur 19 hors du site.
+
+     ── L'ÉCHAPPATOIRE EST DANS L'ÉCRAN, PAS SEULEMENT DANS L'URL ────────────
+     Laisser `/account` « joignable » ne sert à rien si l'écran couvre tout : le
+     membre qui s'est trompé d'adresse ne peut ni la corriger ni sortir. L'écran
+     porte donc lui-même « Mon compte » et « Me déconnecter ».
+     ════════════════════════════════════════════════════════════════════════ */
+  var HORS_BLOCAGE=/^\/(account|signout|formules|inscription|author)/;
+  var GRACE_MS=48*60*60*1000;
+
+  function etatBlocage(u, part, path){
+    if(!u || u.is_admin) return null;
+    if(HORS_BLOCAGE.test(path||"") || PAGES_MUETTES.test(path||"")) return null;
+    /* Tableau absent = pas encore connu. On ne bloque JAMAIS sur un doute. */
+    if(!Array.isArray(u.userLearningPrograms)) return null;
+    var prog=u.userLearningPrograms.length;
+    var attente=verifEnAttente(u);
+
+    if(part && attente) return "verif";       /* école : valider, jamais payer */
+    if(part) return null;                     /* école validée : on laisse vivre */
+    if(prog===0) return "offre";              /* hors école : choisir sa formule */
+    if(attente){
+      /* Compteur DANS LE NAVIGATEUR (choix de Ziad). Changer de navigateur le
+         remet à zéro : assumé — le but est de relancer, pas de contraindre. */
+      var cle="psGrace48:"+(u.id||"?"), t0=0;
+      try{
+        t0=Number(localStorage.getItem(cle)||0);
+        if(!t0){ t0=Date.now(); localStorage.setItem(cle,String(t0)); }
+      }catch(e){ return null; }               /* stockage refusé : on ne bloque pas */
+      if(Date.now()-t0>GRACE_MS) return "verif";
+    }
+    return null;
+  }
+
+  /* ── LES PAGES QUI SE FERMENT ────────────────────────────────────────────
+     🔴 LISTE DE CE QU'ON FERME, PAS DE CE QU'ON OUVRE. Une page oubliée reste
+     donc ACCESSIBLE — inoffensif — au lieu d'être bloquée par erreur. L'inverse
+     (autoriser explicitement) aurait fait de chaque nouvelle page de Ziad une
+     page interdite jusqu'à ce que quelqu'un pense à ce fichier.
+     🔴 Ce sont les pages « où il y a des cours » (mot de Ziad, 07/08).
+     **L'annuaire n'en est pas** : il ne contient aucun cours, et il possède
+     déjà son propre écran d'explication — l'envoyer vers les offres
+     remplacerait une explication par une page de vente.
+     🔴 Table DÉDIÉE et non `CLOAK_SLUGS` : celle-là sert à l'anti-flash. Les
+     coupler ferait qu'un jour, retirer une page de l'anti-flash l'ouvrirait
+     silencieusement à tout le monde. */
+  var PAGES_COURS=["formation-par-modules","etudes-cas","fiches-secteur",
+                   "fiches-cabinet","sentrainer","formation-par-thematiques"];
+  PAGES_COURS=PAGES_COURS.concat(PAGES_COURS.map(function(s){ return PAGES_EN[s]; }).filter(Boolean));
+
+  function slugDe(chemin){
+    return String(chemin||"").replace(/^\/+|\/+$/g,"").split("?")[0];
+  }
+  function estPageCours(chemin){
+    return PAGES_COURS.indexOf(slugDe(chemin))>=0;
+  }
+  /* Où l'on renvoie, selon l'état — la MÊME machine que ci-dessus.
+     🔴 L'étudiant d'école ne voit JAMAIS les offres : son école a payé, on
+     l'envoie valider son adresse (réponse de Ziad, 07/08). */
+  function destinationParcours(){
+    var u=membrePS();
+    if(!u) return null;
+    var part=null;
+    try{ part=window.PS_PARTENAIRE_EMAIL ? window.PS_PARTENAIRE_EMAIL(u.email) : null; }catch(e){}
+    var cas=etatBlocage(u, part, location.pathname);
+    if(!cas) return null;
+    return cas==="verif" ? "/email-verification-pending" : (window.PS_URL_OFFRE||"/formules");
+  }
+
+  /* 1) Arrivée directe sur une page de cours (lien, favori, retour arrière).
+        `replace` et non `href` : sinon le retour arrière y revient en boucle. */
+  function fermerPagesCours(){
+    if(!estPageCours(location.pathname)) return;
+    var d=destinationParcours();
+    if(d && slugDe(d)!==slugDe(location.pathname)) location.replace(d);
+  }
+
+  /* 2) Clic dans le menu. 🔴 ON NE RÉÉCRIT PAS LES `href` : `mega-menu.js`
+        choisit la COULEUR de chaque picto d'après le slug visé
+        (`couleurLien`). Remplacer l'adresse par `/formules` repeindrait tout
+        le menu en bleu de marque, et Ziad a explicitement demandé que chaque
+        entrée garde la couleur de sa page. On intercepte le clic, l'adresse
+        reste intacte. Le repli reste `fermerPagesCours` : ouvrir dans un
+        nouvel onglet contourne l'écouteur, pas la redirection à l'arrivée. */
+  function garderClicsMenu(){
+    if(window.__psParcoursClics) return;
+    window.__psParcoursClics=1;
+    document.addEventListener("click", function(e){
+      var a=e.target && e.target.closest ? e.target.closest("a[href]") : null;
+      if(!a) return;
+      var chemin;
+      try{ chemin=new URL(a.getAttribute("href"), location.href).pathname; }catch(_){ return; }
+      if(!estPageCours(chemin)) return;
+      var d=destinationParcours();
+      if(!d) return;
+      e.preventDefault(); e.stopPropagation();
+      location.href=d;
+    }, true);   /* capture : LearnWorlds arrête la propagation sur ses liens */
+  }
+
+  /* 🔴 L'ÉCRAN PLEIN A ÉTÉ ÉCRIT PUIS RETIRÉ LE MÊME JOUR (07/08).
+     Première version : un calque opaque recouvrant tout le site. Ziad a tranché
+     autrement — « je veux garder la home, le menu visible, et les pages où il y
+     a des cours pointent vers les offres ». C'est mieux : un prospect continue
+     de VOIR ce qu'il y a à gagner, au lieu d'être mis dehors.
+     🔴 Le code de ce calque est SUPPRIMÉ, pas neutralisé derrière un `return`.
+     Du code mort qui ressemble à une fonctionnalité finit par être relu comme
+     une source de vérité — et j'avais justement laissé un `return` devant lui
+     pendant dix minutes. Ce qui survit, c'est la machine à états
+     (`etatBlocage`), qui n'a jamais été en cause : seule la RÉACTION change. */
+  function blocageParcours(){
+    fermerPagesCours();
+    garderClicsMenu();
+  }
+
+  [1500,3000,6000,10000].forEach(function(d){ setTimeout(blocageParcours,d); });
   [2500,6000].forEach(function(d){ setTimeout(verifierChampsProfil,d); });
   /* 🔴 Le dépôt est relancé PLUS TARD que le reste : les cartes du Site Builder
      n'apparaissent qu'au bout de plusieurs secondes (mesuré : ~5 à 8 s avant que
