@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-o";
+  window.PS_TOKENS_V="2026-08-07-p";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4038,7 +4038,7 @@
   }
 
   /* ── Le formulaire lui-même ─────────────────────────────────────────────── */
-  function ficheOuvrir(u, revision){
+  function ficheOuvrir(u, revision, cibleCle){
     ficheCSS();
     var rep={}, i=0, NOYAU=5, noyauMontre=false, noyauEnvoye=false, toutRevoir=false;
     /* 🔴🔴 NE PAS REDEMANDER CE QU'ON SAIT DÉJÀ (07/08, signalé par Ziad :
@@ -4116,7 +4116,18 @@
          sert à ÉVITER le noyau, pas à empêcher d'y revenir exprès. */
       if(revision && !toutRevoir && i>0 && i<NOYAU && rempli(connus.cf_ecole)) i=NOYAU;
     }
-    sauterConnus();
+    /* 🔴 CIBLE UNIQUE (07/08, demande de Ziad : un crayon sur chaque pastille,
+       « ça ouvre la popup sur un seul élément à modifier »).
+       On se place sur l'écran demandé, on désactive le saut — sinon un champ
+       DÉJÀ rempli, qui est justement le cas normal quand on clique un crayon,
+       serait sauté et la popup s'ouvrirait ailleurs. */
+    var unSeul=false;
+    if(cibleCle){
+      for(var ic=0; ic<FICHE_ECRANS.length; ic++){
+        if(FICHE_ECRANS[ic].cle===cibleCle){ i=ic; unSeul=true; toutRevoir=true; break; }
+      }
+    }
+    if(!unSeul) sauterConnus();
     var hote=document.createElement("div"); hote.id="ps-fiche";
     hote.setAttribute("role","dialog"); hote.setAttribute("aria-modal","true");
     document.body.appendChild(hote);
@@ -4154,7 +4165,9 @@
     fermer = function(enregistrer){ _ficheRendre = null; _fermerOrig(enregistrer); };
 
     function rendre(){
-      var segs=""; for(var k=0;k<FICHE_ECRANS.length;k++) segs+='<i class="'+(k<i?"on":"")+'"></i>';
+      /* Un seul écran : le chapelet de dix jalons annoncerait un parcours qui
+         n'aura pas lieu. */
+      var segs=""; if(!unSeul) for(var k=0;k<FICHE_ECRANS.length;k++) segs+='<i class="'+(k<i?"on":"")+'"></i>';
       var corps;
 
       /* 🔴🔴 LE WORKER A REFUSÉ — ET ON NE PEUT PAS LAISSER « VOTRE FICHE EST EN
@@ -4270,6 +4283,10 @@
             sauterConnus(); rendre(); return;
           }
           if(a==="passer"||a==="suivant"){
+            /* Cible unique : la question posée est la seule ; y répondre
+               termine. Enchaîner sur les autres écrans reviendrait à imposer le
+               parcours complet à quelqu'un qui a cliqué un crayon précis. */
+            if(unSeul){ fermer(true); return; }
             i++; sauterConnus();
             /* `>=` et non `===` : avec le saut des champs connus, on peut
                franchir le jalon sans jamais tomber dessus exactement. */
@@ -4320,7 +4337,9 @@
           var c=hote.querySelector(".pf-cpt b"); if(c) c.textContent=champ.value.length;
         };
         champ.onkeydown=function(ev){
-          if(ev.key==="Enter" && e.type!=="long"){ ev.preventDefault(); i++; sauterConnus(); if(i>=FICHE_ECRANS.length) ficheEnvoyer(u,rep,true); rendre(); }
+          if(ev.key==="Enter" && e.type!=="long"){ ev.preventDefault();
+            if(unSeul){ fermer(true); return; }
+            i++; sauterConnus(); if(i>=FICHE_ECRANS.length) ficheEnvoyer(u,rep,true); rendre(); }
         };
         try{ champ.focus(); }catch(_){}
       }
@@ -4479,6 +4498,15 @@
     var u=membrePS();
     if(!u || !champs || typeof champs!=="object") return false;
     ficheEnvoyer(u, champs, true);
+    return true;
+  };
+
+  /* Ouvrir la popup sur UN champ précis (crayon d'une pastille de /account). */
+  window.PS_FICHE_OUVRIR_CHAMP=function(cle){
+    var u=membrePS();
+    if(!u || !cle) return false;
+    if(document.getElementById("ps-fiche")) return true;
+    ficheOuvrir(u, true, cle);
     return true;
   };
 

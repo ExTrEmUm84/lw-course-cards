@@ -118,6 +118,16 @@
        toute la page. Nos classes nous appartiennent, donc l'effet serait nul
        ici ; c'est l'habitude qui compte, elle a déjà coûté cher ailleurs. */
     B+".ps-carte-fiche .ps-fiche-actions{display:flex;gap:8px;flex-wrap:wrap}",
+    /* Le crayon vit DANS la pastille, hérite de sa couleur, et ne se révèle
+       qu'au survol sur les grands écrans — au doigt il n'y a pas de survol,
+       donc il reste visible en dessous de 900px. */
+    B+".ps-carte-fiche .ps-fpill{position:relative;display:inline-flex;align-items:center;gap:8px}",
+    B+".ps-carte-fiche .ps-fpill-edit{border:0;background:transparent;padding:2px;margin:0;cursor:pointer;"+
+      "line-height:0;color:inherit;opacity:.45;transition:opacity .15s ease}",
+    B+".ps-carte-fiche .ps-fpill:hover .ps-fpill-edit,.ps-carte-fiche .ps-fpill-edit:focus-visible{opacity:1}",
+    B+".ps-carte-fiche .ps-fpill-edit svg{width:14px;height:14px;fill:none;stroke:currentColor;"+
+      "stroke-width:2;stroke-linecap:round;stroke-linejoin:round}",
+    "@media(max-width:900px){"+B+".ps-carte-fiche .ps-fpill-edit{opacity:.8}}",
     B+".ps-carte-fiche .ps-fiche-alerte{margin:10px 0 0;font:400 13.5px/1.5 var(--ps-font,Figtree,sans-serif);"+
       "color:#8a5a00;background:#fff8e6;border:1px solid #f0dca8;border-radius:10px;padding:9px 12px}",
     B+".ps-carte-fiche .ps-fiche-hd{margin-bottom:14px !important;}",
@@ -658,6 +668,10 @@
      les pastilles parlent donc la même langue que le reste du site, et une
      retouche au configurateur les suit sans toucher à ce fichier. Inventer
      cinq couleurs ici, c'eût été créer une seconde charte à maintenir. */
+  /* Crayon inline : pas de police d'icônes, pas de requête, et il hérite de la
+     couleur de sa pastille via `currentColor`. */
+  var CRAYON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>';
+
   var FICHE_PASTILLES=[
     {cle:"cf_ecole",     nom:"École",     lvl:1},
     {cle:"cf_niveau",    nom:"Niveau",    lvl:4},
@@ -726,7 +740,14 @@
       /* 🔴 Le CONTACT ne s'affiche pas en clair : c'est le moyen de joindre la
          personne, lisible par-dessus son épaule. On dit qu'il est là. */
       var aff = c.cle==="cf_contact" ? "renseigné" : v.replace(/[&<>]/g,"");
-      chips+='<span class="ps-fpill ps-lvl'+c.lvl+'"><b>'+c.nom+'</b><i>'+aff+'</i></span>';
+      /* 🔴 La pastille CONTACT couvre quatre champs depuis le 07/08 ; son crayon
+         ouvre l'e-mail, qui est celui du noyau. Ouvrir « cf_contact », l'ancien
+         champ libre qu'on ne demande plus, mènerait à un écran qui n'existe
+         plus dans la popup — un crayon qui n'ouvre rien. */
+      var cible = c.cle==="cf_contact" ? "cf_contactmail" : c.cle;
+      chips+='<span class="ps-fpill ps-lvl'+c.lvl+'"><b>'+c.nom+'</b><i>'+aff+'</i>'+
+        '<button type="button" class="ps-fpill-edit" data-ps-champ="'+cible+'" '+
+        'aria-label="Modifier '+c.nom.toLowerCase()+'" title="Modifier">'+CRAYON+'</button></span>';
     });
     /* 🔴 UNE SEULE pastille pour tout ce qui manque : une par champ vide
        transformait la carte en liste de reproches. */
@@ -785,6 +806,17 @@
         e.addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); action(); } });
       });
     };
+    /* 🔴 `stopPropagation` : sans lui, le clic du crayon remonterait à la
+       pastille et ouvrirait AUSSI le parcours complet — deux popups pour un
+       clic, ou la mauvaise des deux. */
+    [].slice.call(carte.querySelectorAll(".ps-fpill-edit")).forEach(function(b){
+      b.addEventListener("click",function(ev){
+        ev.preventDefault(); ev.stopPropagation();
+        var cle=b.getAttribute("data-ps-champ");
+        if(typeof window.PS_FICHE_OUVRIR_CHAMP==="function" && window.PS_FICHE_OUVRIR_CHAMP(cle)) return;
+        ouvrir();                       /* repli : le parcours complet */
+      });
+    });
     brancher(".ps-fiche-visi", basculer);
     brancher(".ps-fiche-cta,.ps-fpill-vide", ouvrir);
 
