@@ -26,12 +26,18 @@
   8 fiches secteur, 12 études de cas, 4 parcours, 3 modules d'entraînement)
   sont de l'ORDRE de grandeur du vrai site, pas son inventaire exact.
 
-  🔴 LES SIX DÉCISIONS SONT INDÉPENDANTES et se combinent (96 réglages
-  livrables — 192 sur le papier, mais deux des quatre barèmes de la décision B
-  sont indisponibles, cf. `indispo`). Ne pas les présenter comme un menu de
-  trois formules toutes faites : le client doit pouvoir prendre le périmètre de
-  l'une et la pondération de l'autre. Les boutons de présélection ne sont que
-  des raccourcis vers des combinaisons remarquables.
+  🔴🔴 ON NE POSE PLUS QUE DEUX QUESTIONS (08/08, Ziad : « trop de
+  paramètres »). Six décisions existent toujours dans le calcul, mais quatre
+  sont ASSUMÉES par nous (`fixe:true` dans QUESTIONS) : barème, acquisition,
+  inconnu, agrégation. Le client ne tranche que le PÉRIMÈTRE et l'ÉCHELLE — les
+  deux seules qui engagent la promesse faite à l'étudiant ; les autres sont des
+  choix de fabrication.
+  🔴 Les quatre réglages assumés restent AFFICHÉS sous le simulateur et gardent
+  leur section détaillée : ne plus poser une question n'autorise pas à cacher
+  la réponse. Une page qui reproche au site d'afficher des chiffres dont on
+  ignore l'origine ne peut pas produire les siens en coulisse.
+  🔴 Retirer `fixe:true` d'une entrée suffit à reposer la question : la
+  simplification est un réglage, pas une amputation.
   🔴 Le chiffre affiché à l'écran est CALCULÉ par `ecartMax()`, jamais écrit en
   dur : il suit donc les options réellement disponibles. Ce commentaire, lui,
   est à la main — c'est le seul endroit à corriger si la liste bouge.
@@ -132,6 +138,10 @@ code{font-family:ui-monospace,'SF Mono',Menlo,monospace;font-size:.87em;backgrou
 .pill.no{background:var(--ps-no-tint);color:var(--ps-no)}
 .pill.nous{background:var(--ps-accent-tint);color:#3466A8}
 .pill.warn{background:var(--ps-warn-tint);color:var(--ps-warn)}
+/* Pastille des sections qu'on n'ouvre plus comme des questions : la couleur
+   dit « c'est réglé », pas « c'est à vous ». */
+.idx.nous{background:var(--ps-ok-tint) !important;color:var(--ps-ok) !important}
+.toc a em{font-style:normal;color:#3466A8;font-weight:700}
 /* Ligne de tableau écartée : atténuée, jamais barrée. On veut que la RAISON se
    lise, or un texte barré ne se lit pas — il se saute. */
 .tab tr.ko td{background:#FAFAFB;color:#6b7180}
@@ -186,6 +196,11 @@ figcaption{padding:11px 18px;font-size:13px;color:#8d95a6;background:#FAFBFD;bor
 .sim-opt.sel{border-color:var(--ps-accent);background:var(--ps-accent-tint)}
 /* Option écartée : lisible, mais visiblement hors service. On garde le texte
    noir sur le titre — c'est la RAISON qu'on veut faire lire, pas l'option. */
+/* Les réglages assumés : présents, lisibles, mais visiblement pas des boutons. */
+.sim-fixe{margin-top:14px;padding:12px 14px;border:1px dashed var(--ps-border);border-radius:12px;background:#FBFCFE}
+.sim-fixe .sf-t{font-size:11px;font-weight:800;letter-spacing:.06em;text-transform:uppercase;color:#8A8F9C;margin-bottom:7px}
+.sim-fixe span{display:block;font-size:13px;line-height:1.5;color:#4b5262}
+.sim-fixe span b{color:var(--ps-navy);font-weight:700}
 .sim-opt.indispo{cursor:not-allowed;background:#FAFAFB;border-style:dashed}
 .sim-opt.indispo:hover{border-color:var(--ps-border);background:#FAFAFB}
 .sim-opt.indispo span,.sim-opt.indispo span em{color:#8A8F9C}
@@ -256,6 +271,7 @@ figcaption{padding:11px 18px;font-size:13px;color:#8d95a6;background:#FAFBFD;bor
 .reco{border:1px solid var(--ps-border);border-radius:12px;overflow:hidden}
 .reco .r{display:grid;grid-template-columns:34px 1fr;gap:14px;padding:16px 18px;border-bottom:1px solid #F0F2F6;background:#fff}
 .reco .r:last-child{border-bottom:none}
+.reco .r .n.ok{background:var(--ps-ok) !important}
 .reco .r .n{width:34px;height:34px;border-radius:50%;background:var(--ps-navy);color:#fff;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:800}
 .reco .r h4{font-size:16px;font-weight:800;color:var(--ps-navy);margin-bottom:4px}
 .reco .r p{font-size:14.5px;color:#4b5262}
@@ -297,12 +313,12 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     <h2>Sommaire</h2>
     <a href="#s1">1 · Ce que l'étudiant voit aujourd'hui</a>
     <a href="#s2">2 · D'où sort le pourcentage</a>
-    <a href="#perimetre">A · Le périmètre</a>
-    <a href="#bareme">B · Le barème — combien vaut un contenu</a>
-    <a href="#acquisition">C · Quand les points tombent</a>
-    <a href="#echelle">D · Pourcentage ou points</a>
-    <a href="#inconnu">E · L'inconnu</a>
-    <a href="#rythme">F · Le rythme</a>
+    <a href="#perimetre">A · Le périmètre <em>— à décider</em></a>
+    <a href="#echelle">B · Pourcentage ou points <em>— à décider</em></a>
+    <a href="#bareme">Le barème — combien vaut un contenu</a>
+    <a href="#acquisition">Quand les points tombent</a>
+    <a href="#inconnu">L'inconnu</a>
+    <a href="#rythme">Le rythme</a>
     <a href="#simulateur">→ Le simulateur</a>
     <a href="#trancher">→ Ce qu'il reste à trancher</a>
     <div class="sep"></div>
@@ -383,27 +399,33 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
 
         <p>Ce qui <strong>se discute</strong>, c'est tout ce qui vient après&nbsp;: comment
         transformer des dizaines de pourcentages de cours en un seul chiffre, et en un titre.
-        Six questions, et une seule bonne réponse par site — celle qui correspond à la promesse que
-        vous faites à l'étudiant.</p>
+        Six questions se posent — mais <strong>deux seulement vous appartiennent</strong>&nbsp;:
+        elles engagent la promesse que vous faites à l'étudiant. Les quatre autres sont des choix
+        de fabrication&nbsp;: nous les prenons, et nous les écrivons ci-dessous pour que vous
+        puissiez les contester.</p>
 
         <div class="scroll">
           <table class="tab">
-            <tr><th style="width:24%">La question</th><th>Ce qu'elle décide</th><th style="width:12%">Section</th></tr>
+            <tr><th style="width:24%">La question</th><th>Ce qu'elle décide</th><th style="width:16%">Qui tranche</th></tr>
             <tr><td>Le périmètre</td><td>Ce qui entre au dénominateur — tout le catalogue, ou
-              seulement ce à quoi il a accès</td><td><a href="#perimetre" style="color:#3466A8;font-weight:700">A</a></td></tr>
-            <tr><td>Le barème</td><td>Combien vaut un contenu&nbsp;: la même chose pour tous, ou
-              une valeur par famille de contenu</td>
-              <td><a href="#bareme" style="color:#3466A8;font-weight:700">B</a></td></tr>
-            <tr><td>L'acquisition</td><td>Si les points tombent au prorata de l'avancement, par
-              paliers, ou seulement à 100&nbsp;%</td>
-              <td><a href="#acquisition" style="color:#3466A8;font-weight:700">C</a></td></tr>
+              seulement ce à quoi il a accès</td>
+              <td><a href="#perimetre" style="color:#3466A8;font-weight:700">Vous&nbsp;·&nbsp;A</a></td></tr>
             <tr><td>L'échelle</td><td>Si le grade se lit sur un <em>pourcentage</em> du catalogue ou
               sur un <em>total de points</em>. C'est elle qui commande les titres Junior →
-              Master</td><td><a href="#echelle" style="color:#3466A8;font-weight:700">D</a></td></tr>
-            <tr><td>L'inconnu</td><td>Ce qu'on affiche quand on n'a pas encore mesuré</td>
-              <td><a href="#inconnu" style="color:#3466A8;font-weight:700">E</a></td></tr>
-            <tr><td>Le rythme</td><td>Au bout de combien de temps un cours terminé se voit sur le
-              profil</td><td><a href="#rythme" style="color:#3466A8;font-weight:700">F</a></td></tr>
+              PrepaStrat Master</td>
+              <td><a href="#echelle" style="color:#3466A8;font-weight:700">Vous&nbsp;·&nbsp;B</a></td></tr>
+            <tr class="ko"><td>Le barème</td><td>Combien vaut un contenu&nbsp;: la même chose pour
+              tous, ou une valeur par famille de contenu</td>
+              <td><a href="#bareme" style="color:#1b5e40;font-weight:700">Nous</a></td></tr>
+            <tr class="ko"><td>L'acquisition</td><td>Si les points tombent au prorata de
+              l'avancement, par paliers, ou seulement à 100&nbsp;%</td>
+              <td><a href="#acquisition" style="color:#1b5e40;font-weight:700">Nous</a></td></tr>
+            <tr class="ko"><td>L'inconnu</td><td>Ce qu'on affiche quand on n'a pas encore
+              mesuré</td>
+              <td><a href="#inconnu" style="color:#1b5e40;font-weight:700">Nous</a></td></tr>
+            <tr class="ko"><td>Le rythme</td><td>Au bout de combien de temps un cours terminé se
+              voit sur le profil</td>
+              <td><a href="#rythme" style="color:#1b5e40;font-weight:700">Nous</a></td></tr>
           </table>
         </div>
       </div>
@@ -451,9 +473,76 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
       </div>
     </details>
 
+    <details id="echelle">
+      <summary><span class="idx dec">B</span> Décision B — pourcentage ou points&nbsp;: d'où viennent les titres
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>C'est la décision qui commande directement le widget de grade — Junior, Consultant,
+        Manager, Principal, Partner, Master. Le titre se déclenche à un seuil&nbsp;; reste à savoir
+        <strong>en quoi ce seuil est exprimé</strong>.</p>
+
+        <div class="scroll">
+          <table class="tab">
+            <tr><th style="width:26%">Option</th><th>Le seuil s'écrit</th><th style="width:36%">La conséquence, en une phrase</th></tr>
+            <tr><td>Pourcentage du catalogue <span class="pill warn">actuel</span></td>
+              <td>« Manager à partir de <strong>25&nbsp;%</strong> du catalogue »</td>
+              <td>Le grade est <strong>relatif</strong>&nbsp;: il dit quelle part du site l'étudiant
+                a couverte.</td></tr>
+            <tr><td>Total de points</td>
+              <td>« Manager à partir de <strong>87&nbsp;points</strong> »</td>
+              <td>Le grade est <strong>absolu</strong>&nbsp;: il dit combien de travail a été
+                accompli, quel que soit le reste.</td></tr>
+          </table>
+        </div>
+
+        <div class="box no"><strong>Et voici pourquoi ça compte vraiment.</strong> En pourcentage,
+        <strong>publier de nouveaux contenus fait rétrograder tout le monde</strong>. Le
+        dénominateur grandit, les numérateurs ne bougent pas&nbsp;: un étudiant qui n'a rien fait
+        de la semaine peut passer de Manager à Consultant parce que <em>vous</em> avez travaillé.
+        En points, le total acquis ne bouge jamais, les seuils sont fixés une fois&nbsp;: personne
+        ne rétrograde jamais.</div>
+
+        <p>Le simulateur permet d'éprouver ça directement&nbsp;: une case
+        « <strong>le catalogue grandit</strong> » ajoute 10&nbsp;études de cas et montre l'effet sur
+        les deux échelles, sans que Camille ait ouvert une seule leçon de plus. Prenez le
+        préréglage <strong>« Pourcentage pondéré »</strong> et cochez la case&nbsp;: elle tombe de
+        <strong>29&nbsp;% à 22&nbsp;%</strong> et <strong>perd son titre de Manager</strong> — parce
+        que vous avez publié. Le même essai avec le préréglage « Recommandée », qui lit les points&nbsp;:
+        elle reste à 87&nbsp;points et garde son grade.</p>
+
+        <div class="scroll">
+          <table class="tab">
+            <tr><th style="width:26%"></th><th>Pourcentage</th><th>Points</th></tr>
+            <tr><td>Ce que le titre raconte</td><td>« J'ai couvert un quart du site »</td>
+              <td>« J'ai accompli tel volume de travail »</td></tr>
+            <tr><td>Quand vous publiez</td><td><span class="pill no">Tout le monde recule</span></td>
+              <td><span class="pill ok">Personne ne bouge</span></td></tr>
+            <tr><td>Comparable entre étudiants</td><td><span class="pill ok">Oui</span></td>
+              <td><span class="pill ok">Oui</span></td></tr>
+            <tr><td>Se comprend sans explication</td><td><span class="pill ok">Oui</span></td>
+              <td><span class="pill warn">Il faut donner un repère</span> — «&nbsp;87&nbsp;points&nbsp;»
+                ne veut rien dire seul. Le bon repère est le <strong>prochain grade</strong>
+                («&nbsp;encore 70&nbsp;points&nbsp;»), pas le total du catalogue&nbsp;: ce total-là
+                grandit à chaque publication, et l'afficher ramènerait le recul qu'on vient
+                d'éviter.</td></tr>
+            <tr><td>Une jauge reste possible</td><td><span class="pill ok">Oui</span></td>
+              <td><span class="pill ok">Oui</span> — remplie jusqu'au <em>prochain grade</em>,
+                pas jusqu'à 100&nbsp;% du catalogue. C'est même plus motivant.</td></tr>
+          </table>
+        </div>
+
+        <div class="box info"><strong>Les deux ne s'excluent pas.</strong> Rien n'interdit d'afficher
+        les tuiles de pages en pourcentage — « Cours&nbsp;: 41&nbsp;% » reste la formulation la plus
+        naturelle pour une page — et de faire reposer le <em>grade</em> sur les points. C'est même
+        la combinaison que nous recommandons&nbsp;: le pourcentage pour situer, les points pour
+        récompenser.</div>
+      </div>
+    </details>
+
     <!-- ======================= 4 ======================= -->
     <details id="bareme">
-      <summary><span class="idx dec">B</span> Décision B — le barème&nbsp;: combien vaut un contenu&nbsp;?
+      <summary><span class="idx nous">✓</span> Notre choix — le barème&nbsp;: combien vaut un contenu&nbsp;?
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
@@ -525,7 +614,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     </details>
 
     <details id="acquisition">
-      <summary><span class="idx dec">C</span> Décision C — quand les points tombent
+      <summary><span class="idx nous">✓</span> Notre choix — quand les points tombent
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
@@ -567,76 +656,10 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
       </div>
     </details>
 
-    <details id="echelle">
-      <summary><span class="idx dec">D</span> Décision D — pourcentage ou points&nbsp;: d'où viennent les titres
-        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
-      </summary>
-      <div class="inner">
-        <p>C'est la décision qui commande directement le widget de grade — Junior, Consultant,
-        Manager, Principal, Partner, Master. Le titre se déclenche à un seuil&nbsp;; reste à savoir
-        <strong>en quoi ce seuil est exprimé</strong>.</p>
-
-        <div class="scroll">
-          <table class="tab">
-            <tr><th style="width:26%">Option</th><th>Le seuil s'écrit</th><th style="width:36%">La conséquence, en une phrase</th></tr>
-            <tr><td>Pourcentage du catalogue <span class="pill warn">actuel</span></td>
-              <td>« Manager à partir de <strong>25&nbsp;%</strong> du catalogue »</td>
-              <td>Le grade est <strong>relatif</strong>&nbsp;: il dit quelle part du site l'étudiant
-                a couverte.</td></tr>
-            <tr><td>Total de points</td>
-              <td>« Manager à partir de <strong>87&nbsp;points</strong> »</td>
-              <td>Le grade est <strong>absolu</strong>&nbsp;: il dit combien de travail a été
-                accompli, quel que soit le reste.</td></tr>
-          </table>
-        </div>
-
-        <div class="box no"><strong>Et voici pourquoi ça compte vraiment.</strong> En pourcentage,
-        <strong>publier de nouveaux contenus fait rétrograder tout le monde</strong>. Le
-        dénominateur grandit, les numérateurs ne bougent pas&nbsp;: un étudiant qui n'a rien fait
-        de la semaine peut passer de Manager à Consultant parce que <em>vous</em> avez travaillé.
-        En points, le total acquis ne bouge jamais, les seuils sont fixés une fois&nbsp;: personne
-        ne rétrograde jamais.</div>
-
-        <p>Le simulateur permet d'éprouver ça directement&nbsp;: une case
-        « <strong>le catalogue grandit</strong> » ajoute 10&nbsp;études de cas et montre l'effet sur
-        les deux échelles, sans que Camille ait ouvert une seule leçon de plus. Prenez le
-        préréglage <strong>« Pourcentage pondéré »</strong> et cochez la case&nbsp;: elle tombe de
-        <strong>29&nbsp;% à 22&nbsp;%</strong> et <strong>perd son titre de Manager</strong> — parce
-        que vous avez publié. Le même essai avec le préréglage « Recommandée », qui lit les points&nbsp;:
-        elle reste à 87&nbsp;points et garde son grade.</p>
-
-        <div class="scroll">
-          <table class="tab">
-            <tr><th style="width:26%"></th><th>Pourcentage</th><th>Points</th></tr>
-            <tr><td>Ce que le titre raconte</td><td>« J'ai couvert un quart du site »</td>
-              <td>« J'ai accompli tel volume de travail »</td></tr>
-            <tr><td>Quand vous publiez</td><td><span class="pill no">Tout le monde recule</span></td>
-              <td><span class="pill ok">Personne ne bouge</span></td></tr>
-            <tr><td>Comparable entre étudiants</td><td><span class="pill ok">Oui</span></td>
-              <td><span class="pill ok">Oui</span></td></tr>
-            <tr><td>Se comprend sans explication</td><td><span class="pill ok">Oui</span></td>
-              <td><span class="pill warn">Il faut donner un repère</span> — «&nbsp;87&nbsp;points&nbsp;»
-                ne veut rien dire seul. Le bon repère est le <strong>prochain grade</strong>
-                («&nbsp;encore 70&nbsp;points&nbsp;»), pas le total du catalogue&nbsp;: ce total-là
-                grandit à chaque publication, et l'afficher ramènerait le recul qu'on vient
-                d'éviter.</td></tr>
-            <tr><td>Une jauge reste possible</td><td><span class="pill ok">Oui</span></td>
-              <td><span class="pill ok">Oui</span> — remplie jusqu'au <em>prochain grade</em>,
-                pas jusqu'à 100&nbsp;% du catalogue. C'est même plus motivant.</td></tr>
-          </table>
-        </div>
-
-        <div class="box info"><strong>Les deux ne s'excluent pas.</strong> Rien n'interdit d'afficher
-        les tuiles de pages en pourcentage — « Cours&nbsp;: 41&nbsp;% » reste la formulation la plus
-        naturelle pour une page — et de faire reposer le <em>grade</em> sur les points. C'est même
-        la combinaison que nous recommandons&nbsp;: le pourcentage pour situer, les points pour
-        récompenser.</div>
-      </div>
-    </details>
 
     <!-- ======================= 5 ======================= -->
     <details id="inconnu">
-      <summary><span class="idx dec">E</span> Décision E — l'inconnu&nbsp;: 0&nbsp;% ou «&nbsp;—&nbsp;»&nbsp;?
+      <summary><span class="idx nous">✓</span> Notre choix — l'inconnu&nbsp;: 0&nbsp;% ou «&nbsp;—&nbsp;»&nbsp;?
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
@@ -679,7 +702,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
 
     <!-- ======================= 6 ======================= -->
     <details id="rythme">
-      <summary><span class="idx dec">F</span> Décision F — le rythme&nbsp;: quand le chiffre bouge
+      <summary><span class="idx nous">✓</span> Notre choix — le rythme&nbsp;: quand le chiffre bouge
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
@@ -719,7 +742,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
 
     <!-- ======================= 7 ======================= -->
     <details id="simulateur" open>
-      <summary><span class="idx">7</span> Le simulateur — le même étudiant, tous les réglages
+      <summary><span class="idx">7</span> Le simulateur — le même étudiant, vos deux réponses
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
@@ -746,6 +769,11 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
           </div>
 
           <div class="sim-ctl" id="simCtl"></div>
+          <!-- 🔴 Les réglages qu'on assume restent AFFICHÉS. On ne demande plus
+               au client de les trancher ; on ne les lui cache pas pour autant —
+               une page qui reproche au site d'afficher des chiffres dont on
+               ignore l'origine ne peut pas produire les siens en coulisse. -->
+          <div class="sim-fixe" id="simFixe"></div>
 
           <div class="sim-out">
             <div class="sim-head">
@@ -794,9 +822,11 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
-        <p>Six réponses — plus la case «&nbsp;chiffre global&nbsp;» du simulateur — et le calcul est
-        défini pour tout le site&nbsp;: page Cours, pages de fiches,
-        études de cas et profil affichent alors <strong>un chiffre, et un seul, calculé de la même
+        <p><strong>Deux réponses de votre part suffisent.</strong> Les quatre autres lignes
+        ci-dessous sont déjà tranchées&nbsp;: ce sont nos choix de fabrication, écrits ici pour que
+        vous puissiez les contester, pas pour vous les faire arbitrer. Une fois vos deux réponses
+        données, le calcul est défini pour tout le site&nbsp;: page Cours, pages de fiches, études
+        de cas et profil affichent alors <strong>un chiffre, et un seul, calculé de la même
         façon</strong>.</p>
 
         <div class="reco">
@@ -811,7 +841,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             </div>
           </div>
           <div class="r">
-            <div class="n">B</div>
+            <div class="n ok">✓</div>
             <div>
               <h4>Le barème</h4>
               <p>Identique pour tous, ou une valeur par famille de contenu&nbsp;? (Les barèmes
@@ -826,7 +856,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             </div>
           </div>
           <div class="r">
-            <div class="n">C</div>
+            <div class="n ok">✓</div>
             <div>
               <h4>L'acquisition</h4>
               <p>Les points tombent au prorata, par paliers, ou seulement à 100&nbsp;%&nbsp;?</p>
@@ -837,7 +867,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             </div>
           </div>
           <div class="r">
-            <div class="n">D</div>
+            <div class="n">B</div>
             <div>
               <h4>L'échelle — celle qui commande les titres</h4>
               <p>Le grade se lit sur un pourcentage du catalogue, ou sur un total de points&nbsp;?</p>
@@ -847,7 +877,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             </div>
           </div>
           <div class="r">
-            <div class="n">E</div>
+            <div class="n ok">✓</div>
             <div>
               <h4>L'inconnu</h4>
               <p>Une page jamais visitée&nbsp;: 0&nbsp;%, «&nbsp;—&nbsp;», et comptée ou non&nbsp;?</p>
@@ -860,7 +890,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             </div>
           </div>
           <div class="r">
-            <div class="n">F</div>
+            <div class="n ok">✓</div>
             <div>
               <h4>Le rythme</h4>
               <p>Mise à jour au passage sur la page, au retour sur le profil, ou en temps réel&nbsp;?</p>
@@ -1028,7 +1058,13 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
        du dénombrement des combinaisons (`ecartMax`). Un réglage qu'on ne peut
        pas livrer n'a rien à faire dans une amplitude qu'on présente comme
        réelle — ce serait vendre un écart qui n'existe pas. */
-    {cle:"bareme", eti:"Décision B", q:"Combien vaut un contenu&nbsp;?", opts:[
+    /* 🔴🔴 `fixe` = ON NE POSE PLUS LA QUESTION, on assume la réponse (08/08,
+       Ziad : « trop de paramètres »). Ces réglages restent CALCULÉS et
+       AFFICHÉS sous le simulateur — les masquer reviendrait à cacher ce qui
+       produit le chiffre, exactement le défaut que cette page dénonce. Ce qui
+       change, c'est qu'on ne demande plus au client de trancher ce qui relève
+       de notre métier. Retirer `fixe` suffit à reposer la question. */
+    {cle:"bareme", fixe:true, eti:"Notre choix", q:"Combien vaut un contenu&nbsp;?", opts:[
       {v:"identique",  t:"Identique — 10&nbsp;pts chacun", d:"Le plus simple à expliquer. Récompense le survol."},
       {v:"volume",     t:"Par volume — 1&nbsp;pt par leçon", d:"Suivrait le temps passé.",
        indispo:"le nombre de leçons n'est fourni par aucune API LearnWorlds. Il est tapé à la main dans la description du cours, et seule la page Cours sait le lire. Les fiches cabinet, les fiches secteur, les études de cas et les parcours n'ont aucun compteur."},
@@ -1036,20 +1072,20 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
       {v:"difficulte", t:"Par difficulté — 6&nbsp;pts par cran", d:"Serait le plus juste.",
        indispo:"aucune difficulté n'existe aujourd'hui, nulle part. Il faudrait noter chaque contenu à la main, puis tenir cette note à chaque publication."}
     ]},
-    {cle:"acquisition", eti:"Décision C", q:"Quand les points tombent&nbsp;?", opts:[
+    {cle:"acquisition", fixe:true, eti:"Notre choix", q:"Quand les points tombent&nbsp;?", opts:[
       {v:"prorata", t:"Au prorata de l'avancement", d:"La jauge bouge à chaque leçon. Entamer dix cours vaut en finir cinq."},
       {v:"paliers", t:"Par paliers — 50&nbsp;% puis 100&nbsp;%", d:"Du mouvement, et deux vrais évènements."},
       {v:"tout",    t:"Tout ou rien — à 100&nbsp;% seulement", d:"Rien n'est acquis avant la fin. La règle des certifications."}
     ]},
-    {cle:"echelle", eti:"Décision D", q:"Le grade se lit sur&nbsp;?", opts:[
+    {cle:"echelle", eti:"Décision B", q:"Le grade se lit sur&nbsp;?", opts:[
       {v:"pct",    t:"Un pourcentage du catalogue", d:"«&nbsp;Manager à 25&nbsp;%&nbsp;». Publier de nouveaux contenus fait rétrograder tout le monde."},
       {v:"points", t:"Un total de points", d:"«&nbsp;Manager à 87&nbsp;points&nbsp;». Les seuils sont gelés&nbsp;: personne ne rétrograde jamais."}
     ]},
-    {cle:"inconnu", eti:"Décision E", q:"Et ce qu'on n'a pas mesuré&nbsp;?", opts:[
+    {cle:"inconnu", fixe:true, eti:"Notre choix", q:"Et ce qu'on n'a pas mesuré&nbsp;?", opts:[
       {v:"zero",  t:"Ça compte pour 0", d:"Une page jamais visitée tire le grade vers le bas."},
       {v:"exclu", t:"C'est exclu du calcul", d:"Le grade ne parle que de ce qui a été mesuré."}
     ]},
-    {cle:"global", eti:"Le chiffre global", q:"Comment agréger les pages&nbsp;?", opts:[
+    {cle:"global", fixe:true, eti:"Notre choix", q:"Comment agréger les pages&nbsp;?", opts:[
       {v:"pages",    t:"Moyenne des pages", d:"Chaque page pèse pareil, quelle que soit sa taille."},
       {v:"contenus", t:"Sur tous les contenus", d:"« Finir un module » vaut la même chose partout. Toujours le cas en mode points."}
     ]}
@@ -1077,7 +1113,11 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     strict: {perimetre:"tout",  bareme:"famille",    acquisition:"tout",    echelle:"points", inconnu:"exclu", global:"contenus"}
   };
 
-  var etat={perimetre:"tout", bareme:"identique", acquisition:"prorata", echelle:"pct", inconnu:"zero", global:"pages"};
+  /* 🔴 L'état de DÉPART est désormais notre recommandation, plus « ce que fait
+     le site aujourd'hui ». Un simulateur qui s'ouvre sur le réglage qu'on
+     déconseille demande au lecteur de faire le trajet lui-même ; le préréglage
+     « Aujourd'hui » reste à un clic pour la comparaison. */
+  var etat={perimetre:"tout", bareme:"famille", acquisition:"paliers", echelle:"points", inconnu:"exclu", global:"contenus"};
   var croissance=false;
 
   /* ---- LE BARÈME : combien vaut ce contenu ---------------------------- */
@@ -1162,7 +1202,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
 
   /* ---- Les contrôles -------------------------------------------------- */
   var ctl=document.getElementById("simCtl");
-  QUESTIONS.forEach(function(q){
+  QUESTIONS.filter(function(q){ return !q.fixe; }).forEach(function(q){
     var box=document.createElement("div"); box.className="sim-q";
     var b=document.createElement("b"); b.textContent=q.eti; box.appendChild(b);
     var qq=document.createElement("div"); qq.className="qq"; qq.innerHTML=q.q; box.appendChild(qq);
@@ -1217,7 +1257,21 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     return null;
   }
 
+  /* Les choix qu'on assume, écrits en toutes lettres sous les deux questions.
+     🔴 Ils se relisent depuis `etat` à chaque rendu, jamais depuis une liste
+     recopiée : les préréglages (« Aujourd'hui ») les changent, et une copie
+     figée annoncerait alors l'inverse de ce qui est calculé. */
+  function peindreFixes(){
+    var h=QUESTIONS.filter(function(q){ return q.fixe; }).map(function(q){
+      var o=q.opts.filter(function(x){ return x.v===etat[q.cle]; })[0];
+      return o ? "<span><b>"+q.q.replace(/&nbsp;\?$/,"")+"</b> "+o.t+"</span>" : "";
+    }).filter(Boolean).join("");
+    document.getElementById("simFixe").innerHTML=
+      "<div class='sf-t'>Réglages que nous prenons en charge</div>"+h;
+  }
+
   function rendre(){
+    peindreFixes();
     /* état des contrôles */
     document.querySelectorAll(".sim-opt").forEach(function(lab){
       var sel=(etat[lab.dataset.cle]===lab.dataset.v);
@@ -1328,7 +1382,13 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
      gonflerait l'amplitude annoncée avec des réglages qu'on ne sait pas
      produire : la phrase « sur les N combinaisons possibles » deviendrait une
      promesse fausse, et c'est justement l'argument central de la page. */
-  function dispo(q){ return q.opts.filter(function(o){ return !o.indispo; }); }
+  function dispo(q){
+    /* Une question FIXÉE n'a plus qu'une valeur possible : celle qu'on a
+       retenue. La compter pour plusieurs gonflerait une amplitude qu'aucun
+       client ne pourra produire. */
+    if(q.fixe) return q.opts.filter(function(o){ return o.v===etat[q.cle]; });
+    return q.opts.filter(function(o){ return !o.indispo; });
+  }
 
   function ecartMax(){
     var min=null, max=null, n=0, pcts=[];
@@ -1352,10 +1412,33 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     if(min===null) return;
     var el=document.getElementById("simEcart");
     var bornes = pcts.length ? (Math.min.apply(null,pcts)+"&nbsp;% à "+Math.max.apply(null,pcts)+"&nbsp;%") : "";
-    el.innerHTML="<strong>Le même travail, du grade "+GRADES[min].nom+" au grade "+GRADES[max].nom+
-      ".</strong> Sur les "+n+" combinaisons possibles, Camille couvre "+bornes+" du périmètre sans "+
-      "avoir ouvert une leçon de plus. Aucune de ces combinaisons n'est un bug&nbsp;: elles "+
-      "racontent des histoires différentes, et c'est pour ça que le choix vous revient.";
+    /* 🔴🔴 LA PHRASE DOIT SUIVRE CE QU'ELLE MESURE (08/08). Elle annonçait
+       « du grade X au grade Y » ; depuis qu'on ne pose plus que deux questions,
+       les quatre combinaisons restantes donnent toutes le MÊME grade, et la
+       phrase disait « du grade Manager au grade Manager ».
+       ⇒ Deux formulations, choisies sur la mesure et non sur ce qu'on aurait
+       aimé démontrer. Quand le grade ne bouge plus, c'est une bonne nouvelle —
+       nos choix le rendent robuste — et la vraie information devient l'écart
+       qui subsiste sur le POURCENTAGE. Le dire ainsi vaut mieux que forcer un
+       écart de grade qui n'existe plus. */
+    var refG2=gradeDe(lecture(calculer(PRESETS.today,croissance),PRESETS.today), seuils(PRESETS.today));
+    /* 🔴 `gradeDe` rend `{actuel, suivant, seuilSuivant, index}` — le nom est
+       dans `.actuel.nom`, pas à la racine. Ma première version lisait `.nom` et
+       affichait « la laisse undefined » au client. Lire la forme réelle d'un
+       retour, jamais celle qu'on imagine. */
+    var nomAuj = refG2 && refG2.actuel ? refG2.actuel.nom : null;
+    var contraste = (nomAuj && nomAuj!==GRADES[min].nom)
+      ? " Avec les règles d'aujourd'hui, le même travail la laisse <strong>"+nomAuj+"</strong>."
+      : "";
+    el.innerHTML = (min===max)
+      ? "<strong>Vos deux réponses ne changent pas son titre&nbsp;: Camille reste "+GRADES[min].nom+
+        ".</strong> Sur les "+n+" combinaisons possibles, elles déplacent la part du périmètre qu'elle "+
+        "couvre — de "+bornes+" — sans jamais lui faire changer de grade."+contraste+
+        " C'est le signe que l'échelle tient&nbsp;: elle ne dépend pas d'un détail de réglage."
+      : "<strong>Le même travail, du grade "+GRADES[min].nom+" au grade "+GRADES[max].nom+
+        ".</strong> Sur les "+n+" combinaisons possibles, Camille couvre "+bornes+" du périmètre sans "+
+        "avoir ouvert une leçon de plus. Aucune de ces combinaisons n'est un bug&nbsp;: elles "+
+        "racontent des histoires différentes, et c'est pour ça que le choix vous revient.";
   }
 
   /* ---- Le catalogue affiché ------------------------------------------- */
