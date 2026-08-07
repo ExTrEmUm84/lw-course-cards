@@ -203,20 +203,25 @@
     + "padding-top:var(--ps-mob-pad,40px);padding-bottom:var(--ps-mob-pad,40px);}"
     /* 🔴🔴 DEUX BOUTONS DU SITE BUILDER QUI SE COLLENT EN PASSANT À LA LIGNE
        (08/08, Ziad : « les pastilles des filtres se collent »).
-       Mesuré sur la page Cours : les boutons « Formations par Modules » et
-       « Formations par Thématiques » sont des `learnworlds-button-wrapper`
-       posés CÔTE À CÔTE, avec une marge de 10 px **à droite seulement**. Sur
-       grand écran ils tiennent sur une ligne et tout va bien ; sur téléphone
-       ils se replient l'un sous l'autre et **plus rien ne les sépare**.
-       🔴 Ce n'est pas notre balisage : la marge vient du Site Builder. On ne
-       corrige donc pas « nos » pastilles, on donne une respiration verticale à
-       un motif de LearnWorlds — d'où la place ici, dans le CSS de site.
-       🔴 Ils partagent un parent mais ne sont PAS voisins directs (mesuré) :
-       un sélecteur `+` n'attraperait rien. La marge se pose sur chaque
-       enveloppe.
-       ⚠️ Contrepartie assumée : 10 px de plus sous un bouton isolé sur mobile.
-       C'est le prix d'une règle qui n'a pas besoin de connaître la page. */
-    + "#pageContent .learnworlds-button-wrapper{margin-bottom:10px;}"
+       🔴🔴 MA PREMIÈRE VERSION ÉTAIT FAUSSE SUR TOUTE LA LIGNE, et elle est
+       partie en production. Je croyais deux enveloppes empilées et j'ai posé
+       `margin-bottom:10px` dessus, sans `!important`. Trois erreurs d'un coup :
+       (1) les deux boutons sont **deux liens EN LIGNE dans la MÊME enveloppe** ;
+       (2) LearnWorlds pose déjà `margin:20px 0 10px` sur cette enveloppe, donc
+       ma valeur de 10 px n'aurait fait que RÉDUIRE l'espace ; (3) une marge
+       VERTICALE n'a **aucun effet sur un élément en ligne** — le lien mesure
+       219×0, la marge était donc ignorée quand bien même elle aurait gagné.
+       ⇒ La cause réelle : quand le contenu en ligne se replie, rien ne sépare
+       les deux lignes. Mesuré à 390 px avec la vraie feuille LearnWorlds :
+       **écart de 0 px**. Avec `inline-block` + marge basse : **10 px**.
+       🔴 CE QUI M'A FAIT PERDRE DEUX TOURS : j'ai raisonné sur une mesure prise
+       à 1565 px, où les boutons sont côte à côte, pour corriger un défaut qui
+       n'existe QU'EN DESSOUS de 768. Une mesure prise dans le mauvais contexte
+       ne vaut pas mieux qu'une supposition — il fallait cadrer la vraie page à
+       390 px, ce que fait `mobile-390.html`.
+       🔴 `!important` : dans ce projet, une règle qui affronte LearnWorlds sans
+       lui est une règle perdue d'avance. */
+    + "#pageContent .learnworlds-button-wrapper > a{display:inline-block !important;margin-bottom:10px !important;}"
     + "}";
   function poserMobile(){
     var st=document.getElementById("ps-mobile");
@@ -795,7 +800,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-08-e";
+  window.PS_TOKENS_V="2026-08-08-f";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
