@@ -118,7 +118,12 @@
        `visibility` et non `display` : la place reste réservée. Filet de
        sécurité à 2,5s, sinon un titre sans "#" resterait invisible. */
     S+" h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    S+" h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#507EC5) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    S+" h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-h2,var(--ps-accent,#507EC5)) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    /* 🔴 Séparateur ajouté le 07/08 : il n'existait QUE sur la page Cours, alors
+       que le titre en accent, lui, était partout. Demande de Ziad — « sans oublier
+       le petit séparateur qui vient par dessus », sur toutes les pages.
+       Sa couleur suit celle du titre tant que `--ps-h2-sep` n'est pas posée. */
+    S+" h2.learnworlds-subheading::before{content:\"\" !important;display:block !important;width:60px !important;height:4px !important;border-radius:2px !important;background:var(--ps-h2-sep,var(--ps-h2,var(--ps-accent,#507EC5))) !important;margin:0 0 24px 0 !important;}",
     S+" .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
     /* ─── Tuile de progression EN HAUT (portée de course-cards.js) ───
        mountKpi() enveloppe le H1 + la tuile dans `.ps-herotop`. Moyenne de la

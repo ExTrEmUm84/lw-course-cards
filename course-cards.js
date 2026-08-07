@@ -278,7 +278,7 @@
        heroText() pose data-ps-tw dès qu'il voit le titre, même s'il n'y a pas de
        "#" à animer — et un filet de sécurité le révèle après 2,5s au pire. */
     "#pageContent h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#507EC5) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-h2,var(--ps-accent,#507EC5)) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
     /* .learnworlds-main-text existe AUSSI dans chaque carte : on ne stylise que
        la description marquée en JS (cf. heroText), jamais la classe nue.
        padding-right : garde une longueur de ligne lisible (~620px) tout en
@@ -291,7 +291,7 @@
     /* ─── Séparateur entre le titre animé (H1) et le sous-titre (H2) ───
        Petit trait à la couleur d'accent de la page (bleu, jaune, rouge…), via
        ::before pour ne rien ajouter au DOM. Aligné à gauche sur le titre. */
-    "#pageContent h2.learnworlds-subheading::before{content:\"\" !important;display:block !important;width:60px !important;height:4px !important;border-radius:2px !important;background:var(--ps-accent,#507EC5) !important;margin:0 0 24px 0 !important;}",
+    "#pageContent h2.learnworlds-subheading::before{content:\"\" !important;display:block !important;width:60px !important;height:4px !important;border-radius:2px !important;background:var(--ps-h2-sep,var(--ps-h2,var(--ps-accent,#507EC5))) !important;margin:0 0 24px 0 !important;}",
     /* H2 SANS TITRE : LearnWorlds pose quand même un sous-titre vide -> le trait
        séparateur flottait tout seul (signalé par Ziad le 22/07). On masque le
        trait et on écrase toute hauteur/marge du H2 vide. `emptyHeadings()` pose

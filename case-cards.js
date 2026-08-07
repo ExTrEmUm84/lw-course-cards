@@ -122,7 +122,12 @@
        Filet de sécurité à 2,5s plus bas, sinon un titre sans "#" resterait
        invisible pour toujours. */
     "#pageContent h1.learnworlds-heading:not([data-ps-tw]){visibility:hidden !important;}",
-    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-accent,#507EC5) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    "#pageContent h2.learnworlds-subheading{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:34px !important;font-weight:800 !important;letter-spacing:-.02em !important;line-height:1.2 !important;color:var(--ps-h2,var(--ps-accent,#507EC5)) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;}",
+    /* 🔴 Séparateur ajouté le 07/08 : il n'existait QUE sur la page Cours, alors
+       que le titre en accent, lui, était partout. Demande de Ziad — « sans oublier
+       le petit séparateur qui vient par dessus », sur toutes les pages.
+       Sa couleur suit celle du titre tant que `--ps-h2-sep` n'est pas posée. */
+    "#pageContent h2.learnworlds-subheading::before{content:\"\" !important;display:block !important;width:60px !important;height:4px !important;border-radius:2px !important;background:var(--ps-h2-sep,var(--ps-h2,var(--ps-accent,#507EC5))) !important;margin:0 0 24px 0 !important;}",
     /* .learnworlds-main-text existe AUSSI dans chaque carte ET dans le bouton des
        catégories du filtre : on ne stylise que la description marquée en JS
        (cf. heroText), jamais la classe nue. */

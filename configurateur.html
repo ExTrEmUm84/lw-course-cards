@@ -587,6 +587,22 @@ body.ps-verrou .ps-porte{display:grid}
               ton réglage par section reste prioritaire. Ce curseur ne touche que les sections restées au format par défaut.</div>
           </div>
 
+          <!-- 🔴 Carte STATIQUE : l onglet General est bati en HTML, pas par la
+               fonction `grille` des onglets de page. J avais d abord ajoute une
+               carte dynamique -- elle ne s affichait jamais, sans erreur. -->
+          <div class="card">
+            <h4>Titres de section</h4>
+            <p class="expl">Les intertitres des pages (« Tout savoir sur le Conseil en Stratégie »,
+              « Focus sur les autres types de Conseil »…) et le petit trait qui les surmonte, sur les
+              six pages à cartes. <strong>Décochés, ils prennent la couleur de la page</strong> —
+              c'est le comportement actuel.</p>
+            <div class="row"><input type="checkbox" id="ck-h2" style="flex:none"><label for="ck-h2">Couleur propre des titres</label><input type="color" id="col-h2"></div>
+            <div class="lien">↳ décochée, chaque page garde sa teinte</div>
+            <div class="row"><input type="checkbox" id="ck-h2Sep" style="flex:none"><label for="ck-h2Sep">Couleur propre du séparateur</label><input type="color" id="col-h2Sep"></div>
+            <div class="lien">↳ décochée, le trait suit la couleur du titre</div>
+          </div>
+
+
           <!-- 🔴 Le menu est le même sur toutes les pages : sa place est ici, et non
                dans un onglet de page. Ses couleurs se choisissent ENSEMBLE — les
                répartir par page aurait obligé à naviguer pour comparer deux teintes
@@ -1233,6 +1249,9 @@ body.ps-verrou .ps-porte{display:grid}
        de cartes, pour que poser le jeton ne change rien tant que Ziad n'y touche pas. */
     mobPad:40, mobH1:36,
     anAvatar:56, anCol:260, pfRing:64, pfBar:8, anBtn:"", pfBtn:"",
+    /* Titres de section + leur separateur. VIDE = suit la couleur de la page,
+       comportement actuel : ne rien regler ne change donc rien. */
+    h2:"", h2Sep:"",
     /* Niveau 1 et champ 1 SUIVENT la marque (cases cochées) : ces deux valeurs ne
        servent que si Ziad décoche le lien. Elles doivent donc valoir ce que le
        lien produirait, sinon décocher changerait la couleur sans qu'il l'ait
@@ -2206,6 +2225,8 @@ body.ps-verrou .ps-porte{display:grid}
     R.setProperty("--ps-pf-bar",S.pfBar+"px");
     if(S.pfBtn) R.setProperty("--ps-pf-btn",S.pfBtn); else R.removeProperty("--ps-pf-btn");
     if(S.anBtn) R.setProperty("--ps-an-btn",S.anBtn); else R.removeProperty("--ps-an-btn");
+    if(S.h2)    R.setProperty("--ps-h2",S.h2);        else R.removeProperty("--ps-h2");
+    if(S.h2Sep) R.setProperty("--ps-h2-sep",S.h2Sep); else R.removeProperty("--ps-h2-sep");
     R.setProperty("--ps-font",S.font);
     R.setProperty("--ps-r-card",S.rCard+"px");
     R.setProperty("--ps-r-pill",S.rPill+"px");
@@ -2253,6 +2274,11 @@ body.ps-verrou .ps-porte{display:grid}
        figerait cet heritage et casserait la source unique. */
     if(S.pfBtn) L.push(["--ps-pf-btn",S.pfBtn]);
     if(S.anBtn) L.push(["--ps-an-btn",S.anBtn]);
+    /* 🔴 Emis SEULEMENT si Ziad a coche. Ecrire une valeur par defaut figerait
+       la couleur des titres et supprimerait l accent PAR PAGE -- exactement le
+       piege evite pour --ps-pf-btn et --ps-an-btn. */
+    if(S.h2)    L.push(["--ps-h2",S.h2]);
+    if(S.h2Sep) L.push(["--ps-h2-sep",S.h2Sep]);
     L.push(["--ps-font",S.font]);
     L.push(["--ps-r-card",S.rCard+"px"]);
     L.push(["--ps-r-pill",S.rPill+"px"]);
@@ -2304,6 +2330,17 @@ body.ps-verrou .ps-porte{display:grid}
   document.getElementById("deriv").onchange=function(){
     S.deriv=this.checked; if(S.deriv){ deduire(); rendre(); }
   };
+
+  /* Deux couleurs FACULTATIVES : vide = la page reprend la main. Meme semantique
+     que `anBtn` / `pfBtn`, et meme raison -- ecrire une valeur par defaut
+     figerait la couleur et supprimerait l accent par page. */
+  [["h2","ck-h2","col-h2"],["h2Sep","ck-h2Sep","col-h2Sep"]].forEach(function(t){
+    var cle=t[0], ck=document.getElementById(t[1]), c=document.getElementById(t[2]);
+    if(!ck||!c) return;
+    ck.checked=!!S[cle]; c.value=S[cle]||S.accent; c.disabled=!S[cle];
+    ck.onchange=function(){ S[cle]= ck.checked ? (c.value||S.accent) : ""; c.disabled=!ck.checked; rendre(); sortie(); };
+    c.oninput=function(){ if(ck.checked){ S[cle]=c.value; rendre(); sortie(); } };
+  });
   ["rCard","rPill","rBtn","mobPad","mobH1"].forEach(function(k){
     var el=document.getElementById(k); el.value=S[k];
     el.oninput=function(){ S[k]=+el.value; rendre(); };
@@ -2640,6 +2677,8 @@ body.ps-verrou .ps-porte{display:grid}
           else if(nom==="--ps-pf-bar")    S.pfBar=parseInt(val,10);
           else if(nom==="--ps-pf-btn")    S.pfBtn=val;
           else if(nom==="--ps-an-btn")    S.anBtn=val;
+          else if(nom==="--ps-h2")        S.h2=val;
+          else if(nom==="--ps-h2-sep")    S.h2Sep=val;
           else { var p=nom.match(/^--ps-(lvl|f)([1-6])(-tint)?$/);
                  if(p && val.indexOf("var(")<0) S[p[1]==="lvl"?"lvl":"f"][+p[2]-1][p[3]?1:0]=val; }
         });
