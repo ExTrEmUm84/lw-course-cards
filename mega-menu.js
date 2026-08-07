@@ -254,10 +254,27 @@
     "[data-ps-lang]{opacity:1 !important;transition:opacity .15s ease !important;}",
     "[data-ps-lang].ps-lang-off{opacity:.45 !important;}",
     "[data-ps-lang].ps-lang-off:hover{opacity:.85 !important;}",
-    "[data-ps-lang] img{transition:box-shadow .15s ease !important;border-radius:2px !important;}",
-    /* 2 px sous l'image, avec 3 px de respiration : assez pour se voir, assez
-       près pour appartenir au drapeau. */
-    "[data-ps-lang].ps-lang-on img{box-shadow:0 5px 0 -3px var(--ps-accent,#507EC5) !important;}",
+    "[data-ps-lang] img{transition:border-color .15s ease !important;border-radius:2px !important;}",
+    /* 🔴🔴 LE TRAIT ÉTAIT COLLÉ AU DRAPEAU (08/08, signalé par Ziad sur son
+       iPhone). L'ancienne version — `box-shadow:0 5px 0 -3px` — annonçait
+       « 3 px de respiration » dans son commentaire ; sa géométrie réelle en
+       donnait **zéro** : pour une image de 16 px, l'ombre s'étendait de 16 à
+       18 px, soit une bande qui commence exactement au bord bas.
+       🔴 Et ces valeurs ne valaient QUE pour 16 px : une ombre décalée dépend
+       de la hauteur de l'élément, si bien qu'un drapeau d'une autre taille
+       aurait donné un tout autre écart. Le tiroir mobile n'était pas mesurable
+       à la largeur où je travaillais — j'aurais réglé à l'aveugle.
+       ✅ `padding` + `border` sur l'image : l'écart et l'épaisseur sont dits
+       en clair et ne dépendent plus d'aucune hauteur. Mesuré : la largeur est
+       imposée (26 px) mais la HAUTEUR est libre, donc le rembourrage grandit
+       la boîte au lieu de rogner l'image — ce qu'un `box-sizing:border-box`
+       aurait fait sur une hauteur fixée.
+       🔴 `margin-bottom` négatif : la boîte ne grandit pas, donc la barre de
+       navigation ne bouge pas d'un pixel au changement de langue. C'était la
+       raison d'être du `box-shadow` d'origine, elle reste satisfaite. */
+    "[data-ps-lang].ps-lang-on img{padding-bottom:4px !important;"+
+      "border-bottom:2px solid var(--ps-accent,#507EC5) !important;"+
+      "margin-bottom:-6px !important;box-shadow:none !important;}",
     "[data-ps-lang]:focus-visible{outline:2px solid var(--ps-accent,#507EC5) !important;outline-offset:2px !important;}",
 
     /* ---------- menu centré, drapeaux inchangés ----------
