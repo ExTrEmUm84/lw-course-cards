@@ -194,7 +194,30 @@
   /* ================================================================
      2) Ouverture/fermeture du sommaire au chargement (repris de Ziad)
      ================================================================ */
+  /* 🔴🔴 UNE BASCULE SUPPOSE L'ÉTAT DE DÉPART (08/08, Ziad : « sur mobile le
+     cours s'ouvre avec le menu ouvert, ça cache le cours »).
+     L'ancienne version cliquait `.js-showhide-btn` À L'AVEUGLE au chargement.
+     Sur grand écran LearnWorlds ouvre le lecteur sommaire FERMÉ, donc ce clic
+     l'ouvrait — l'effet voulu. Sur téléphone le sommaire occupe TOUT l'écran :
+     le même clic recouvre la leçon qu'on vient d'ouvrir.
+     ⇒ **On ne touche à rien sur téléphone.** Un sommaire plein écran n'est pas
+     un panneau latéral : l'ouvrir au chargement, c'est masquer ce qu'on vient
+     d'ouvrir.
+     🔴🔴 ET ON S'ARRÊTE LÀ, DÉLIBÉRÉMENT. Ma première correction remplaçait
+     aussi la bascule par « je pose un état » (cliquer seulement si fermé) — plus
+     propre en théorie. Mesuré sur le vrai lecteur en grand écran : le panneau
+     reste **fermé** (`left: -27%`) pendant les 5 s qui suivent le chargement,
+     code actuel en place. Impossible d'en déduire si LearnWorlds l'ouvre et que
+     notre clic le ferme, ou s'il était déjà fermé. Dans les deux lectures, la
+     version « conditionnelle » **inverserait le comportement du bureau** — un
+     changement que Ziad n'a pas demandé, sur la foi d'une mesure ambiguë.
+     ⇒ On corrige le défaut signalé, rien de plus. La bascule aveugle du bureau
+     reste à revoir le jour où on saura ce que LearnWorlds fait par défaut. */
   (function () {
+    function surTelephone(){
+      try { return window.matchMedia("(max-width:768px)").matches; } catch (e) { return false; }
+    }
+    if (surTelephone()) return;
     var iv = setInterval(function () {
       var btn = document.querySelector(".js-showhide-btn");
       if (btn) { btn.click(); clearInterval(iv); }
