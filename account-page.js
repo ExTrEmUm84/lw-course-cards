@@ -191,7 +191,25 @@
        trop pour son contenu ; sur fond blanc, la bordure suffit à séparer. */
     B+"section.account-section{background:#fff !important;border:1px solid var(--ps-border,#E6E9EF) !important;border-radius:var(--ps-r-card,16px) !important;padding:22px 24px !important;margin:0 0 12px !important;box-shadow:none !important;transition:box-shadow .2s ease !important;}",
     B+"section.account-section:hover{box-shadow:0 6px 20px rgba(15,23,42,.05) !important;}",
-    B+".account-section-header{display:flex !important;align-items:center !important;justify-content:space-between !important;gap:16px !important;margin-bottom:18px !important;}",
+    /* 🔴🔴 `flex-wrap` MANQUAIT (08/08, capture de Ziad sur iPhone : « sur
+       mobile cette page est cassée »). Un `space-between` sans repli ne fait pas
+       tenir ses enfants : il les laisse SORTIR. Mesuré dans un cadre de 390 px —
+       document 398 px, donc défilement horizontal, et les deux boutons de la
+       fiche hors de l'écran.
+       🔴 Le repli ne coûte rien sur grand écran : tant que tout tient, il ne se
+       déclenche jamais. Ce n'est pas un correctif mobile, c'est la règle qui
+       manquait. */
+    B+".account-section-header{display:flex !important;align-items:center !important;justify-content:space-between !important;flex-wrap:wrap !important;gap:16px !important;margin-bottom:18px !important;}",
+    /* Sous 600 px, les actions prennent leur propre ligne et se partagent la
+       largeur : deux boutons côte à côte s'ils tiennent, empilés sinon.
+       🔴 `min-width:0` : sans lui un bouton refuse de descendre sous la largeur
+       de son texte et re-déborde — c'est le défaut qu'on vient de corriger, par
+       un autre chemin. */
+    "@media(max-width:600px){"+
+      B+".ps-carte-fiche .ps-fiche-actions{width:100% !important;}"+
+      B+".ps-carte-fiche .ps-fiche-actions button{flex:1 1 140px !important;min-width:0 !important;}"+
+      B+".ps-carte-fiche .ps-fiche-t{min-width:0 !important;}"+
+    "}",
     B+".account-section-title{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:21px !important;font-weight:800 !important;letter-spacing:-.015em !important;color:#243B6B !important;}",
     /* petite icône du titre de section : en accent, un peu plus grande */
     B+".account-section-title-icon{color:var(--ps-accent,#507EC5) !important;width:22px !important;height:22px !important;margin-right:9px !important;vertical-align:-3px !important;}",
