@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-j";
+  window.PS_TOKENS_V="2026-08-07-k";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4038,7 +4038,7 @@
   }
 
   /* ── Le formulaire lui-même ─────────────────────────────────────────────── */
-  function ficheOuvrir(u){
+  function ficheOuvrir(u, revision){
     ficheCSS();
     var rep={}, i=0, NOYAU=5, noyauMontre=false, noyauEnvoye=false;
     /* 🔴🔴 NE PAS REDEMANDER CE QU'ON SAIT DÉJÀ (07/08, signalé par Ziad :
@@ -4067,6 +4067,21 @@
     function dejaConnu(e){ return !!e && e.cle!=="cf_annuaire" && rempli(connus[e.cle]); }
     function sauterConnus(){
       while(i<FICHE_ECRANS.length && dejaConnu(FICHE_ECRANS[i])) i++;
+      /* 🔴🔴 GÉRER UNE FICHE N'EST PAS LA CRÉER (07/08, Ziad : « pourquoi
+         m'obliger à remplir encore à chaque fois que je change masqué à
+         visible ? quand je clique sur apparaître, il devrait me proposer de
+         modifier le reste si j'ai envie, ou de juste fermer »).
+         Il a raison : le noyau existe pour amener une fiche NEUVE jusqu'à la
+         publication. Quelqu'un qui rebascule sa visibilité a déjà une fiche —
+         lui refaire traverser le questionnaire, c'est le punir d'un clic.
+         ⇒ Ouverture depuis `/account` (`revision`) ET fiche déjà constituée :
+         on répond à l'opt-in, puis on saute droit au récapitulatif, qui offre
+         « C'est bon pour moi » ou « Compléter ».
+         🔴 La condition porte sur l'ÉCOLE, pas sur l'opt-in : c'est le premier
+         champ du noyau après lui, donc le signe qu'une fiche existe. Sans ce
+         garde, un membre sans aucune fiche qui cliquerait « modifier »
+         atterrirait sur un récapitulatif vide. */
+      if(revision && i>0 && i<NOYAU && rempli(connus.cf_ecole)) i=NOYAU;
     }
     sauterConnus();
     var hote=document.createElement("div"); hote.id="ps-fiche";
@@ -4394,7 +4409,9 @@
     if(!u) return false;
     if(document.getElementById("ps-fiche")) return true;
     if(!force && !fichePeutSAfficher()) return false;
-    ficheOuvrir(u);
+    /* `force` = ouverture DEMANDÉE (bouton « modifier » de /account, annuaire) :
+       c'est une révision, pas une première saisie. */
+    ficheOuvrir(u, !!force);
     return true;
   };
 
