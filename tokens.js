@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-h";
+  window.PS_TOKENS_V="2026-08-07-i";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4040,7 +4040,19 @@
        `/profile`, mais les TAGS le sont partout et disent si un champ est
        rempli — c'est tout ce qu'il faut ici. */
     var connus=ficheChamps(u);
-    function dejaConnu(e){ return !!e && rempli(connus[e.cle]); }
+    /* 🔴🔴 L'OPT-IN N'EST JAMAIS SAUTÉ (07/08, signalé par Ziad dans l'heure).
+       Ma première version sautait TOUT champ déjà rempli — y compris
+       `cf_annuaire`. Or c'est précisément celui qu'on vient changer en cliquant
+       « modifier » depuis `/account` : la popup sautait à la bio, et il
+       devenait IMPOSSIBLE de se désinscrire de l'annuaire.
+       ⇒ « Déjà connu » vaut pour ce qu'on ne veut pas RESAISIR, jamais pour ce
+       qu'on vient RÉVISER. La seule question dont la réponse est le but même de
+       l'ouverture doit toujours être posée.
+       🔴 Et on ne pré-remplit PAS `rep.cf_annuaire` pour autant : `rendre()`
+       teste `rep.cf_annuaire===OPTIN_NON` avant tout le reste, donc un membre
+       actuellement désinscrit tomberait droit sur l'écran « C'est noté » sans
+       pouvoir se réinscrire — le même piège, dans l'autre sens. */
+    function dejaConnu(e){ return !!e && e.cle!=="cf_annuaire" && rempli(connus[e.cle]); }
     function sauterConnus(){
       while(i<FICHE_ECRANS.length && dejaConnu(FICHE_ECRANS[i])) i++;
     }
