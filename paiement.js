@@ -30,7 +30,7 @@
 (function () {
   "use strict";
 
-  window.PS_PAIEMENT_V = "2026-08-08-b";
+  window.PS_PAIEMENT_V = "2026-08-05-c";
 
   /* 🔴 Le test porte sur le CHEMIN et pas sur `body.slug-…` : cette page est
      servie par LearnWorlds, pas construite dans le Site Builder, et elle ne
@@ -321,13 +321,6 @@
      ══════════════════════════════════════════════════════════════════════════ */
   function reveiller(el) {
     if (!el || el.dataset.psReveille) return false;
-    /* 🔴🔴 CORRECTION DU 08/08 (voir le bloc « LE FANTÔME » plus bas) : un mot
-       de passe que PERSONNE N'A TAPÉ n'est pas un champ à valider, c'est une
-       valeur que Chrome a versée tout seul et qui va être effacée. Le
-       réveiller apprendrait à LearnWorlds à l'accepter — c'est exactement
-       l'erreur commise ici le 08/08 au matin, quand on a pris le fantôme pour
-       « un mot de passe bien là que LearnWorlds refuse ». */
-    if (estMdpChoisi(el) && !el.dataset.psFrappe) return false;
     /* On ne touche qu'à un champ qui a DÉJÀ quelque chose : réveiller un champ
        vide ferait apparaître l'erreur « requis » avant même que la personne
        ait commencé à écrire. */
@@ -356,147 +349,7 @@
     }, true);
   }
 
-  /* ══════════════════════════════════════════════════════════════════════════
-     LE FANTÔME : CHROME ÉCRIT UN MOT DE PASSE QUE PERSONNE N'A CHOISI (08/08)
-     --------------------------------------------------------------------------
-     Signalé par Ziad : « quand je clique sur le prénom, le mot de passe se
-     remplit tout seul ». Mesuré en direct sur la vraie page, horodaté :
-
-       47731 ms   #signin-email     rempli   [isTrusted]
-       47732 ms   #signin-password  rempli   [isTrusted]
-       47734 ms   mot de passe VISIBLE rempli (15 car.)
-       47742 ms   focusin sur first_name          ← 8 ms PLUS TARD
-
-     Le remplissage PRÉCÈDE le focus. Ce n'est donc pas le champ Prénom qui
-     réagit : c'est **Chrome qui, au moment du clic, verse le mot de passe
-     enregistré pour l'origine dans tout ce qui ressemble à un champ de mot de
-     passe** — les formulaires cachés de LearnWorlds ET celui, visible, de
-     l'inscription. Les évènements portent `isTrusted:true` : ils viennent du
-     NAVIGATEUR, aucun script de la page n'écrit ces valeurs.
-
-     🔴 CE QUE ÇA DONNE À L'ÉCRAN : e-mail VIDE, mot de passe PLEIN — l'inverse
-     exact de ce que montre un formulaire de création de compte. Et l'acheteur
-     repartirait avec un compte dont le mot de passe est celui d'un AUTRE
-     compte, qu'il n'a jamais choisi ici.
-     🔴 Ne sont touchés que ceux qui ont DÉJÀ un mot de passe enregistré pour
-     `elearning.prepastrat.com`. Un prospect neuf ne voit rien — d'où le temps
-     qu'il a fallu pour que ça se voie.
-
-     PISTES ESSAYÉES ET ÉCARTÉES, chacune mesurée, aucune supposée :
-     - **Réparer `autocomplete`.** LearnWorlds écrit `new-first_name` /
-       `new-last_name`, des jetons qui N'EXISTENT PAS dans la norme (les vrais
-       sont `given-name` / `family-name`). Corrigés en direct : Chrome a rempli
-       quand même, et plus largement qu'avant. Sans effet.
-     - **`readonly` levé au clic.** Efficace, et prouvé plutôt que supposé :
-       pendant que le champ était verrouillé, Chrome a rempli le formulaire
-       CACHÉ et pas celui-ci — donc son autoremplissage tournait toujours.
-       Écarté quand même : **un champ en lecture seule n'ouvre pas le clavier
-       sur téléphone**. On ne répare pas une gêne de bureau par une panne
-       mobile.
-     - **`:-webkit-autofill`** (le signal utilisé plus haut pour `reveiller`) :
-       mesuré ABSENT sur ce champ précis, alors qu'il est bien présent sur les
-       champs cachés. Le détecteur qui existe déjà ne pouvait donc pas servir.
-
-     ⇒ RETENU : laisser le champ parfaitement normal — même `type`, saisissable,
-     clavier mobile intact — et EFFACER ce qui y arrive sans frappe humaine.
-     ══════════════════════════════════════════════════════════════════════════ */
-
-  var MAX_EFFACEMENTS = 6;
-
-  /* Mesuré sur la page : le SEUL `password` de `.payment-section` est celui de
-     l'inscription ; le champ de CONNEXION (`#signin-password`,
-     `current-password`) vit HORS de la section. On exige quand même
-     `new-password` : si LearnWorlds glissait un jour une connexion ici,
-     l'autoremplissage y serait LÉGITIME et ce code doit le laisser passer. */
-  function champMdpChoisi() {
-    return document.querySelector(
-      ".payment-section input[type='password'][autocomplete='new-password']");
-  }
-
-  function estMdpChoisi(el) {
-    return !!el && el.tagName === "INPUT" && el.type === "password" &&
-      el.getAttribute("autocomplete") === "new-password" &&
-      !!el.closest && !!el.closest(".payment-section");
-  }
-
-  function marquerFrappe(e) {
-    var el = e.target;
-    if (!estMdpChoisi(el) || el.dataset.psFrappe) return;
-    /* Un déplacement au clavier n'est pas une saisie : compter Tab ouvrirait la
-       porte au fantôme pour qui traverse le formulaire sans rien écrire. */
-    if (e.type === "keydown" &&
-        /^(Tab|Escape|Shift|Control|Alt|Meta|CapsLock)$/.test(e.key || "")) return;
-    el.dataset.psFrappe = "1";
-  }
-
-  function effacerFantome(el) {
-    if (!estMdpChoisi(el) || el.dataset.psFrappe || !el.value) return false;
-    var n = +(el.dataset.psEfface || 0);
-    /* Garde-fou : si le navigateur reremplit sans cesse, on s'arrête. Un champ
-       qui clignote sous les doigts est pire que le défaut qu'on corrige. */
-    if (n >= MAX_EFFACEMENTS) return false;
-    el.dataset.psEfface = n + 1;
-    el.value = "";
-    /* 🔴 ON N'ÉMET RIEN. Émettre `input` sur un champ redevenu vide ferait
-       surgir « Ce champ est requis » avant que la personne ait écrit un seul
-       caractère — la raison même pour laquelle `reveiller()` refuse les champs
-       vides quelques lignes plus haut. */
-    return true;
-  }
-
-  if (!window.__psFantomeLie) {
-    window.__psFantomeLie = 1;
-
-    ["keydown", "paste", "contextmenu", "drop"].forEach(function (t) {
-      document.addEventListener(t, marquerFrappe, true);
-    });
-
-    /* 1er chemin — l'évènement du navigateur, intercepté EN CAPTURE et coupé.
-       LearnWorlds ne doit pas le voir passer : sinon son aide « le mot de passe
-       doit contenir… » se déploie sur un simple clic dans Prénom, ce que Ziad a
-       signalé pendant la mise au point. */
-    ["beforeinput", "input", "change"].forEach(function (t) {
-      document.addEventListener(t, function (e) {
-        if (!e.isTrusted || !estMdpChoisi(e.target)) return;
-        if (effacerFantome(e.target)) e.stopImmediatePropagation();
-      }, true);
-    });
-
-    /* 2e chemin — LE REMPLISSAGE SILENCIEUX, et c'est lui qui compte. Mesuré :
-       Chrome remplit parfois ce champ SANS émettre le moindre évènement, et
-       c'est ce chemin-là qui a tout attrapé lors de la vérification finale.
-       Sans lui, le correctif ne tiendrait que par chance.
-       Déclencheur : le focus d'un champ de la section — le seul geste qui ait
-       jamais provoqué le remplissage. Rafale BORNÉE (~450 ms) plutôt qu'un
-       observateur permanent : sur un écran de paiement, chaque frame compte. */
-    document.addEventListener("focusin", function (e) {
-      var t = e.target;
-      if (!t || !t.closest || !t.closest(".payment-section")) return;
-      var fin = Date.now() + 450;
-      (function encore() {
-        effacerFantome(champMdpChoisi());
-        if (Date.now() < fin) requestAnimationFrame(encore);
-      })();
-    }, true);
-
-    /* 3e chemin — l'animation `ps-autofill` déclarée en haut de ce fichier.
-       Mesurée ABSENTE sur ce champ (présente sur les champs cachés) : on la
-       branche quand même, elle ne coûte rien et couvrira les versions de Chrome
-       où elle apparaît. */
-    document.addEventListener("animationstart", function (e) {
-      if (e.animationName === "ps-autofill") effacerFantome(e.target);
-    }, true);
-  }
-
-  function passer() {
-    poser(); traduire(); degrouperPrix();
-    /* 🔴 L'ORDRE COMPTE : on chasse le fantôme AVANT de réveiller les champs,
-       sinon `reveillerAutoremplissage()` validerait la valeur qu'on s'apprête
-       à effacer. (`reveiller()` porte aussi son propre garde — deux verrous
-       valent mieux qu'un sur un écran de paiement.) */
-    effacerFantome(champMdpChoisi());
-    reveillerAutoremplissage();
-  }
+  function passer() { poser(); traduire(); degrouperPrix(); reveillerAutoremplissage(); }
 
   passer();
   if (document.readyState === "loading") {
