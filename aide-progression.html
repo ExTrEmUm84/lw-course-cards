@@ -38,9 +38,14 @@
 
   🔴 ÉTAT DES LIEUX MESURÉ LE 07/08/2026 dans le code du site (course-cards.js,
   case-cards.js, sector-cards.js, cabinet-cards.js, program-cards.js,
-  tokens.js, profile-page.js). La section 1 cite trois nombres divergents sur
-  /profile : ce n'est pas une hypothèse, c'est ce que produisent trois
-  fonctions différentes lues ce jour-là.
+  tokens.js, profile-page.js). La section 1 cite deux nombres divergents : ce
+  n'est pas une hypothèse, c'est ce que produisent deux fonctions différentes
+  lues ce jour-là.
+  🔴 IL Y EN AVAIT TROIS. La stat de l'en-tête du profil (moyenne des parcours
+  LearnWorlds) a été retirée le 07/08, et la page n'en parle PLUS DU TOUT —
+  demande de Ziad : un document de décision expose ce qu'il reste à trancher,
+  pas ce qui l'a déjà été. Raconter la correction, c'était garder à l'écran un
+  chiffre que plus personne ne voit et rallonger la lecture d'un tiers.
   ============================================================
 -->
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -142,8 +147,15 @@ figure .bar span{margin-left:8px;font-size:11.5px;font-weight:700;letter-spacing
 figure .shot{padding:22px;overflow-x:auto;background:var(--ps-surface-soft)}
 figcaption{padding:11px 18px;font-size:13px;color:#8d95a6;background:#FAFBFD;border-top:1px solid var(--ps-border);font-style:italic}
 
-/* --- reconstitution : les trois endroits où le chiffre apparaît --- */
-.tri{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;min-width:640px}
+/* --- reconstitution : les endroits où le chiffre apparaît ---
+   🔴 `auto-fit` et non `repeat(3,…)` : la reconstitution comptait trois cartes,
+   elle n'en compte plus que deux depuis le retrait de la stat d'en-tête. Une
+   grille figée à trois colonnes aurait laissé une colonne vide à droite — un
+   trou que le lecteur interprète comme un bug d'affichage. */
+/* 🔴 240 et non 260 : deux colonnes de 260 plus l'écart de 14 font 534, donc
+   au-dessus du `min-width` — `auto-fit` retombait alors à UNE colonne. Un
+   minimum de piste doit toujours être calculé écart compris. */
+.tri{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:14px;min-width:520px}
 .tri .z{background:#fff;border:1px solid var(--ps-border);border-radius:var(--ps-r-card);padding:16px}
 .tri .z .ou{font-size:10px;font-weight:800;letter-spacing:.09em;text-transform:uppercase;color:var(--ps-accent);margin-bottom:10px}
 .tri .z .big{font-size:34px;font-weight:800;color:var(--ps-navy);line-height:1;font-variant-numeric:tabular-nums}
@@ -307,15 +319,15 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
-        <p>Le mot « progression » apparaît à <strong>trois endroits</strong> du site, et ces trois
-        endroits ne calculent pas la même chose. Sur la page Profil, deux d'entre eux sont visibles
-        <strong>en même temps, à quelques centimètres l'un de l'autre</strong>.</p>
+        <p>Le mot « progression » apparaît à <strong>deux endroits</strong> du site, et ces deux
+        endroits ne calculent pas la même chose&nbsp;: l'un parle d'<strong>une page</strong>,
+        l'autre de <strong>tout le site</strong>. Rien ne le dit à l'étudiant.</p>
 
         <p>Les chiffres ci-dessous sont ceux de <strong>Camille</strong>, l'étudiante fictive du
         simulateur (section&nbsp;7), avec les règles en vigueur aujourd'hui.</p>
 
         <figure>
-          <div class="bar"><i></i><i></i><i></i><span>Reconstitution · les trois chiffres</span></div>
+          <div class="bar"><i></i><i></i><i></i><span>Reconstitution · les deux chiffres</span></div>
           <div class="shot">
             <div class="tri">
               <div class="z">
@@ -331,31 +343,18 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
                 <div class="rule">Moyenne des <strong>6 pages</strong> du site. Une page jamais
                 visitée y entre pour 0.</div>
               </div>
-              <div class="z bad" style="opacity:.62">
-                <div class="ou">Profil · en-tête <span class="pill no" style="font-size:10px;padding:2px 8px">retiré</span></div>
-                <div class="big" style="text-decoration:line-through;text-decoration-thickness:3px;text-decoration-color:#d98b7a">33 %</div>
-                <div class="lb">progression</div>
-                <div class="rule">Moyenne des <strong>parcours LearnWorlds</strong> — ni le même
-                ensemble, ni la même moyenne. <strong>Supprimé le 07/08&nbsp;:</strong> deux chiffres
-                globaux sur un même écran, c'est un de trop.</div>
-              </div>
             </div>
           </div>
-          <figcaption>Reconstitution dessinée à la main. Les deux premiers chiffres sont ceux que le
-          simulateur recalcule ; le troisième porte sur les parcours LearnWorlds, un ensemble qui ne
-          se superpose pas aux pages du site — sa valeur est ici une illustration. Les écarts, eux,
-          sont réels : ces trois nombres sortent de trois fonctions différentes du site.</figcaption>
+          <figcaption>Reconstitution dessinée à la main. Les deux chiffres sont ceux que le
+          simulateur recalcule ; les écarts entre eux sont réels : ils sortent de deux fonctions
+          différentes du site.</figcaption>
         </figure>
 
-        <div class="box no"><strong>Le problème n'est pas qu'un chiffre soit faux — c'est qu'il y en
-        a trois.</strong> Un étudiant qui lit « 33&nbsp;% » en haut de son profil et
-        « 20&nbsp;% — Consultant » juste en dessous ne comprend ni l'un ni l'autre, et n'a aucune
-        raison de faire confiance au troisième sur la page Cours.</div>
-
-        <div class="box ok"><strong>Un des trois est déjà réglé.</strong> La stat de l'en-tête du
-        profil a été retirée le 7&nbsp;août. Il ne reste que deux chiffres&nbsp;: celui d'une page,
-        et le chiffre global du bandeau de grade. C'est la bonne structure — reste à décider
-        <em>comment</em> chacun se calcule.</div>
+        <div class="box no"><strong>Le problème n'est pas qu'un chiffre soit faux — c'est qu'ils ne
+        répondent pas à la même question.</strong> « 41&nbsp;% » parle des six cours affichés sur
+        une page. « 20&nbsp;% » parle des six pages du site, celles jamais visitées comptant pour 0.
+        Les deux sont exacts, aucun n'est comparable à l'autre, et rien à l'écran ne prévient
+        l'étudiant qu'il lit deux mesures différentes.</div>
 
         <p>Il faut donc <strong>une seule définition</strong>, déclinée en deux vues&nbsp;: un
         pourcentage <em>par page</em> (les tuiles) et un chiffre <em>global</em> (le grade).
