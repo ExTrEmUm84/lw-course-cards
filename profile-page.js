@@ -1232,7 +1232,22 @@
     if(!progs.length) return;                       // rien à peindre : on réessaiera
     /* 🔴 La signature porte AUSSI la page : sans ça, un programme qui change de
        section (1 ligne dans PROG_PAGES) ne repeindrait pas le tableau. */
-    var sig=lpEtat+"~"+progs.map(function(p){return progPage(p.id,p.name,p.raw,p.page).url+">"+p.name+"="+p.pct;}).join("|");
+    /* 🔴🔴 LA SIGNATURE PORTE CE QUI EST VISIBLE, PAS L'ÉTAT INTERNE (08/08).
+       Elle contenait `lpEtat`. Conséquence : le passage de « attente » à « ok »
+       reconstruisait TOUT le board **même quand rien ne changeait à l'écran** —
+       mêmes programmes, mêmes pourcentages, même bandeau.
+       C'est resté invisible tant que `/lp` mettait 8 à 36 secondes : la seconde
+       peinture arrivait si tard qu'elle passait pour la fin d'un chargement.
+       Depuis que le Worker répond en ~200 ms (un seul appel au lieu de
+       cinquante), les deux peintures s'enchaînent en moins d'une seconde et
+       Ziad l'a vu comme un CLIGNOTEMENT du résumé. Le défaut ne venait pas de
+       l'accélération : elle l'a seulement rendu visible.
+       ⇒ On remplace `lpEtat` par le TYPE DE BANDEAU réellement affiché, qui est
+       la seule chose que l'état change à l'écran (`buildRank(progs)` rend null
+       quand le % global est inconnu, et c'est alors `buildAttente()` qui passe).
+       Chiffres identiques ⇒ signature identique ⇒ **aucune repeinture**. */
+    var typeBandeau = (pctGlobal(progs)!==null) ? "grade" : (lpEtat==="echec" ? "ko" : "attente");
+    var sig=typeBandeau+"~"+progs.map(function(p){return progPage(p.id,p.name,p.raw,p.page).url+">"+p.name+"="+p.pct;}).join("|");
     var board=grandpa.querySelector(".ps-pf-board");
     if(board && board.dataset.sig===sig){ grandpa.classList.add("ps-has-board"); return; }
     if(!board){ board=document.createElement("div"); board.className="ps-pf-board"; grandpa.insertBefore(board,grandpa.firstChild); }
