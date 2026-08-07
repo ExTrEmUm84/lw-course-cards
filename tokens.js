@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-a";
+  window.PS_TOKENS_V="2026-08-07-c";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4501,8 +4501,24 @@
   function slugDe(chemin){
     return String(chemin||"").replace(/^\/+|\/+$/g,"").split("?")[0];
   }
+  /* 🔴 LES FICHES DE COURS AUSSI (07/08). Mesuré : `/course/niveau-1` répond
+     **200 à un anonyme**, titre en clair dans la balise `<title>`. Fermer les
+     6 pages catalogue ne fermait donc rien — les 61 fiches restaient ouvertes
+     une par une, et elles sont liées depuis le catalogue, donc énumérables.
+     ⚠️ Ceci ne vaut QUE pour un membre connecté sans accès : ce qui est dans le
+     HTML servi par LearnWorlds n'est pas masquable en JavaScript. Le cas
+     anonyme se règle dans les réglages LearnWorlds, pas ici.
+     🟢 Le webinar gratuit est ÉPARGNÉ : c'est le seul cours en accès libre,
+     c'est l'appât, et son entrée de menu a été gardée cliquable exprès. Sa clé
+     est celle de `MENU_COULEURS` — une seule source pour les deux. */
+  var COURS_LIBRES=["course/supports-webinar"];
+  function estFicheCours(chemin){
+    var s=slugDe(chemin);
+    if(s.indexOf("course/")!==0) return false;
+    return COURS_LIBRES.indexOf(s)<0;
+  }
   function estPageCours(chemin){
-    return PAGES_COURS.indexOf(slugDe(chemin))>=0;
+    return PAGES_COURS.indexOf(slugDe(chemin))>=0 || estFicheCours(chemin);
   }
   /* Où l'on renvoie, selon l'état — la MÊME machine que ci-dessus.
      🔴 L'étudiant d'école ne voit JAMAIS les offres : son école a payé, on
@@ -4558,9 +4574,81 @@
      une source de vérité — et j'avais justement laissé un `return` devant lui
      pendant dix minutes. Ce qui survit, c'est la machine à états
      (`etatBlocage`), qui n'a jamais été en cause : seule la RÉACTION change. */
+  /* ════════════════════════════════════════════════════════════════════════
+     LA VITRINE FERMÉE — ce qu'un PROSPECT voit à la place des cartes
+     ------------------------------------------------------------------------
+     07/08 : les 55 cours sont passés en « Privé » pour que les concurrents ne
+     lisent plus la collection. Effet secondaire mesuré aussitôt : les sections
+     de cartes tombent à zéro et LearnWorlds y affiche SON message d'attente —
+     « Le propriétaire de l'école travaille dur pour préparer les cours pour
+     vous. »
+     🔴 Pour un prospect, ça ne dit pas « réservé aux membres », ça dit
+     « cette école est VIDE, elle n'est pas prête ». On a fermé la vitrine et
+     mis une pancarte « travaux en cours » à la place, sur six pages. C'est pire
+     que de ne rien afficher.
+
+     🔴 ON DÉTECTE L'ABSENCE DE CARTES, PAS LE TEXTE. Se fier à « travaille
+     dur » serait se fier à une chaîne que Weglot traduit et que LearnWorlds
+     peut réécrire ; le jour où elle change, le message disparaîtrait sans que
+     personne ne le voie. Zéro carte, c'est un fait, dans toutes les langues.
+
+     🔴 ON ATTEND QUE LEARNWORLDS AIT FINI. Une grille vide au premier rendu ne
+     veut pas dire « vide », elle veut dire « pas encore peinte » — le même
+     troisième état que pour les cartes verrouillées. On n'agit donc que si le
+     conteneur a DÉJÀ du contenu (le message de LW), et on s'efface tout seul si
+     des cartes finissent par arriver.
+
+     🔴 VISITEURS SEULEMENT. Un membre connecté sans accès est déjà redirigé
+     vers les offres par `fermerPagesCours` : il ne verra jamais ceci. Et un
+     membre avec accès voit ses cartes.
+     ════════════════════════════════════════════════════════════════════════ */
+  function vitrineFermee(){
+    if(membrePS()) return;                               /* visiteurs seulement */
+    if(!estPageCours(location.pathname)) return;
+
+    if(!document.getElementById("ps-vitrine-css")){
+      var st=document.createElement("style"); st.id="ps-vitrine-css";
+      st.textContent=
+        ".ps-vitrine{max-width:560px;margin:8px auto;padding:30px 26px;text-align:center;"+
+        "background:var(--ps-surface-soft,#F7F8FB);border:1px solid var(--ps-border,#E6E9EF);"+
+        "border-radius:var(--ps-r-card,16px);font-family:var(--ps-font,Figtree,sans-serif)}"+
+        ".ps-vitrine h3{margin:0 0 8px;font:800 19px/1.3 inherit;color:var(--ps-text,#203866)}"+
+        ".ps-vitrine p{margin:0 0 18px;font:400 15px/1.55 inherit;color:var(--ps-text-soft,#676879)}"+
+        ".ps-vitrine a{display:inline-block;padding:12px 24px;border-radius:var(--ps-r-btn,10px);"+
+        "background:var(--ps-accent,#507EC5);color:#fff;font:700 15px inherit;text-decoration:none}"+
+        "@media(max-width:768px){.ps-vitrine{padding:24px 18px}.ps-vitrine h3{font-size:17px}}";
+      (document.head||document.documentElement).appendChild(st);
+    }
+
+    document.querySelectorAll(".cards-grandpa").forEach(function(g){
+      var cartes=g.querySelectorAll(".lw-course-card").length;
+      var deja=g.querySelector(":scope > .ps-vitrine");
+      /* LearnWorlds a fini par afficher des cartes : on se retire. */
+      if(cartes){ if(deja) deja.remove(); g.querySelectorAll(":scope > .ps-cache-lw").forEach(function(e){ e.classList.remove("ps-cache-lw"); e.style.display=""; }); return; }
+      if(deja) return;
+      if(!(g.textContent||"").trim()) return;            /* pas encore peinte */
+
+      /* On MASQUE le message de LearnWorlds, on ne le supprime pas : s'il
+         revient à afficher des cartes, on doit pouvoir tout rendre intact. */
+      [].slice.call(g.children).forEach(function(e){
+        e.classList.add("ps-cache-lw"); e.style.display="none";
+      });
+      var d=document.createElement("div");
+      d.className="ps-vitrine";
+      d.innerHTML='<h3></h3><p></p><a></a>';
+      d.querySelector("h3").textContent="Le catalogue est réservé aux membres";
+      d.querySelector("p").textContent="Découvrez les formules d'accès — ou commencez dès maintenant avec le webinar gratuit.";
+      var a=d.querySelector("a");
+      a.textContent="Voir les formules";
+      a.href=window.PS_URL_OFFRE||"/formules";
+      g.appendChild(d);
+    });
+  }
+
   function blocageParcours(){
     fermerPagesCours();
     garderClicsMenu();
+    vitrineFermee();
   }
 
   [1500,3000,6000,10000].forEach(function(d){ setTimeout(blocageParcours,d); });

@@ -444,6 +444,49 @@
      un titre sans nombre (« Introduction au conseil ») ne matche toujours pas. */
   var RE_NIVEAU=/^[A-Za-zÀ-ÿ]{2,12}\s*#?\s*(\d+)\s*[-–—:]\s*(.+)$/;
 
+  /* ════════════════════════════════════════════════════════════════════════
+     REMETTRE LES NIVEAUX DANS L'ORDRE  (07/08, signalé par Ziad)
+     ------------------------------------------------------------------------
+     Constat : après le passage de deux cours en « Privé », la première section
+     sortait dans l'ordre **1, 4, 2, 3, 5, 6** — LearnWorlds sert les cours
+     privés en tête. Ce n'est donc pas un défaut d'affichage isolé : le jour où
+     les 56 cours basculent, c'est TOUT le catalogue qui part dans le désordre,
+     sur les six pages. On trie donc avant, pas après.
+
+     🔴 ON NE TRIE QUE LES GRILLES ENTIÈREMENT NUMÉROTÉES. Une grille qui mêle
+     des cartes « Niveau #N » et des cartes de domaine (Fiches secteur, Cabinets,
+     Cas…) garderait l'ordre voulu par Ziad dans le Site Builder pour les
+     secondes ; les réordonner déplacerait du contenu qu'il a rangé à la main.
+     La section 2 de la page Cours, par exemple, n'est pas numérotée : intacte.
+
+     🔴 ON NE TOUCHE AU DOM QUE SI L'ORDRE EST FAUX. Ce fichier tourne sous un
+     MutationObserver, et Weglot retraduit derrière : réécrire à chaque passage
+     déclencherait la boucle « on écrit / Weglot retraduit / on réécrit » déjà
+     payée le 25/07 sur la tuile de progression. Comparer d'abord, agir ensuite.
+
+     🔴 Le tri porte sur `data-ps-num`, le numéro RÉEL, jamais sur `psLvl` qui
+     est ramené sur 1..6 pour la couleur — un niveau 7 y vaudrait 1.
+     ════════════════════════════════════════════════════════════════════════ */
+  function trierParNiveau(){
+    document.querySelectorAll(S+" .cards-grandpa > .lw-cols").forEach(function(grille){
+      var cartes=[].slice.call(grille.querySelectorAll(":scope > .lw-course-card"));
+      if(cartes.length<2) return;
+      /* toutes numérotées, sinon on s'abstient */
+      var nums=cartes.map(function(c){ return parseInt(c.dataset.psNum||"",10); });
+      if(nums.some(function(n){ return !isFinite(n); })) return;
+
+      var voulu=cartes.slice().sort(function(a,b){
+        return parseInt(a.dataset.psNum,10)-parseInt(b.dataset.psNum,10);
+      });
+      /* déjà dans l'ordre ? on ne touche à rien */
+      var identique=voulu.every(function(c,i){ return c===cartes[i]; });
+      if(identique) return;
+
+      voulu.forEach(function(c){ grille.appendChild(c); });
+      try{ console.info("[PrepaStrat] Niveaux remis dans l'ordre : "+voulu.map(function(c){ return c.dataset.psNum; }).join(", ")); }catch(e){}
+    });
+  }
+
   function build(){
     document.querySelectorAll(S+" .lw-course-card").forEach(function(card){
       if(card.dataset.psM) return;
@@ -535,8 +578,13 @@
       /* Couleur suivant le niveau ; carte domaine (sans niveau) -> 1 = violet de
          marque, pour qu'une barre de progression éventuelle reste cohérente. */
       card.dataset.psLvl=level ? (((parseInt(level,10)-1)%6)+1) : 1;
+      /* 🔴 LE NIVEAU BRUT, EN PLUS DU MODULO. `psLvl` est ramené sur 1..6 pour
+         choisir une COULEUR ; il ne peut donc pas servir à trier (deux cours de
+         niveau 1 et 7 y sont indiscernables). On garde le numéro réel à côté. */
+      if(level) card.dataset.psNum=String(parseInt(level,10));
       card.dataset.psM="1";
     });
+    trierParNiveau();
     /* Plus de chevrons décoratifs entre les cartes (choix de Ziad) : la
        navigation se fait par les deux flèches gauche/droite du carrousel. On
        retire aussi ceux qu'une version précédente aurait posés. */
