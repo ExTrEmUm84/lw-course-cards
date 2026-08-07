@@ -292,6 +292,16 @@
        Petit trait à la couleur d'accent de la page (bleu, jaune, rouge…), via
        ::before pour ne rien ajouter au DOM. Aligné à gauche sur le titre. */
     "#pageContent h2.learnworlds-subheading::before{content:\"\" !important;display:block !important;width:60px !important;height:4px !important;border-radius:2px !important;background:var(--ps-h2-sep,var(--ps-h2,var(--ps-accent,#507EC5))) !important;margin:0 0 24px 0 !important;}",
+    /* 🔴🔴 PAS DE TRAIT SANS TITRE (08/08, Ziad : « il est sous les titres des
+       pages aussi, il faut le retirer »). Mesuré : les pages portent des
+       `h2.learnworlds-subheading` **VIDES** laissées par le Site Builder — 2 sur
+       la page Cours, 1 sur Cabinets. Le `::before` se peint AU-DESSUS de son
+       élément : un trait orphelin apparaît donc SOUS le titre précédent, et on
+       le cherche du mauvais côté. Un séparateur introduit un titre ; sans titre,
+       il n’introduit rien.
+       🔴 `:empty` est exact ici (mesuré : 0 nœud enfant, `matches(":empty")`
+       vrai) — il ne l’aurait pas été si LearnWorlds y laissait une espace. */
+    "#pageContent h2.learnworlds-subheading:empty::before{display:none !important;}",
     /* H2 SANS TITRE : LearnWorlds pose quand même un sous-titre vide -> le trait
        séparateur flottait tout seul (signalé par Ziad le 22/07). On masque le
        trait et on écrase toute hauteur/marge du H2 vide. `emptyHeadings()` pose

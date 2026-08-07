@@ -128,6 +128,16 @@
        le petit séparateur qui vient par dessus », sur toutes les pages.
        Sa couleur suit celle du titre tant que `--ps-h2-sep` n'est pas posée. */
     "#pageContent h2.learnworlds-subheading::before{content:\"\" !important;display:block !important;width:60px !important;height:4px !important;border-radius:2px !important;background:var(--ps-h2-sep,var(--ps-h2,var(--ps-accent,#507EC5))) !important;margin:0 0 24px 0 !important;}",
+    /* 🔴🔴 PAS DE TRAIT SANS TITRE (08/08, Ziad : « il est sous les titres des
+       pages aussi, il faut le retirer »). Mesuré : les pages portent des
+       `h2.learnworlds-subheading` **VIDES** laissées par le Site Builder — 2 sur
+       la page Cours, 1 sur Cabinets. Le `::before` se peint AU-DESSUS de son
+       élément : un trait orphelin apparaît donc SOUS le titre précédent, et on
+       le cherche du mauvais côté. Un séparateur introduit un titre ; sans titre,
+       il n’introduit rien.
+       🔴 `:empty` est exact ici (mesuré : 0 nœud enfant, `matches(":empty")`
+       vrai) — il ne l’aurait pas été si LearnWorlds y laissait une espace. */
+    "#pageContent h2.learnworlds-subheading:empty::before{display:none !important;}",
     /* .learnworlds-main-text existe AUSSI dans chaque carte ET dans le bouton des
        catégories du filtre : on ne stylise que la description marquée en JS
        (cf. heroText), jamais la classe nue. */

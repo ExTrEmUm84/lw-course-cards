@@ -245,6 +245,26 @@
        le petit séparateur qui vient par dessus », sur toutes les pages.
        Sa couleur suit celle du titre tant que `--ps-h2-sep` n'est pas posée. */
     "#pageContent h2.learnworlds-subheading::before{content:\"\" !important;display:block !important;width:60px !important;height:4px !important;border-radius:2px !important;background:var(--ps-h2-sep,var(--ps-h2,var(--ps-accent,#507EC5))) !important;margin:0 0 24px 0 !important;}",
+    /* 🔴🔴 PAS DE TRAIT SANS TITRE (08/08, Ziad : « il est sous les titres des
+       pages aussi, il faut le retirer »). Mesuré : les pages portent des
+       `h2.learnworlds-subheading` **VIDES** laissées par le Site Builder — 2 sur
+       la page Cours, 1 sur Cabinets. Le `::before` se peint AU-DESSUS de son
+       élément : un trait orphelin apparaît donc SOUS le titre précédent, et on
+       le cherche du mauvais côté. Un séparateur introduit un titre ; sans titre,
+       il n’introduit rien.
+       🔴 `:empty` est exact ici (mesuré : 0 nœud enfant, `matches(":empty")`
+       vrai) — il ne l’aurait pas été si LearnWorlds y laissait une espace. */
+    "#pageContent h2.learnworlds-subheading:empty::before{display:none !important;}",
+    /* 🔴 NI SUR LES TUILES (08/08, Ziad : « les tirets sont venus sur cette page
+       dans les tuiles WhatsApp et Slack, il ne faut pas les mettre »).
+       Le titre d'une TUILE n'est pas un titre de SECTION : le séparateur y
+       annonce un chapitre qui n'existe pas, et il le fait deux fois côte à côte.
+       🔴 Mesuré sur la page : ces deux `h2` sont les SEULS de l'annuaire — la
+       règle du 07/08 n'y servait donc à rien d'autre qu'à les décorer à tort.
+       🔴 Une classe de plus dans le sélecteur suffit à l'emporter (0,2,2 contre
+       0,1,2) : pas besoin d'un `:not()` à combinateur, dont la prise en charge
+       est inégale sur les navigateurs anciens. */
+    "#pageContent .psa-comm-txt h2.learnworlds-subheading::before{display:none !important;}",
     /* `.learnworlds-main-text` existe aussi dans le pied de page : on ne stylise
        que la description marquée en JS (cf. hero), jamais la classe nue. */
     "#pageContent .ps-desc{font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif) !important;font-size:17px !important;line-height:1.65 !important;color:var(--ps-text-soft,#676879) !important;text-align:left !important;max-width:1000px !important;margin-left:auto !important;margin-right:auto !important;padding-right:38% !important;}",
