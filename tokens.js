@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-i";
+  window.PS_TOKENS_V="2026-08-07-j";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3668,6 +3668,21 @@
       options:["Débutant","Avancé","Expert"] },
     { cle:"cf_recherche", type:"choix", vis:"cible", noyau:true, q:"Que cherchez-vous ?",
       options:["Stage","CDI Junior","CDI expérimenté"] },
+    /* 🔴🔴 LE CONTACT EST DANS LE NOYAU (07/08, remarque de Ziad : « on peut
+       remplir sa fiche sans pouvoir rentrer en contact, ça ne sert à rien
+       puisque personne ne peut me contacter »).
+       Il avait raison, et c'était un défaut de CONCEPTION, pas un bug : une
+       fiche sans moyen de joindre est une fiche inerte, et l'écran de
+       publication annonçait pourtant « votre fiche est en ligne ».
+       ⇒ Un e-mail est demandé AVANT la publication. Les autres canaux
+       (LinkedIn, téléphone, WhatsApp) restent facultatifs, après.
+       🔴 On ne l'IMPOSE pas pour autant : « Passer » reste possible. Forcer
+       ferait abandonner ceux qui ne veulent rien partager — et une fiche
+       abandonnée au 5e écran vaut moins qu'une fiche sans contact. C'est
+       l'écran de publication qui dit alors la vérité (voir plus bas). */
+    { cle:"cf_contactmail", type:"texte", vis:"contact", noyau:true, q:"Comment peut-on vous joindre ?",
+      sous:"Votre e-mail de contact — celui que vous acceptez de partager, pas forcément celui de votre compte. Sans lui, personne ne pourra vous écrire.",
+      placeholder:"prenom.nom@exemple.fr" },
     { cle:"cf_langue", type:"multi", vis:"langue", q:"Dans quelle langue voulez-vous vous entraîner ?",
       /* 🔴 LearnWorlds n'a PAS de champ à choix multiple (confirmé par Ziad le
          07/08) : le champ reste un menu déroulant, et c'est le LIBELLÉ qui
@@ -3691,9 +3706,6 @@
        🔴 WhatsApp est un DRAPEAU sur le numéro, pas un second numéro. Si le
        membre coche sans avoir donné de numéro exploitable, le Worker n'affiche
        aucun bouton plutôt qu'un lien vers une page d'erreur. */
-    { cle:"cf_contactmail", type:"texte", vis:"contact", q:"Votre e-mail de contact",
-      sous:"Celui que vous acceptez de partager — pas forcément celui de votre compte.",
-      placeholder:"prenom.nom@exemple.fr" },
     { cle:"cf_contactlinkedin", type:"texte", vis:"contact", q:"Votre profil LinkedIn",
       sous:"L'adresse de votre page, pour que les autres puissent vous situer.",
       placeholder:"linkedin.com/in/prenom-nom" },
@@ -4028,7 +4040,7 @@
   /* ── Le formulaire lui-même ─────────────────────────────────────────────── */
   function ficheOuvrir(u){
     ficheCSS();
-    var rep={}, i=0, NOYAU=4, noyauMontre=false, noyauEnvoye=false;
+    var rep={}, i=0, NOYAU=5, noyauMontre=false, noyauEnvoye=false;
     /* 🔴🔴 NE PAS REDEMANDER CE QU'ON SAIT DÉJÀ (07/08, signalé par Ziad :
        « quand on passe d'apparaître à masquer puis réapparaître, il nous
        redemande les infos qu'on a déjà données »).
@@ -4132,12 +4144,23 @@
           '<div class="pf-pied"><span class="pf-lien" style="cursor:default"></span>'+
           '<button class="pf-ok" data-a="fin">Fermer</button></div>';
       } else if(i===NOYAU && !noyauMontre){
+        /* 🔴 ON NE PROMET PAS UNE FICHE UTILE QUAND ELLE NE L'EST PAS. Sans
+           aucun moyen de contact, « votre fiche est en ligne » est vrai mais
+           trompeur : personne ne pourra joindre ce membre. On le dit, et le
+           bouton principal devient « Ajouter un contact » au lieu de la sortie.
+           🔴 Le décompte n'est plus écrit en dur : il disait « trois questions
+           de plus » alors qu'il en restait six depuis l'ajout des canaux de
+           contact. Un chiffre en dur finit toujours par mentir. */
+        var joignable=!!(rep.cf_contactmail||connus.cf_contactmail||connus.cf_contacttel||connus.cf_contactlinkedin);
+        var restantes=FICHE_ECRANS.length-NOYAU;
         corps='<div class="pf-e"><div class="pf-vis">'+FICHE_VIS.fini+'</div>'+
-          '<h3>Votre fiche est en ligne</h3>'+
-          '<p class="pf-sous">Voici ce que les autres étudiants verront. Trois questions de plus la rendent bien plus utile.</p>'+
+          '<h3>'+(joignable?"Votre fiche est en ligne":"Votre fiche est en ligne, mais muette")+'</h3>'+
+          '<p class="pf-sous">'+(joignable
+            ? "Voici ce que les autres étudiants verront. "+restantes+" questions de plus la rendent bien plus utile."
+            : "Voici ce que les autres verront — mais <strong>personne ne peut vous joindre</strong> tant que vous n\'avez donné aucun moyen de contact.")+'</p>'+
           carte()+'</div>'+
           '<div class="pf-pied"><button class="pf-lien" data-a="fin">C\'est bon pour moi</button>'+
-          '<button class="pf-ok" data-a="suite">Compléter (1 min)</button></div>';
+          '<button class="pf-ok" data-a="suite">'+(joignable?"Compléter (1 min)":"Ajouter un contact")+'</button></div>';
       } else if(i>=FICHE_ECRANS.length){
         corps='<div class="pf-e"><div class="pf-vis">'+FICHE_VIS.fini+'</div>'+
           '<h3>Fiche complète, merci</h3>'+
