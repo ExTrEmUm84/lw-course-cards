@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-08-c";
+  window.PS_TOKENS_V="2026-08-08-d";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3680,7 +3680,13 @@
        ferait abandonner ceux qui ne veulent rien partager — et une fiche
        abandonnée au 5e écran vaut moins qu'une fiche sans contact. C'est
        l'écran de publication qui dit alors la vérité (voir plus bas). */
-    { cle:"cf_contactmail", type:"texte", vis:"contact", noyau:true, q:"Comment peut-on vous joindre ?",
+    /* 🔴 `verif` : la saisie est jugée PENDANT la frappe et le membre est
+       prévenu (08/08). Sans ça, une adresse ou un lien invalide ne produit
+       aucun bouton — et le membre ne l'apprend jamais, puisqu'une fiche sans
+       bouton ressemble à une fiche normale. On ne bloque pas pour autant :
+       « Passer » reste possible, c'est l'affichage qui dit la vérité. */
+    { cle:"cf_contactmail", type:"texte", vis:"contact", noyau:true, verif:"mail",
+      q:"Comment peut-on vous joindre ?",
       sous:"Votre e-mail de contact — celui que vous acceptez de partager, pas forcément celui de votre compte. Sans lui, personne ne pourra vous écrire.",
       placeholder:"prenom.nom@exemple.fr" },
     { cle:"cf_langue", type:"multi", vis:"langue", q:"Dans quelle langue voulez-vous vous entraîner ?",
@@ -3706,7 +3712,8 @@
        🔴 WhatsApp est un DRAPEAU sur le numéro, pas un second numéro. Si le
        membre coche sans avoir donné de numéro exploitable, le Worker n'affiche
        aucun bouton plutôt qu'un lien vers une page d'erreur. */
-    { cle:"cf_contactlinkedin", type:"texte", vis:"contact", q:"Votre profil LinkedIn",
+    { cle:"cf_contactlinkedin", type:"texte", vis:"contact", verif:"linkedin",
+      q:"Votre profil LinkedIn",
       sous:"L'adresse de votre page, pour que les autres puissent vous situer.",
       placeholder:"linkedin.com/in/prenom-nom" },
     /* 🔴 `tel` et non `texte` : le pays se CHOISIT (08/08). Un champ libre
@@ -3948,20 +3955,50 @@
     return String(v==null?"":v).normalize("NFD").replace(/[̀-ͯ]/g,"")
       .trim().toLowerCase().indexOf("oui")===0;
   }
-  function psUrlValide(v){
+  /* 🔴 Miroir de `estLienLinkedIn()` du Worker : l'hôte doit être LinkedIn, et
+     on l'ANALYSE au lieu de le chercher dans la chaîne — `linkedin.com.exemple.fr`
+     et `exemple.fr/linkedin.com/…` contiennent le mot sans lui appartenir. */
+  function psLienLinkedIn(v){
     var brut=String(v==null?"":v).trim();
     if(!brut) return false;
     try{
       var u=new URL(/^https?:\/\//i.test(brut) ? brut : "https://"+brut);
-      return u.protocol==="https:" || u.protocol==="http:";
+      if(u.protocol!=="https:" && u.protocol!=="http:") return false;
+      var h=u.hostname.toLowerCase();
+      /* 🔴 Comparaison de FIN par découpe, pas par index calculé : ma première
+         version comptait les caractères à la main (« length-14 » pour
+         « .linkedin.com », qui en fait 13) et rejetait donc TOUS les
+         sous-domaines. Une longueur écrite à la main est une faute qui attend. */
+      var finit=function(s,suf){ return s.length>=suf.length && s.slice(-suf.length)===suf; };
+      return h==="linkedin.com" || finit(h,".linkedin.com")
+          || h==="lnkd.in"      || finit(h,".lnkd.in");
     }catch(e){ return false; }
   }
+  /* Miroir de `RE_EMAIL` du Worker. Chaque étiquette de domaine commence et
+     finit par un caractère alphanumérique : `a@b..com` et `a@-b.com` sont des
+     adresses mortes que l'ancienne expression acceptait. */
+  var PS_RE_EMAIL=/^[A-Za-z0-9._%+-]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/;
+  function psEmailValide(v){
+    var mail=String(v==null?"":v).trim();
+    return !!mail && PS_RE_EMAIL.test(mail);
+  }
+  /* Le message est VIDE tant qu'il n'y a rien à dire : un champ encore vide
+     n'est pas une faute, on n'accueille personne par un reproche. */
+  function messageVerif(e, valeur){
+    var v=String(valeur==null?"":valeur).trim();
+    if(!v) return "";
+    if(e.verif==="mail" && !psEmailValide(v))
+      return "Cette adresse ne semble pas valide : aucun bouton « Envoyer un email » n'apparaîtra sur votre fiche.";
+    if(e.verif==="linkedin" && !psLienLinkedIn(v))
+      return "Seuls les liens linkedin.com sont acceptés : sans cela, aucun bouton « LinkedIn » n'apparaîtra.";
+    return "";
+  }
+
   function contactsApercu(f){
     f=f||{};
     var out=[];
-    var mail=String(f.cf_contactmail==null?"":f.cf_contactmail).trim();
-    if(mail && /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(mail)) out.push("Envoyer un email");
-    if(psUrlValide(f.cf_contactlinkedin)) out.push("LinkedIn");
+    if(psEmailValide(f.cf_contactmail)) out.push("Envoyer un email");
+    if(psLienLinkedIn(f.cf_contactlinkedin)) out.push("LinkedIn");
     var num=psNumeroWhatsApp(f.cf_contacttel);
     if(num){
       out.push("Appeler");
@@ -4043,6 +4080,12 @@
       /* Sélecteur d'indicatif + numéro : une seule ligne, le pays ne prenant
          que sa largeur utile. `min-width:0` sur l'input, sinon il refuse de
          rétrécir sous sa largeur intrinsèque et déborde sur mobile. */
+      /* L'avertissement vit toujours dans le DOM et reste VIDE quand tout va
+         bien : `:empty` lui retire alors sa boîte, sinon un cadre jaune vide
+         apparaîtrait sous chaque champ. */
+      "#ps-fiche .pf-avert{margin:9px 0 0;font:600 12px/1.45 var(--ps-font,Figtree,sans-serif);color:#8a5a00;"+
+      "background:#fff8e6;border:1px solid #f0dca8;border-radius:10px;padding:8px 10px}"+
+      "#ps-fiche .pf-avert:empty{display:none}"+
       "#ps-fiche .pf-tel{display:flex;gap:8px;align-items:stretch}"+
       "#ps-fiche .pf-tel .pf-champ{flex:1;min-width:0}"+
       "#ps-fiche .pf-ind{flex:0 0 auto;max-width:44%;border:1.5px solid var(--ps-border,#E6E9EF);"+
@@ -4493,7 +4536,8 @@
           champ='<input class="pf-champ" type="text" placeholder="'+esc(e.placeholder||"")+'" value="'+esc(rep[e.cle]||"")+'">';
         }
         corps='<div class="pf-e"><div class="pf-vis">'+FICHE_VIS[e.vis]+'</div>'+
-          '<h3>'+esc(e.q)+'</h3>'+(e.sous?'<p class="pf-sous">'+esc(e.sous)+'</p>':'')+champ+'</div>'+
+          '<h3>'+esc(e.q)+'</h3>'+(e.sous?'<p class="pf-sous">'+esc(e.sous)+'</p>':'')+champ+
+          (e.verif?'<p class="pf-avert">'+esc(messageVerif(e, rep[e.cle]))+'</p>':'')+'</div>'+
           '<div class="pf-pied"><button class="pf-lien" data-a="passer">'+(i===0?"Plus tard":"Passer")+'</button>'+
           '<button class="pf-ok" data-a="suivant">'+(i===FICHE_ECRANS.length-1?"Terminer":"Continuer")+'</button></div>';
       }
@@ -4606,6 +4650,10 @@
           if(indic){ majTel(); return; }
           rep[e.cle]=champ.value;
           var c=hote.querySelector(".pf-cpt b"); if(c) c.textContent=champ.value.length;
+          /* 🔴 On met à jour le NŒUD, on ne redessine pas l'écran : un `rendre()`
+             à chaque frappe reconstruit le champ et fait perdre le curseur. */
+          var av=hote.querySelector(".pf-avert");
+          if(av) av.textContent=messageVerif(e, champ.value);
         };
         champ.onkeydown=function(ev){
           if(ev.key==="Enter" && e.type!=="long"){ ev.preventDefault();
