@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-m";
+  window.PS_TOKENS_V="2026-08-07-n";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4040,7 +4040,7 @@
   /* ── Le formulaire lui-même ─────────────────────────────────────────────── */
   function ficheOuvrir(u, revision){
     ficheCSS();
-    var rep={}, i=0, NOYAU=5, noyauMontre=false, noyauEnvoye=false;
+    var rep={}, i=0, NOYAU=5, noyauMontre=false, noyauEnvoye=false, toutRevoir=false;
     /* 🔴🔴 NE PAS REDEMANDER CE QU'ON SAIT DÉJÀ (07/08, signalé par Ziad :
        « quand on passe d'apparaître à masquer puis réapparaître, il nous
        redemande les infos qu'on a déjà données »).
@@ -4052,6 +4052,17 @@
        `/profile`, mais les TAGS le sont partout et disent si un champ est
        rempli — c'est tout ce qu'il faut ici. */
     var connus=ficheChamps(u);
+    /* 🔴 PRÉREMPLIR, sinon « réviser » redevient « ressaisir » : c'est
+       exactement ce que Ziad reprochait quand l'écran École s'ouvrait vide
+       alors que sa carte affichait ESSEC juste derrière.
+       🔴 SAUF l'opt-in : `rendre()` teste `rep.cf_annuaire===OPTIN_NON` avant
+       toutes les autres branches — préremplir « Non » enverrait un membre
+       désinscrit droit sur l'écran de sortie, sans pouvoir se réinscrire. */
+    FICHE_ECRANS.forEach(function(e){
+      if(e.cle==="cf_annuaire" || !rempli(connus[e.cle])) return;
+      rep[e.cle] = (e.type==="multi") ? String(connus[e.cle]).split(/[,;/]/).map(function(x){ return x.trim(); }).filter(Boolean)
+                                      : connus[e.cle];
+    });
     /* 🔴🔴 L'OPT-IN N'EST JAMAIS SAUTÉ (07/08, signalé par Ziad dans l'heure).
        Ma première version sautait TOUT champ déjà rempli — y compris
        `cf_annuaire`. Or c'est précisément celui qu'on vient changer en cliquant
@@ -4064,7 +4075,15 @@
        teste `rep.cf_annuaire===OPTIN_NON` avant tout le reste, donc un membre
        actuellement désinscrit tomberait droit sur l'écran « C'est noté » sans
        pouvoir se réinscrire — le même piège, dans l'autre sens. */
-    function dejaConnu(e){ return !!e && e.cle!=="cf_annuaire" && rempli(connus[e.cle]); }
+    /* 🔴🔴 EN MODE RÉVISION ON NE SAUTE RIEN (07/08, Ziad : « je ne peux plus
+       modifier les infos annuaire, ça passe direct à la fin »).
+       Ma correction précédente avait fait de « déjà rempli » un synonyme de
+       « jamais montré » — donc plus aucun moyen de CHANGER une valeur. J'avais
+       supprimé le harcèlement en supprimant la modification.
+       ⇒ Trois intentions, et non deux : compléter ce qui manque (popup
+       automatique), basculer sa visibilité (opt-in + récapitulatif), et
+       RÉVISER ses infos (« Modifier mes infos » : tous les écrans, préremplis). */
+    function dejaConnu(e){ return !toutRevoir && !!e && e.cle!=="cf_annuaire" && rempli(connus[e.cle]); }
     function sauterConnus(){
       /* 🔴🔴 LE SAUT NE FRANCHIT PAS LE RÉCAPITULATIF (07/08, trouvé au banc de
          rejeu, pas à l'écran). L'index `NOYAU` porte DEUX choses : l'écran
@@ -4091,7 +4110,11 @@
          champ du noyau après lui, donc le signe qu'une fiche existe. Sans ce
          garde, un membre sans aucune fiche qui cliquerait « modifier »
          atterrirait sur un récapitulatif vide. */
-      if(revision && i>0 && i<NOYAU && rempli(connus.cf_ecole)) i=NOYAU;
+      /* 🔴 `!toutRevoir` : sans lui, ce raccourci ramenait l'index à NOYAU juste
+         après que « Modifier mes infos » l'a remis à 1 — l'école redevenait
+         inatteignable, et le bouton ne faisait rien de visible. Le raccourci
+         sert à ÉVITER le noyau, pas à empêcher d'y revenir exprès. */
+      if(revision && !toutRevoir && i>0 && i<NOYAU && rempli(connus.cf_ecole)) i=NOYAU;
     }
     sauterConnus();
     var hote=document.createElement("div"); hote.id="ps-fiche";
@@ -4185,7 +4208,7 @@
             : "Voici ce que les autres verront — mais <strong>personne ne peut vous joindre</strong> tant que vous n\'avez donné aucun moyen de contact.")+'</p>'+
           carte()+'</div>'+
           '<div class="pf-pied"><button class="pf-lien" data-a="fin">C\'est bon pour moi</button>'+
-          '<button class="pf-ok" data-a="suite">'+(joignable?"Compléter (1 min)":"Ajouter un contact")+'</button></div>';
+          '<button class="pf-ok" data-a="suite">'+(revision?"Modifier mes infos":(joignable?"Compléter (1 min)":"Ajouter un contact"))+'</button></div>';
       } else if(i>=FICHE_ECRANS.length){
         corps='<div class="pf-e"><div class="pf-vis">'+FICHE_VIS.fini+'</div>'+
           '<h3>Fiche complète, merci</h3>'+
@@ -4238,7 +4261,14 @@
              même si sa réponse est déjà connue. Mesuré : la langue était
              redemandée alors qu'elle valait « Français ». QUATRIÈME chemin qui
              bouge l'index — chacun devait recevoir la même règle. */
-          if(a==="suite"){ ficheEnvoyer(u, rep, false); noyauMontre=true; sauterConnus(); rendre(); return; }
+          if(a==="suite"){
+            ficheEnvoyer(u, rep, false); noyauMontre=true;
+            /* En RÉVISION, « Modifier mes infos » reprend au premier écran
+               APRÈS l'opt-in : sinon l'école et le niveau, situés avant le
+               récapitulatif, resteraient inatteignables. */
+            if(revision){ toutRevoir=true; i=1; }
+            sauterConnus(); rendre(); return;
+          }
           if(a==="passer"||a==="suivant"){
             i++; sauterConnus();
             /* `>=` et non `===` : avec le saut des champs connus, on peut
