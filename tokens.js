@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-f";
+  window.PS_TOKENS_V="2026-08-07-g";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4701,6 +4701,32 @@
     garderClicsMenu();
     vitrineFermee();
   }
+
+  /* ── LA REDIRECTION DOIT PARTIR AVANT LA PEINTURE ────────────────────────
+     🔴 Signalé par Ziad : « on voit un peu la page cours avant d'aller vers
+     formules, c'est moche ». Cause mesurée, et c'était mon ordonnancement :
+     le premier passage était programmé à **1 500 ms**, alors que la page est
+     interactive à 411 ms. On affichait donc un catalogue à quelqu'un à qui on
+     s'apprêtait à le retirer — le pire des deux mondes.
+     🟢 Ce qui rend le correctif possible : **`me` est DANS LE HTML SERVI**
+     (mesuré), pas chargé par une requête. Il est donc lisible dès que le corps
+     de la page est analysé, bien avant la peinture des cartes.
+     ⇒ On tente immédiatement, puis toutes les 30 ms jusqu'à ce que `me` soit
+     lisible. Plafond à 2,5 s : au-delà, ou bien il n'y a pas de membre (visiteur
+     anonyme, qu'on ne redirige jamais), ou bien quelque chose ne va pas — et
+     dans les deux cas on cesse d'interroger plutôt que de tourner en boucle.
+     🔴 On ne masque PAS la page en attendant. Un anti-flash a déjà coûté deux
+     secondes à chaque prospect le 05/08 ; ici la fenêtre est de quelques
+     dizaines de millisecondes, le remède serait pire que le mal. */
+  (function partirTot(){
+    if(!estPageCours(location.pathname)) return;   /* seules ces pages redirigent */
+    fermerPagesCours();
+    var t0=Date.now();
+    var h=setInterval(function(){
+      if(membrePS() || Date.now()-t0>2500){ clearInterval(h); fermerPagesCours(); return; }
+      fermerPagesCours();
+    }, 30);
+  })();
 
   [1500,3000,6000,10000].forEach(function(d){ setTimeout(blocageParcours,d); });
   [2500,6000].forEach(function(d){ setTimeout(verifierChampsProfil,d); });
