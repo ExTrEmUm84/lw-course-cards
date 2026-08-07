@@ -13,7 +13,7 @@
 
   🔴 CETTE PAGE NE DOCUMENTE PAS UN DISPOSITIF EN PLACE : elle PRÉSENTE UN
   CHOIX. Les trois autres aides décrivent ce que le site fait déjà ; celle-ci
-  expose quatre décisions encore ouvertes sur le calcul de la progression, et
+  expose six décisions encore ouvertes sur le calcul de la progression, et
   ce que chacune change pour un étudiant. Une seule colonne du simulateur —
   celle marquée « Aujourd'hui » — décrit le comportement réel du site.
   Tant que rien n'est tranché, rien ne bouge en ligne.
@@ -26,7 +26,7 @@
   8 fiches secteur, 12 études de cas, 4 parcours, 3 modules d'entraînement)
   sont de l'ORDRE de grandeur du vrai site, pas son inventaire exact.
 
-  🔴 LES QUATRE DÉCISIONS SONT INDÉPENDANTES et se combinent (16 réglages
+  🔴 LES SIX DÉCISIONS SONT INDÉPENDANTES et se combinent (192 réglages
   possibles). Ne pas les présenter comme un menu de trois formules toutes
   faites : le client doit pouvoir prendre le périmètre de l'une et la
   pondération de l'autre. Les boutons de présélection ne sont que des
@@ -186,6 +186,36 @@ figcaption{padding:11px 18px;font-size:13px;color:#8d95a6;background:#FAFBFD;bor
 .sim-t .ts{font-size:11.5px;color:#8d95a6;margin-top:7px;line-height:1.35}
 .sim-t.unk .tp{color:#b0b7c5}
 
+/* points : la ligne acquis / possibles, et l'échelle des grades */
+.sim-pts{display:flex;gap:10px;flex-wrap:wrap;align-items:center;justify-content:center;margin-top:14px;
+  padding:13px 16px;background:#F3F6FB;border:1px solid var(--ps-border);border-radius:12px;font-size:14px;color:#4b5262}
+.sim-pts b{color:var(--ps-navy);font-variant-numeric:tabular-nums}
+.sim-pts .sep{width:1px;height:18px;background:var(--ps-border)}
+
+.sim-ech{display:flex;gap:6px;margin-top:12px;overflow-x:auto;padding-bottom:2px}
+.sim-ech .e{flex:1 1 0;min-width:96px;border:1px solid var(--ps-border);border-radius:10px;padding:9px 10px;background:#fff;text-align:center}
+.sim-ech .e.on{border-color:var(--ps-navy);background:var(--ps-navy);color:#fff}
+.sim-ech .e .en{font-size:12.5px;font-weight:800;color:var(--ps-navy);line-height:1.2}
+.sim-ech .e.on .en{color:#fff}
+.sim-ech .e .es{font-size:11px;color:#8d95a6;margin-top:3px;font-variant-numeric:tabular-nums}
+.sim-ech .e.on .es{color:#a9c0e5}
+
+/* l'expérience « le catalogue grandit » */
+.sim-gro{display:flex;gap:11px;align-items:flex-start;margin-top:14px;padding:13px 16px;border:1px dashed #c9b48f;
+  background:#FFFBF4;border-radius:12px;cursor:pointer}
+.sim-gro input{margin-top:3px;flex:none;accent-color:#8A5320}
+.sim-gro span{font-size:13.5px;line-height:1.45;color:#6f4118}
+.sim-gro span em{display:block;font-style:normal;font-weight:800;color:#5c360f;margin-bottom:1px}
+.sim-gro.on{background:#FFF3E0;border-style:solid;border-color:var(--ps-warn-border)}
+
+/* barème : le tableau des valeurs de points */
+.bar-t{width:100%;border-collapse:collapse;font-size:14.5px;margin-top:6px}
+.bar-t th{text-align:left;background:#F3F5F9;color:#5A6478;padding:9px 13px;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--ps-border)}
+.bar-t td{padding:9px 13px;border-bottom:1px solid #F0F2F6;color:#4b5262}
+.bar-t td:first-child{font-weight:700;color:var(--ps-navy)}
+.bar-t .num{text-align:right;font-variant-numeric:tabular-nums;font-weight:700;color:var(--ps-navy)}
+.bar-t tr:last-child td{border-bottom:none}
+
 /* tableau du catalogue fictif */
 .cat{width:100%;border-collapse:collapse;font-size:14px;min-width:620px}
 .cat th{text-align:left;background:#F3F5F9;color:#5A6478;padding:9px 12px;font-size:11.5px;font-weight:800;letter-spacing:.05em;text-transform:uppercase;border-bottom:1px solid var(--ps-border)}
@@ -226,7 +256,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     <div class="kicker">PrepaStrat · Aide</div>
     <h1>Comment calculer la progression</h1>
     <p>Un pourcentage de progression n'est jamais « le » pourcentage&nbsp;: c'est le résultat de
-    quatre décisions. Cette page les pose une par une, et un simulateur montre ce que chacune
+    six décisions. Cette page les pose une par une, et un simulateur montre ce que chacune
     change pour un même étudiant. <strong style="color:#fff">Rien n'est modifié en ligne&nbsp;:
     c'est un document de décision.</strong></p>
     <a class="back" href="configurateur.html">← Retour au configurateur</a>
@@ -239,12 +269,14 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     <h2>Sommaire</h2>
     <a href="#s1">1 · Ce que l'étudiant voit aujourd'hui</a>
     <a href="#s2">2 · D'où sort le pourcentage</a>
-    <a href="#s3">3 · Décision A — le périmètre</a>
-    <a href="#s4">4 · Décision B — le poids</a>
-    <a href="#s5">5 · Décision C — l'inconnu</a>
-    <a href="#s6">6 · Décision D — le rythme</a>
-    <a href="#s7">7 · Le simulateur</a>
-    <a href="#s8">8 · Ce qu'il reste à trancher</a>
+    <a href="#perimetre">A · Le périmètre</a>
+    <a href="#bareme">B · Le barème — combien vaut un contenu</a>
+    <a href="#acquisition">C · Quand les points tombent</a>
+    <a href="#echelle">D · Pourcentage ou points</a>
+    <a href="#inconnu">E · L'inconnu</a>
+    <a href="#rythme">F · Le rythme</a>
+    <a href="#simulateur">→ Le simulateur</a>
+    <a href="#trancher">→ Ce qu'il reste à trancher</a>
     <div class="sep"></div>
     <a href="aide-ecoles.html" class="ext">→ Les écoles partenaires</a>
     <a href="aide-annuaire.html" class="ext">→ L'annuaire des étudiants</a>
@@ -283,12 +315,13 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
                 <div class="rule">Moyenne des <strong>6 pages</strong> du site. Une page jamais
                 visitée y entre pour 0.</div>
               </div>
-              <div class="z bad">
-                <div class="ou">Profil · en-tête, juste au-dessus</div>
-                <div class="big">33 %</div>
+              <div class="z bad" style="opacity:.62">
+                <div class="ou">Profil · en-tête <span class="pill no" style="font-size:10px;padding:2px 8px">retiré</span></div>
+                <div class="big" style="text-decoration:line-through;text-decoration-thickness:3px;text-decoration-color:#d98b7a">33 %</div>
                 <div class="lb">progression</div>
-                <div class="rule">Moyenne des <strong>parcours LearnWorlds</strong> auxquels elle
-                est inscrite. Ni le même ensemble, ni la même moyenne.</div>
+                <div class="rule">Moyenne des <strong>parcours LearnWorlds</strong> — ni le même
+                ensemble, ni la même moyenne. <strong>Supprimé le 07/08&nbsp;:</strong> deux chiffres
+                globaux sur un même écran, c'est un de trop.</div>
               </div>
             </div>
           </div>
@@ -303,9 +336,14 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         « 20&nbsp;% — Consultant » juste en dessous ne comprend ni l'un ni l'autre, et n'a aucune
         raison de faire confiance au troisième sur la page Cours.</div>
 
+        <div class="box ok"><strong>Un des trois est déjà réglé.</strong> La stat de l'en-tête du
+        profil a été retirée le 7&nbsp;août. Il ne reste que deux chiffres&nbsp;: celui d'une page,
+        et le chiffre global du bandeau de grade. C'est la bonne structure — reste à décider
+        <em>comment</em> chacun se calcule.</div>
+
         <p>Il faut donc <strong>une seule définition</strong>, déclinée en deux vues&nbsp;: un
-        pourcentage <em>par page</em> (les tuiles) et un pourcentage <em>global</em> (le grade).
-        Choisir cette définition, c'est répondre aux quatre questions des sections 3 à 6.</p>
+        pourcentage <em>par page</em> (les tuiles) et un chiffre <em>global</em> (le grade).
+        Choisir cette définition, c'est répondre aux six questions qui suivent.</p>
       </div>
     </details>
 
@@ -327,28 +365,35 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         configurateur peut corriger.</div>
 
         <p>Ce qui <strong>se discute</strong>, c'est tout ce qui vient après&nbsp;: comment
-        additionner des dizaines de pourcentages de cours pour en faire un seul chiffre. Quatre
-        questions, et une seule bonne réponse par site — celle qui correspond à la promesse que
+        transformer des dizaines de pourcentages de cours en un seul chiffre, et en un titre.
+        Six questions, et une seule bonne réponse par site — celle qui correspond à la promesse que
         vous faites à l'étudiant.</p>
 
         <div class="scroll">
           <table class="tab">
-            <tr><th>La question</th><th>Ce qu'elle décide</th><th>Section</th></tr>
+            <tr><th style="width:24%">La question</th><th>Ce qu'elle décide</th><th style="width:12%">Section</th></tr>
             <tr><td>Le périmètre</td><td>Ce qui entre au dénominateur — tout le catalogue, ou
-              seulement ce à quoi il a accès</td><td><a href="#s3" style="color:#3466A8;font-weight:700">A</a></td></tr>
-            <tr><td>Le poids</td><td>Si une fiche de 3&nbsp;pages vaut autant qu'un module de
-              22&nbsp;leçons</td><td><a href="#s4" style="color:#3466A8;font-weight:700">B</a></td></tr>
+              seulement ce à quoi il a accès</td><td><a href="#perimetre" style="color:#3466A8;font-weight:700">A</a></td></tr>
+            <tr><td>Le barème</td><td>Combien vaut un contenu&nbsp;: la même chose pour tous, ou
+              une valeur par volume, par famille, par difficulté</td>
+              <td><a href="#bareme" style="color:#3466A8;font-weight:700">B</a></td></tr>
+            <tr><td>L'acquisition</td><td>Si les points tombent au prorata de l'avancement, par
+              paliers, ou seulement à 100&nbsp;%</td>
+              <td><a href="#acquisition" style="color:#3466A8;font-weight:700">C</a></td></tr>
+            <tr><td>L'échelle</td><td>Si le grade se lit sur un <em>pourcentage</em> du catalogue ou
+              sur un <em>total de points</em>. C'est elle qui commande les titres Junior →
+              Master</td><td><a href="#echelle" style="color:#3466A8;font-weight:700">D</a></td></tr>
             <tr><td>L'inconnu</td><td>Ce qu'on affiche quand on n'a pas encore mesuré</td>
-              <td><a href="#s5" style="color:#3466A8;font-weight:700">C</a></td></tr>
+              <td><a href="#inconnu" style="color:#3466A8;font-weight:700">E</a></td></tr>
             <tr><td>Le rythme</td><td>Au bout de combien de temps un cours terminé se voit sur le
-              profil</td><td><a href="#s6" style="color:#3466A8;font-weight:700">D</a></td></tr>
+              profil</td><td><a href="#rythme" style="color:#3466A8;font-weight:700">F</a></td></tr>
           </table>
         </div>
       </div>
     </details>
 
     <!-- ======================= 3 ======================= -->
-    <details id="s3">
+    <details id="perimetre">
       <summary><span class="idx dec">A</span> Décision A — le périmètre : 100&nbsp;% de quoi&nbsp;?
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
@@ -390,44 +435,176 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     </details>
 
     <!-- ======================= 4 ======================= -->
-    <details id="s4">
-      <summary><span class="idx dec">B</span> Décision B — le poids : une fiche vaut-elle un module&nbsp;?
+    <details id="bareme">
+      <summary><span class="idx dec">B</span> Décision B — le barème : combien vaut un contenu&nbsp;?
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
-        <p>Aujourd'hui, tous les contenus pèsent pareil. Une fiche cabinet de 3&nbsp;pages compte
-        autant qu'un module de 22&nbsp;leçons. Deux façons de voir les choses&nbsp;:</p>
+        <p>Aujourd'hui, tous les contenus valent la même chose. Une fiche cabinet de 3&nbsp;pages
+        compte autant qu'un module de 22&nbsp;leçons. Quatre barèmes possibles, du plus simple au
+        plus éditorial&nbsp;:</p>
 
         <div class="scroll">
           <table class="tab">
-            <tr><th style="width:24%">Option</th><th>Ce que ça veut dire</th><th style="width:32%">Le revers</th></tr>
+            <tr><th style="width:22%">Barème</th><th>Le principe</th><th style="width:30%">Qui décide, et le revers</th></tr>
             <tr>
-              <td>Un contenu = un contenu</td>
-              <td>Simple à expliquer&nbsp;: « il y a 40&nbsp;contenus, tu en as fini 10, tu es à
-                25&nbsp;% ». L'étudiant peut <strong>recompter lui-même</strong>.</td>
-              <td>Lire 6&nbsp;fiches de 3&nbsp;pages fait plus monter la jauge que finir le module
-                le plus lourd du site. Ça <strong>récompense le survol</strong>.</td>
+              <td>Identique</td>
+              <td>Chaque contenu vaut <strong>10&nbsp;points</strong>, quel qu'il soit. « 40&nbsp;contenus,
+                400&nbsp;points possibles ». L'étudiant peut <strong>recompter lui-même</strong>.</td>
+              <td><span class="pill ok">Personne</span> Rien à tenir à jour. Mais enchaîner
+                6&nbsp;fiches courtes rapporte plus que finir le module le plus lourd du site&nbsp;:
+                ça <strong>récompense le survol</strong>.</td>
             </tr>
             <tr>
-              <td>Pondéré par le volume</td>
-              <td>Chaque contenu pèse son nombre de leçons. La jauge mesure <strong>le travail
-                réellement fourni</strong>, pas le nombre de cases cochées.</td>
-              <td>Plus difficile à recompter de tête. Et un long module peu dense pèse autant qu'un
-                long module exigeant — la leçon reste l'unité, pas la difficulté.</td>
+              <td>Par volume</td>
+              <td><strong>1&nbsp;point par leçon.</strong> Un module de 22&nbsp;leçons vaut
+                22&nbsp;points, une fiche de 3&nbsp;pages en vaut 3. La jauge suit le
+                <strong>temps passé</strong>.</td>
+              <td><span class="pill ok">Personne</span> Le nombre de leçons est déjà affiché sur
+                chaque carte — aucune saisie. Mais un long module facile pèse autant qu'un long
+                module exigeant.</td>
+            </tr>
+            <tr>
+              <td>Par famille</td>
+              <td>Une valeur par <strong>type de contenu</strong>&nbsp;: un module vaut 20, une
+                étude de cas 10, un parcours 12, un entraînement 8, une fiche 4. Le barème dit ce
+                que vous jugez structurant.</td>
+              <td><span class="pill nous">Vous, une fois</span> Cinq nombres à fixer, et c'est tenu
+                pour toujours&nbsp;: un nouveau contenu hérite du barème de sa famille.</td>
+            </tr>
+            <tr>
+              <td>Par difficulté</td>
+              <td>Une valeur par <strong>niveau</strong>&nbsp;: 6&nbsp;points par cran de difficulté
+                (1&nbsp;à&nbsp;5). Un Niveau&nbsp;6 rapporte quatre fois plus qu'une fiche
+                d'introduction. C'est le barème le plus proche d'un vrai parcours de progression.</td>
+              <td><span class="pill warn">Vous, contenu par contenu</span> Le plus juste et le plus
+                exigeant&nbsp;: chaque nouveau contenu demande qu'on lui attribue une difficulté,
+                sinon il vaut 0.</td>
             </tr>
           </table>
         </div>
 
-        <div class="box ok"><strong>Bonne nouvelle technique.</strong> Le nombre de leçons est déjà
-        affiché sur chaque carte du site (les pastilles « 8&nbsp;leçons », « 3&nbsp;quiz »). Passer
-        au calcul pondéré ne demande <strong>aucune saisie manuelle</strong> et aucun nouvel appel
-        à LearnWorlds&nbsp;: la donnée est déjà sous nos yeux.</div>
+        <div class="box info"><strong>Le barème n'a pas besoin d'être visible pour agir.</strong>
+        L'étudiant peut très bien ne jamais voir « 20&nbsp;points » écrit nulle part&nbsp;: le
+        barème décide de la vitesse à laquelle sa jauge monte, et donc du moment où il change de
+        titre. L'afficher ou non est une question d'interface, pas de calcul — et les deux se
+        défendent.</div>
+
+        <div class="box warn"><strong>Un barème se tient dans la durée.</strong> « Identique » et
+        « par volume » se calculent tout seuls à partir de ce que le site sait déjà. « Par famille »
+        et « par difficulté » demandent une décision éditoriale par contenu ou par type&nbsp;: à
+        choisir seulement si quelqu'un s'engage à la tenir quand le catalogue grandira.</div>
+      </div>
+    </details>
+
+    <details id="acquisition">
+      <summary><span class="idx dec">C</span> Décision C — quand les points tombent
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>Un contenu vaut 20&nbsp;points. L'étudiant l'a fait <strong>à moitié</strong>. Combien
+        a-t-il gagné&nbsp;? Trois réponses, et elles changent complètement le comportement qu'on
+        encourage.</p>
+
+        <div class="scroll">
+          <table class="tab">
+            <tr><th style="width:24%">Option</th><th>Sur un contenu à 20 points, fait à 50&nbsp;%</th><th style="width:34%">Ce que ça encourage</th></tr>
+            <tr><td>Au prorata <span class="pill warn">actuel</span></td>
+              <td><strong>10&nbsp;points.</strong> La jauge bouge à chaque leçon.</td>
+              <td>La régularité. Mais aussi le survol&nbsp;: entamer dix cours sans en finir un
+                rapporte autant qu'en finir cinq.</td></tr>
+            <tr><td>Par paliers</td>
+              <td><strong>10&nbsp;points</strong> — mais rien de plus avant 100&nbsp;%. Les points
+                tombent à 50&nbsp;% puis à 100&nbsp;%.</td>
+              <td>Un compromis&nbsp;: la jauge récompense d'avoir commencé, puis d'avoir fini. Deux
+                moments de satisfaction au lieu d'un ruissellement continu.</td></tr>
+            <tr><td>Tout ou rien</td>
+              <td><strong>0&nbsp;point.</strong> Rien n'est acquis avant la fin du contenu.</td>
+              <td>L'achèvement. C'est la règle des vraies certifications&nbsp;: un module commencé
+                ne vaut rien, un module fini vaut tout. Exigeant, et très lisible.</td></tr>
+          </table>
+        </div>
+
+        <div class="box info"><strong>C'est la décision qui a le plus d'effet sur la sensation de
+        jeu.</strong> Au prorata, la jauge avance en permanence mais chaque pas est invisible. En
+        tout ou rien, il ne se passe rien pendant longtemps puis le titre change d'un coup. Les
+        paliers sont le seul des trois à donner les deux&nbsp;: du mouvement, et des évènements.</div>
+
+        <div class="box warn"><strong>Attention à ce que LearnWorlds appelle « terminé ».</strong>
+        Selon le réglage du cours, faire défiler une leçon peut suffire à la marquer terminée
+        (cf. section&nbsp;2). En tout ou rien, cela veut dire qu'un étudiant peut rafler tous les
+        points d'un module en le parcourant sans le lire. Si vous choisissez le tout ou rien, il
+        faut regarder ce réglage cours par cours dans LearnWorlds.</div>
+      </div>
+    </details>
+
+    <details id="echelle">
+      <summary><span class="idx dec">D</span> Décision D — pourcentage ou points&nbsp;: d'où viennent les titres
+        <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
+      </summary>
+      <div class="inner">
+        <p>C'est la décision qui commande directement le widget de grade — Junior, Consultant,
+        Manager, Principal, Partner, Master. Le titre se déclenche à un seuil&nbsp;; reste à savoir
+        <strong>en quoi ce seuil est exprimé</strong>.</p>
+
+        <div class="scroll">
+          <table class="tab">
+            <tr><th style="width:26%">Option</th><th>Le seuil s'écrit</th><th style="width:36%">La conséquence, en une phrase</th></tr>
+            <tr><td>Pourcentage du catalogue <span class="pill warn">actuel</span></td>
+              <td>« Manager à partir de <strong>25&nbsp;%</strong> du catalogue »</td>
+              <td>Le grade est <strong>relatif</strong>&nbsp;: il dit quelle part du site l'étudiant
+                a couverte.</td></tr>
+            <tr><td>Total de points</td>
+              <td>« Manager à partir de <strong>55&nbsp;points</strong> »</td>
+              <td>Le grade est <strong>absolu</strong>&nbsp;: il dit combien de travail a été
+                accompli, quel que soit le reste.</td></tr>
+          </table>
+        </div>
+
+        <div class="box no"><strong>Et voici pourquoi ça compte vraiment.</strong> En pourcentage,
+        <strong>publier de nouveaux contenus fait rétrograder tout le monde</strong>. Le
+        dénominateur grandit, les numérateurs ne bougent pas&nbsp;: un étudiant qui n'a rien fait
+        de la semaine peut passer de Manager à Consultant parce que <em>vous</em> avez travaillé.
+        En points, le total acquis ne bouge jamais, les seuils sont fixés une fois&nbsp;: personne
+        ne rétrograde jamais.</div>
+
+        <p>Le simulateur permet d'éprouver ça directement&nbsp;: une case
+        « <strong>le catalogue grandit</strong> » ajoute 10&nbsp;études de cas et montre l'effet sur
+        les deux échelles, sans que Camille ait ouvert une seule leçon de plus. Prenez le
+        préréglage <strong>« Pourcentage pondéré »</strong> et cochez la case&nbsp;: elle tombe de
+        <strong>28&nbsp;% à 23&nbsp;%</strong> et <strong>perd son titre de Manager</strong> — parce
+        que vous avez publié. Le même essai avec le préréglage « Recommandée », qui lit les points&nbsp;:
+        elle reste à 87&nbsp;points et garde son grade.</p>
+
+        <div class="scroll">
+          <table class="tab">
+            <tr><th style="width:26%"></th><th>Pourcentage</th><th>Points</th></tr>
+            <tr><td>Ce que le titre raconte</td><td>« J'ai couvert un quart du site »</td>
+              <td>« J'ai accompli tel volume de travail »</td></tr>
+            <tr><td>Quand vous publiez</td><td><span class="pill no">Tout le monde recule</span></td>
+              <td><span class="pill ok">Personne ne bouge</span></td></tr>
+            <tr><td>Comparable entre étudiants</td><td><span class="pill ok">Oui</span></td>
+              <td><span class="pill ok">Oui</span></td></tr>
+            <tr><td>Se comprend sans explication</td><td><span class="pill ok">Oui</span></td>
+              <td><span class="pill warn">Il faut donner une échelle</span> — « 55&nbsp;points »
+                ne veut rien dire sans le « sur 221 » d'à côté.</td></tr>
+            <tr><td>Une jauge reste possible</td><td><span class="pill ok">Oui</span></td>
+              <td><span class="pill ok">Oui</span> — remplie jusqu'au <em>prochain grade</em>,
+                pas jusqu'à 100&nbsp;% du catalogue. C'est même plus motivant.</td></tr>
+          </table>
+        </div>
+
+        <div class="box info"><strong>Les deux ne s'excluent pas.</strong> Rien n'interdit d'afficher
+        les tuiles de pages en pourcentage — « Cours&nbsp;: 41&nbsp;% » reste la formulation la plus
+        naturelle pour une page — et de faire reposer le <em>grade</em> sur les points. C'est même
+        la combinaison que nous recommandons&nbsp;: le pourcentage pour situer, les points pour
+        récompenser.</div>
       </div>
     </details>
 
     <!-- ======================= 5 ======================= -->
-    <details id="s5">
-      <summary><span class="idx dec">C</span> Décision C — l'inconnu : 0&nbsp;% ou «&nbsp;—&nbsp;»&nbsp;?
+    <details id="inconnu">
+      <summary><span class="idx dec">E</span> Décision E — l'inconnu : 0&nbsp;% ou «&nbsp;—&nbsp;»&nbsp;?
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
@@ -465,8 +642,8 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     </details>
 
     <!-- ======================= 6 ======================= -->
-    <details id="s6">
-      <summary><span class="idx dec">D</span> Décision D — le rythme : quand le chiffre bouge
+    <details id="rythme">
+      <summary><span class="idx dec">F</span> Décision F — le rythme : quand le chiffre bouge
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
@@ -505,8 +682,8 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     </details>
 
     <!-- ======================= 7 ======================= -->
-    <details id="s7" open>
-      <summary><span class="idx">7</span> Le simulateur — le même étudiant, seize réglages
+    <details id="simulateur" open>
+      <summary><span class="idx">7</span> Le simulateur — le même étudiant, tous les réglages
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
@@ -519,6 +696,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             <b>Combinaisons remarquables</b>
             <button type="button" data-pre="today">Aujourd'hui</button>
             <button type="button" data-pre="reco">Recommandée</button>
+            <button type="button" data-pre="pctpond">Pourcentage pondéré</button>
             <button type="button" data-pre="motiv">La plus motivante</button>
             <button type="button" data-pre="strict">La plus exigeante</button>
           </div>
@@ -534,10 +712,18 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
               </div>
               <div class="gp">
                 <b id="simGp">—</b>
-                <span>global</span>
+                <span id="simGu">global</span>
               </div>
             </div>
             <div class="sim-delta" id="simDelta"></div>
+            <div class="sim-pts" id="simPts"></div>
+            <div class="sim-ech" id="simEch"></div>
+            <label class="sim-gro" id="simGro">
+              <input type="checkbox" id="simGroCk">
+              <span><em>Et si le catalogue grandit ? Vous publiez 10 nouvelles études de cas.</em>
+              Camille n'ouvre pas une leçon de plus. Regardez son grade selon que l'échelle est en
+              pourcentage ou en points (décision&nbsp;D).</span>
+            </label>
             <div class="sim-tiles" id="simTiles"></div>
           </div>
         </div>
@@ -559,13 +745,17 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     </details>
 
     <!-- ======================= 8 ======================= -->
-    <details id="s8" open>
+    <details id="trancher" open>
       <summary><span class="idx">8</span> Ce qu'il reste à trancher
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
-        <p>Quatre réponses, et le calcul est défini pour tout le site — page Cours, pages de fiches,
+        <p>Six réponses, et le calcul est défini pour tout le site — page Cours, pages de fiches,
         études de cas et profil compris, avec <strong>un seul chiffre par objet</strong>.</p>
+
+        <div class="box ok"><strong>Une décision est déjà prise&nbsp;:</strong> la stat
+        « progression » de l'en-tête du profil a été retirée le 7&nbsp;août. Elle donnait un
+        deuxième chiffre global, différent de celui du grade, sur le même écran.</div>
 
         <div class="reco">
           <div class="r">
@@ -581,15 +771,38 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
           <div class="r">
             <div class="n">B</div>
             <div>
-              <h4>Le poids</h4>
-              <p>Un contenu = un contenu, ou pondéré par le nombre de leçons&nbsp;?</p>
-              <div class="mine"><b>Notre avis&nbsp;:</b> pondéré. La donnée est déjà affichée sur
-              les cartes, ça ne coûte rien, et ça évite qu'enchaîner des fiches courtes rapporte
-              plus que finir un module.</div>
+              <h4>Le barème</h4>
+              <p>Identique pour tous, par volume, par famille de contenu, ou par difficulté&nbsp;?</p>
+              <div class="mine"><b>Notre avis&nbsp;:</b> <strong>par famille</strong> — module 20,
+              étude de cas 10, parcours 12, entraînement 8, fiche 4. C'est le seul barème qui dise
+              ce que <em>vous</em> jugez structurant, et il se tient tout seul&nbsp;: un nouveau
+              contenu hérite du barème de sa famille. « Par difficulté » est plus juste mais
+              demande un arbitrage à chaque publication.</div>
             </div>
           </div>
           <div class="r">
             <div class="n">C</div>
+            <div>
+              <h4>L'acquisition</h4>
+              <p>Les points tombent au prorata, par paliers, ou seulement à 100&nbsp;%&nbsp;?</p>
+              <div class="mine"><b>Notre avis&nbsp;:</b> <strong>par paliers</strong> (50&nbsp;%
+              puis 100&nbsp;%). Le prorata rend chaque pas invisible, le tout ou rien laisse
+              l'étudiant sans signal pendant des semaines. Les paliers donnent les deux&nbsp;: du
+              mouvement, et des moments où il se passe quelque chose.</div>
+            </div>
+          </div>
+          <div class="r">
+            <div class="n">D</div>
+            <div>
+              <h4>L'échelle — celle qui commande les titres</h4>
+              <p>Le grade se lit sur un pourcentage du catalogue, ou sur un total de points&nbsp;?</p>
+              <div class="mine"><b>Notre avis&nbsp;:</b> <strong>les points</strong> pour le grade,
+              le <strong>pourcentage</strong> pour les tuiles de pages. C'est la seule combinaison
+              où publier de nouveaux contenus ne fait rétrograder personne — et vous allez publier.</div>
+            </div>
+          </div>
+          <div class="r">
+            <div class="n">E</div>
             <div>
               <h4>L'inconnu</h4>
               <p>Une page jamais visitée&nbsp;: 0&nbsp;%, «&nbsp;—&nbsp;», et comptée ou non&nbsp;?</p>
@@ -599,7 +812,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             </div>
           </div>
           <div class="r">
-            <div class="n">D</div>
+            <div class="n">F</div>
             <div>
               <h4>Le rythme</h4>
               <p>Mise à jour au passage sur la page, au retour sur le profil, ou en temps réel&nbsp;?</p>
@@ -609,10 +822,16 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
           </div>
         </div>
 
+        <p style="margin-top:20px"><strong>Ce que donne notre combinaison</strong> (le préréglage
+        « Recommandée » du simulateur)&nbsp;: Camille est <strong>Manager, 87&nbsp;points sur 348</strong>.
+        Elle le reste quand vous publiez 10&nbsp;nouvelles études de cas. Avec les règles
+        d'aujourd'hui elle est Consultant à 20&nbsp;%, et elle tombe à 18&nbsp;% le jour où vous
+        publiez.</p>
+
         <div class="box info" style="margin-top:18px"><strong>Un cinquième levier, déjà entre vos
         mains.</strong> L'échelle des grades (les noms et les seuils : Junior, Consultant, Manager,
         Principal, Partner, Master) se règle depuis le Site Builder, dans un bloc de texte de la
-        page Profil. Elle ne dépend d'aucune des quatre décisions ci-dessus — vous pouvez la
+        page Profil. Elle ne dépend d'aucune des six décisions ci-dessus — vous pouvez la
         modifier quand vous voulez, sans nous.</div>
 
         <div class="box warn" style="margin-top:14px"><strong>Attention à un effet de bord le jour
@@ -628,10 +847,11 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
 
 <footer>
   Aide PrepaStrat — comment calculer la progression. Document de décision établi le
-  7&nbsp;août&nbsp;2026 à partir du code en ligne. Les réglages décrits en sections&nbsp;3 à 6 ne
+  7&nbsp;août&nbsp;2026 à partir du code en ligne. Les réglages décrits aux décisions&nbsp;A à F ne
   sont <strong>pas</strong> en place&nbsp;: seule la combinaison « Aujourd'hui » du simulateur
-  décrit le comportement réel du site. Le simulateur travaille sur un catalogue fictif&nbsp;: il ne
-  lit et n'envoie aucune donnée d'étudiant.
+  décrit le comportement réel du site. Seul changement déjà appliqué&nbsp;: la stat « progression »
+  de l'en-tête du profil, retirée le 7&nbsp;août. Le simulateur travaille sur un catalogue
+  fictif&nbsp;: il ne lit et n'envoie aucune donnée d'étudiant.
 </footer>
 
 <script>
@@ -644,71 +864,96 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
    n'a aucune authentification.
 
    🔴 UNE SEULE FONCTION DE CALCUL, PARAMÉTRÉE. C'est tout l'objet de la
-   démonstration : montrer que les seize résultats sortent de la MÊME formule,
+   démonstration : montrer que toutes les variantes sortent de la MÊME formule,
    et que seuls les réglages changent. Dupliquer la formule par variante
    reproduirait exactement le défaut que la page dénonce.
 
+   🔴 LE MODÈLE EST CELUI DES POINTS, ET IL CONTIENT L'ANCIEN. Chaque contenu
+   vaut un nombre de points (barème), dont l'étudiant acquiert une part
+   (acquisition). Le pourcentage n'est qu'une lecture de ce total :
+   acquis ÷ possibles. Avec le barème « identique » et l'acquisition « prorata »,
+   la formule redonne EXACTEMENT la moyenne des pourcentages d'aujourd'hui —
+   c'est ce qui permet de comparer les réglages entre eux sans tricher.
+
+   🔴 LES SEUILS EN POINTS SONT GELÉS SUR LE CATALOGUE DE BASE, jamais sur le
+   catalogue agrandi. C'est toute la démonstration de la décision D : quand le
+   catalogue grandit, le pourcentage recule et les points ne bougent pas. Les
+   recalculer sur le catalogue agrandi effacerait précisément ce qu'on montre.
+
    `p:null` = progression inconnue (page jamais visitée), à distinguer d'un
-   vrai 0. C'est toute la décision C.
+   vrai 0. C'est toute la décision E.
    ============================================================ */
 (function(){
+  /* f = famille (barème « par famille ») · d = difficulté 1..5 (barème « par
+     difficulté ») · l = leçons (barème « par volume ») */
   var CATALOGUE=[
     {page:"Cours", col:"#507EC5", items:[
-      {n:"Niveau 1 — Découvrir le conseil",     l:12, p:100, acces:true},
-      {n:"Niveau 2 — Le paysage des cabinets",  l:14, p:100, acces:true},
-      {n:"Niveau 3 — Les outils du consultant", l:18, p:45,  acces:true},
-      {n:"Niveau 4 — La résolution de cas",     l:22, p:0,   acces:true},
-      {n:"Niveau 5 — Les entretiens",           l:16, p:0,   acces:false},
-      {n:"Niveau 6 — Décrocher l'offre",        l:10, p:0,   acces:false}
+      {n:"Niveau 1 — Découvrir le conseil",     l:12, p:100, acces:true,  f:"module", d:1},
+      {n:"Niveau 2 — Le paysage des cabinets",  l:14, p:100, acces:true,  f:"module", d:2},
+      {n:"Niveau 3 — Les outils du consultant", l:18, p:45,  acces:true,  f:"module", d:3},
+      {n:"Niveau 4 — La résolution de cas",     l:22, p:0,   acces:true,  f:"module", d:4},
+      {n:"Niveau 5 — Les entretiens",           l:16, p:0,   acces:false, f:"module", d:5},
+      {n:"Niveau 6 — Décrocher l'offre",        l:10, p:0,   acces:false, f:"module", d:5}
     ]},
     {page:"Fiches cabinet", col:"#12A85F", items:[
-      {n:"McKinsey",       l:3, p:100, acces:true},
-      {n:"BCG",            l:3, p:100, acces:true},
-      {n:"Bain",           l:3, p:0,   acces:true},
-      {n:"Roland Berger",  l:3, p:0,   acces:true},
-      {n:"Oliver Wyman",   l:3, p:0,   acces:true},
-      {n:"Kearney",        l:3, p:0,   acces:true},
-      {n:"Strategy&",      l:3, p:0,   acces:true}
+      {n:"McKinsey",       l:3, p:100, acces:true, f:"fiche", d:1},
+      {n:"BCG",            l:3, p:100, acces:true, f:"fiche", d:1},
+      {n:"Bain",           l:3, p:0,   acces:true, f:"fiche", d:1},
+      {n:"Roland Berger",  l:3, p:0,   acces:true, f:"fiche", d:1},
+      {n:"Oliver Wyman",   l:3, p:0,   acces:true, f:"fiche", d:1},
+      {n:"Kearney",        l:3, p:0,   acces:true, f:"fiche", d:1},
+      {n:"Strategy&",      l:3, p:0,   acces:true, f:"fiche", d:1}
     ]},
     {page:"Fiches secteur", col:"#009257", items:[
-      {n:"Banque",     l:3, p:100, acces:false},
-      {n:"Énergie",    l:3, p:0,   acces:false},
-      {n:"Luxe",       l:3, p:0,   acces:false},
-      {n:"Santé",      l:3, p:0,   acces:false},
-      {n:"Retail",     l:3, p:0,   acces:false},
-      {n:"Télécoms",   l:3, p:0,   acces:false},
-      {n:"Transport",  l:3, p:0,   acces:false},
-      {n:"Industrie",  l:3, p:0,   acces:false}
+      {n:"Banque",     l:3, p:100, acces:false, f:"fiche", d:2},
+      {n:"Énergie",    l:3, p:0,   acces:false, f:"fiche", d:2},
+      {n:"Luxe",       l:3, p:0,   acces:false, f:"fiche", d:2},
+      {n:"Santé",      l:3, p:0,   acces:false, f:"fiche", d:2},
+      {n:"Retail",     l:3, p:0,   acces:false, f:"fiche", d:2},
+      {n:"Télécoms",   l:3, p:0,   acces:false, f:"fiche", d:2},
+      {n:"Transport",  l:3, p:0,   acces:false, f:"fiche", d:2},
+      {n:"Industrie",  l:3, p:0,   acces:false, f:"fiche", d:2}
     ]},
     {page:"Études de cas", col:"#D22B45", items:[
-      {n:"Profitabilité",      l:5, p:100, acces:true},
-      {n:"Entrée sur marché",  l:5, p:100, acces:true},
-      {n:"Acquisition",        l:5, p:100, acces:true},
-      {n:"Tarification",       l:5, p:50,  acces:true},
-      {n:"Réduction de coûts", l:5, p:0,   acces:true},
-      {n:"Croissance externe", l:5, p:0,   acces:true},
-      {n:"Diversification",    l:5, p:0,   acces:true},
-      {n:"Chaîne logistique",  l:5, p:0,   acces:true},
-      {n:"Transformation",     l:5, p:0,   acces:true},
-      {n:"Digitalisation",     l:5, p:0,   acces:true},
-      {n:"Restructuration",    l:5, p:0,   acces:true},
-      {n:"Étude de faisabilité",l:5,p:0,   acces:true}
+      {n:"Profitabilité",       l:5, p:100, acces:true, f:"cas", d:3},
+      {n:"Entrée sur marché",   l:5, p:100, acces:true, f:"cas", d:3},
+      {n:"Acquisition",         l:5, p:100, acces:true, f:"cas", d:4},
+      {n:"Tarification",        l:5, p:50,  acces:true, f:"cas", d:3},
+      {n:"Réduction de coûts",  l:5, p:0,   acces:true, f:"cas", d:3},
+      {n:"Croissance externe",  l:5, p:0,   acces:true, f:"cas", d:4},
+      {n:"Diversification",     l:5, p:0,   acces:true, f:"cas", d:4},
+      {n:"Chaîne logistique",   l:5, p:0,   acces:true, f:"cas", d:3},
+      {n:"Transformation",      l:5, p:0,   acces:true, f:"cas", d:4},
+      {n:"Digitalisation",      l:5, p:0,   acces:true, f:"cas", d:3},
+      {n:"Restructuration",     l:5, p:0,   acces:true, f:"cas", d:5},
+      {n:"Étude de faisabilité",l:5, p:0,   acces:true, f:"cas", d:3}
     ]},
     {page:"Compétences", col:"#D98500", items:[
-      {n:"Structuration",     l:6, p:30, acces:false},
-      {n:"Dimensionnement",   l:6, p:0,  acces:false},
-      {n:"Communication",     l:6, p:0,  acces:false},
-      {n:"Chiffres & Excel",  l:6, p:0,  acces:false}
+      {n:"Structuration",     l:6, p:30, acces:false, f:"parcours", d:3},
+      {n:"Dimensionnement",   l:6, p:0,  acces:false, f:"parcours", d:3},
+      {n:"Communication",     l:6, p:0,  acces:false, f:"parcours", d:2},
+      {n:"Chiffres & Excel",  l:6, p:0,  acces:false, f:"parcours", d:4}
     ]},
     /* jamais visitée : progression inconnue, pas nulle */
     {page:"S'entraîner", col:"#8A45C9", items:[
-      {n:"Simulations d'entretien", l:8, p:null, acces:true},
-      {n:"Cas chronométrés",        l:8, p:null, acces:true},
-      {n:"Tests numériques",        l:8, p:null, acces:true}
+      {n:"Simulations d'entretien", l:8, p:null, acces:true, f:"entrainement", d:4},
+      {n:"Cas chronométrés",        l:8, p:null, acces:true, f:"entrainement", d:4},
+      {n:"Tests numériques",        l:8, p:null, acces:true, f:"entrainement", d:3}
     ]}
   ];
 
-  /* Échelle par défaut du site (réglable depuis le Site Builder). */
+  /* Les 10 études de cas que « vous venez de publier » (décision D). */
+  var CROISSANCE=[];
+  for(var ic=1; ic<=10; ic++){
+    CROISSANCE.push({n:"Nouvelle étude de cas "+ic, l:5, p:0, acces:true, f:"cas", d:3});
+  }
+
+  var BAREME_FAMILLE={module:20, cas:10, parcours:12, entrainement:8, fiche:4};
+  var FAMILLE_LBL={module:"Module", cas:"Étude de cas", parcours:"Parcours", entrainement:"Entraînement", fiche:"Fiche"};
+
+  /* Échelle par défaut du site (réglable depuis le Site Builder). Les `min` sont
+     des POURCENTAGES ; en mode points ils sont convertis en seuils absolus,
+     une fois pour toutes, sur le catalogue de base. */
   var GRADES=[
     {min:0,  nom:"Junior",            mot:"Sa préparation démarre."},
     {min:10, nom:"Consultant",        mot:"Les bases sont posées."},
@@ -721,63 +966,127 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
   var QUESTIONS=[
     {cle:"perimetre", eti:"Décision A", q:"Que compte-t-on&nbsp;?", opts:[
       {v:"tout",  t:"Tout le catalogue", d:"Y compris ce à quoi elle n'a pas accès. Comparable entre étudiants."},
-      {v:"acces", t:"Seulement ses accès", d:"Le 100&nbsp;% devient atteignable, mais baisse après un achat."}
+      {v:"acces", t:"Seulement ses accès", d:"Le maximum devient atteignable, mais recule après un achat."}
     ]},
-    {cle:"poids", eti:"Décision B", q:"Tout se vaut-il&nbsp;?", opts:[
-      {v:"egal",   t:"Un contenu = un contenu", d:"Une fiche de 3 pages pèse autant qu'un module de 22 leçons."},
-      {v:"lecons", t:"Pondéré par le nombre de leçons", d:"La jauge suit le travail fourni, pas les cases cochées."}
+    {cle:"bareme", eti:"Décision B", q:"Combien vaut un contenu&nbsp;?", opts:[
+      {v:"identique",  t:"Identique — 10 pts chacun", d:"Le plus simple à expliquer. Récompense le survol."},
+      {v:"volume",     t:"Par volume — 1 pt par leçon", d:"Suit le temps passé. Aucune saisie : la donnée est sur les cartes."},
+      {v:"famille",    t:"Par famille — module 20, cas 10, fiche 4…", d:"Vous fixez cinq nombres, et c'est tenu pour toujours."},
+      {v:"difficulte", t:"Par difficulté — 6 pts par cran", d:"Le plus juste, le plus exigeant à tenir contenu par contenu."}
     ]},
-    {cle:"inconnu", eti:"Décision C", q:"Et ce qu'on n'a pas mesuré&nbsp;?", opts:[
+    {cle:"acquisition", eti:"Décision C", q:"Quand les points tombent&nbsp;?", opts:[
+      {v:"prorata", t:"Au prorata de l'avancement", d:"La jauge bouge à chaque leçon. Entamer dix cours vaut en finir cinq."},
+      {v:"paliers", t:"Par paliers — 50 % puis 100 %", d:"Du mouvement, et deux vrais évènements."},
+      {v:"tout",    t:"Tout ou rien — à 100 % seulement", d:"Rien n'est acquis avant la fin. La règle des certifications."}
+    ]},
+    {cle:"echelle", eti:"Décision D", q:"Le grade se lit sur&nbsp;?", opts:[
+      {v:"pct",    t:"Un pourcentage du catalogue", d:"« Manager à 25 % ». Publier de nouveaux contenus fait rétrograder tout le monde."},
+      {v:"points", t:"Un total de points", d:"« Manager à 55 points ». Les seuils sont gelés : personne ne rétrograde jamais."}
+    ]},
+    {cle:"inconnu", eti:"Décision E", q:"Et ce qu'on n'a pas mesuré&nbsp;?", opts:[
       {v:"zero",  t:"Ça compte pour 0", d:"Une page jamais visitée tire le grade vers le bas."},
       {v:"exclu", t:"C'est exclu du calcul", d:"Le grade ne parle que de ce qui a été mesuré."}
     ]},
-    {cle:"global", eti:"Le chiffre global", q:"Comment agréger le global&nbsp;?", opts:[
-      {v:"pages",   t:"Moyenne des pages", d:"Chaque page pèse pareil, quelle que soit sa taille."},
-      {v:"contenus",t:"Sur tous les contenus", d:"«&nbsp;Finir un module&nbsp;» vaut la même chose partout."}
+    {cle:"global", eti:"Le chiffre global", q:"Comment agréger les pages&nbsp;?", opts:[
+      {v:"pages",    t:"Moyenne des pages", d:"Chaque page pèse pareil, quelle que soit sa taille."},
+      {v:"contenus", t:"Sur tous les contenus", d:"« Finir un module » vaut la même chose partout. Toujours le cas en mode points."}
     ]}
   ];
 
+  /* 🔴 `pctpond` EST LÀ POUR LA DÉMONSTRATION DE LA DÉCISION D, pas pour faire
+     nombre : c'est la combinaison où « +10 études de cas publiées » fait passer
+     Camille de Manager à Consultant sans qu'elle ait rien fait (28 % → 23 %,
+     le seuil Manager étant à 25 %). Déplacer ses valeurs casse l'exemple cité
+     en toutes lettres dans la section D — vérifier les deux ensemble. */
   var PRESETS={
-    today:  {perimetre:"tout",  poids:"egal",   inconnu:"zero",  global:"pages"},
-    reco:   {perimetre:"tout",  poids:"lecons", inconnu:"exclu", global:"contenus"},
-    motiv:  {perimetre:"acces", poids:"lecons", inconnu:"exclu", global:"contenus"},
-    strict: {perimetre:"tout",  poids:"egal",   inconnu:"zero",  global:"contenus"}
+    today:  {perimetre:"tout",  bareme:"identique",  acquisition:"prorata", echelle:"pct",    inconnu:"zero",  global:"pages"},
+    reco:   {perimetre:"tout",  bareme:"famille",    acquisition:"paliers", echelle:"points", inconnu:"exclu", global:"contenus"},
+    pctpond:{perimetre:"tout",  bareme:"volume",     acquisition:"prorata", echelle:"pct",    inconnu:"exclu", global:"contenus"},
+    motiv:  {perimetre:"acces", bareme:"volume",     acquisition:"prorata", echelle:"pct",    inconnu:"exclu", global:"contenus"},
+    strict: {perimetre:"tout",  bareme:"difficulte", acquisition:"tout",    echelle:"points", inconnu:"exclu", global:"contenus"}
   };
 
-  var etat={perimetre:"tout", poids:"egal", inconnu:"zero", global:"pages"};
+  var etat={perimetre:"tout", bareme:"identique", acquisition:"prorata", echelle:"pct", inconnu:"zero", global:"pages"};
+  var croissance=false;
 
-  /* ---- LE CALCUL, en une fonction ------------------------------------
-     Rend {pages:[{page,col,pct,connu,n}], global}. `pct===null` = inconnu.  */
-  function calculer(o){
-    var pages=[], numG=0, denG=0, sommePages=0, nbPages=0;
-    CATALOGUE.forEach(function(sec){
-      var num=0, den=0, n=0;
-      sec.items.forEach(function(it){
-        if(o.perimetre==="acces" && !it.acces) return;      // hors périmètre
-        var p=it.p;
-        if(p===null){
-          if(o.inconnu==="exclu") return;                   // décision C
-          p=0;
-        }
-        var w=(o.poids==="lecons") ? it.l : 1;              // décision B
-        num+=p*w; den+=w; n++;
-      });
-      var pct=den ? num/den : null;
-      pages.push({page:sec.page, col:sec.col, pct:pct, n:n});
-      if(den){ numG+=num; denG+=den; sommePages+=pct; nbPages++; }
-    });
-    var global = (o.global==="contenus")
-      ? (denG ? numG/denG : null)
-      : (nbPages ? sommePages/nbPages : null);
-    return {pages:pages, global:global};
+  /* ---- LE BARÈME : combien vaut ce contenu ---------------------------- */
+  function valeur(it,bareme){
+    if(bareme==="volume")     return it.l;
+    if(bareme==="famille")    return BAREME_FAMILLE[it.f]||0;
+    if(bareme==="difficulte") return it.d*6;
+    return 10;                                          // identique
   }
 
-  function gradeDe(pct){
-    var g=GRADES[0], suivant=null;
-    for(var i=0;i<GRADES.length;i++){
-      if(pct>=GRADES[i].min){ g=GRADES[i]; suivant=GRADES[i+1]||null; }
-    }
-    return {actuel:g, suivant:suivant};
+  /* ---- L'ACQUISITION : quelle part de ces points est gagnée ----------- */
+  function part(p,acq){
+    if(acq==="tout")    return p>=100 ? 1 : 0;
+    if(acq==="paliers") return p>=100 ? 1 : (p>=50 ? .5 : 0);
+    return p/100;                                       // prorata
+  }
+
+  /* ---- LE CALCUL, en une fonction -------------------------------------
+     Rend {pages:[{page,col,pct,acquis,possible,n}], acquis, possible, pct}
+     `pct===null` = rien de mesurable dans ce périmètre.                   */
+  function calculer(o,avecCroissance){
+    var pages=[], accG=0, posG=0, sommePages=0, nbPages=0;
+    CATALOGUE.forEach(function(sec){
+      var items=sec.items;
+      if(avecCroissance && sec.page==="Études de cas") items=items.concat(CROISSANCE);
+      var acc=0, pos=0, n=0;
+      items.forEach(function(it){
+        if(o.perimetre==="acces" && !it.acces) return;   // décision A
+        var p=it.p;
+        if(p===null){
+          if(o.inconnu==="exclu") return;                // décision E
+          p=0;
+        }
+        var v=valeur(it,o.bareme);                       // décision B
+        acc+=v*part(p,o.acquisition);                    // décision C
+        pos+=v; n++;
+      });
+      var pct=pos ? (acc/pos)*100 : null;
+      pages.push({page:sec.page, col:sec.col, pct:pct, acquis:acc, possible:pos, n:n});
+      if(pos){ accG+=acc; posG+=pos; sommePages+=pct; nbPages++; }
+    });
+    /* 🔴 En mode POINTS le global est toujours la somme des contenus : des points
+       ne se « moyennent » pas par page, ils s'additionnent. L'option « moyenne
+       des pages » ne concerne donc que la lecture en pourcentage. */
+    /* 🔴 DEUX POURCENTAGES DISTINCTS, ET IL FAUT LES DEUX.
+       `pool` = acquis ÷ possibles sur l'ensemble : c'est le rapport que la ligne
+       de points doit afficher, sinon on écrirait « 93 points sur 400, soit
+       20 % » — un lecteur qui fait la division tombe sur 23 % et perd confiance.
+       `pct` = ce que LIT le grade, qui peut être la moyenne des pages. Les
+       confondre est très exactement le défaut que cette page dénonce. */
+    var pool = posG ? (accG/posG)*100 : null;
+    var pct;
+    if(o.echelle==="points" || o.global==="contenus") pct = pool;
+    else pct = nbPages ? sommePages/nbPages : null;
+    return {pages:pages, acquis:accG, possible:posG, pct:pct, pool:pool};
+  }
+
+  /* Seuils du grade, dans l'unité de l'échelle choisie.
+     🔴 GELÉS SUR LE CATALOGUE DE BASE (jamais `croissance`) : c'est la
+     démonstration même de la décision D. */
+  function seuils(o){
+    if(o.echelle!=="points") return GRADES.map(function(g){ return g.min; });
+    var base=calculer(o,false).possible;
+    return GRADES.map(function(g){ return Math.round(g.min/100*base); });
+  }
+
+  function gradeDe(valeurLue,sls){
+    var i=0;
+    for(var k=0;k<GRADES.length;k++){ if(valeurLue>=sls[k]) i=k; }
+    return {actuel:GRADES[i], suivant:GRADES[i+1]||null, seuilSuivant:(i+1<sls.length?sls[i+1]:null), index:i};
+  }
+
+  /* Ce que le grade lit, dans l'unité de l'échelle. */
+  function lecture(r,o){
+    if(r.pct===null) return null;
+    return (o.echelle==="points") ? r.acquis : r.pct;
+  }
+  function fmtVal(v,o){
+    if(v===null) return "—";
+    return (o.echelle==="points") ? String(Math.round(v)) : (Math.round(v)+" %");
   }
 
   /* ---- Les contrôles -------------------------------------------------- */
@@ -810,9 +1119,13 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     });
   });
 
-  /* ---- Le rendu -------------------------------------------------------- */
-  function pcTxt(v){ return v===null ? "—" : Math.round(v)+" %"; }
+  document.getElementById("simGroCk").addEventListener("change", function(){
+    croissance=this.checked;
+    document.getElementById("simGro").classList.toggle("on", croissance);
+    rendre();
+  });
 
+  /* ---- Le rendu -------------------------------------------------------- */
   function nomPreset(){
     for(var k in PRESETS){
       var p=PRESETS[k], ok=true;
@@ -834,34 +1147,72 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
       b.classList.toggle("on", b.dataset.pre===pre);
     });
 
-    var r=calculer(etat);
+    var r=calculer(etat,croissance);
+    var sls=seuils(etat);
+    var lu=lecture(r,etat);
 
     /* bandeau de grade */
     var gp=document.getElementById("simGp");
     var gn=document.getElementById("simGn");
     var gm=document.getElementById("simGm");
-    if(r.global===null){
+    var gu=document.getElementById("simGu");
+    gu.textContent=(etat.echelle==="points")?"points":"global";
+    if(lu===null){
       gp.textContent="—"; gn.textContent="Rien de mesuré"; gm.textContent="";
     }else{
-      var v=Math.round(r.global);
-      var g=gradeDe(v);
-      gp.textContent=v+" %";
+      var g=gradeDe(lu,sls);
+      gp.textContent=(etat.echelle==="points")?String(Math.round(lu)):(Math.round(lu)+" %");
       gn.textContent=g.actuel.nom;
       gm.textContent = g.suivant
-        ? (g.actuel.mot+" Encore "+Math.max(1,g.suivant.min-v)+" % pour devenir "+g.suivant.nom.toLowerCase()+".")
+        ? (g.actuel.mot+" Encore "+Math.max(1,Math.round(g.seuilSuivant-lu))+
+           (etat.echelle==="points"?" points":" %")+" pour devenir "+g.suivant.nom.toLowerCase()+".")
         : g.actuel.mot;
     }
 
-    /* écart avec la règle actuelle */
-    var ref=calculer(PRESETS.today);
+    /* comparaison avec la règle actuelle — en GRADES, seule unité commune aux
+       deux échelles (comparer « 20 % » et « 62 points » n'aurait aucun sens) */
+    var ref=calculer(PRESETS.today,croissance);
+    var refG=gradeDe(lecture(ref,PRESETS.today), seuils(PRESETS.today));
     var d=document.getElementById("simDelta");
-    if(r.global===null || ref.global===null){ d.textContent=""; }
+    if(lu===null){ d.textContent=""; }
     else{
-      var a=Math.round(ref.global), b=Math.round(r.global);
-      d.innerHTML = (a===b)
-        ? "Même résultat qu'avec la règle actuelle (<b>"+a+" %</b>)."
-        : "Règle actuelle : <b>"+a+" %</b> ("+gradeDe(a).actuel.nom+") · ce réglage : <b>"+b+" %</b> ("+gradeDe(b).actuel.nom+").";
+      var moi=gradeDe(lu,sls);
+      d.innerHTML="Règle actuelle&nbsp;: <b>"+refG.actuel.nom+"</b> ("+Math.round(ref.pct)+"&nbsp;%)"+
+                  " · ce réglage&nbsp;: <b>"+moi.actuel.nom+"</b> ("+fmtVal(lu,etat)+
+                  (etat.echelle==="points"?(" sur "+Math.round(r.possible)):"")+").";
     }
+
+    /* la ligne des points : toujours visible, c'est elle qui rend le barème lisible */
+    var pts=document.getElementById("simPts");
+    pts.innerHTML="";
+    function bout(html){ var s=document.createElement("span"); s.innerHTML=html; pts.appendChild(s); }
+    function sep(){ var s=document.createElement("span"); s.className="sep"; pts.appendChild(s); }
+    bout("<b>"+Math.round(r.acquis)+"</b> points acquis sur <b>"+Math.round(r.possible)+"</b> possibles");
+    sep();
+    bout("soit <b>"+(r.pool===null?"—":Math.round(r.pool)+"&nbsp;%")+"</b> du périmètre");
+    sep();
+    bout("le grade se lit sur <b>"+(etat.echelle==="points"?"les points":"le pourcentage")+"</b>");
+    /* Quand le grade lit la moyenne des pages, elle DIFFÈRE du rapport ci-dessus :
+       on l'écrit plutôt que de laisser deux nombres se contredire en silence. */
+    if(etat.echelle!=="points" && etat.global==="pages" && r.pct!==null && r.pool!==null
+       && Math.round(r.pct)!==Math.round(r.pool)){
+      sep();
+      bout("moyenne des pages&nbsp;: <b>"+Math.round(r.pct)+"&nbsp;%</b>");
+    }
+
+    /* l'échelle des grades, dans l'unité choisie */
+    var ech=document.getElementById("simEch");
+    ech.textContent="";
+    var idx=(lu===null)?-1:gradeDe(lu,sls).index;
+    GRADES.forEach(function(g,i){
+      var e=document.createElement("div");
+      e.className="e"+(i===idx?" on":"");
+      var en=document.createElement("div"); en.className="en"; en.textContent=g.nom; e.appendChild(en);
+      var es=document.createElement("div"); es.className="es";
+      es.textContent="dès "+sls[i]+(etat.echelle==="points"?" pts":" %");
+      e.appendChild(es);
+      ech.appendChild(e);
+    });
 
     /* tuiles par page */
     var t=document.getElementById("simTiles");
@@ -870,49 +1221,60 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
       var el=document.createElement("div");
       el.className="sim-t"+(p.pct===null?" unk":"");
       var nm=document.createElement("div"); nm.className="tn"; nm.textContent=p.page; el.appendChild(nm);
-      var pv=document.createElement("div"); pv.className="tp"; pv.textContent=pcTxt(p.pct); el.appendChild(pv);
+      var pv=document.createElement("div"); pv.className="tp";
+      pv.textContent=(p.pct===null?"—":Math.round(p.pct)+" %"); el.appendChild(pv);
       var bar=document.createElement("div"); bar.className="tb";
       var fill=document.createElement("i");
       fill.style.background=p.col;
       fill.style.width=(p.pct===null?0:Math.max(0,Math.min(100,p.pct)))+"%";
       bar.appendChild(fill); el.appendChild(bar);
       var sub=document.createElement("div"); sub.className="ts";
-      sub.textContent = p.n ? (p.n+(p.n>1?" contenus comptés":" contenu compté")) : "aucun contenu compté";
+      sub.textContent = p.n
+        ? (p.n+" contenus · "+Math.round(p.acquis)+"/"+Math.round(p.possible)+" pts")
+        : "aucun contenu compté";
       el.appendChild(sub);
       t.appendChild(el);
     });
 
-    /* l'écart maximal entre les seize réglages : l'argument le plus parlant */
     ecartMax();
   }
 
+  /* L'argument le plus parlant : l'amplitude sur TOUTES les combinaisons.
+     🔴 On compare des GRADES, pas des nombres : « 20 % » et « 62 points » ne
+     sont pas commensurables, alors que le titre affiché à l'étudiant, si. */
   function ecartMax(){
-    var vals=[], combos=[];
-    ["tout","acces"].forEach(function(a){
-      ["egal","lecons"].forEach(function(b){
-        ["zero","exclu"].forEach(function(c){
-          ["pages","contenus"].forEach(function(e){
-            var g=calculer({perimetre:a,poids:b,inconnu:c,global:e}).global;
-            if(g!==null){ vals.push(Math.round(g)); combos.push({a:a,b:b,c:c,e:e}); }
-          });
-        });
-      });
-    });
-    if(!vals.length) return;
-    var mn=Math.min.apply(null,vals), mx=Math.max.apply(null,vals);
-    document.getElementById("simEcart").innerHTML=
-      "<strong>Le même travail, de "+mn+"&nbsp;% à "+mx+"&nbsp;%.</strong> Camille n'a pas ouvert une "+
-      "leçon de plus entre ces deux chiffres — et son grade passe de <strong>"+gradeDe(mn).actuel.nom+
-      "</strong> à <strong>"+gradeDe(mx).actuel.nom+"</strong>. C'est pourquoi ce choix vous revient : "+
-      "aucune de ces réponses n'est techniquement plus juste qu'une autre, elles racontent des "+
-      "histoires différentes.";
+    var min=null, max=null, n=0, pcts=[];
+    QUESTIONS[0].opts.forEach(function(a){
+    QUESTIONS[1].opts.forEach(function(b){
+    QUESTIONS[2].opts.forEach(function(c){
+    QUESTIONS[3].opts.forEach(function(e){
+    QUESTIONS[4].opts.forEach(function(f){
+    QUESTIONS[5].opts.forEach(function(g){
+      var o={perimetre:a.v, bareme:b.v, acquisition:c.v, echelle:e.v, inconnu:f.v, global:g.v};
+      var rr=calculer(o,croissance), ll=lecture(rr,o);
+      if(ll===null) return;
+      var gi=gradeDe(ll,seuils(o)).index;
+      if(min===null||gi<min) min=gi;
+      if(max===null||gi>max) max=gi;
+      n++;
+      /* `pool`, pas `pct` : la phrase parle de la PART DU PÉRIMÈTRE couverte,
+         qui est un rapport de points — pas de ce que le grade lit. */
+      if(rr.pool!==null) pcts.push(Math.round(rr.pool));
+    });});});});});});
+    if(min===null) return;
+    var el=document.getElementById("simEcart");
+    var bornes = pcts.length ? (Math.min.apply(null,pcts)+"&nbsp;% à "+Math.max.apply(null,pcts)+"&nbsp;%") : "";
+    el.innerHTML="<strong>Le même travail, du grade "+GRADES[min].nom+" au grade "+GRADES[max].nom+
+      ".</strong> Sur les "+n+" combinaisons possibles, Camille couvre "+bornes+" du périmètre sans "+
+      "avoir ouvert une leçon de plus. Aucune de ces réponses n'est techniquement plus juste qu'une "+
+      "autre&nbsp;: elles racontent des histoires différentes, et c'est pour ça que le choix vous revient.";
   }
 
   /* ---- Le catalogue affiché ------------------------------------------- */
   (function(){
     var t=document.getElementById("simCat");
     var head=document.createElement("tr");
-    ["Contenu","Leçons","Progression","Accès"].forEach(function(h,i){
+    ["Contenu","Famille","Leçons","Difficulté","Progression","Accès"].forEach(function(h,i){
       var th=document.createElement("th");
       th.textContent=h;
       if(i>0) th.style.textAlign="right";
@@ -921,7 +1283,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     t.appendChild(head);
     CATALOGUE.forEach(function(sec){
       var gr=document.createElement("tr"); gr.className="grp";
-      var td=document.createElement("td"); td.colSpan=4;
+      var td=document.createElement("td"); td.colSpan=6;
       var dot=document.createElement("span"); dot.className="dot"; dot.style.background=sec.col;
       td.appendChild(dot);
       td.appendChild(document.createTextNode(sec.page+" — "+sec.items.length+" contenus"));
@@ -929,12 +1291,15 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
       sec.items.forEach(function(it){
         var tr=document.createElement("tr");
         var c1=document.createElement("td"); c1.textContent=it.n; tr.appendChild(c1);
-        var c2=document.createElement("td"); c2.className="num"; c2.textContent=it.l; tr.appendChild(c2);
-        var c3=document.createElement("td"); c3.className="num";
-        c3.textContent=(it.p===null?"non mesurée":it.p+" %"); tr.appendChild(c3);
-        var c4=document.createElement("td"); c4.className="num";
-        c4.innerHTML=it.acces?'<span class="pill ok">ouvert</span>':'<span class="pill no">verrouillé</span>';
-        tr.appendChild(c4);
+        var c2=document.createElement("td"); c2.className="num";
+        c2.textContent=FAMILLE_LBL[it.f]||it.f; tr.appendChild(c2);
+        var c3=document.createElement("td"); c3.className="num"; c3.textContent=it.l; tr.appendChild(c3);
+        var c4=document.createElement("td"); c4.className="num"; c4.textContent=it.d+"/5"; tr.appendChild(c4);
+        var c5=document.createElement("td"); c5.className="num";
+        c5.textContent=(it.p===null?"non mesurée":it.p+" %"); tr.appendChild(c5);
+        var c6=document.createElement("td"); c6.className="num";
+        c6.innerHTML=it.acces?'<span class="pill ok">ouvert</span>':'<span class="pill no">verrouillé</span>';
+        tr.appendChild(c6);
         t.appendChild(tr);
       });
     });
