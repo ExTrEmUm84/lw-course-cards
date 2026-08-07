@@ -177,6 +177,9 @@
        LearnWorlds impose à TOUS ses liens sa couleur (#1c1f26) + un soulignement.
        Sans !important, le texte du bouton virait gris foncé souligné sur fond
        violet — illisible. Vérifié sur la page réelle le 2026-07-17. */
+    /* 🔴 WhatsApp a sa couleur de marque (#25D366), comme le bouton du bloc
+       communaute pose le 25/07 : un bouton vert est reconnu avant d etre lu. */
+    R + ".psa-contact-whatsapp{background:#25D366 !important;}" +
     R + ".psa-contact{display:inline-flex;align-items:center;gap:7px;padding:9px 15px;" +
       "border-radius:var(--ps-r-btn,10px);background:var(--ps-an-btn,var(--ps-accent,#507EC5)) !important;color:#fff !important;" +
       "font-family:var(--ps-font,Figtree,-apple-system,Segoe UI,Roboto,sans-serif);" +
@@ -344,20 +347,30 @@
     // secondaires (LinkedIn / Site). Le tout collé en bas par margin-top:auto.
     var foot = el("div", "psa-foot");
 
-    // Bouton contact : le canal (email, LinkedIn, tél…) est choisi par le
-    // membre ; le Worker a déjà déterminé libellé et lien.
-    if (m.contact && m.contact.href) {
-      var cta = el("a", "psa-contact", m.contact.label);
-      cta.href = m.contact.href;
-      // On n'ouvre un nouvel onglet que pour le web ; mailto:/tel: restent
-      // dans le même contexte (sinon un onglet blanc s'ouvre puis se ferme).
-      if (/^https?:/i.test(m.contact.href)) {
+    /* Boutons de contact. Le Worker a deja decide libelle, lien et validite :
+       on ne fabrique aucune URL ici, on ne fait que rendre ce qu il autorise.
+
+       🔴 `contacts` (les 4 champs explicites, 07/08) PUIS `contact` (l ancien
+       champ unique, devine par classifyContact) : les deux coexistent, parce
+       que des membres n ont rempli que l ancien. On n affiche l ancien QUE si
+       les nouveaux sont vides -- sinon la meme personne aurait deux boutons
+       pour le meme canal.
+       🔴 On n ouvre un nouvel onglet que pour le web : `mailto:` et `tel:`
+       restent dans le contexte courant, sinon un onglet blanc s ouvre et se
+       referme aussitot. */
+    var canaux = (m.contacts && m.contacts.length) ? m.contacts
+               : (m.contact && m.contact.href ? [m.contact] : []);
+    canaux.forEach(function (c) {
+      if (!c || !c.href) return;
+      var cta = el("a", "psa-contact" + (c.type ? " psa-contact-" + c.type : ""), c.label);
+      cta.href = c.href;
+      if (/^https?:/i.test(c.href)) {
         cta.target = "_blank";
         cta.rel = "noopener noreferrer nofollow";
       }
-      cta.setAttribute("aria-label", m.contact.label + " — " + m.name);
+      cta.setAttribute("aria-label", c.label + " — " + m.name);
       foot.appendChild(cta);
-    }
+    });
 
     var links = el("div", "psa-links");
     [[m.linkedin, "LinkedIn"], [m.website, "Site web"]].forEach(function (p) {

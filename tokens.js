@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-g";
+  window.PS_TOKENS_V="2026-08-07-h";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3669,13 +3669,40 @@
     { cle:"cf_recherche", type:"choix", vis:"cible", noyau:true, q:"Que cherchez-vous ?",
       options:["Stage","CDI Junior","CDI expérimenté"] },
     { cle:"cf_langue", type:"multi", vis:"langue", q:"Dans quelle langue voulez-vous vous entraîner ?",
+      /* 🔴 LearnWorlds n'a PAS de champ à choix multiple (confirmé par Ziad le
+         07/08) : le champ reste un menu déroulant, et c'est le LIBELLÉ qui
+         porte la donnée. Une troisième option « Français, Anglais » y a été
+         ajoutée — la VIRGULE compte, c'est elle que `splitList()` découpe côté
+         Worker pour faire apparaître le membre sous les deux facettes.
+         🔴 Ne JAMAIS renommer « Français » ni « Anglais » : renommer une option
+         réécrit la donnée de tous les membres qui la portent (défaut payé le
+         04/08, l'annuaire s'était vidé à moitié). */
       sous:"Plusieurs réponses possibles.", options:["Français","Anglais"] },
     { cle:"bio", type:"long", vis:"plume", q:"Deux lignes sur vous",
       sous:"Ce que vous préparez, d'où vous venez, ce qui vous motive.", max:280,
       placeholder:"En M1 à l'ESSEC, je vise le conseil en stratégie après une prépa HEC…" },
-    { cle:"cf_contact", type:"texte", vis:"contact", q:"Comment peut-on vous joindre ?",
-      sous:"E-mail, LinkedIn, WhatsApp, Calendly — ce que vous acceptez de partager. C'est ce qui fait apparaître le bouton « Contacter » sur votre fiche.",
-      placeholder:"prenom.nom@exemple.fr" }
+    /* 🔴🔴 QUATRE CHAMPS EXPLICITES AU LIEU D'UNE DEVINETTE (07/08, Ziad).
+       L'unique `cf_contact` était un texte libre que le Worker devait
+       CLASSER (`classifyContact`) : e-mail ? téléphone ? LinkedIn ? On demande
+       désormais chaque canal, ce qui supprime l'ambiguïté à la source.
+       🔴 L'ancien `cf_contact` n'est PAS supprimé côté Worker — des membres
+       l'ont rempli et garderaient sinon une carte sans bouton — mais il n'est
+       plus DEMANDÉ : on ne fait pas saisir deux fois la même chose.
+       🔴 WhatsApp est un DRAPEAU sur le numéro, pas un second numéro. Si le
+       membre coche sans avoir donné de numéro exploitable, le Worker n'affiche
+       aucun bouton plutôt qu'un lien vers une page d'erreur. */
+    { cle:"cf_contactmail", type:"texte", vis:"contact", q:"Votre e-mail de contact",
+      sous:"Celui que vous acceptez de partager — pas forcément celui de votre compte.",
+      placeholder:"prenom.nom@exemple.fr" },
+    { cle:"cf_contactlinkedin", type:"texte", vis:"contact", q:"Votre profil LinkedIn",
+      sous:"L'adresse de votre page, pour que les autres puissent vous situer.",
+      placeholder:"linkedin.com/in/prenom-nom" },
+    { cle:"cf_contacttel", type:"texte", vis:"contact", q:"Votre numéro de téléphone",
+      sous:"⚠️ Il sera visible des autres membres de l'annuaire. Laissez vide si vous préférez.",
+      placeholder:"+33 6 12 34 56 78" },
+    { cle:"cf_contactwhatsapp", type:"choix", vis:"contact", q:"Êtes-vous joignable sur WhatsApp ?",
+      sous:"On ajoutera un bouton WhatsApp à partir du numéro ci-dessus.",
+      options:["Oui","Non"] }
   ];
 
   /* ====================================================================
@@ -4001,7 +4028,23 @@
   /* ── Le formulaire lui-même ─────────────────────────────────────────────── */
   function ficheOuvrir(u){
     ficheCSS();
-    var rep={}, i=0, NOYAU=4;
+    var rep={}, i=0, NOYAU=4, noyauMontre=false, noyauEnvoye=false;
+    /* 🔴🔴 NE PAS REDEMANDER CE QU'ON SAIT DÉJÀ (07/08, signalé par Ziad :
+       « quand on passe d'apparaître à masquer puis réapparaître, il nous
+       redemande les infos qu'on a déjà données »).
+       Cause : `/account` ouvre la popup avec `PS_FICHE_OUVRIR(true)`, et
+       `force` court-circuitait `fichePeutSAfficher()` — c'est-à-dire le SEUL
+       endroit qui calculait ce qui manquait encore. Court-circuiter le MOMENT
+       ne devait pas court-circuiter le CONTENU.
+       🟢 On lit `ficheChamps(u)` : `me.custom_fields` n'est pas fiable hors
+       `/profile`, mais les TAGS le sont partout et disent si un champ est
+       rempli — c'est tout ce qu'il faut ici. */
+    var connus=ficheChamps(u);
+    function dejaConnu(e){ return !!e && rempli(connus[e.cle]); }
+    function sauterConnus(){
+      while(i<FICHE_ECRANS.length && dejaConnu(FICHE_ECRANS[i])) i++;
+    }
+    sauterConnus();
     var hote=document.createElement("div"); hote.id="ps-fiche";
     hote.setAttribute("role","dialog"); hote.setAttribute("aria-modal","true");
     document.body.appendChild(hote);
@@ -4076,7 +4119,7 @@
           'Vous pourrez changer d\'avis depuis votre profil.</p></div>'+
           '<div class="pf-pied"><span class="pf-lien" style="cursor:default"></span>'+
           '<button class="pf-ok" data-a="fin">Fermer</button></div>';
-      } else if(i===NOYAU){
+      } else if(i===NOYAU && !noyauMontre){
         corps='<div class="pf-e"><div class="pf-vis">'+FICHE_VIS.fini+'</div>'+
           '<h3>Votre fiche est en ligne</h3>'+
           '<p class="pf-sous">Voici ce que les autres étudiants verront. Trois questions de plus la rendent bien plus utile.</p>'+
@@ -4124,10 +4167,18 @@
           if(a==="fin"){ fermer(true); return; }
           /* Publication du noyau : on enregistre AVANT de proposer la suite —
              celui qui ferme la fenêtre ici a déjà sa fiche. */
-          if(a==="suite"){ ficheEnvoyer(u, rep, false); i++; rendre(); return; }
+          /* 🔴🔴 NE PLUS INCREMENTER ICI (07/08). L'écran « Votre fiche est en
+             ligne » s'affichait À LA PLACE de `FICHE_ECRANS[NOYAU]`, puis ce
+             `i++` sautait par-dessus : la question d'index 4 — **la langue** —
+             n'était JAMAIS posée. C'est pour ça que Ziad ne pouvait pas choisir
+             « Français et Anglais » : il ne pouvait choisir aucune langue.
+             ⇒ Le jalon devient un ÉTAT (`noyauMontre`), pas une position. */
+          if(a==="suite"){ ficheEnvoyer(u, rep, false); noyauMontre=true; rendre(); return; }
           if(a==="passer"||a==="suivant"){
-            i++;
-            if(i===NOYAU) ficheEnvoyer(u, rep, false);
+            i++; sauterConnus();
+            /* `>=` et non `===` : avec le saut des champs connus, on peut
+               franchir le jalon sans jamais tomber dessus exactement. */
+            if(!noyauEnvoye && i>=NOYAU){ noyauEnvoye=true; ficheEnvoyer(u, rep, false); }
             if(i>=FICHE_ECRANS.length) ficheEnvoyer(u, rep, true);
             rendre();
           }
@@ -4161,7 +4212,7 @@
           var c=hote.querySelector(".pf-cpt b"); if(c) c.textContent=champ.value.length;
         };
         champ.onkeydown=function(ev){
-          if(ev.key==="Enter" && e.type!=="long"){ ev.preventDefault(); i++; if(i>=FICHE_ECRANS.length) ficheEnvoyer(u,rep,true); rendre(); }
+          if(ev.key==="Enter" && e.type!=="long"){ ev.preventDefault(); i++; sauterConnus(); if(i>=FICHE_ECRANS.length) ficheEnvoyer(u,rep,true); rendre(); }
         };
         try{ champ.focus(); }catch(_){}
       }
