@@ -146,6 +146,32 @@
 
     /* ---------- récapitulatif ---------- */
     S + ".payment-section .col.span_4_of_12{position:sticky !important;top:92px !important;}",
+
+    /* 🔴🔴 LA LIGNE DU COUPON SE BRISAIT EN PLEIN MONTANT (08/08, signalé par
+       Ziad, mesuré sur la vraie page avec un coupon appliqué).
+       La rangée de LearnWorlds est un `flex` en `nowrap`, large de 261 px, et
+       ses trois cellules en réclament autant : nom 70 · montant · description
+       163. Le montant, coincé à 28 px, passait sur DEUX lignes — le tiret
+       au-dessus du chiffre, « -€99 » devenu illisible.
+       ⇒ On autorise le repli, on interdit à chaque cellule de se couper, et on
+       envoie la DESCRIPTION seule à la ligne (c'est le seul texte qui peut se
+       permettre de passer sur deux lignes). Mesuré après application :
+       montant 34×23 sur UNE ligne, description entière en dessous.
+       🔴 `.lw-text-color-fadeout3` = le texte atténué, donc la description :
+       c'est la seule prise disponible, LearnWorlds ne nomme pas ses cellules.
+       Vérifié que les rangées voisines n'en pâtissent pas — « Total dû
+       aujourd'hui €0 » reste sur une ligne de 29 px. */
+    S + ".payment-section .col.span_4_of_12 .flex.j-c-sb{flex-wrap:wrap !important;gap:2px 10px !important;}",
+    S + ".payment-section .col.span_4_of_12 .flex.j-c-sb > *{white-space:nowrap !important;}",
+    S + ".payment-section .col.span_4_of_12 .flex.j-c-sb > .lw-text-color-fadeout3{"+
+      "flex:1 1 100% !important;white-space:normal !important;}",
+
+    /* 🔴 Animation vide, uniquement là pour être DÉTECTÉE : Chrome déclenche
+       `animationstart` quand il autoremplit un champ, et c'est le seul signal
+       fiable qu'un gestionnaire de mots de passe est passé par là. Voir le
+       bloc `reveillerAutoremplissage()` plus bas. */
+    "@keyframes ps-autofill{from{opacity:1}to{opacity:1}}",
+    S + ".payment-section input:-webkit-autofill{animation-name:ps-autofill !important;animation-duration:.01s !important;}",
     S + ".payment-section .col.span_4_of_12 .learnworlds-main-text{font-family:var(--ps-font,Figtree,sans-serif) !important;}",
 
     /* 🔴 Sous 900 px la sticky et la grille à deux colonnes n'ont plus de sens :
@@ -268,7 +294,62 @@
     return fait;
   }
 
-  function passer() { poser(); traduire(); degrouperPrix(); }
+  /* ══════════════════════════════════════════════════════════════════════════
+     LE CHAMP EST REMPLI, ET LEARNWORLDS LE CROIT VIDE  (08/08)
+     --------------------------------------------------------------------------
+     Signalé par Ziad : « ça bloque sur le mot de passe alors qu'il est bien
+     là ». Diagnostiqué en direct sur sa page, sans jamais lire la valeur du
+     champ : le message « Ce champ est requis » était rattaché à un `password`
+     dont `value.length > 0`. En émettant les seuls ÉVÈNEMENTS de saisie, sans
+     toucher à la valeur, les erreurs ont disparu instantanément.
+     ⇒ Cause : le mot de passe vient d'un gestionnaire de mots de passe (ou d'un
+     collage). Le navigateur remplit le DOM **sans émettre `input`**, et le
+     validateur de LearnWorlds n'écoute que ça. Il maintient donc « vide » dans
+     son état interne pendant que l'utilisateur voit son champ rempli.
+     🔴 CE N'EST PAS NOTRE BUG, MAIS IL NOUS COÛTE DES VENTES : il frappe
+     précisément les gens qui vont payer, et rien à l'écran ne leur dit quoi
+     faire. À signaler à LearnWorlds — leur validateur doit lire la valeur, pas
+     seulement écouter les frappes. En attendant, on le réveille.
+
+     🔴🔴 CE QUE CE CODE NE FAIT PAS, ET NE DOIT JAMAIS FAIRE : il ne lit
+     aucune valeur, n'en écrit aucune, ne soumet rien. Il se contente de dire
+     « ce champ a été touché » — exactement ce qu'aurait produit une frappe au
+     clavier. Sur un écran de paiement, toute autre liberté serait de trop.
+     🔴 Un seul réveil par champ (`data-ps-reveille`) : ces évènements
+     déclenchent des validations, en émettre à chaque passage ferait clignoter
+     les messages d'erreur sous les doigts de l'utilisateur.
+     ══════════════════════════════════════════════════════════════════════════ */
+  function reveiller(el) {
+    if (!el || el.dataset.psReveille) return false;
+    /* On ne touche qu'à un champ qui a DÉJÀ quelque chose : réveiller un champ
+       vide ferait apparaître l'erreur « requis » avant même que la personne
+       ait commencé à écrire. */
+    if (!el.value || !el.value.length) return false;
+    el.dataset.psReveille = "1";
+    ["input", "change"].forEach(function (t) {
+      try { el.dispatchEvent(new Event(t, { bubbles: true })); } catch (e) {}
+    });
+    return true;
+  }
+
+  function reveillerAutoremplissage() {
+    var champs = document.querySelectorAll(
+      ".payment-section input[type='password'], .payment-section input[type='text'], .payment-section input[type='email']");
+    for (var i = 0; i < champs.length; i++) reveiller(champs[i]);
+  }
+
+  /* Chrome annonce l'autoremplissage par l'animation déclarée plus haut. C'est
+     le seul signal fiable : il arrive AVANT nos relances quand le navigateur
+     remplit au chargement, et APRÈS elles quand la personne choisit une entrée
+     de son gestionnaire trente secondes plus tard. */
+  if (!window.__psAutofillLie) {
+    window.__psAutofillLie = 1;
+    document.addEventListener("animationstart", function (e) {
+      if (e.animationName === "ps-autofill") reveiller(e.target);
+    }, true);
+  }
+
+  function passer() { poser(); traduire(); degrouperPrix(); reveillerAutoremplissage(); }
 
   passer();
   if (document.readyState === "loading") {
