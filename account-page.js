@@ -205,6 +205,23 @@
        🔴 `min-width:0` : sans lui un bouton refuse de descendre sous la largeur
        de son texte et re-déborde — c'est le défaut qu'on vient de corriger, par
        un autre chemin. */
+    /* 🔴🔴 LE VRAI DÉBORDEMENT DE `/account` VENAIT DE LEARNWORLDS (08/08).
+       Après avoir réglé nos boutons, la page défilait TOUJOURS en horizontal.
+       Mesuré à 390 px, dans un cadre chargeant la vraie page avec sa session :
+       `.personal-details-values` porte **`min-width:400px`** (et `flex:0 1 420px`)
+       alors que son parent ne fait que **240 px** sur un téléphone.
+       🔴 Un `min-width` BAT le rétrécissement d'un flex : l'élément refuse de
+       descendre, et c'est lui qui pousse toute la page. C'est LA cause la plus
+       fréquente des débordements en flex, et elle ne se voit qu'à la largeur où
+       elle mord — à 1565 px ce `min-width` est parfaitement inoffensif.
+       ✅ `min-width:0` lève le plancher, `max-width:100%` empêche le
+       `flex-basis` de 420 px de reprendre la main. Vérifié : bloc à 240 px et
+       **plus aucun élément qui dépasse**.
+       🔴 On ne touche à rien au-dessus de 768 px : là, la place existe et le
+       réglage de LearnWorlds est justifié. */
+    "@media(max-width:768px){"+
+      B+".personal-details-values{min-width:0 !important;max-width:100% !important;width:auto !important;}"+
+    "}",
     "@media(max-width:600px){"+
       B+".ps-carte-fiche .ps-fiche-actions{width:100% !important;}"+
       B+".ps-carte-fiche .ps-fiche-actions button{flex:1 1 140px !important;min-width:0 !important;}"+
