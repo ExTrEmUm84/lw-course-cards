@@ -346,7 +346,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             </div>
           </div>
           <figcaption>Reconstitution dessinée à la main. Les deux chiffres sont ceux que le
-          simulateur recalcule ; les écarts entre eux sont réels : ils sortent de deux fonctions
+          simulateur recalcule&nbsp;; l'écart entre eux est réel&nbsp;: ils sortent de deux fonctions
           différentes du site.</figcaption>
         </figure>
 
@@ -369,9 +369,11 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
       </summary>
       <div class="inner">
         <p>La matière première n'est pas discutable&nbsp;: c'est LearnWorlds qui la produit. Pour
-        chaque cours suivi, il calcule <strong>unités terminées ÷ unités du cours</strong> et
-        affiche le résultat sous la carte du cours. Le site lit cette valeur, il ne la recalcule
-        jamais.</p>
+        chaque cours suivi, il calcule <strong>leçons terminées ÷ leçons du cours</strong> et
+        affiche le résultat sous la carte du cours. Le site lit ce pourcentage, il ne le recalcule
+        jamais — et il n'obtient <strong>que</strong> lui&nbsp;: LearnWorlds livre le rapport, jamais
+        les deux nombres qui le composent. C'est ce qui écartera le barème «&nbsp;par
+        volume&nbsp;» (décision&nbsp;B).</p>
 
         <div class="box info"><strong>Une conséquence à connaître.</strong> « Unité terminée » veut
         dire ce que LearnWorlds veut bien dire&nbsp;: selon le réglage du cours, ouvrir une leçon
@@ -409,7 +411,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
 
     <!-- ======================= 3 ======================= -->
     <details id="perimetre">
-      <summary><span class="idx dec">A</span> Décision A — le périmètre : 100&nbsp;% de quoi&nbsp;?
+      <summary><span class="idx dec">A</span> Décision A — le périmètre&nbsp;: 100&nbsp;% de quoi&nbsp;?
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
@@ -442,7 +444,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         mathématiquement correct et commercialement désastreux — sauf à l'accompagner d'un message
         explicite (« votre parcours vient de s'agrandir »). À trancher en connaissance de cause.</div>
 
-        <p>Une troisième voie existe et se combine aux deux&nbsp;: garder <strong>tout le
+        <p>Une troisième voie existe, et c'est un prolongement de la première&nbsp;: garder <strong>tout le
         catalogue</strong> comme dénominateur du chiffre global, mais afficher les tuiles de pages
         verrouillées différemment (grisées, avec un cadenas) pour que l'étudiant comprenne pourquoi
         son plafond est bas. Le pourcentage reste honnête, la frustration devient une invitation.</p>
@@ -451,7 +453,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
 
     <!-- ======================= 4 ======================= -->
     <details id="bareme">
-      <summary><span class="idx dec">B</span> Décision B — le barème : combien vaut un contenu&nbsp;?
+      <summary><span class="idx dec">B</span> Décision B — le barème&nbsp;: combien vaut un contenu&nbsp;?
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
@@ -480,8 +482,8 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
                 n'est fourni par aucune API LearnWorlds.</strong> Là où il s'affiche, il est
                 <strong>tapé à la main dans la description du cours</strong>, et seule la page
                 Cours sait le relire. Les fiches cabinet, les fiches secteur, les études de cas et
-                les parcours n'ont <strong>aucun compteur</strong> — ce barème ne pourrait donc
-                noter qu'un sixième du catalogue.</td>
+                les parcours et les entraînements n'ont <strong>aucun compteur</strong> — ce barème ne
+                noterait donc que les 6&nbsp;cours, soit <strong>6&nbsp;contenus sur 40</strong>.</td>
             </tr>
             <tr>
               <td>Par famille</td>
@@ -613,8 +615,11 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             <tr><td>Comparable entre étudiants</td><td><span class="pill ok">Oui</span></td>
               <td><span class="pill ok">Oui</span></td></tr>
             <tr><td>Se comprend sans explication</td><td><span class="pill ok">Oui</span></td>
-              <td><span class="pill warn">Il faut donner une échelle</span> — « 87&nbsp;points »
-                ne veut rien dire sans le « sur 348 » d'à côté.</td></tr>
+              <td><span class="pill warn">Il faut donner un repère</span> — «&nbsp;87&nbsp;points&nbsp;»
+                ne veut rien dire seul. Le bon repère est le <strong>prochain grade</strong>
+                («&nbsp;encore 70&nbsp;points&nbsp;»), pas le total du catalogue&nbsp;: ce total-là
+                grandit à chaque publication, et l'afficher ramènerait le recul qu'on vient
+                d'éviter.</td></tr>
             <tr><td>Une jauge reste possible</td><td><span class="pill ok">Oui</span></td>
               <td><span class="pill ok">Oui</span> — remplie jusqu'au <em>prochain grade</em>,
                 pas jusqu'à 100&nbsp;% du catalogue. C'est même plus motivant.</td></tr>
@@ -631,11 +636,11 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
 
     <!-- ======================= 5 ======================= -->
     <details id="inconnu">
-      <summary><span class="idx dec">E</span> Décision E — l'inconnu : 0&nbsp;% ou «&nbsp;—&nbsp;»&nbsp;?
+      <summary><span class="idx dec">E</span> Décision E — l'inconnu&nbsp;: 0&nbsp;% ou «&nbsp;—&nbsp;»&nbsp;?
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
-        <p>Le site ne connaît la progression d'une page qu'<strong>après que l'étudiant y soit
+        <p>Le site ne connaît la progression d'une page qu'<strong>une fois que l'étudiant y est
         passé</strong> — c'est ainsi que la mesure est collectée, et c'est ce qui permet d'éviter
         des dizaines d'appels à LearnWorlds par étudiant. Question&nbsp;: que montrer entre-temps&nbsp;?</p>
 
@@ -661,16 +666,20 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         </div>
 
         <div class="box info"><strong>À noter&nbsp;:</strong> le cas «&nbsp;on ne sait pas encore&nbsp;»
-        est bref. La page Profil charge en arrière-plan l'ensemble du catalogue, ce qui permet de
-        mesurer la quasi-totalité des cours <strong>dès la première visite du profil</strong>.
-        L'option retenue ne se voit donc que pendant les premières secondes d'un compte neuf — mais
-        elle décide du grade affiché pendant tout ce temps.</div>
+        <strong>n'est pas passager</strong>. La page Profil charge déjà tout le catalogue en
+        arrière-plan, mais elle s'en sert pour connaître les <em>cours</em>, pas pour renseigner les
+        <em>pages</em>&nbsp;: une page qu'un étudiant ne visite jamais reste inconnue
+        <strong>indéfiniment</strong>. S'en servir aussi pour les pages, c'est précisément l'option
+        «&nbsp;au retour sur le profil&nbsp;» de la décision&nbsp;F. Tant qu'elle n'est pas retenue,
+        ce choix-ci pèse en permanence&nbsp;: dans le simulateur, il vaut à Camille
+        <strong>un grade entier</strong> — Manager si l'inconnu est exclu, Consultant s'il compte
+        pour 0.</div>
       </div>
     </details>
 
     <!-- ======================= 6 ======================= -->
     <details id="rythme">
-      <summary><span class="idx dec">F</span> Décision F — le rythme : quand le chiffre bouge
+      <summary><span class="idx dec">F</span> Décision F — le rythme&nbsp;: quand le chiffre bouge
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
@@ -718,6 +727,14 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         ce qui suit&nbsp;: elle a terminé deux modules, entamé un troisième, lu quelques fiches et
         traité quatre études de cas. Seules les <strong>règles de calcul</strong> changent.</p>
 
+        <p>Le simulateur reprend les décisions&nbsp;A à E. La décision&nbsp;F n'y figure pas&nbsp;:
+        elle décide de <em>quand</em> le chiffre bouge, jamais de sa valeur. En revanche une
+        <strong>septième case</strong> s'y ajoute, «&nbsp;le chiffre global&nbsp;»&nbsp;: quand le
+        grade se lit en pourcentage, faut-il faire la moyenne des six pages — une page de
+        4&nbsp;contenus pèse alors autant qu'une page de 12 — ou rapporter tous les contenus les uns
+        aux autres&nbsp;? En mode points la question ne se pose pas&nbsp;: des points s'additionnent.
+        <strong>Notre avis&nbsp;: sur tous les contenus.</strong></p>
+
         <div class="sim">
           <div class="sim-pre">
             <b>Combinaisons remarquables</b>
@@ -747,7 +764,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             <div class="sim-ech" id="simEch"></div>
             <label class="sim-gro" id="simGro">
               <input type="checkbox" id="simGroCk">
-              <span><em>Et si le catalogue grandit ? Vous publiez 10 nouvelles études de cas.</em>
+              <span><em>Et si le catalogue grandit&nbsp;? Vous publiez 10 nouvelles études de cas.</em>
               Camille n'ouvre pas une leçon de plus. Regardez son grade selon que l'échelle est en
               pourcentage ou en points (décision&nbsp;D).</span>
             </label>
@@ -777,8 +794,10 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         <svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m9 5 7 7-7 7"/></svg>
       </summary>
       <div class="inner">
-        <p>Six réponses, et le calcul est défini pour tout le site — page Cours, pages de fiches,
-        études de cas et profil compris, avec <strong>un seul chiffre par objet</strong>.</p>
+        <p>Six réponses — plus la case «&nbsp;chiffre global&nbsp;» du simulateur — et le calcul est
+        défini pour tout le site&nbsp;: page Cours, pages de fiches,
+        études de cas et profil affichent alors <strong>un chiffre, et un seul, calculé de la même
+        façon</strong>.</p>
 
         <div class="reco">
           <div class="r">
@@ -796,7 +815,9 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             <div>
               <h4>Le barème</h4>
               <p>Identique pour tous, ou une valeur par famille de contenu&nbsp;? (Les barèmes
-              par volume et par difficulté sont écartés&nbsp;: la donnée n'existe pas.)</p>
+              par volume et par difficulté sont écartés&nbsp;: la donnée manque sur la
+              quasi-totalité du catalogue, et il faudrait la ressaisir à la main à chaque
+              publication.)</p>
               <div class="mine"><b>Notre avis&nbsp;:</b> <strong>par famille</strong> — module 20,
               étude de cas 10, parcours 12, entraînement 8, fiche 4. C'est le seul barème qui dise
               ce que <em>vous</em> jugez structurant, et il se tient tout seul&nbsp;: un nouveau
@@ -830,9 +851,12 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
             <div>
               <h4>L'inconnu</h4>
               <p>Une page jamais visitée&nbsp;: 0&nbsp;%, «&nbsp;—&nbsp;», et comptée ou non&nbsp;?</p>
-              <div class="mine"><b>Notre avis&nbsp;:</b> affichée à 0&nbsp;% avec un bouton
-              « Commencer » — l'incitation est conservée — mais <strong>exclue du grade</strong>
-              tant que rien n'a été mesuré.</div>
+              <div class="mine"><b>Notre avis&nbsp;:</b> la tuile reste à <strong>0&nbsp;%</strong>
+              — l'invitation à commencer est conservée — mais la page est
+              <strong>exclue du grade</strong> tant que rien n'a été mesuré. Contrepartie
+              assumée&nbsp;: la tuile et le grade ne disent alors plus tout à fait la même chose, il
+              faut donc une mention sur la tuile («&nbsp;pas encore comptée&nbsp;»). Le simulateur,
+              lui, affiche «&nbsp;—&nbsp;»&nbsp;: le calcul est le bon, seul l'habillage diffère.</div>
             </div>
           </div>
           <div class="r">
@@ -852,11 +876,16 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
         d'aujourd'hui elle est Consultant à 20&nbsp;%, et elle tombe à 18&nbsp;% le jour où vous
         publiez.</p>
 
-        <div class="box info" style="margin-top:18px"><strong>Un septième levier, déjà entre vos
-        mains.</strong> L'échelle des grades (les noms et les seuils : Junior, Consultant, Manager,
-        Principal, Partner, Master) se règle depuis le Site Builder, dans un bloc de texte de la
-        page Profil. Elle ne dépend d'aucune des six décisions ci-dessus — vous pouvez la
-        modifier quand vous voulez, sans nous.</div>
+        <div class="box info" style="margin-top:18px"><strong>Un dernier levier, déjà entre vos
+        mains.</strong> Les <strong>noms</strong> des grades (Junior, Consultant, Manager,
+        Principal, Partner, PrepaStrat&nbsp;Master) et leurs <strong>seuils</strong> se règlent
+        depuis le Site Builder, dans un bloc de texte de la page Profil&nbsp;: vous les changez
+        quand vous voulez, sans nous. Une réserve&nbsp;: ces seuils s'écrivent en pourcentage. Si le
+        grade se lit en points (décision&nbsp;D), ils sont convertis — «&nbsp;Manager à
+        25&nbsp;%&nbsp;» vaut <strong>87&nbsp;points</strong> avec le barème par famille,
+        <strong>93</strong> si l'inconnu compte pour 0, <strong>57</strong> si le périmètre se limite
+        à ses accès. Le réglage est bien à vous&nbsp;; ce qu'il produit dépend des
+        décisions&nbsp;A, B et E.</div>
 
         <div class="box warn" style="margin-top:14px"><strong>Attention à un effet de bord le jour
         du changement.</strong> Quelle que soit la combinaison retenue, les pourcentages de tous les
@@ -873,8 +902,7 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
   Aide PrepaStrat — comment calculer la progression. Document de décision établi le
   7&nbsp;août&nbsp;2026 à partir du code en ligne. Les réglages décrits aux décisions&nbsp;A à F ne
   sont <strong>pas</strong> en place&nbsp;: seule la combinaison « Aujourd'hui » du simulateur
-  décrit le comportement réel du site. Seul changement déjà appliqué&nbsp;: la stat « progression »
-  de l'en-tête du profil, retirée le 7&nbsp;août. Le simulateur travaille sur un catalogue
+  décrit le comportement réel du site. Le simulateur travaille sur un catalogue
   fictif&nbsp;: il ne lit et n'envoie aucune donnée d'étudiant.
 </footer>
 
@@ -1001,21 +1029,21 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
        pas livrer n'a rien à faire dans une amplitude qu'on présente comme
        réelle — ce serait vendre un écart qui n'existe pas. */
     {cle:"bareme", eti:"Décision B", q:"Combien vaut un contenu&nbsp;?", opts:[
-      {v:"identique",  t:"Identique — 10 pts chacun", d:"Le plus simple à expliquer. Récompense le survol."},
-      {v:"volume",     t:"Par volume — 1 pt par leçon", d:"Suivrait le temps passé.",
+      {v:"identique",  t:"Identique — 10&nbsp;pts chacun", d:"Le plus simple à expliquer. Récompense le survol."},
+      {v:"volume",     t:"Par volume — 1&nbsp;pt par leçon", d:"Suivrait le temps passé.",
        indispo:"le nombre de leçons n'est fourni par aucune API LearnWorlds. Il est tapé à la main dans la description du cours, et seule la page Cours sait le lire. Les fiches cabinet, les fiches secteur, les études de cas et les parcours n'ont aucun compteur."},
       {v:"famille",    t:"Par famille — module 20, cas 10, fiche 4…", d:"Vous fixez cinq nombres, et c'est tenu pour toujours."},
-      {v:"difficulte", t:"Par difficulté — 6 pts par cran", d:"Serait le plus juste.",
+      {v:"difficulte", t:"Par difficulté — 6&nbsp;pts par cran", d:"Serait le plus juste.",
        indispo:"aucune difficulté n'existe aujourd'hui, nulle part. Il faudrait noter chaque contenu à la main, puis tenir cette note à chaque publication."}
     ]},
     {cle:"acquisition", eti:"Décision C", q:"Quand les points tombent&nbsp;?", opts:[
       {v:"prorata", t:"Au prorata de l'avancement", d:"La jauge bouge à chaque leçon. Entamer dix cours vaut en finir cinq."},
-      {v:"paliers", t:"Par paliers — 50 % puis 100 %", d:"Du mouvement, et deux vrais évènements."},
-      {v:"tout",    t:"Tout ou rien — à 100 % seulement", d:"Rien n'est acquis avant la fin. La règle des certifications."}
+      {v:"paliers", t:"Par paliers — 50&nbsp;% puis 100&nbsp;%", d:"Du mouvement, et deux vrais évènements."},
+      {v:"tout",    t:"Tout ou rien — à 100&nbsp;% seulement", d:"Rien n'est acquis avant la fin. La règle des certifications."}
     ]},
     {cle:"echelle", eti:"Décision D", q:"Le grade se lit sur&nbsp;?", opts:[
-      {v:"pct",    t:"Un pourcentage du catalogue", d:"« Manager à 25 % ». Publier de nouveaux contenus fait rétrograder tout le monde."},
-      {v:"points", t:"Un total de points", d:"« Manager à 87 points ». Les seuils sont gelés : personne ne rétrograde jamais."}
+      {v:"pct",    t:"Un pourcentage du catalogue", d:"«&nbsp;Manager à 25&nbsp;%&nbsp;». Publier de nouveaux contenus fait rétrograder tout le monde."},
+      {v:"points", t:"Un total de points", d:"«&nbsp;Manager à 87&nbsp;points&nbsp;». Les seuils sont gelés&nbsp;: personne ne rétrograde jamais."}
     ]},
     {cle:"inconnu", eti:"Décision E", q:"Et ce qu'on n'a pas mesuré&nbsp;?", opts:[
       {v:"zero",  t:"Ça compte pour 0", d:"Une page jamais visitée tire le grade vers le bas."},
@@ -1326,8 +1354,8 @@ footer{max-width:1180px;margin:0 auto;padding:26px 40px 60px;font-size:13.5px;co
     var bornes = pcts.length ? (Math.min.apply(null,pcts)+"&nbsp;% à "+Math.max.apply(null,pcts)+"&nbsp;%") : "";
     el.innerHTML="<strong>Le même travail, du grade "+GRADES[min].nom+" au grade "+GRADES[max].nom+
       ".</strong> Sur les "+n+" combinaisons possibles, Camille couvre "+bornes+" du périmètre sans "+
-      "avoir ouvert une leçon de plus. Aucune de ces réponses n'est techniquement plus juste qu'une "+
-      "autre&nbsp;: elles racontent des histoires différentes, et c'est pour ça que le choix vous revient.";
+      "avoir ouvert une leçon de plus. Aucune de ces combinaisons n'est un bug&nbsp;: elles "+
+      "racontent des histoires différentes, et c'est pour ça que le choix vous revient.";
   }
 
   /* ---- Le catalogue affiché ------------------------------------------- */
