@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-08-a";
+  window.PS_TOKENS_V="2026-08-08-b";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3829,6 +3829,54 @@
     return cf;
   }
 
+  /* ====================================================================
+     LES MOYENS DE CONTACT DE L'APERÇU — MIROIR DE `contactsDe()` DU WORKER
+     --------------------------------------------------------------------
+     🔴 C'est une COPIE de la règle du serveur (`worker.js` : `contactsDe`,
+     `cleanUrl`, `numeroWhatsApp`, `estOui`), et une copie diverge — la règle
+     est donc écrite ici en un seul endroit, avec les MÊMES expressions, et
+     signalée des deux côtés. On ne peut pas faire autrement : l'aperçu doit
+     dire ce que l'annuaire affichera AVANT que quoi que ce soit soit écrit.
+     🔴 Les libellés sont ceux de l'annuaire, exprès : l'aperçu ne vaut que si
+     ce qu'on y lit est ce qu'on retrouvera.
+     🔴 On VALIDE avant d'annoncer : un e-mail malformé ou un numéro à six
+     chiffres ne produit aucune pastille. Annoncer un bouton que l'annuaire ne
+     posera pas, c'est faire croire à quelqu'un qu'il est joignable. */
+  function psNumeroWhatsApp(tel){
+    var chiffres=String(tel==null?"":tel).replace(/[^\d]/g,"");
+    return (chiffres.length>=8 && chiffres.length<=15) ? chiffres : "";
+  }
+  function psEstOui(v){
+    /* 🔴 `̀-ͯ` en ÉCHAPPEMENTS, jamais les signes combinants tapés en
+       clair : ils sont invisibles dans l'éditeur, et une plage vide passerait
+       sans erreur. Même famille que le `U+2028` qui a cassé Google le 07/08. */
+    return String(v==null?"":v).normalize("NFD").replace(/[̀-ͯ]/g,"")
+      .trim().toLowerCase().indexOf("oui")===0;
+  }
+  function psUrlValide(v){
+    var brut=String(v==null?"":v).trim();
+    if(!brut) return false;
+    try{
+      var u=new URL(/^https?:\/\//i.test(brut) ? brut : "https://"+brut);
+      return u.protocol==="https:" || u.protocol==="http:";
+    }catch(e){ return false; }
+  }
+  function contactsApercu(f){
+    f=f||{};
+    var out=[];
+    var mail=String(f.cf_contactmail==null?"":f.cf_contactmail).trim();
+    if(mail && /^[^@\s]+@[^@\s]+\.[a-z]{2,}$/i.test(mail)) out.push("Envoyer un email");
+    if(psUrlValide(f.cf_contactlinkedin)) out.push("LinkedIn");
+    var num=psNumeroWhatsApp(f.cf_contacttel);
+    if(num){
+      out.push("Appeler");
+      /* WhatsApp ne s'ajoute QUE si le numéro est exploitable : cocher l'option
+         sans numéro valide donnerait un bouton vers une page d'erreur. */
+      if(psEstOui(f.cf_contactwhatsapp)) out.push("WhatsApp");
+    }
+    return out;
+  }
+
   function ficheCSS(){
     if(document.getElementById("ps-fiche-css")) return;
     var st=document.createElement("style"); st.id="ps-fiche-css";
@@ -3894,6 +3942,15 @@
       "#ps-fiche .pf-tags span{background:#EEF4FA;color:var(--ps-accent,#3887b4);border-radius:var(--ps-r-pill,999px);"+
       "padding:4px 10px;font:700 11.5px var(--ps-font,Figtree,sans-serif)}"+
       "#ps-fiche .pf-bio{font:400 12.5px/1.45 var(--ps-font,Figtree,sans-serif);color:var(--ps-text-soft,#676879);margin-top:9px}"+
+      /* Les boutons de contact de l'aperçu : MÊME allure que ceux de l'annuaire,
+         mais INERTES — c'est un aperçu de ce que les autres verront, pas un
+         moyen de s'écrire à soi-même. */
+      "#ps-fiche .pf-cts{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}"+
+      "#ps-fiche .pf-cts span{display:inline-flex;align-items:center;gap:5px;border:1px solid var(--ps-border,#E6E9EF);"+
+      "border-radius:var(--ps-r-pill,999px);padding:4px 11px;font:700 11.5px var(--ps-font,Figtree,sans-serif);"+
+      "color:var(--ps-accent,#3887b4);background:#fff}"+
+      "#ps-fiche .pf-muet{margin-top:10px;font:600 12px/1.4 var(--ps-font,Figtree,sans-serif);color:#8a5a00;"+
+      "background:#fff8e6;border:1px solid #f0dca8;border-radius:10px;padding:7px 10px}"+
       "@keyframes pf-trace{to{stroke-dashoffset:0}}"+
       "@keyframes pf-flotte{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}"+
       "#ps-fiche .tr{stroke-dasharray:var(--l,300);stroke-dashoffset:var(--l,300);animation:pf-trace 1.1s ease forwards}"+
@@ -4174,16 +4231,59 @@
     function auClavier(e){ if(e.key==="Escape"){ e.preventDefault(); fermer(true); } }
     document.addEventListener("keydown", auClavier, true);
 
+    /* 🔴🔴 UNE SEULE DÉFINITION DE « JOIGNABLE » (08/08). L'écran de publication
+       la calculait par PRÉSENCE (`rep.cf_contactmail||connus…`), la carte
+       d'aperçu par VALIDITÉ : avec un e-mail malformé, le titre annonçait
+       « Votre fiche est en ligne » pendant que la carte, trois lignes plus bas,
+       disait que personne ne pouvait joindre ce membre. Le même écran se
+       contredisait. Encore une règle en deux exemplaires — c'est la troisième
+       de la semaine.
+       🔴 On fusionne `rep` (ce qui vient d'être saisi) et `connus` (ce que
+       LearnWorlds sait déjà) : un canal rempli lors d'une visite précédente
+       compte, sinon réviser sa langue ferait disparaître son téléphone de
+       l'aperçu. */
+    function contactsCourants(){
+      var f={};
+      ["cf_contactmail","cf_contactlinkedin","cf_contacttel","cf_contactwhatsapp"].forEach(function(k){
+        var v=rep[k];
+        f[k]=(v!=null && String(v).trim()!=="") ? v : connus[k];
+      });
+      return contactsApercu(f);
+    }
+
     function carte(){
       var n=[u.firstName||u.first_name||"", u.lastName||u.last_name||""].filter(Boolean).join(" ")||u.username||"Vous";
       var ini=n.split(/\s+/).map(function(m){return m[0]||"";}).join("").slice(0,2).toUpperCase();
       var tags=[rep.cf_niveau, rep.cf_recherche].filter(Boolean);
       var meta=[rep.cf_ecole, (rep.cf_langue||[]).join(" · ")].filter(Boolean).join(" — ");
+      /* 🔴🔴 L'APERÇU MONTRE LES MOYENS DE CONTACT (08/08, Ziad : « j'ai rajouté
+         tout, je devrais avoir les boutons de contact »).
+         Il avait raison, et c'était un aperçu MENTEUR PAR OMISSION : on venait
+         de faire du contact le cœur de la fiche — l'e-mail est entré dans le
+         noyau, l'écran de publication dit « en ligne, mais muette » sans lui —
+         et la carte d'aperçu, elle, n'en montrait aucun. On demandait quatre
+         canaux pour n'en afficher aucun.
+         🔴🔴 LES RÈGLES SONT CELLES DU WORKER, RECOPIÉES À L'IDENTIQUE
+         (`contactsDe`, `numeroWhatsApp`, `cleanUrl`, `estOui` dans `worker.js`).
+         C'est une COPIE, donc un risque de divergence assumé faute de pouvoir
+         appeler le Worker avant d'avoir écrit. Mais l'alternative est pire :
+         montrer un bouton là où l'annuaire n'en mettra pas, c'est promettre
+         qu'on est joignable alors qu'on ne l'est pas. **Toute retouche des
+         règles côté Worker doit être reportée ici** — et l'inverse.
+         🔴 Un numéro invalide ou un e-mail malformé ne produit AUCUNE pastille :
+         même règle que l'annuaire, « on valide avant de rendre cliquable ». */
       return '<div class="pf-carte"><div class="pf-av">'+esc(ini)+'</div><div style="flex:1">'+
         '<div class="pf-nom">'+esc(n)+'</div>'+
         (meta?'<div class="pf-meta">'+esc(meta)+'</div>':'')+
         (tags.length?'<div class="pf-tags">'+tags.map(function(t){return '<span>'+esc(t)+'</span>';}).join("")+'</div>':'')+
-        (rep.bio?'<div class="pf-bio">'+esc(rep.bio)+'</div>':'')+'</div></div>';
+        (rep.bio?'<div class="pf-bio">'+esc(rep.bio)+'</div>':'')+
+        (function(){
+          var c=contactsCourants();
+          if(c.length) return '<div class="pf-cts">'+c.map(function(l){ return '<span>'+esc(l)+'</span>'; }).join("")+'</div>';
+          /* Rien à montrer : on le DIT. Une carte sans contact et sans mot
+             ressemble à une carte normale — c'est le silence qui trompe. */
+          return '<div class="pf-muet">Personne ne peut vous joindre : aucun moyen de contact valide.</div>';
+        })()+'</div></div>';
     }
 
     /* 🔴 La popup se laisse repeindre DE L'EXTÉRIEUR. Sans ça, une réponse du
@@ -4242,7 +4342,10 @@
            🔴 Le décompte n'est plus écrit en dur : il disait « trois questions
            de plus » alors qu'il en restait six depuis l'ajout des canaux de
            contact. Un chiffre en dur finit toujours par mentir. */
-        var joignable=!!(rep.cf_contactmail||connus.cf_contactmail||connus.cf_contacttel||connus.cf_contactlinkedin);
+        /* 🔴 MÊME calcul que la carte juste en dessous (`contactsCourants`) :
+           un champ REMPLI ne suffit pas, il doit être VALIDE — c'est la règle
+           du Worker, et c'est elle qui décide s'il y aura un bouton. */
+        var joignable=contactsCourants().length>0;
         var restantes=FICHE_ECRANS.length-NOYAU;
         corps='<div class="pf-e"><div class="pf-vis">'+FICHE_VIS.fini+'</div>'+
           '<h3>'+(joignable?"Votre fiche est en ligne":"Votre fiche est en ligne, mais muette")+'</h3>'+
