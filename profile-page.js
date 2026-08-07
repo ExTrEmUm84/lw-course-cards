@@ -192,6 +192,28 @@
     S+" .ps-pf-chip.-hi{background:var(--ps-accent,#507EC5) !important;border-color:var(--ps-accent,#507EC5) !important;}",
     S+" .ps-pf-hero .ps-pf-edit{margin-left:auto !important;align-self:flex-start !important;flex:none !important;}",
     S+" .ps-pf-stats{display:flex !important;gap:12px !important;margin-top:20px !important;flex-wrap:wrap !important;}",
+    /* 🔴🔴 LE BANDEAU SUR TÉLÉPHONE (08/08, capture de Ziad : « le cadre touche
+       les bords, les trucs ne sont pas alignés »).
+       Trois défauts, une seule cause : des valeurs pensées pour 1170 px.
+       1. `margin:0` — sur grand écran ce sont les marges du conteneur
+          LearnWorlds qui donnent l'air ; sur téléphone ce conteneur fait toute
+          la largeur, donc notre carte **touche les deux bords** alors que le
+          reste de la page respire. On lui donne ses propres marges.
+       2. `.ps-pf-id{flex:1 1 260px}` : 260 px de base + l'avatar + l'écart ne
+          tiennent pas dans 294 px utiles, l'identité passe donc sous l'avatar.
+          On l'assume — mais en pleine largeur, pas en reliquat.
+       3. `.ps-pf-edit{margin-left:auto}` : une fois seul sur sa ligne, ce
+          `auto` le colle à DROITE, séparé de tout. C'est ce que montre la
+          capture. Sur téléphone il prend la largeur, comme tout le reste.
+       🔴 Rembourrage réduit aussi : 32 px de chaque côté sur un écran de 390,
+       c'est 16 % de la largeur mangés par du vide. */
+    "@media(max-width:768px){"+
+      S+" .ps-pf-hero{margin-left:16px !important;margin-right:16px !important;padding:22px 18px 20px !important;}"+
+      S+" .ps-pf-hero-row{gap:16px !important;}"+
+      S+" .ps-pf-id{flex:1 1 100% !important;}"+
+      S+" .ps-pf-hero .ps-pf-edit{margin-left:0 !important;width:100% !important;align-self:stretch !important;}"+
+      S+" .ps-pf-stats{gap:10px !important;margin-top:16px !important;}"+
+    "}",
     S+" .ps-pf-st{flex:1 1 130px !important;background:rgba(255,255,255,.09) !important;border:1px solid rgba(255,255,255,.12) !important;border-radius:13px !important;padding:12px 14px !important;animation:psPfIn .5s ease both !important;}",
     S+" .ps-pf-st b{display:block !important;"+FT+"font-size:21px !important;font-weight:800 !important;color:#fff !important;line-height:1.1 !important;}",
     S+" .ps-pf-st span{"+FT+"font-size:11.5px !important;color:rgba(255,255,255,.66) !important;}",
@@ -1482,15 +1504,45 @@
      JAMAIS. C'est mot pour mot la faute du 05/08 — l'anti-flash de la home
      testait cette classe trop tôt et n'a jamais été posé, alors que je le
      croyais en service. On teste donc À CHAQUE passage, pas une seule fois. */
+  /* 🔴🔴 DEUXIÈME TOUR (08/08) — « la page profil affiche TOUJOURS le contenu du
+     builder avant de mettre en forme ». La boucle ci-dessous existait déjà ;
+     ce qui la retenait, c'est le garde `surLaPage()` : elle refusait d'agir
+     tant que LearnWorlds n'avait pas posé `slug-profile` sur le corps, et
+     pendant ce temps le texte était DÉJÀ peint.
+     ⇒ Le masquage ne dépend plus de la classe. Il peut se le permettre : il ne
+     masque QUE le bloc qui contient littéralement `gradeN-nom :`, une signature
+     qu'aucun autre contenu ne porte. Attendre la classe, c'était se protéger
+     d'un risque qui n'existait pas — au prix du défaut qu'on voulait corriger.
+     🔴 Un OBSERVATEUR en plus de la boucle : il se déclenche à l'INSERTION du
+     nœud, donc avant la peinture, là où un intervalle de 20 ms arrive forcément
+     après. La boucle reste comme filet — l'observateur ne voit rien si le bloc
+     était déjà là avant notre exécution. */
   (function masquerTot(){
-    var t0=Date.now(), h=null;
+    var t0=Date.now(), h=null, obs=null;
+    function fini(){
+      if(h){ clearInterval(h); h=null; }
+      if(obs){ try{ obs.disconnect(); }catch(e){} obs=null; }
+    }
     function essayer(){
-      if(Date.now()-t0>3000){ if(h) clearInterval(h); return; }
-      if(!surLaPage()) return;                 /* la classe arrive plus tard */
-      if(appliquerGradesDuBuilder() && h) clearInterval(h);
+      if(Date.now()-t0>3000){ fini(); return; }
+      if(appliquerGradesDuBuilder()) fini();
     }
     essayer();
     h=setInterval(essayer, 20);
+    /* 🔴 UNE FOIS PAR TRAME, PAS PAR MUTATION. `appliquerGradesDuBuilder`
+       balaie tous les `.learnworlds-element` de la page ; le déclencher à
+       chaque insertion pendant la construction du DOM ferait payer ce balayage
+       des centaines de fois. `requestAnimationFrame` regroupe — et il s'exécute
+       AVANT la peinture, donc on ne perd rien de ce qu'on cherchait. */
+    try{
+      var prevu=false;
+      obs=new MutationObserver(function(){
+        if(prevu) return;
+        prevu=true;
+        requestAnimationFrame(function(){ prevu=false; essayer(); });
+      });
+      obs.observe(document.documentElement, {childList:true, subtree:true});
+    }catch(e){}
   })();
 
   if(document.readyState!=="loading") start(); else document.addEventListener("DOMContentLoaded",start);
