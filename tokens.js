@@ -201,6 +201,22 @@
   var MOBILE_CSS="@media(max-width:768px){"
     + "section.learnworlds-section.learnworlds-size-normal{"
     + "padding-top:var(--ps-mob-pad,40px);padding-bottom:var(--ps-mob-pad,40px);}"
+    /* 🔴🔴 DEUX BOUTONS DU SITE BUILDER QUI SE COLLENT EN PASSANT À LA LIGNE
+       (08/08, Ziad : « les pastilles des filtres se collent »).
+       Mesuré sur la page Cours : les boutons « Formations par Modules » et
+       « Formations par Thématiques » sont des `learnworlds-button-wrapper`
+       posés CÔTE À CÔTE, avec une marge de 10 px **à droite seulement**. Sur
+       grand écran ils tiennent sur une ligne et tout va bien ; sur téléphone
+       ils se replient l'un sous l'autre et **plus rien ne les sépare**.
+       🔴 Ce n'est pas notre balisage : la marge vient du Site Builder. On ne
+       corrige donc pas « nos » pastilles, on donne une respiration verticale à
+       un motif de LearnWorlds — d'où la place ici, dans le CSS de site.
+       🔴 Ils partagent un parent mais ne sont PAS voisins directs (mesuré) :
+       un sélecteur `+` n'attraperait rien. La marge se pose sur chaque
+       enveloppe.
+       ⚠️ Contrepartie assumée : 10 px de plus sous un bouton isolé sur mobile.
+       C'est le prix d'une règle qui n'a pas besoin de connaître la page. */
+    + "#pageContent .learnworlds-button-wrapper{margin-bottom:10px;}"
     + "}";
   function poserMobile(){
     var st=document.getElementById("ps-mobile");
@@ -779,7 +795,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-08-d";
+  window.PS_TOKENS_V="2026-08-08-e";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
