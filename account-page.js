@@ -122,7 +122,21 @@
        qu'au survol sur les grands écrans — au doigt il n'y a pas de survol,
        donc il reste visible en dessous de 900px. */
     B+".ps-carte-fiche .ps-fpill{position:relative;display:inline-flex;align-items:center;gap:8px}",
-    B+".ps-carte-fiche .ps-fpill-edit{border:0;background:transparent;padding:2px;margin:0;cursor:pointer;"+
+    /* 🔴🔴 LE CRAYON EST SORTI DU FLUX (08/08). Il était posé en enfant normal
+       d'une pastille que la règle `.ps-fpill{flex-direction:column !important}`
+       met en COLONNE — il tombait donc sur une troisième ligne, et les
+       pastilles à crayon étaient plus hautes que les autres. Invisible tant que
+       toutes en avaient un ; flagrant depuis que les pastilles vides existent.
+       La ligne au-dessus (`position:relative` sur la pastille, `align-items:
+       center`) montre que cette mise en page était l'intention d'origine :
+       c'est le `!important` d'une règle écrite plus bas qui la battait.
+       ⇒ Épinglé à droite, centré : toutes les pastilles ont la même hauteur.
+       `ps-fpill-cray` réserve la place pour que le texte ne passe pas dessous —
+       une classe posée dans le BALISAGE plutôt qu'un `:has()`, parce qu'on sait
+       exactement quelles pastilles portent un crayon. */
+    B+".ps-carte-fiche .ps-fpill-cray{padding-right:31px !important;}",
+    B+".ps-carte-fiche .ps-fpill-edit{position:absolute !important;right:9px !important;top:50% !important;"+
+      "transform:translateY(-50%) !important;border:0;background:transparent;padding:2px;margin:0;cursor:pointer;"+
       "line-height:0;color:inherit;opacity:.45;transition:opacity .15s ease}",
     B+".ps-carte-fiche .ps-fpill:hover .ps-fpill-edit,.ps-carte-fiche .ps-fpill-edit:focus-visible{opacity:1}",
     B+".ps-carte-fiche .ps-fpill-edit svg{width:14px;height:14px;fill:none;stroke:currentColor;"+
@@ -154,6 +168,18 @@
     /* champ manquant : pointillé, cliquable — il ouvre le formulaire. */
     B+".ps-fpill-vide{flex-direction:row !important;align-items:center !important;background:transparent !important;border:1.5px dashed var(--ps-border,#E6E9EF) !important;color:var(--ps-text-soft,#676879) !important;cursor:pointer !important;font-size:12.5px !important;font-weight:700 !important;padding:8px 13px !important;}",
     B+".ps-fpill-vide:hover{border-color:var(--ps-accent,#3887b4) !important;color:var(--ps-accent,#3887b4) !important;}",
+    /* Pastille VIDE d'un champ précis (08/08) : MÊME gabarit que les remplies —
+       le nom au-dessus, l'état en dessous — pour que la grille reste régulière,
+       mais en pointillé. On lit d'un coup d'œil ce qui est fait et ce qui ne
+       l'est pas, et toute la pastille est le bouton : il n'y a rien à corriger
+       dedans, donc pas de crayon.
+       🔴 `padding` réduit de 1,5 px : la bordure s'ajoute à la boîte, sans quoi
+       les pastilles vides seraient 3 px plus hautes que les autres et la ligne
+       ondulerait. */
+    B+".ps-fpill-todo{background:transparent !important;border:1.5px dashed var(--ps-border,#E6E9EF) !important;"+
+      "color:var(--ps-text-soft,#676879) !important;cursor:pointer !important;padding:5.5px 11.5px !important;}",
+    B+".ps-fpill-todo i{font-weight:800 !important;opacity:.9 !important;}",
+    B+".ps-fpill-todo:hover,"+B+".ps-fpill-todo:focus-visible{border-color:var(--ps-accent,#3887b4) !important;color:var(--ps-accent,#3887b4) !important;}",
 
     /* La grande carte blanche unique s'efface : ce sont les sections qui
        portent désormais la carte (choix de Ziad). */
@@ -672,12 +698,44 @@
      couleur de sa pastille via `currentColor`. */
   var CRAYON='<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 20h4L19 9l-4-4L4 16v4z"/><path d="M14 6l4 4"/></svg>';
 
+  /* 🔴🔴 UN CANAL = UNE PASTILLE (08/08, Ziad : « contact il faut le retirer
+     pour mettre les différents choix visibles sur la page »).
+     L'unique pastille « Contact — renseigné » cachait deux choses à la fois :
+     PAR QUOI le membre est joignable, et le fait que son crayon n'ouvrait
+     jamais que l'e-mail. Quatre canaux, quatre pastilles, quatre crayons.
+     - `discret` : la VALEUR ne s'affiche pas (« renseigné »). C'est le moyen de
+       joindre quelqu'un, lisible par-dessus son épaule — la règle du 07/08 ne
+       change pas, c'est le NOMBRE de pastilles qui change.
+     - Même `lvl` pour les quatre : la couleur dit qu'ils forment une famille.
+     🔴 L'ORDRE EST CELUI DE `FICHE_ECRANS` dans `tokens.js`, et la liste doit
+     lui rester parallèle : une pastille sans écran serait un crayon qui n'ouvre
+     rien, un écran sans pastille un champ qu'on ne peut plus atteindre depuis
+     la carte. Ajouter une question quelque part, c'est l'ajouter aux deux. */
   var FICHE_PASTILLES=[
     {cle:"cf_ecole",     nom:"École",     lvl:1},
     {cle:"cf_niveau",    nom:"Niveau",    lvl:4},
     {cle:"cf_recherche", nom:"Recherche", lvl:3},
     {cle:"cf_langue",    nom:"Langue",    lvl:6},
-    {cle:"cf_contact",   nom:"Contact",   lvl:5}
+    {cle:"cf_contactmail",     nom:"E-mail",    lvl:5, discret:true},
+    {cle:"cf_contactlinkedin", nom:"LinkedIn",  lvl:5, discret:true},
+    {cle:"cf_contacttel",      nom:"Téléphone", lvl:5, discret:true},
+    {cle:"cf_contactwhatsapp", nom:"WhatsApp",  lvl:5},
+    /* 🔴 L'ANCIEN champ libre n'est PAS supprimé : des membres l'ont rempli
+       avant le 07/08 et le Worker le lit toujours pour bâtir leur carte. Le
+       retirer de cet écran sans regarder leur donnée leur afficherait « aucun
+       contact » alors qu'ils en ont un. Il s'efface de lui-même dès qu'un canal
+       explicite existe (`ancien`), et son crayon ouvre l'e-mail — l'écran
+       `cf_contact` n'existe plus dans la popup, ce serait un crayon qui
+       n'ouvre rien.
+       🔴 Sa place est ICI, avec les canaux : rangé après la bio il partait tout
+       seul en fin de rangée, séparé de la famille dont il fait partie. */
+    {cle:"cf_contact",   nom:"Contact",   lvl:5, discret:true, ancien:true},
+    /* 🔴🔴 LA BIO EST UN CHAMP **NATIF** de LearnWorlds : elle n'a pas de tag
+       `cf_bio_…`, donc `champsFiche()` ne la voyait pas et la pastille aurait
+       affiché « à renseigner » à un membre qui l'a remplie — un écran qui ment.
+       C'est pour ça qu'elle manquait ici. Elle est lue à part, sur `me`
+       directement (voir `champsFiche`). */
+    {cle:"bio",          nom:"Bio",       lvl:2}
   ];
 
   function champsFiche(){
@@ -685,6 +743,18 @@
     if(!m) return {};
     var cf={}, k, src=m.custom_fields||{};
     for(k in src) if(Object.prototype.hasOwnProperty.call(src,k)) cf[k]=src[k];
+    /* 🔴🔴 LA BIO EST NATIVE, ET ELLE EST LÀ (mesuré le 08/08 sur `/account` :
+       `me.bio` = chaîne, 11 caractères). Ma note du 07/08 — « la bio paraîtra
+       toujours à remplir » — décrivait une limite de CE CODE, qui ne lisait que
+       `custom_fields` et les tags `cf_*`, pas une limite de LearnWorlds.
+       ⇒ C'est aussi la réponse à « on ne peut pas la remplacer par une bio de
+       chez nous ? » : inutile. Un `cf_bio` obligerait à migrer les bios déjà
+       écrites, à changer `CHAMPS_ANNUAIRE`/`toCard()` côté Worker, et
+       LearnWorlds en ferait un TAG portant la bio entière — sans empêcher
+       `/profile` de continuer à éditer la native. Deux portes d'écriture pour
+       la même donnée finissent toujours par diverger (règle déjà écrite dans
+       le Worker pour la photo). */
+    if(m.bio!=null && String(m.bio).trim()) cf.bio=String(m.bio);
     [].slice.call(m.tags||[]).forEach(function(t){
       var s=String(typeof t==="string"?t:(t&&t.name)||"");
       if(s.indexOf("cf_")!==0) return;
@@ -733,27 +803,53 @@
     var etat = optin ? '<span class="ps-fpill '+(oui?"ps-fpill-oui":"ps-fpill-non")+'">'+(oui?"Visible":"Masquée")+'</span>' : "";
     var libelleBouton = optin ? (oui ? "Modifier" : "Réactiver") : "Compléter";
 
-    var chips="", manquants=[];
+    var chips="";
+    /* L'ancien champ libre ne coexiste pas avec les canaux explicites : dès
+       qu'un seul est rempli, il n'a plus rien à dire que les autres ne disent
+       mieux. */
+    var aCanal=["cf_contactmail","cf_contactlinkedin","cf_contacttel"]
+                 .some(function(k){ return String(cf[k]||"").trim(); });
+    /* 🔴🔴 TOUS LES CHAMPS SONT À L'ÉCRAN, REMPLIS OU NON (08/08, Ziad : « ya
+       pas toutes les entrées dans les pastilles colorées, faut tout rajouter,
+       bio, linkedin etc »).
+       ⚠️ Cela REMPLACE la règle du 07/08 (« une seule pastille pour tout ce qui
+       manque, une par champ vide transformait la carte en liste de reproches »).
+       Ce qui a changé entre-temps et rend l'inversion juste : depuis le crayon,
+       une pastille n'est plus une étiquette, c'est **la seule porte d'entrée
+       vers un champ précis**. Regroupées, les entrées manquantes n'avaient pas
+       de porte — pour ajouter son LinkedIn il fallait retraverser tout le
+       questionnaire. Une pastille vide n'est plus un reproche, c'est un bouton.
+       🔴 La contrepartie est réelle : la carte affiche désormais tout ce qui
+       n'est pas fait. C'est un arbitrage assumé, pas un oubli. */
     FICHE_PASTILLES.forEach(function(c){
+      if(c.ancien && aCanal) return;
       var v=String(cf[c.cle]==null?"":cf[c.cle]).trim();
-      if(!v){ manquants.push(c.nom); return; }
-      /* 🔴 Le CONTACT ne s'affiche pas en clair : c'est le moyen de joindre la
-         personne, lisible par-dessus son épaule. On dit qu'il est là. */
-      var aff = c.cle==="cf_contact" ? "renseigné" : v.replace(/[&<>]/g,"");
-      /* 🔴 La pastille CONTACT couvre quatre champs depuis le 07/08 ; son crayon
-         ouvre l'e-mail, qui est celui du noyau. Ouvrir « cf_contact », l'ancien
-         champ libre qu'on ne demande plus, mènerait à un écran qui n'existe
-         plus dans la popup — un crayon qui n'ouvre rien. */
-      var cible = c.cle==="cf_contact" ? "cf_contactmail" : c.cle;
-      chips+='<span class="ps-fpill ps-lvl'+c.lvl+'"><b>'+c.nom+'</b><i>'+aff+'</i>'+
+      var cible = c.ancien ? "cf_contactmail" : c.cle;
+      if(!v){
+        /* L'ancien champ libre ne se PROPOSE pas : on ne demande plus de le
+           remplir, on se contente de ne pas perdre ceux qui l'ont fait. */
+        if(c.ancien) return;
+        /* Vide : la pastille ENTIÈRE est le bouton — pas de crayon dans une
+           pastille qui n'a rien à corriger. */
+        chips+='<span class="ps-fpill ps-fpill-todo" role="button" tabindex="0" '+
+          'data-ps-champ="'+cible+'" title="Renseigner">'+
+          '<b>'+c.nom+'</b><i>+ à renseigner</i></span>';
+        return;
+      }
+      /* 🔴 Un moyen de CONTACT ne s'affiche pas en clair : c'est ce qui permet
+         de joindre la personne, lisible par-dessus son épaule. On dit qu'il est
+         là, le crayon suffit à le revoir. */
+      var aff = c.discret ? "renseigné" : v.replace(/[&<>]/g,"");
+      /* 🔴 La BIO va jusqu'à 280 caractères : affichée entière, elle faisait de
+         sa pastille un pavé qui déformait toute la rangée. Les autres champs
+         sont courts par nature — la coupe ne les touche pas, elle ne coûte donc
+         rien et protège du seul cas qui déborde. Le texte complet reste à un
+         clic, dans son écran. */
+      if(aff.length>44) aff=aff.slice(0,42).replace(/\s+\S*$/,"")+"…";
+      chips+='<span class="ps-fpill ps-fpill-cray ps-lvl'+c.lvl+'"><b>'+c.nom+'</b><i>'+aff+'</i>'+
         '<button type="button" class="ps-fpill-edit" data-ps-champ="'+cible+'" '+
         'aria-label="Modifier '+c.nom.toLowerCase()+'" title="Modifier">'+CRAYON+'</button></span>';
     });
-    /* 🔴 UNE SEULE pastille pour tout ce qui manque : une par champ vide
-       transformait la carte en liste de reproches. */
-    if(manquants.length){
-      chips+='<span class="ps-fpill ps-fpill-vide" role="button" tabindex="0">+ '+manquants.join(", ")+'</span>';
-    }
 
     /* 🔴🔴 DEUX ACTIONS SÉPARÉES (07/08, demande de Ziad : « dissocier
        l'activation de la visibilité seule et le remplissage des infos »).
@@ -809,12 +905,20 @@
     /* 🔴 `stopPropagation` : sans lui, le clic du crayon remonterait à la
        pastille et ouvrirait AUSSI le parcours complet — deux popups pour un
        clic, ou la mauvaise des deux. */
-    [].slice.call(carte.querySelectorAll(".ps-fpill-edit")).forEach(function(b){
-      b.addEventListener("click",function(ev){
+    /* Le crayon d'une pastille remplie ET la pastille vide entière ouvrent la
+       même chose : l'écran de CE champ. Deux apparences, une seule action. */
+    [].slice.call(carte.querySelectorAll(".ps-fpill-edit,.ps-fpill-todo")).forEach(function(b){
+      var agir=function(ev){
         ev.preventDefault(); ev.stopPropagation();
         var cle=b.getAttribute("data-ps-champ");
         if(typeof window.PS_FICHE_OUVRIR_CHAMP==="function" && window.PS_FICHE_OUVRIR_CHAMP(cle)) return;
         ouvrir();                       /* repli : le parcours complet */
+      };
+      b.addEventListener("click",agir);
+      /* Les pastilles vides sont des `span` en `role="button"` : le clavier ne
+         les active pas tout seul, il faut le lui dire. */
+      b.addEventListener("keydown",function(ev){
+        if(ev.key==="Enter"||ev.key===" ") agir(ev);
       });
     });
     brancher(".ps-fiche-visi", basculer);
