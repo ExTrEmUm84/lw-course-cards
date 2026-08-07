@@ -639,7 +639,18 @@
      🔴 POUR REVENIR AUX SEULS VRAIS MEMBRES : passer DEMO_FILL à false
      (ou supprimer ce bloc + la ligne « if (DEMO_FILL) … » plus bas).
      ═══════════════════════════════════════════════════════════════════ */
-  var DEMO_FILL = true;
+  /* 🔴🔴 COUPÉ LE 08/08 (demande de Ziad : « supprime les faux comptes de
+     l'annuaire »). Les 42 profils de démonstration servaient à peupler la
+     grille et à rendre les filtres démontrables tant que l'annuaire était vide.
+     Ils n'ont plus lieu d'être maintenant qu'il y a de vrais membres — et un
+     annuaire qui mélange 5 personnes réelles à 42 inventées trompe autant le
+     visiteur que le client.
+     ⚠️ CONSÉQUENCE ASSUMÉE : la page passe de 47 cartes à celles qui existent
+     vraiment. Une grille clairsemée est la VÉRITÉ, pas une régression.
+     🟢 Le jeu de données reste dans le fichier : il ne coûte rien tant qu'il
+     n'est pas concaténé, et c'est le seul décor réaliste dont disposent les
+     harnais. Remettre `true` suffit à revenir en arrière. */
+  var DEMO_FILL = false;
 
   /* Photos des profils démo (choix de Ziad : portraits réalistes). Source
      externe randomuser.me, assortie au GENRE du prénom, déterministe (même
