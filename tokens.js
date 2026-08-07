@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-d";
+  window.PS_TOKENS_V="2026-08-07-e";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4265,7 +4265,23 @@
        qui renvoie null pour un compte non validé (via `ficheAcces`). Testé
        après, ce cas serait avalé par le `null` et on n'afficherait plus rien —
        exactement le silence qu'on cherche à éviter. */
-    if(u && verifEnAttente(u) && !PAGES_MUETTES.test(location.pathname||"")){
+    /* 🔴🔴 ON NE RÉCLAME PAS UNE VALIDATION À QUI DOIT D'ABORD ACHETER (07/08).
+       Signalé par Ziad, capture à l'appui : le bandeau proposait bien « Voir les
+       formules » (corrigé le matin) mais CETTE POPUP continuait d'exiger la
+       validation par-dessus. Deux dispositifs, une seule correction — j'avais
+       traité `orientation()` et `versOffre()` sans voir qu'un troisième chemin
+       disait encore le contraire.
+       ⇒ La popup ne s'adresse qu'à ceux pour qui valider est l'action utile :
+         • l'étudiant d'ÉCOLE (reconnu au domaine) — son école a payé, il n'a
+           rien à acheter, valider est son seul geste ;
+         • le membre qui A DÉJÀ un accès et ne l'a pas validé — c'est le cas
+           « payant mais non validé », la NORME chez PrepaStrat.
+       Un prospect hors école et sans accès, lui, n'a rien à valider tant qu'il
+       n'a rien acheté : on lui laisse le bandeau d'offre, et rien d'autre. */
+    var partVerif=null;
+    try{ partVerif=(u && window.PS_PARTENAIRE_EMAIL) ? window.PS_PARTENAIRE_EMAIL(u.email) : null; }catch(e){}
+    var aDejaUnAcces=!!(u && (u.userLearningPrograms||[]).length);
+    if(u && verifEnAttente(u) && (partVerif || aDejaUnAcces) && !PAGES_MUETTES.test(location.pathname||"")){
       /* 🔴 Sa PROPRE mémoire, et une ÉCHÉANCE, pas une session (voir
          `fermer()`). Lire `psFicheVue` ici revenait à laisser un report
          d'annuaire masquer le message qui débloque le compte — mesuré en prod,
