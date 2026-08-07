@@ -168,10 +168,20 @@
        nouvelle, et elle doit se lire avant le titre qui, lui, demande encore
        quelque chose. Elle n'apparaît que si un programme est réellement acquis
        (cf. `rassurerAcheteur`). */
-    "body.slug-" + SLUG + " #ps-achat{background:var(--ps-ok-tint,#E8F7F0);" +
-      "border:1px solid var(--ps-ok,#1b5e40);border-radius:14px;padding:14px 16px;margin:0 0 22px;" +
-      "font:400 14.5px/1.55 var(--ps-font,Figtree,sans-serif);color:#154832;text-align:left;}",
-    "body.slug-" + SLUG + " #ps-achat strong{color:#0f3a28;}",
+    "body.slug-" + SLUG + " #ps-achat{border-radius:14px;padding:14px 16px;margin:0 0 22px;" +
+      "font:400 14.5px/1.55 var(--ps-font,Figtree,sans-serif);text-align:left;}",
+    /* Vert = une bonne nouvelle (le paiement). Bleu = une information (l'accès
+       existe, il faut l'activer). 🔴 Deux couleurs et non une : le premier cas
+       annonce que l'argent est passé, les deux autres demandent encore quelque
+       chose — les peindre pareil effacerait la seule chose qui rassure. */
+    "body.slug-" + SLUG + " #ps-achat.ps-ok{background:var(--ps-ok-tint,#E8F7F0);" +
+      "border:1px solid var(--ps-ok,#1b5e40);color:#154832;}",
+    "body.slug-" + SLUG + " #ps-achat.ps-ok strong{color:#0f3a28;}",
+    "body.slug-" + SLUG + " #ps-achat.ps-info{background:var(--ps-accent-tint,#EEF4FA);" +
+      "border:1px solid var(--ps-border,#E6E9EF);color:var(--ps-text,#203866);}",
+    "body.slug-" + SLUG + " #ps-achat.ps-info strong{color:var(--ps-text,#203866);}",
+    "body.slug-" + SLUG + " #ps-achat a{color:var(--ps-accent,#3887b4);font-weight:700;}",
+    "body.slug-" + SLUG + " #ps-achat em{font-style:normal;font-weight:700;}",
     /* Fond : la page n'a NI barre de navigation NI pied de page (une seule
        section `Thankyou1`, mesuré). Elle occupe donc tout l'écran, et c'est
        elle seule qui porte la DA. */
@@ -290,21 +300,65 @@
   function rassurerAcheteur(sec) {
     if (!sec || document.getElementById("ps-achat")) return;
     var m = (typeof me === "object" && me) ? me : null;
-    if (!m || !Array.isArray(m.userLearningPrograms) || !m.userLearningPrograms.length) return;
+    if (!m) return;
+    /* Tableau absent = pas encore chargé, JAMAIS « rien acheté ». Même
+       discipline que le blocage de `tokens.js` : on ne conclut pas sur un
+       doute, on attend le passage suivant. */
+    if (!Array.isArray(m.userLearningPrograms)) return;
 
-    var nom = "";
-    try {
-      var p = m.userLearningPrograms[0];
-      nom = (p && (p.title || p.name)) ? String(p.title || p.name) : "";
-    } catch (e) {}
+    var prog = m.userLearningPrograms.length;
+    var ecole = null;
+    try { ecole = window.PS_PARTENAIRE || null; } catch (e) {}
 
     var b = document.createElement("div");
     b.id = "ps-achat";
-    b.innerHTML =
-      '<strong>Votre achat est bien enregistré' + (nom ? '&nbsp;: ' + nom.replace(/[&<>]/g, "") : "") + '.</strong> ' +
-      'Il reste une seule étape&nbsp;: confirmer votre adresse e-mail. ' +
-      'Vos cours s\'ouvriront dès que vous aurez cliqué sur le lien ci-dessous — ' +
-      'rien ne sera à repayer.';
+
+    if (prog > 0) {
+      /* ── 1. Il vient de payer ──────────────────────────────────────────
+         Le cas mesuré le 08/08 sur le compte de Ziad : programme acquis,
+         adresse en attente, et une page qui ne parlait que d'« activer un
+         compte ». On confirme d'abord l'argent, on demande ensuite. */
+      var nom = "";
+      try {
+        var p = m.userLearningPrograms[0];
+        nom = (p && (p.title || p.name)) ? String(p.title || p.name) : "";
+      } catch (e2) {}
+      b.className = "ps-ok";
+      b.innerHTML =
+        '<strong>Paiement reçu, merci&nbsp;!</strong> Votre accès à ' +
+        (nom ? '<em>' + nom.replace(/[&<>]/g, "") + '</em>' : 'votre formation') +
+        ' est enregistré. Il reste une seule étape&nbsp;: confirmer votre adresse e-mail. ' +
+        'Vos cours s\'ouvriront dès que vous aurez cliqué sur le lien — ' +
+        '<strong>rien ne sera à repayer</strong>.';
+
+    } else if (ecole) {
+      /* ── 2. Étudiant d'une école partenaire ────────────────────────────
+         🔴 ON NE LUI PARLE JAMAIS D'ARGENT : son école a payé. C'est la règle
+         posée le 07/08 pour le bandeau d'orientation, et elle vaut ici.
+         🔴 Son accès n'existe pas ENCORE : l'automatisation d'école se
+         déclenche précisément sur la vérification. La validation n'est donc
+         pas une formalité administrative, c'est ce qui ouvre ses cours — et
+         c'est ce que la phrase doit dire. */
+      var nomEcole = "";
+      try { nomEcole = ecole.nom ? String(ecole.nom).replace(/[&<>]/g, "") : ""; } catch (e3) {}
+      b.className = "ps-info";
+      b.innerHTML =
+        '<strong>Votre accès est prévu' + (nomEcole ? ' avec ' + nomEcole : '') + '.</strong> ' +
+        'Confirmez votre adresse e-mail pour l\'activer&nbsp;: c\'est ce clic qui ouvre vos cours. ' +
+        'Vous n\'avez rien à payer.';
+
+    } else {
+      /* ── 3. Compte créé, rien acheté ───────────────────────────────────
+         🔴 Le lien vers les formules est HONNÊTE : mesuré le 08/08,
+         `/formules` répond 200 sans redirection pendant l'attente. Seul le
+         LECTEUR de cours est bloqué par LearnWorlds — proposer « mes cours »
+         ici renverrait sur cette même page. */
+      b.className = "ps-info";
+      b.innerHTML =
+        '<strong>Votre compte est créé.</strong> Confirmez votre adresse e-mail pour l\'activer. ' +
+        'Il vous restera à choisir votre formule pour ouvrir les cours — ' +
+        '<a href="/formules">voir les formules</a>.';
+    }
     /* 🔴🔴 ON S'INSÈRE À CÔTÉ DU TITRE, PAS À CÔTÉ DE SON PARENT. Première
        version : `titre.parentElement.parentElement.insertBefore(...)` — le bloc
        atterrissait dans `.lw-cols`, un conteneur FLEX EN LIGNE avec
