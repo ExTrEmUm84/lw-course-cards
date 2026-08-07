@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-e";
+  window.PS_TOKENS_V="2026-08-07-f";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4321,6 +4321,18 @@
     try{ part=window.PS_PARTENAIRE_EMAIL ? window.PS_PARTENAIRE_EMAIL(u.email) : null; }catch(e){}
     var etat=orientation(u, part, (u.userLearningPrograms||[]).length);
     if(!etat.montrer) return;
+
+    /* 🔴 ON NE PROPOSE PAS D'ALLER LÀ OÙ L'ON EST DÉJÀ (07/08, demande de Ziad :
+       « sur la page formule pas besoin d'afficher le bandeau formule en haut »).
+       Traité par comparaison avec la DESTINATION, et non par une exception
+       nommée `/formules` : le jour où `PS_URL_OFFRE` change — il est réglable —
+       une exception codée en dur laisserait le bandeau réapparaître sur la
+       nouvelle page de vente, et disparaître de nulle part.
+       Bénéfice au passage : la même règle couvre la page de validation. */
+    var destBandeau = etat.mode==="offre"        ? (window.PS_URL_OFFRE||URL_OFFRE_DEFAUT)
+                    : etat.mode==="verification" ? "/email-verification-pending"
+                    : "";
+    if(destBandeau && slugDe(destBandeau)===slugDe(location.pathname)) return;
 
     if(!document.getElementById("ps-acces-css")){
       var st=document.createElement("style"); st.id="ps-acces-css";
