@@ -1455,6 +1455,44 @@
   function schedule(){ if(scheduled) return; scheduled=true; requestAnimationFrame(function(){ scheduled=false; build(); sectionCoursVide(); }); }
   var obs=new MutationObserver(schedule);
   function start(){ build(); sectionCoursVide(); obs.observe(document.body,{childList:true,subtree:true}); }
+  /* ════════════════════════════════════════════════════════════════════════
+     MASQUER LE BLOC DE RÉGLAGES AVANT LA PEINTURE  (07/08)
+     ------------------------------------------------------------------------
+     🔴 Signalé par Ziad : « la page profil affiche aussi le texte du builder
+     avant de mettre en page ». Autrement dit l'étudiant lit
+     « grade1-nom : Junior », « grade1-seuil : 0 »… en clair, une demi-seconde,
+     avant que le board ne se construise.
+     Cause : `appliquerGradesDuBuilder()` n'était appelée que depuis `start()`,
+     lui-même suspendu à `DOMContentLoaded` — mesuré ce jour sur ce site :
+     **411 ms**, bien après l'affichage du texte servi dans le HTML.
+     ⇒ On tente immédiatement, puis toutes les 20 ms jusqu'à l'avoir trouvé et
+     masqué. Le bloc est dans le HTML servi : il est donc atteignable dès que le
+     corps est analysé, sans attendre le moindre événement.
+     🔴 UNE SEULE SOURCE : on rappelle la fonction existante, on ne recopie pas
+     sa détection ailleurs. Une seconde copie du motif `gradeN-nom` finirait par
+     diverger de celle qui lit vraiment les valeurs.
+     🔴 Plafond 3 s : une page sans bloc de réglages est le cas NORMAL (l'échelle
+     par défaut suffit), il ne faut pas interroger le DOM indéfiniment pour rien.
+     🔴 Idempotent : `appliquerGradesDuBuilder` repose `display:none` sur le même
+     élément et sort au premier bloc trouvé — la rappeler ne coûte rien.
+     ════════════════════════════════════════════════════════════════════════ */
+  /* 🔴🔴 NE PAS SORTIR SUR `surLaPage()` AU PREMIER PASSAGE. À l'exécution du
+     script, `document.body` peut être NUL et la classe `slug-profile` pas
+     encore posée : un `if(!surLaPage()) return;` ici ne se déclencherait
+     JAMAIS. C'est mot pour mot la faute du 05/08 — l'anti-flash de la home
+     testait cette classe trop tôt et n'a jamais été posé, alors que je le
+     croyais en service. On teste donc À CHAQUE passage, pas une seule fois. */
+  (function masquerTot(){
+    var t0=Date.now(), h=null;
+    function essayer(){
+      if(Date.now()-t0>3000){ if(h) clearInterval(h); return; }
+      if(!surLaPage()) return;                 /* la classe arrive plus tard */
+      if(appliquerGradesDuBuilder() && h) clearInterval(h);
+    }
+    essayer();
+    h=setInterval(essayer, 20);
+  })();
+
   if(document.readyState!=="loading") start(); else document.addEventListener("DOMContentLoaded",start);
   window.addEventListener("load",build);
   /* Le tableau dépend de la langue -> le reconstruire quand elle change.
