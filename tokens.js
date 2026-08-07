@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-p";
+  window.PS_TOKENS_V="2026-08-08-a";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3806,6 +3806,15 @@
     var cf={}, k;
     var src=u.custom_fields||{};
     for(k in src) if(Object.prototype.hasOwnProperty.call(src,k)) cf[k]=src[k];
+    /* 🔴🔴 LA BIO EST UN CHAMP NATIF — elle n'a aucun tag `cf_bio_…`, donc elle
+       manquait à `connus` : l'écran « Deux lignes sur vous » s'ouvrait VIDE
+       pour un membre qui avait déjà écrit sa bio. C'est le défaut « réviser
+       redevient ressaisir » du 07/08, resté vivant sur ce seul champ parce
+       qu'il ne passe pas par le même tuyau que les autres.
+       🟢 Mesuré le 08/08 sur `/account` : `me.bio` est bien une chaîne peuplée.
+       (Le Worker ne l'efface pas quand elle repart vide — mais afficher un
+       champ vide à quelqu'un qui l'a rempli reste un mensonge d'écran.) */
+    if(u.bio!=null && String(u.bio).trim()) cf.bio=String(u.bio);
     [].slice.call(u.tags||[]).forEach(function(t){
       var s=String(typeof t==="string" ? t : (t && t.name) || "");
       if(s.indexOf("cf_")!==0) return;
@@ -4084,6 +4093,27 @@
        automatique), basculer sa visibilité (opt-in + récapitulatif), et
        RÉVISER ses infos (« Modifier mes infos » : tous les écrans, préremplis). */
     function dejaConnu(e){ return !toutRevoir && !!e && e.cle!=="cf_annuaire" && rempli(connus[e.cle]); }
+    /* 🔴🔴🔴 LE JALON EST UN ÉTAT — ET IL DOIT L'ÊTRE DANS LES TROIS CHEMINS
+       (08/08, deux symptômes signalés par Ziad, UNE seule cause).
+       `cf_langue` occupe EXACTEMENT l'index `NOYAU` : tester `i===NOYAU` pour
+       reconnaître le récapitulatif, c'est confondre l'écran-jalon avec la
+       QUESTION qui habite cette place. Résultat, deux fois le même défaut :
+       - **crayon « Langue »** : `rendre()` peignait « Votre fiche est en ligne »
+         à la place de la question ;
+       - **« Modifier mes infos »** : la question s'affichait (le jalon avait
+         déjà été montré) mais `brancher()` calculait `e=null` et ne câblait
+         AUCUN bouton — « Anglais » ne répondait à rien. Un écran juste, et
+         mort.
+       🔴 Le 07/08 j'ai transformé le jalon en état **dans `rendre()`
+       seulement** ; `brancher()` a gardé le test de position et n'a jamais
+       connu `noyauMontre`. C'est exactement la leçon écrite ce jour-là —
+       *chercher tous les porteurs d'une règle avant d'en corriger un* — que je
+       n'ai pas appliquée à ma propre correction. ⇒ UN SEUL porteur désormais,
+       appelé par les trois chemins.
+       🔴 `!unSeul` : ouverte sur un champ précis (un crayon), la popup ne fait
+       aucun parcours — il n'y a donc aucun jalon à franchir, même si le champ
+       visé tombe pile sur l'index du noyau. C'est ce cas-là que Ziad a vu. */
+    function auJalon(){ return !unSeul && !noyauMontre && i===NOYAU; }
     function sauterConnus(){
       /* 🔴🔴 LE SAUT NE FRANCHIT PAS LE RÉCAPITULATIF (07/08, trouvé au banc de
          rejeu, pas à l'écran). L'index `NOYAU` porte DEUX choses : l'écran
@@ -4093,7 +4123,7 @@
          voyait JAMAIS le récapitulatif, donc jamais le choix « C'est bon pour
          moi / Compléter » — c'est-à-dire exactement ce que Ziad demandait. */
       while(i<FICHE_ECRANS.length && dejaConnu(FICHE_ECRANS[i])){
-        if(i===NOYAU && !noyauMontre) break;
+        if(auJalon()) break;
         i++;
       }
       /* 🔴🔴 GÉRER UNE FICHE N'EST PAS LA CRÉER (07/08, Ziad : « pourquoi
@@ -4204,7 +4234,7 @@
           'Vous pourrez changer d\'avis depuis votre profil.</p></div>'+
           '<div class="pf-pied"><span class="pf-lien" style="cursor:default"></span>'+
           '<button class="pf-ok" data-a="fin">Fermer</button></div>';
-      } else if(i===NOYAU && !noyauMontre){
+      } else if(auJalon()){
         /* 🔴 ON NE PROMET PAS UNE FICHE UTILE QUAND ELLE NE L'EST PAS. Sans
            aucun moyen de contact, « votre fiche est en ligne » est vrai mais
            trompeur : personne ne pourra joindre ce membre. On le dit, et le
@@ -4255,7 +4285,11 @@
     function brancher(){
       hote.querySelector(".pf-x").onclick=function(){ fermer(true); };
       hote.onclick=function(ev){ if(ev.target===hote) fermer(true); };   // clic hors carte
-      var e=(i<FICHE_ECRANS.length && i!==NOYAU && rep.cf_annuaire!==OPTIN_NON) ? FICHE_ECRANS[i] : null;
+      /* 🔴 `auJalon()` et NON `i!==NOYAU` : c'est ce test-là qui laissait
+         l'écran « Langue » sans aucun gestionnaire (voir plus haut). Le champ à
+         câbler dépend de ce que `rendre()` vient de peindre — les deux doivent
+         donc lire LA MÊME règle, pas deux formulations qui se ressemblent. */
+      var e=(i<FICHE_ECRANS.length && !auJalon() && rep.cf_annuaire!==OPTIN_NON) ? FICHE_ECRANS[i] : null;
 
       hote.querySelectorAll("[data-a]").forEach(function(b){
         b.onclick=function(){
@@ -4310,6 +4344,14 @@
             /* Choix unique : on avance seul. Un clic de plus par écran, c'est
                autant d'occasions d'abandonner. */
             setTimeout(function(){
+              /* 🔴 CIBLE UNIQUE, ICI AUSSI (08/08). L'avance automatique était le
+                 QUATRIÈME chemin, et le seul que la règle `unSeul` n'avait pas
+                 reçue : un crayon sur École, Niveau ou Recherche — tous à choix
+                 unique — enchaînait sur tout le questionnaire au lieu de se
+                 fermer. Le défaut est le même que celui du 07/08 sur
+                 `sauterConnus()`, à la ligne près. **Une règle ajoutée doit
+                 l'être sur TOUS les chemins qui avancent l'index.** */
+              if(unSeul){ fermer(true); return; }
               /* 🔴🔴 CE CHEMIN N'APPELAIT PAS `sauterConnus()` (07/08). Un choix
                  unique avance TOUT SEUL après le clic ; j'avais ajouté le saut
                  des champs déjà connus sur « Passer / Continuer » et sur la
