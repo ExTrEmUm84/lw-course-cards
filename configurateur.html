@@ -314,6 +314,19 @@ body.ps-verrou .ps-porte{display:grid}
 .pv-cur{display:inline-block;width:3px;height:.86em;background:var(--ps-accent);margin-left:5px;vertical-align:-.06em;border-radius:2px;animation:bl 1.05s steps(1) infinite}
 @keyframes bl{50%{opacity:0}}
 .pv-desc{font-family:var(--ps-font);font-size:15px;line-height:1.65;color:var(--ps-text-soft);margin:12px 0 0;max-width:520px}
+/* surtitre de section — REPLI DE MAQUETTE, et seulement un repli.
+   🔴 Deux des sept pages qui ont un surtitre (Compétences, Annuaire) n'ont pas de
+   feuille réelle dans cet aperçu : `program-cards.js` et `annuaire.js` ne publient
+   rien dans `PS_CSS`. Sans ces deux règles, leur onglet montrerait un titre nu et
+   le réglage n'aurait aucun retour visuel.
+   🔴 LA CASCADE EST RECOPIÉE À L'IDENTIQUE de la production (`--ps-h2-sep` ->
+   `--ps-h2` -> `--ps-accent`) : c'est la condition pour que l'aperçu ne montre pas
+   une couleur que le site ne produira pas. Toute correction ici doit être portée
+   dans les six feuilles de cartes, et réciproquement.
+   🔴 Sans `!important`, à dessein : les règles réelles en portent, donc là où la
+   vraie feuille est chargée c'est elle qui peint, et ce repli s'efface. */
+.stage h2.learnworlds-subheading{font-family:var(--ps-font);font-size:34px;font-weight:800;letter-spacing:-.02em;line-height:1.2;color:var(--ps-h2,var(--ps-accent));text-align:left;margin:0}
+.stage h2.learnworlds-subheading::before{content:"";display:block;width:60px;height:4px;border-radius:2px;background:var(--ps-h2-sep,var(--ps-h2,var(--ps-accent)));margin:0 0 24px 0}
 /* ---- LES CARTES : plus de maquette, la VRAIE structure ---------------
    Les quatre blocs de cartes de l'aperçu (cours, fiches secteur, fiches cabinet,
    études de cas) portent les classes de production et sont dessinés par la
@@ -602,18 +615,17 @@ body.ps-verrou .ps-porte{display:grid}
           <!-- 🔴 Carte STATIQUE : l onglet General est bati en HTML, pas par la
                fonction `grille` des onglets de page. J avais d abord ajoute une
                carte dynamique -- elle ne s affichait jamais, sans erreur. -->
-          <div class="card">
-            <h4>Titres de section</h4>
-            <p class="expl">Les intertitres des pages (« Tout savoir sur le Conseil en Stratégie »,
-              « Focus sur les autres types de Conseil »…) et le petit trait qui les surmonte, sur les
-              six pages à cartes. <strong>Décochés, ils prennent la couleur de la page</strong> —
-              c'est le comportement actuel.</p>
-            <div class="row"><input type="checkbox" id="ck-h2" style="flex:none"><label for="ck-h2">Couleur propre des titres</label><input type="color" id="col-h2"></div>
-            <div class="lien">↳ décochée, chaque page garde sa teinte</div>
-            <div class="row"><input type="checkbox" id="ck-h2Sep" style="flex:none"><label for="ck-h2Sep">Couleur propre du séparateur</label><input type="color" id="col-h2Sep"></div>
-            <div class="lien">↳ décochée, le trait suit la couleur du titre</div>
-          </div>
-
+          <!-- 🔴 LA CARTE « Titres de section » A QUITTE CE PANNEAU LE 08/08, demande
+               du client : la couleur du surtitre et de son trait se regle desormais
+               DANS l onglet de chaque page, aux cotes de la couleur de page et de la
+               couleur du trait. Posee ici elle valait pour tout le site, donc elle
+               ECRASAIT l accent de chaque page — exactement ce que la cascade
+               `--ps-h2 -> --ps-accent` avait ete ecrite pour preserver.
+               Le commentaire ci-dessus reste en place : sa lecon vaut pour les cartes
+               statiques qui restent, a commencer par celle du menu juste en dessous.
+               ⚠️ Rien a reprendre au passage : `--ps-h2` n avait JAMAIS ete publie
+               (mesure le 08/08 sur le `tokens.js` servi par GitHub Pages), donc
+               aucune page ne change d apparence tant que rien n est regle. -->
 
           <!-- 🔴 Le menu est le même sur toutes les pages : sa place est ici, et non
                dans un onglet de page. Ses couleurs se choisissent ENSEMBLE — les
@@ -696,6 +708,24 @@ body.ps-verrou .ps-porte{display:grid}
     <div class="bloc" data-p="__general home formation-par-modules sentrainer fiches-cabinet fiches-secteur etudes-cas formation-par-thematiques profile annuaire-partenaire-de-cas">
       <h1 class="pv-h1">Nos formations pour <span class="pv-tw">le conseil</span><span class="pv-cur"></span></h1>
       <p class="pv-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed in metus vulputate, imperdiet tortor imperdiet, pulvinar metus.</p>
+    </div>
+
+    <!-- 🔴 LE SURTITRE MANQUAIT À L'APERÇU (constaté à l'écran le 08/08, en
+         déplaçant son réglage dans les onglets de page). Il se réglait depuis le
+         07/08 sans que rien ne bouge nulle part : on publiait une couleur qu'on
+         n'avait jamais vue. Un réglage sans retour visuel, c'est publier à
+         l'aveugle — le défaut déjà corrigé pour la couleur de page.
+         🔴 VRAIE CLASSE, `h2.learnworlds-subheading`, et pas une maquette : les
+         feuilles réelles la visent en `#pageContent h2.learnworlds-subheading`, et
+         la scène EST `#pageContent`. Sur les pages qui ont leur feuille dans
+         l'aperçu, c'est donc la production qui peint ce bloc.
+         ⚠️ Compétences et Annuaire n'ont PAS de feuille ici : `program-cards.js` et
+         `annuaire.js` ne publient rien dans `PS_CSS`. Un repli de maquette, à la
+         cascade recopiée, prend le relais dans la feuille du châssis. -->
+    <h3 data-p="formation-par-modules sentrainer fiches-cabinet fiches-secteur etudes-cas formation-par-thematiques annuaire-partenaire-de-cas">Titre de section <span style="text-transform:none;font-weight:600;color:#B4BAC8">— le surtitre et le petit trait qui le surmonte</span></h3>
+    <div class="bloc" data-p="formation-par-modules sentrainer fiches-cabinet fiches-secteur etudes-cas formation-par-thematiques annuaire-partenaire-de-cas">
+      <h2 class="learnworlds-subheading">Tout savoir sur le Conseil en Stratégie</h2>
+      <p class="pv-desc">Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed in metus vulputate, imperdiet tortor imperdiet.</p>
     </div>
 
     <h3 data-p="formation-par-modules sentrainer fiches-secteur fiches-cabinet etudes-cas">Tuile de progression</h3>
@@ -1261,9 +1291,10 @@ body.ps-verrou .ps-porte{display:grid}
        de cartes, pour que poser le jeton ne change rien tant que Ziad n'y touche pas. */
     mobPad:40, mobH1:36,
     anAvatar:56, anCol:260, pfRing:64, pfBar:8, anBtn:"", pfBtn:"",
-    /* Titres de section + leur separateur. VIDE = suit la couleur de la page,
-       comportement actuel : ne rien regler ne change donc rien. */
-    h2:"", h2Sep:"",
+    /* 🔴 `h2` / `h2Sep` NE SONT PLUS ICI (08/08). Titres de section et separateur
+       se reglent PAR PAGE : ils vivent dans `style[slug]`, aux cotes de `couleur`.
+       Un reglage global figeait la couleur des intertitres sur tout le site et
+       annulait l accent de chaque page. */
     /* Niveau 1 et champ 1 SUIVENT la marque (cases cochées) : ces deux valeurs ne
        servent que si Ziad décoche le lien. Elles doivent donc valoir ce que le
        lien produirait, sinon décocher changerait la couleur sans qu'il l'ait
@@ -1295,22 +1326,22 @@ body.ps-verrou .ps-porte{display:grid}
        ces valeurs exactes : le défaut reproduit donc le site tel qu'il est, il
        ne le modifie pas. Les autres pages sont livrées ÉTEINTES (demande de
        Ziad : « rajoute-le partout mais ne l'active pas »). */
-    style:{"home":{contour:false,ep:4,duree:1.1,couleur:""},
-           "profile":{contour:false,ep:4,duree:1.1,couleur:""},
-           "annuaire-partenaire-de-cas":{contour:false,ep:4,duree:1.1,couleur:""},
-           "formation-par-modules":{contour:true,ep:4,duree:1.1,couleur:""},
-           "sentrainer":{contour:false,ep:4,duree:1.1,couleur:""},
-           "fiches-cabinet":{contour:false,ep:4,duree:1.1,couleur:""},
-           "fiches-secteur":{contour:false,ep:4,duree:1.1,couleur:""},
-           "etudes-cas":{contour:false,ep:4,duree:1.1,couleur:""},
-           "formation-par-thematiques":{contour:false,ep:4,duree:1.1,couleur:""},
+    style:{"home":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
+           "profile":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
+           "annuaire-partenaire-de-cas":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
+           "formation-par-modules":{contour:true,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
+           "sentrainer":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
+           "fiches-cabinet":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
+           "fiches-secteur":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
+           "etudes-cas":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
+           "formation-par-thematiques":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
            /* Seule `formules` a des cartes que le liseré sait atteindre — les
               trois autres n'en ont pas du tout, et leur entrée n'existe ici que
               pour que « Annuler mes changements » ait quelque chose à restaurer. */
-           "formules":{contour:false,ep:4,duree:1.1,couleur:""},
-           "inscription":{contour:false,ep:4,duree:1.1,couleur:""},
-           "payment":{contour:false,ep:4,duree:1.1,couleur:""},
-           "email-verification-pending":{contour:false,ep:4,duree:1.1,couleur:""}}
+           "formules":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
+           "inscription":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
+           "payment":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""},
+           "email-verification-pending":{contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""}}
   };
   /* 🔴 Les LIBELLÉS vivent ici et non dans tokens.js : le bloc y est réécrit par
      ce fichier, donc tout commentaire posé entre les marqueurs serait effacé à la
@@ -1392,6 +1423,22 @@ body.ps-verrou .ps-porte{display:grid}
      liseré sache l'atteindre recréerait la case qui ne fait rien. */
   var PAGES_A_CARTES=["formation-par-modules","sentrainer","fiches-cabinet",
                       "fiches-secteur","etudes-cas","formules"];
+  /* ====================================================================
+     LES PAGES QUI ONT VRAIMENT UN SURTITRE
+     --------------------------------------------------------------------
+     La regle `h2.learnworlds-subheading` (le gros intertitre et le petit trait
+     qui le surmonte) n est posee que par les feuilles de cartes :
+     `course-cards.js` (Cours et S entrainer), `sector-cards.js`, `case-cards.js`,
+     `cabinet-cards.js`, `program-cards.js` (Competences) et `annuaire.js`.
+     🔴 AILLEURS, LA CASE NE FERAIT RIEN. Home, Profil, Inscription, Formules,
+     Paiement et Verification n ont aucun surtitre stylé : leur offrir le reglage
+     recreerait « la case a cocher qui ne fait rien », le defaut que ce fichier
+     refuse partout ailleurs (cf. `PAGES_A_CARTES`).
+     🔴 `formules` FIGURE DANS `PAGES_A_CARTES` MAIS PAS ICI, et ce n est pas un
+     oubli : ses cartes viennent de `abonnement.js`, qui ne contient pas la regle
+     du surtitre. Les deux listes ne se recouvrent pas, chacune dit autre chose. */
+  var PAGES_H2=["formation-par-modules","sentrainer","fiches-cabinet","fiches-secteur",
+                "etudes-cas","formation-par-thematiques","annuaire-partenaire-de-cas"];
   var REGL_LIB=[
     ["lien_video",            "Vidéo du hero (lecture au clic)"],
     ["lien_video_background", "Vidéo de fond du hero"]
@@ -1658,6 +1705,16 @@ body.ps-verrou .ps-porte{display:grid}
       st.classList.remove("ps-line-0");
       ["--ps-line-w","--ps-line-t","--ps-line-c"].forEach(function(v){ st.style.removeProperty(v); });
     }
+    /* 🔴 LE SURTITRE SE POSE ICI, ET AVANT LES DEUX SORTIES ANTICIPEES qui suivent.
+       Une page peut tres bien avoir une couleur de titre SANS couleur propre —
+       lier les deux aurait oblige a repeindre la page entiere pour changer un
+       intertitre. Sorti sous les `return` de l onglet General et de la page sans
+       couleur, le reglage n aurait rien montre a l ecran dans ces deux cas. */
+    if(pageActive!==TAB_GENERAL && sl.h2)    st.style.setProperty("--ps-h2",sl.h2);
+    else                                     st.style.removeProperty("--ps-h2");
+    if(pageActive!==TAB_GENERAL && sl.h2Sep) st.style.setProperty("--ps-h2-sep",sl.h2Sep);
+    else                                     st.style.removeProperty("--ps-h2-sep");
+
     var hex=S.pages[pageActive];
     var b=document.getElementById("apercuPageNom");
     /* L'onglet Général ne montre AUCUNE page : dire « couleur de la marque » y
@@ -1803,7 +1860,7 @@ body.ps-verrou .ps-porte{display:grid}
     if(!box) return;
     var slug=pageActive;
     var val=S.pages[slug]||"";
-    var st=S.style[slug]||(S.style[slug]={contour:false,ep:4,duree:1.1,couleur:""});
+    var st=S.style[slug]||(S.style[slug]={contour:false,ep:4,duree:1.1,couleur:"",h2:"",h2Sep:""});
     box.innerHTML="";
     var grille=document.createElement("div"); grille.className="pcfg";
 
@@ -1926,6 +1983,15 @@ body.ps-verrou .ps-porte{display:grid}
     du.oninput=function(){ st.duree=parseFloat(du.value); maj(); sortie(); apercuPage(); };
     maj();
 
+    /* ---- carte 3 : le surtitre de section et son trait ----------------------
+       🔴 CETTE CARTE EST CONSTRUITE ICI, PAS EN HTML STATIQUE. Elle vivait dans
+       l onglet General jusqu au 08/08 ; l y laisser aurait rendu la couleur
+       globale, donc prioritaire sur l accent de chaque page. Elle rejoint la
+       `grille` des onglets de page — le seul endroit ou une carte ajoutee
+       dynamiquement s affiche (l onglet General, lui, est bati en HTML : une
+       carte ajoutee par script n y apparait jamais, sans la moindre erreur). */
+    if(PAGES_H2.indexOf(slug)>=0) grille.appendChild(carteSurtitre(slug, st));
+
     /* ---- cartes SPÉCIFIQUES à cette page ------------------------------------
        🔴 Demande de Ziad : « ne laisser dans la colonne que les réglages
        généraux ». Ces trois blocs y étaient, alors qu'ils ne concernent qu'une
@@ -1942,6 +2008,53 @@ body.ps-verrou .ps-porte{display:grid}
     if(slug==="home") grille.appendChild(carteVideos());
 
     box.appendChild(grille);
+  }
+
+  /* ====================================================================
+     SURTITRE DE SECTION ET SON TRAIT — UNE CARTE PAR PAGE
+     --------------------------------------------------------------------
+     Deux couleurs FACULTATIVES, exactement la meme semantique que la couleur
+     propre du trait juste au-dessus : decochee = aucune valeur ecrite, donc la
+     cascade `--ps-h2 -> --ps-accent` reprend la main et le titre suit la couleur
+     de SA page. C est ce repli qui rend le reglage par page possible ; poser une
+     valeur par defaut le detruirait, et toutes les pages repartiraient sur la
+     meme teinte sans que personne ne l ait demande.
+     🔴 Le separateur retombe sur le TITRE, pas sur l accent : sa cascade est
+     `--ps-h2-sep -> --ps-h2 -> --ps-accent`. Regler la seule couleur de titre
+     deplace donc aussi le trait, ce que le libelle doit dire — sinon on croit
+     avoir a remplir les deux. */
+  function carteSurtitre(slug, st){
+    var d=document.createElement("div"); d.className="card";
+    d.innerHTML='<h4>Titre de section</h4>'+
+      '<p class="expl">Le gros intertitre de cette page (« Tout savoir sur le Conseil en Stratégie », '+
+      '« Focus sur les autres types de Conseil »…) et le petit trait qui le surmonte. '+
+      '<strong>Décochés, ils prennent la couleur de cette page</strong> — c\'est le comportement actuel.</p>';
+    /* 🔴 L id porte le SLUG. Les cartes des onglets sont detruites et reconstruites
+       a chaque changement d onglet : deux pages qui partageraient `ck-h2` auraient
+       deux `<label for>` visant le meme id, et cliquer le texte d une page aurait
+       coche la case de l autre. Meme precaution que `ck-page-` et `ck-trait-`. */
+    function ligne(cle, lib, aide){
+      var r=document.createElement("div"); r.className="row";
+      var ck=document.createElement("input"); ck.type="checkbox"; ck.checked=!!st[cle]; ck.style.flex="none";
+      ck.id="ck-"+cle+"-"+slug;
+      var l=document.createElement("label"); l.textContent=lib; l.setAttribute("for",ck.id);
+      var c=document.createElement("input"); c.type="color";
+      c.value=st[cle]||S.pages[slug]||S.accent; c.disabled=!st[cle];
+      /* 🔴 On ne rappelle PAS `pageCfgUI()` ici : il detruirait le nuancier qu on
+         est en train de manipuler, et les evenements suivants partiraient dans un
+         element detache — le piege deja paye sur la couleur de page. On met a jour
+         l etat et l apercu, rien d autre. */
+      ck.onchange=function(){
+        st[cle]= ck.checked ? (c.value||S.pages[slug]||S.accent) : "";
+        c.disabled=!ck.checked; sortie(); apercuPage();
+      };
+      c.oninput=function(){ if(ck.checked){ st[cle]=c.value; sortie(); apercuPage(); } };
+      r.appendChild(ck); r.appendChild(l); r.appendChild(c); d.appendChild(r);
+      var a=document.createElement("div"); a.className="lien"; a.innerHTML=aide; d.appendChild(a);
+    }
+    ligne("h2","Couleur propre du titre","↳ décochée, le titre garde la teinte de cette page");
+    ligne("h2Sep","Couleur propre du séparateur","↳ décochée, le trait suit la couleur du titre");
+    return d;
   }
 
   /* Une palette (6 couleurs pleines + 6 teintes) présentée dans l'onglet de la
@@ -2237,8 +2350,10 @@ body.ps-verrou .ps-porte{display:grid}
     R.setProperty("--ps-pf-bar",S.pfBar+"px");
     if(S.pfBtn) R.setProperty("--ps-pf-btn",S.pfBtn); else R.removeProperty("--ps-pf-btn");
     if(S.anBtn) R.setProperty("--ps-an-btn",S.anBtn); else R.removeProperty("--ps-an-btn");
-    if(S.h2)    R.setProperty("--ps-h2",S.h2);        else R.removeProperty("--ps-h2");
-    if(S.h2Sep) R.setProperty("--ps-h2-sep",S.h2Sep); else R.removeProperty("--ps-h2-sep");
+    /* 🔴 `--ps-h2` / `--ps-h2-sep` NE SONT PLUS POSES SUR `:root` (08/08). Poses
+       ici ils valaient pour tout l outil, y compris pour les pages qui ont leur
+       propre reglage : c est `apercuPage()` qui les pose desormais, sur le seul
+       conteneur de l apercu et pour la seule page affichee. */
     R.setProperty("--ps-font",S.font);
     R.setProperty("--ps-r-card",S.rCard+"px");
     R.setProperty("--ps-r-pill",S.rPill+"px");
@@ -2286,11 +2401,33 @@ body.ps-verrou .ps-porte{display:grid}
        figerait cet heritage et casserait la source unique. */
     if(S.pfBtn) L.push(["--ps-pf-btn",S.pfBtn]);
     if(S.anBtn) L.push(["--ps-an-btn",S.anBtn]);
-    /* 🔴 Emis SEULEMENT si Ziad a coche. Ecrire une valeur par defaut figerait
-       la couleur des titres et supprimerait l accent PAR PAGE -- exactement le
-       piege evite pour --ps-pf-btn et --ps-an-btn. */
-    if(S.h2)    L.push(["--ps-h2",S.h2]);
-    if(S.h2Sep) L.push(["--ps-h2-sep",S.h2Sep]);
+    /* ================= SURTITRE DE SECTION, PAR PAGE =====================
+       🔴 Emis SEULEMENT si la case de la page est cochee. Ecrire une valeur par
+       defaut figerait la couleur des titres et supprimerait l accent PAR PAGE --
+       exactement le piege evite pour --ps-pf-btn et --ps-an-btn.
+
+       🔴🔴 POURQUOI DANS LE BLOC TOKENS ET PAS DANS `PAGE_STYLE`, qui serait sa
+       place naturelle a cote de `couleur`. Parce que le Worker RECONSTRUIT le bloc
+       PAGES a partir des seules cles `contour` / `ep` / `duree` / `couleur`, et
+       qu il y ecrit `"contour":1` en dur pour toute entree presente. Faire voyager
+       la couleur du titre par la aurait produit l un ou l autre de ces deux degats,
+       tous deux silencieux pour qui publie :
+         - la cle inconnue est simplement OUBLIEE a l ecriture, et le reglage
+           disparait a la publication sans que rien ne le dise ;
+         - ou bien, pour la faire passer, il faudrait envoyer aussi `ep` et `duree`
+           sur une page dont le contour est ETEINT, et le Worker allumerait alors
+           un lisere que personne n a demande.
+       Le bloc TOKENS, lui, accepte tout nom `--ps-*` porteur d une couleur : la
+       valeur y est validee comme n importe quel jeton, et c est `accentPage()` de
+       `tokens.js` qui la re-expose sous le nom que lisent les feuilles (`--ps-h2`),
+       sur la seule page concernee. Aucun deploiement du Worker n est necessaire.
+       ⚠️ `h2sep` s ecrit SANS TIRET a dessein : `--ps-page-h2-sep-…` aurait ete
+       indistinguable du reglage de titre d une page nommee `sep-…`. */
+    PAGES_H2.forEach(function(slug){
+      var st=S.style[slug]; if(!st) return;
+      if(st.h2)    L.push(["--ps-page-h2-"+slug, st.h2]);
+      if(st.h2Sep) L.push(["--ps-page-h2sep-"+slug, st.h2Sep]);
+    });
     L.push(["--ps-font",S.font]);
     L.push(["--ps-r-card",S.rCard+"px"]);
     L.push(["--ps-r-pill",S.rPill+"px"]);
@@ -2343,16 +2480,11 @@ body.ps-verrou .ps-porte{display:grid}
     S.deriv=this.checked; if(S.deriv){ deduire(); rendre(); }
   };
 
-  /* Deux couleurs FACULTATIVES : vide = la page reprend la main. Meme semantique
-     que `anBtn` / `pfBtn`, et meme raison -- ecrire une valeur par defaut
-     figerait la couleur et supprimerait l accent par page. */
-  [["h2","ck-h2","col-h2"],["h2Sep","ck-h2Sep","col-h2Sep"]].forEach(function(t){
-    var cle=t[0], ck=document.getElementById(t[1]), c=document.getElementById(t[2]);
-    if(!ck||!c) return;
-    ck.checked=!!S[cle]; c.value=S[cle]||S.accent; c.disabled=!S[cle];
-    ck.onchange=function(){ S[cle]= ck.checked ? (c.value||S.accent) : ""; c.disabled=!ck.checked; rendre(); sortie(); };
-    c.oninput=function(){ if(ck.checked){ S[cle]=c.value; rendre(); sortie(); } };
-  });
+  /* 🔴 Plus de branchement pour le surtitre ici (08/08). Ses deux cases vivent
+     maintenant dans l onglet de leur page et ne sont creees qu a son ouverture :
+     un `getElementById("ck-h2")` au demarrage renverrait null, et la ligne
+     suivante casserait tout le script — la panne classique de l element retire
+     sans le code qui le cherche, deja consignee plus bas pour le bouton Copier. */
   ["rCard","rPill","rBtn","mobPad","mobH1"].forEach(function(k){
     var el=document.getElementById(k); el.value=S[k];
     el.oninput=function(){ S[k]=+el.value; rendre(); };
@@ -2509,6 +2641,37 @@ body.ps-verrou .ps-porte{display:grid}
      404. Le message dit donc « ne figure plus dans le sitemap », pas « n'existe
      plus ». Le verdict ferme, lui, vient du Worker au moment de publier — il
      sonde vraiment, et lui peut affirmer. */
+
+  /* ====================================================================
+     CE QUI ARRIVE DU WORKER N'EST PAS FORCÉMENT UN SLUG
+     --------------------------------------------------------------------
+     🔴🔴 LA FAUSSE ALERTE DU 08/08, ET SA CAUSE EXACTE. L'outil accusait 18
+     réglages d'un coup — c'est-à-dire à peu près tout — alors que
+     `/formation-par-modules`, `/fiches-cabinet` et `/annuaire-partenaire-de-cas`
+     répondaient parfaitement, et que le vérificateur local ne trouvait « aucune
+     référence morte ».
+     Le site a changé de domaine le 07/08 : `prepastrat.learnworlds.com` répond
+     désormais en 301 vers `elearning.prepastrat.com`. Le Worker lit toujours le
+     sitemap sur l'ANCIEN nom — la redirection est suivie, donc la lecture réussit
+     et il compte bien ses 37 pages — mais les `<loc>` du sitemap portent le
+     NOUVEAU domaine, et le `replace(SITE_PUBLIC,"")` du Worker ne coupe plus rien.
+     Il renvoie donc 37 chaînes de la forme
+     `https://elearning.prepastrat.com/fiches-cabinet` au lieu de `fiches-cabinet`.
+     Aucune ne correspond à quoi que ce soit : TOUT paraît mort.
+     (Le vérificateur local a exactement le même défaut de lecture ; il ne crie pas
+     parce qu'il exige une SECONDE preuve — un 404 — que le site ne donne jamais.)
+
+     ⇒ On ramène chaque entrée à un slug ICI, quel que soit le nom d'hôte. L'outil
+     cesse ainsi de dépendre d'un domaine écrit en dur ailleurs, et le prochain
+     changement d'adresse ne le fera plus crier au loup. Le Worker gagnerait à être
+     corrigé aussi, mais l'outil ne doit pas dépendre de ce déploiement. */
+  function slugSeul(v){
+    return String(v||"").trim()
+      .replace(/^[a-z][a-z0-9+.-]*:\/\/[^/]+/i,"")   /* schéma + hôte, quel qu'il soit */
+      .replace(/[?#].*$/,"")
+      .replace(/^\/+|\/+$/g,"");
+  }
+
   async function verifierSlugs(){
     var el=document.getElementById("slugNote");
     if(!el) return;
@@ -2520,9 +2683,23 @@ body.ps-verrou .ps-porte{display:grid}
       j=await r.json();
     }catch(e){ return; }
     if(!j || !j.ok || !Array.isArray(j.pages)) return;
+    var lus=j.pages.map(slugSeul).filter(Boolean);
+    /* 🔴🔴 UNE LISTE VIDE VEUT DIRE « JE N'AI PAS PU VÉRIFIER », PAS « TOUT EST
+       MORT ». C'est la distinction que l'outil ne faisait pas, et c'est elle qui
+       transforme une panne de lecture en accusation contre 18 pages vivantes. Le
+       Worker répond `ok` même quand sa lecture ne donne rien d'exploitable : sans
+       ce garde-fou, l'absence de preuve se lit comme une preuve.
+       On le DIT à l'écran, en gris et non en rouge : se taire complètement
+       laisserait croire que le contrôle a eu lieu et qu'il est passé. */
+    if(!lus.length){
+      peindreNote(el,"ℹ️ <strong>Contrôle des pages impossible</strong> : le site n'a renvoyé aucune "+
+        "page exploitable. Rien n'est signalé — une liste vide veut dire « je n'ai pas pu vérifier », "+
+        "pas « toutes les pages ont disparu ». Tu peux publier normalement.","");
+      return;
+    }
     var vivant={}, hors={};
-    j.pages.forEach(function(p){ vivant[p]=1; });
-    (j.horsSitemap||[]).forEach(function(p){ hors[p]=1; });
+    lus.forEach(function(p){ vivant[p]=1; });
+    (j.horsSitemap||[]).map(slugSeul).forEach(function(p){ if(p) hors[p]=1; });
     /* 🔴🔴 LES PAGES SYSTÈME NE SONT PAS DANS LE SITEMAP, ET C'EST NORMAL.
        Trouvé le 05/08 en ajoutant les onglets du parcours : `/payment` et
        `/email-verification-pending` sont servies par LearnWorlds, pas construites
@@ -2539,10 +2716,30 @@ body.ps-verrou .ps-porte{display:grid}
        Site Builder. Elles doivent rester surveillées — ce sont même les deux
        dont un renommage casse le plus de choses. */
     var PAGES_SYSTEME={"payment":1,"email-verification-pending":1};
-    var douteux=[];
-    PAGES_LIB.forEach(function(p){ if(!PAGES_SYSTEME[p[0]] && !vivant[p[0]] && !hors[p[0]]) douteux.push(p[1]+" <code>"+p[0]+"</code>"); });
-    MENU_LIB.forEach(function(e){ if(!vivant[e[0]] && !hors[e[0]]) douteux.push("menu : "+e[1]+" <code>"+e[0]+"</code>"); });
+    var douteux=[], controles=0;
+    PAGES_LIB.forEach(function(p){ if(PAGES_SYSTEME[p[0]] || hors[p[0]]) return;
+      controles++; if(!vivant[p[0]]) douteux.push(p[1]+" <code>"+p[0]+"</code>"); });
+    MENU_LIB.forEach(function(e){ if(hors[e[0]]) return;
+      controles++; if(!vivant[e[0]]) douteux.push("menu : "+e[1]+" <code>"+e[0]+"</code>"); });
     if(!douteux.length) return;
+    /* 🔴🔴 UNE LISTE PARTIELLE N'EST PAS UNE HÉCATOMBE. Deuxième moitié de la
+       leçon du 08/08 : la liste reçue peut être non vide et pourtant inutilisable
+       (autre domaine, sous-sitemap manquant, index lu sans ses fils…). Or un
+       renommage renomme UNE page à la fois — même les quatre incidents d'une même
+       semaine sont arrivés un par un. Voir la MAJORITÉ des réglages tomber d'un
+       coup ne décrit pas un site cassé, ça décrit une lecture cassée : c'est
+       exactement ce qu'affichait l'outil (18 entrées sur 18 contrôlées) pendant
+       que les pages incriminées répondaient normalement.
+       On le dit donc en gris, sans liste d'accusés et sans conseil de correction —
+       corriger un slug parfaitement vivant, c'est casser une page qui marche. */
+    if(douteux.length > controles/2){
+      peindreNote(el,"ℹ️ <strong>Contrôle des pages ininterprétable</strong> : "+douteux.length+" réglages sur "+
+        controles+" ne correspondent à rien dans la liste renvoyée par le site. Un tel nombre d'un seul coup ne "+
+        "décrit pas des pages renommées, mais une <strong>lecture du sitemap qui a échoué</strong> — un changement "+
+        "de domaine, par exemple. <strong>Ne corrige aucun slug sur cette base</strong> : rien n'est signalé tant "+
+        "que le contrôle n'est pas fiable, et tu peux publier normalement.","");
+      return;
+    }
     peindreNote(el,"⚠️ <strong>"+douteux.length+" réglage(s) visent une page qui ne figure plus dans le sitemap du site.</strong> "+
       "Elle a sans doute été renommée&nbsp;: tant que ce n'est pas corrigé, sa couleur et son picto ne s'appliquent plus, "+
       "et les liens qui la visent tombent en 404.<br>"+douteux.join("<br>"),"ko");
@@ -2672,6 +2869,12 @@ body.ps-verrou .ps-porte{display:grid}
     }
     try{
       var mt=t.match(/>>> DEBUT TOKENS[^\n]*\n([\s\S]*?)\n\/\* <<< FIN TOKENS/);
+      /* 🔴 MIS DE COTE, PAS APPLIQUE TOUT DE SUITE. Les couleurs de surtitre sont
+         indexees par slug et vivent dans `S.style[slug]` — or la relecture du bloc
+         PAGES, quelques lignes plus bas, RECONSTRUIT chaque `S.style[slug]` de zero.
+         Les poser ici les ferait effacer aussitot, sans erreur ni trace : elles
+         attendent donc cette boucle-la. */
+      var h2Lus={};
       if(mt){
         var vus={};
         mt[1].split("\n").forEach(function(l){
@@ -2689,8 +2892,10 @@ body.ps-verrou .ps-porte{display:grid}
           else if(nom==="--ps-pf-bar")    S.pfBar=parseInt(val,10);
           else if(nom==="--ps-pf-btn")    S.pfBtn=val;
           else if(nom==="--ps-an-btn")    S.anBtn=val;
-          else if(nom==="--ps-h2")        S.h2=val;
-          else if(nom==="--ps-h2-sep")    S.h2Sep=val;
+          /* Surtitre par page. Les deux noms sont distincts sans ambiguite parce
+             que `h2sep` n a pas de tiret : un slug ne peut pas les confondre. */
+          else if(nom.indexOf("--ps-page-h2sep-")===0) (h2Lus[nom.slice(16)]=h2Lus[nom.slice(16)]||{}).h2Sep=val;
+          else if(nom.indexOf("--ps-page-h2-")===0)    (h2Lus[nom.slice(13)]=h2Lus[nom.slice(13)]||{}).h2=val;
           else { var p=nom.match(/^--ps-(lvl|f)([1-6])(-tint)?$/);
                  if(p && val.indexOf("var(")<0) S[p[1]==="lvl"?"lvl":"f"][+p[2]-1][p[3]?1:0]=val; }
         });
@@ -2706,9 +2911,15 @@ body.ps-verrou .ps-porte{display:grid}
         var acc=lire("PAGE_ACCENTS"), sty=lire("PAGE_STYLE"), reg=lire("REGLAGES");
         PAGES_LIB.forEach(function(pp){
           S.pages[pp[0]]=acc[pp[0]]||"";
-          var o=sty[pp[0]];
-          S.style[pp[0]]= o ? {contour:true, ep:Number(o.ep), duree:Number(o.duree), couleur:o.couleur||""}
-                            : {contour:false, ep:4, duree:1.1, couleur:""};
+          var o=sty[pp[0]], h=h2Lus[pp[0]]||{};
+          /* 🔴 Le surtitre vient du bloc TOKENS, le contour du bloc PAGES : ils ne
+             sont PAS lies. Une page peut avoir un titre de couleur propre sans le
+             moindre lisere, et c est le cas courant — d ou la fusion ici plutot
+             qu une lecture dans `sty[...]`. */
+          S.style[pp[0]]= o ? {contour:true, ep:Number(o.ep), duree:Number(o.duree), couleur:o.couleur||"",
+                               h2:h.h2||"", h2Sep:h.h2Sep||""}
+                            : {contour:false, ep:4, duree:1.1, couleur:"",
+                               h2:h.h2||"", h2Sep:h.h2Sep||""};
         });
         S.reglages.lien_video=reg.lien_video||"";
         S.reglages.lien_video_background=reg.lien_video_background||"";

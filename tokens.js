@@ -153,6 +153,12 @@
 
   var TOKENS=":root{"+VALEURS.join(";")+";}";
 
+  /* Les mêmes valeurs, mais consultables par nom. Sert au surtitre par page
+     (`accentPage()`), qui doit LIRE un jeton pour le reposer sous un autre nom —
+     ce qu'une simple chaîne CSS ne permet pas. */
+  var TOKEN_VAL={};
+  VALEURS.forEach(function(l){ var i=l.indexOf(":"); if(i>0) TOKEN_VAL[l.slice(0,i)]=l.slice(i+1); });
+
   /* Idempotent : l'observer des autres scripts peut rappeler le DOM en boucle,
      on ne réécrit que si le contenu a changé. */
   function poser(){
@@ -417,6 +423,38 @@
          lieu de suivre la sienne. */
       if(sty.couleur)     v.push("--ps-line-c:"+sty.couleur);
       if(v.length) css+=":root{"+v.join(";")+";}";
+    }
+    /* ====================================================================
+       SURTITRE DE SECTION — RÉGLÉ PAR PAGE DEPUIS LE 08/08
+       --------------------------------------------------------------------
+       Le gros intertitre (`h2.learnworlds-subheading`) et le trait qui le
+       surmonte se réglaient GLOBALEMENT dans le configurateur : la couleur
+       choisie valait pour tout le site et écrasait donc l'accent de chaque page,
+       ce que la cascade `--ps-h2 -> --ps-accent` avait justement été écrite pour
+       préserver. Le client a demandé le réglage page par page.
+
+       🔴🔴 LA VALEUR VOYAGE DANS LE BLOC TOKENS, PAS DANS `PAGE_STYLE`. Ce n'est
+       pas un caprice de nommage : le Worker RECONSTRUIT `PAGE_STYLE` à partir des
+       seules clés `contour` / `ep` / `duree` / `couleur`, et il y écrit
+       `"contour":1` en dur pour toute entrée présente. Une couleur de titre
+       glissée là serait soit oubliée en silence à l'écriture, soit — pour la
+       faire passer — accompagnée d'un `ep`/`duree` qui ALLUMERAIT le liseré d'une
+       page qui l'a éteint. Le bloc TOKENS, lui, accepte n'importe quel nom
+       `--ps-*` porteur d'une couleur : la valeur y est validée comme tous les
+       autres jetons, et c'est ici qu'elle reprend le nom que lisent les feuilles.
+
+       🔴 POSÉE SEULEMENT SI ELLE EXISTE. Sans réglage, aucune propriété n'est
+       écrite et la cascade fait son travail : le titre retombe sur `--ps-accent`,
+       donc sur la couleur de CETTE page. Écrire une valeur par défaut supprimerait
+       ce repli et rendrait le réglage par page impossible.
+       🔴 `base` et non `slug` : une page jumelle EN hérite du réglage de sa page
+       française, comme pour la couleur et le contour. */
+    var h2=TOKEN_VAL["--ps-page-h2-"+base], h2s=TOKEN_VAL["--ps-page-h2sep-"+base];
+    if(h2 || h2s){
+      var w=[];
+      if(h2)  w.push("--ps-h2:"+h2);
+      if(h2s) w.push("--ps-h2-sep:"+h2s);
+      css+=":root{"+w.join(";")+";}";
     }
     if(!css){ if(st) st.textContent=""; return; }                 /* page non réglée -> valeurs globales */
     /* APRÈS ps-tokens dans le <head> : même spécificité (:root), l'ordre du DOM
