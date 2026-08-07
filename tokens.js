@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-c";
+  window.PS_TOKENS_V="2026-08-07-d";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -3099,7 +3099,21 @@
        tag n'est pas encore posé), donc il retombait précisément dans la branche
        « offre » que ce bandeau avait été écrit pour lui épargner.
        ⇒ Un seul message, vrai dans les deux cas : validez votre adresse. */
-    if(verifEnAttente(u)) return {montrer:true, mode:"verification"};
+    /* 🔴🔴 RESTREINT À L'ÉCOLE LE 07/08 — signalé par Ziad : « quand je crée un
+       compte avec Google, on me demande de vérifier mon adresse avant même
+       d'acheter ». Mesuré sur un compte gmail fraîchement créé : notre bandeau
+       affichait « Validez votre adresse e-mail pour ouvrir votre accès », donc
+       on réclamait une validation à un prospect à qui il fallait proposer une
+       FORMULE. On lui barrait le chemin d'achat.
+       Le raisonnement d'origine était juste pour l'étudiant d'ÉCOLE — il n'a
+       rien à acheter — mais son argument (« le tag n'est pas encore posé, on ne
+       le reconnaît plus ») est faux : `partenaire` est calculé sur le DOMAINE
+       de l'adresse, pas sur le tag, donc il reconnaît l'école dès l'inscription,
+       validée ou non.
+       ⇒ École en attente : valider. Hors école : la formule, quoi qu'il arrive.
+       C'est cohérent avec le fait mesuré le 05/08 — chez PrepaStrat **l'achat
+       précède la vérification**, « payant mais non validé » est la NORME. */
+    if(partenaire && verifEnAttente(u)) return {montrer:true, mode:"verification"};
     if(partenaire) return {montrer:true, mode:"ecole", ecole:partenaire.nom||""};
     return {montrer:true, mode:"offre"};
   }
@@ -3412,9 +3426,18 @@
      l'envoie là où il peut se débloquer. L'y envoyer vers l'offre serait lui
      réclamer 99 € pour un problème qui se règle en cliquant un lien reçu par
      e-mail — et, pour un étudiant d'école, réclamer ce que son école a déjà payé. */
+  /* 🔴🔴 MÊME CORRECTION QUE `orientation()` (07/08). Cette fonction envoyait
+     TOUT compte en attente vers la validation — donc un prospect hors école qui
+     cliquait une carte verrouillée se retrouvait devant « validez votre
+     adresse » au lieu des formules. Deux règles pour une même situation, et
+     c'est la plus restrictive qui gagnait.
+     ⇒ La validation ne prime que pour l'étudiant d'ÉCOLE, reconnu à son domaine :
+     lui n'a rien à acheter. Tous les autres vont à l'offre, validés ou non. */
   function versOffre(){
     var u=membrePS();
-    if(u && verifEnAttente(u)){ location.href="/email-verification-pending"; return; }
+    var part=null;
+    try{ part=(u && window.PS_PARTENAIRE_EMAIL) ? window.PS_PARTENAIRE_EMAIL(u.email) : null; }catch(e){}
+    if(u && part && verifEnAttente(u)){ location.href="/email-verification-pending"; return; }
     location.href = window.PS_URL_OFFRE || URL_OFFRE_DEFAUT;
   }
 
