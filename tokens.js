@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-n";
+  window.PS_TOKENS_V="2026-08-07-o";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4462,6 +4462,26 @@
      cliquer, elle n'a pas besoin qu'on juge si c'est le bon moment. Sans ça, un
      membre ayant reporté la popup la semaine dernière cliquerait sur un bouton
      qui ne fait rien. */
+  /* ── Écriture directe, sans passer par la popup ───────────────────────────
+     Demande de Ziad (07/08) : « dissocier l'activation de la visibilité seule
+     et le remplissage des infos ». Basculer un interrupteur ne doit pas ouvrir
+     un questionnaire.
+     🔴 EXPOSÉE ICI, PAS RECOPIÉE AILLEURS. `account-page.js` n'a aucun chemin
+     d'écriture : lui en donner un signifierait dupliquer le jeton Turnstile,
+     l'endpoint, la signature anti-doublon et l'événement de rafraîchissement.
+     🔴 ET SURTOUT LES LIBELLÉS D'OPT-IN : chez LearnWorlds le LIBELLÉ EST LA
+     DONNÉE. Une constante recopiée dans un second fichier, et la prochaine
+     reformulation coupe l'annuaire en silence — c'est exactement le défaut du
+     04/08, où l'annuaire s'est vidé à moitié. */
+  window.PS_OPTIN_OUI=OPTIN_OUI;
+  window.PS_OPTIN_NON=OPTIN_NON;
+  window.PS_FICHE_ECRIRE=function(champs){
+    var u=membrePS();
+    if(!u || !champs || typeof champs!=="object") return false;
+    ficheEnvoyer(u, champs, true);
+    return true;
+  };
+
   window.PS_FICHE_OUVRIR=function(force){
     var u=membrePS();
     if(!u) return false;

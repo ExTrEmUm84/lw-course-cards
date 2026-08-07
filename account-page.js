@@ -113,6 +113,13 @@
     B+".account-value-display-value{margin:0 !important;padding:0 !important;font-size:14.5px !important;font-weight:600 !important;border:0 !important;}",
 
     /* --- la carte « Ma fiche d'annuaire » --- */
+    /* 🔴 CHAQUE sélecteur porte son scope. En n'en préfixant qu'un, on relâche
+       les suivants sans que rien ne le signale — ils s'appliqueraient alors à
+       toute la page. Nos classes nous appartiennent, donc l'effet serait nul
+       ici ; c'est l'habitude qui compte, elle a déjà coûté cher ailleurs. */
+    B+".ps-carte-fiche .ps-fiche-actions{display:flex;gap:8px;flex-wrap:wrap}",
+    B+".ps-carte-fiche .ps-fiche-alerte{margin:10px 0 0;font:400 13.5px/1.5 var(--ps-font,Figtree,sans-serif);"+
+      "color:#8a5a00;background:#fff8e6;border:1px solid #f0dca8;border-radius:10px;padding:9px 12px}",
     B+".ps-carte-fiche .ps-fiche-hd{margin-bottom:14px !important;}",
     B+".ps-carte-fiche .ps-fiche-t{display:flex !important;align-items:center !important;gap:10px !important;}",
     B+".ps-carte-fiche .ps-fiche-cta{white-space:nowrap !important;}",
@@ -727,11 +734,33 @@
       chips+='<span class="ps-fpill ps-fpill-vide" role="button" tabindex="0">+ '+manquants.join(", ")+'</span>';
     }
 
+    /* 🔴🔴 DEUX ACTIONS SÉPARÉES (07/08, demande de Ziad : « dissocier
+       l'activation de la visibilité seule et le remplissage des infos »).
+       Un seul bouton faisait les deux : basculer sa visibilité ouvrait le
+       questionnaire, et on ne pouvait pas réviser ses infos sans toucher à sa
+       visibilité. Deux intentions, deux boutons.
+       🔴 LE MINIMUM EST DIT, PAS DEVINÉ. La règle du Worker retire les fiches
+       sans école ni moyen de contact : sans ce message, un membre verrait
+       « Visible » et n'apparaîtrait nulle part, sans jamais savoir pourquoi.
+       Un opt-in qui semble accepté mais ne produit rien est pire qu'un refus. */
+    var aEcole=!!String(cf.cf_ecole||"").trim();
+    var aContact=["cf_contactmail","cf_contactlinkedin","cf_contacttel","cf_contact"]
+                   .some(function(k){ return String(cf[k]||"").trim(); });
+    var manqueMin=[]; if(!aEcole) manqueMin.push("votre école");
+    if(!aContact) manqueMin.push("un moyen de vous joindre");
+
     carte.innerHTML=
       '<div class="account-section-header ps-fiche-hd">'+
         '<div class="ps-fiche-t"><span class="account-section-title">Ma fiche d\'annuaire</span>'+etat+'</div>'+
-        '<button type="button" class="learnworlds-button ps-fiche-cta">'+libelleBouton+'</button>'+
+        '<div class="ps-fiche-actions">'+
+          '<button type="button" class="learnworlds-button ps-fiche-visi">'+(oui?"Masquer ma fiche":"Afficher ma fiche")+'</button>'+
+          '<button type="button" class="learnworlds-button ps-fiche-cta">'+(optin?"Modifier mes infos":"Compléter")+'</button>'+
+        '</div>'+
       '</div>'+
+      (oui && manqueMin.length
+        ? '<p class="ps-fiche-alerte">Votre fiche n\'apparaîtra pas tant qu\'il manque '+
+          manqueMin.join(" et ")+'&nbsp;: sans cela, personne ne peut vous trouver ni vous joindre.</p>'
+        : '')+
       '<div class="ps-fpills">'+(chips||'<span class="ps-fpill ps-fpill-vide" role="button" tabindex="0">+ Renseigner ma fiche</span>')+'</div>';
 
     var ouvrir=function(){
@@ -740,10 +769,24 @@
         return /modifier/i.test((x.textContent||"").trim()); })[0];
       if(b) b.click();
     };
-    [].slice.call(carte.querySelectorAll(".ps-fiche-cta,.ps-fpill-vide")).forEach(function(e){
-      e.addEventListener("click",ouvrir);
-      e.addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); ouvrir(); } });
-    });
+    /* L'interrupteur n'ouvre RIEN : il écrit, et la carte se refait sur
+       l'événement `ps:fiche-enregistree` émis par tokens.js. */
+    var basculer=function(){
+      if(typeof window.PS_FICHE_ECRIRE!=="function") return ouvrir();
+      var vers = oui ? window.PS_OPTIN_NON : window.PS_OPTIN_OUI;
+      if(!vers) return ouvrir();                 /* libellés absents : on ne devine pas */
+      var b=carte.querySelector(".ps-fiche-visi");
+      if(b){ b.disabled=true; b.textContent="…"; }
+      window.PS_FICHE_ECRIRE({ cf_annuaire: vers });
+    };
+    var brancher=function(sel, action){
+      [].slice.call(carte.querySelectorAll(sel)).forEach(function(e){
+        e.addEventListener("click",action);
+        e.addEventListener("keydown",function(ev){ if(ev.key==="Enter"||ev.key===" "){ ev.preventDefault(); action(); } });
+      });
+    };
+    brancher(".ps-fiche-visi", basculer);
+    brancher(".ps-fiche-cta,.ps-fpill-vide", ouvrir);
 
     if(sec.parentNode) sec.parentNode.insertBefore(carte, sec.nextSibling);
     /* Elle prend la visibilité de sa voisine dès l'insertion. */
