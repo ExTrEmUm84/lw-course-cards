@@ -50,7 +50,7 @@
      deux se ressemblent exactement à l'écran — le 05/08 j'ai cru au premier,
      c'était le second. `window.PS_VERIF_V` en console tranche en une seconde.
      -b : cibles de traduction nommées (le paragraphe « spams » restait anglais). */
-  window.PS_VERIF_V = "2026-08-05-b";
+  window.PS_VERIF_V = "2026-08-08-a";
 
   var SLUG = "email-verification-pending";
 
@@ -164,6 +164,14 @@
   }
 
   var CSS = [
+    /* Confirmation d'achat (08/08) — VERTE, pas bleue : c'est une bonne
+       nouvelle, et elle doit se lire avant le titre qui, lui, demande encore
+       quelque chose. Elle n'apparaît que si un programme est réellement acquis
+       (cf. `rassurerAcheteur`). */
+    "body.slug-" + SLUG + " #ps-achat{background:var(--ps-ok-tint,#E8F7F0);" +
+      "border:1px solid var(--ps-ok,#1b5e40);border-radius:14px;padding:14px 16px;margin:0 0 22px;" +
+      "font:400 14.5px/1.55 var(--ps-font,Figtree,sans-serif);color:#154832;text-align:left;}",
+    "body.slug-" + SLUG + " #ps-achat strong{color:#0f3a28;}",
     /* Fond : la page n'a NI barre de navigation NI pied de page (une seule
        section `Thankyou1`, mesuré). Elle occupe donc tout l'écran, et c'est
        elle seule qui porte la DA. */
@@ -249,9 +257,64 @@
     cibles.forEach(function (b) {
       if (traduireUn(b)) n++;
     });
+    rassurerAcheteur(sec);
     styler();
     reveler();
     return phraseFaite || n > 0;
+  }
+
+  /* ══════════════════════════════════════════════════════════════════════════
+     CELUI QUI VIENT DE PAYER N'EST PAS CELUI QUI VIENT DE S'INSCRIRE  (08/08)
+     --------------------------------------------------------------------------
+     Signalé par Ziad, mesuré sur son compte à l'instant : après un achat, il
+     atterrit ici avec `userLearningPrograms.length === 1` — le paiement est
+     passé, le programme est acquis — et la page ne dit **pas un mot de son
+     achat**. Elle ne parle que d'« activer son compte », et ses deux seules
+     actions sont « Renvoyer l'e-mail » et « Me déconnecter ».
+     Quelqu'un qui vient de payer 99 € lit donc un écran qui ressemble à un
+     échec. C'est le pire moment du parcours pour laisser un doute.
+
+     🔴🔴 ON NE PROMET PAS L'ACCÈS, PARCE QU'IL N'EST PAS LÀ. Mesuré le 08/08 :
+     `/path-player?courseid=niveau-1` répond 200 mais **son URL finale est
+     `/email-verification-pending`** — LearnWorlds redirige le contenu côté
+     serveur tant que l'adresse n'est pas vérifiée. Un bouton « accéder à mes
+     cours » renverrait donc ici. On confirme l'ACHAT, on n'invente pas un
+     accès. Rassurer n'est pas mentir.
+     🔴 Le bloc n'apparaît QUE si un programme est réellement présent : sur un
+     compte sans achat, annoncer « votre achat est enregistré » serait absurde,
+     et `userLearningPrograms` absent veut dire « pas encore chargé », jamais
+     « rien acheté » (même discipline que le blocage de `tokens.js`).
+     🔴 INSÉRÉ AVANT le titre, jamais à la place : on n'enlève rien à la page de
+     LearnWorlds, on ajoute au-dessus. Et jamais deux fois (`ps-achat`).
+     ══════════════════════════════════════════════════════════════════════════ */
+  function rassurerAcheteur(sec) {
+    if (!sec || document.getElementById("ps-achat")) return;
+    var m = (typeof me === "object" && me) ? me : null;
+    if (!m || !Array.isArray(m.userLearningPrograms) || !m.userLearningPrograms.length) return;
+
+    var nom = "";
+    try {
+      var p = m.userLearningPrograms[0];
+      nom = (p && (p.title || p.name)) ? String(p.title || p.name) : "";
+    } catch (e) {}
+
+    var b = document.createElement("div");
+    b.id = "ps-achat";
+    b.innerHTML =
+      '<strong>Votre achat est bien enregistré' + (nom ? '&nbsp;: ' + nom.replace(/[&<>]/g, "") : "") + '.</strong> ' +
+      'Il reste une seule étape&nbsp;: confirmer votre adresse e-mail. ' +
+      'Vos cours s\'ouvriront dès que vous aurez cliqué sur le lien ci-dessous — ' +
+      'rien ne sera à repayer.';
+    /* 🔴🔴 ON S'INSÈRE À CÔTÉ DU TITRE, PAS À CÔTÉ DE SON PARENT. Première
+       version : `titre.parentElement.parentElement.insertBefore(...)` — le bloc
+       atterrissait dans `.lw-cols`, un conteneur FLEX EN LIGNE avec
+       `align-items:stretch`. Il devenait donc une COLONNE, large de 314 px et
+       **haute de 782 px**, étirée sur toute la rangée. Mesuré à l'écran avant
+       de pousser ; invisible à la relecture du code.
+       ⇒ Un niveau d'insertion se vérifie sur le rendu, pas sur l'intention. */
+    var titre = sec.querySelector(".learnworlds-heading");
+    if (titre && titre.parentElement) titre.parentElement.insertBefore(b, titre);
+    else sec.insertBefore(b, sec.firstChild);
   }
 
   function demarrer() {
