@@ -1042,18 +1042,25 @@
     if(f.cf_recherche) chips.push({t:f.cf_recherche});
     if(f.cf_langue)    chips.push({t:f.cf_langue});
     var role=[f.cf_poste, f.cf_promo?("Promo "+f.cf_promo):null].filter(Boolean).join(" · ");
-    /* progression globale : moyenne des domaines connus (vide tant que le
-       Worker n'a pas répondu ET qu'aucune valeur n'est mémorisée). */
-    var src=lpData||lpFromStore()||[], moy=null;
-    var chiffres=src.filter(function(p){ return typeof p.pct==="number"; });
-    if(chiffres.length){
-      moy=Math.round(chiffres.reduce(function(a,p){ return a+p.pct; },0)/chiffres.length);
-    }
+    /* 🔴🔴 LA STAT « PROGRESSION » DE L'EN-TÊTE A ÉTÉ RETIRÉE (07/08, demande de
+       Ziad : « elle ne sert à rien »). Elle affichait la moyenne simple des
+       PARCOURS, pendant que le bandeau de grade, trois centimètres plus bas,
+       affichait la moyenne des PAGES — deux ensembles différents, deux moyennes
+       différentes, deux nombres différents sur le même écran. Le membre n'avait
+       aucun moyen de savoir lequel le concernait.
+       🔴 NE PAS LA REMETTRE « en la corrigeant » : le problème n'était pas la
+       formule, c'était d'avoir deux chiffres globaux. Un seul vit désormais sur
+       cette page, celui du bandeau de grade. Si un chiffre est voulu ici un jour,
+       il doit LIRE celui du bandeau, jamais en recalculer un second.
+       🔴 `lpFromStore()` RESTE APPELÉ : il ne sert pas qu'à rendre des valeurs,
+       il amorce aussi `lpPages` pour la première peinture du board (cf. sa
+       définition). Le supprimer d'ici retarderait l'affichage des tuiles. */
+    var src=lpData||lpFromStore()||[];
     /* Nombre de programmes : celui du BOARD s'il est connu (il fait foi, c'est ce
        que le membre voit), sinon la liste de `me`. Sans ça on affichait « 7 »
        au-dessus de 8 tuiles. */
     var nbProg=src.length||(u.userLearningPrograms&&u.userLearningPrograms.length)||0;
-    var sig=[nom,role,chips.map(function(c){return c.t;}).join(","),moy,nbProg,u.total_time].join("|");
+    var sig=[nom,role,chips.map(function(c){return c.t;}).join(","),nbProg,u.total_time].join("|");
 
     var hero=content.querySelector(".ps-pf-hero");
 
@@ -1069,7 +1076,6 @@
         var bs=hero.querySelectorAll(".ps-pf-st b");
         if(bs[0]) bs[0].textContent=fmtDuree(u.total_time);
         if(bs[1]) bs[1].textContent=String(nbProg);
-        if(bs[2]) bs[2].textContent=(moy==null?"—":moy+" %");
         var lbl=hero.querySelectorAll(".ps-pf-st span");
         if(lbl[1]) lbl[1].textContent=(nbProg>1?"programmes":"programme");
       }
@@ -1142,10 +1148,12 @@
     if(edit){ edit.classList.add("ps-pf-edit"); row.appendChild(edit); }
     hero.appendChild(row);
 
+    /* Deux stats, plus trois : la progression a quitté l'en-tête (cf. plus haut).
+       `.ps-pf-st` est en `flex:1 1 130px`, les deux restantes s'élargissent
+       d'elles-mêmes — rien à changer côté CSS. */
     var stats=[
       {v:fmtDuree(u.total_time), l:"de formation"},
-      {v:String(nbProg),         l:nbProg>1?"programmes":"programme"},
-      {v:(moy==null?"—":moy+" %"), l:"progression"}
+      {v:String(nbProg),         l:nbProg>1?"programmes":"programme"}
     ];
     var sw=document.createElement("div"); sw.className="ps-pf-stats";
     stats.forEach(function(st,i){
