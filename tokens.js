@@ -779,7 +779,7 @@
      le même changement — la leçon a coûté deux fois dans la journée. */
   /* 🔴 -aa : popup « validez votre adresse » à la place de celle de l'annuaire
      pour un compte en attente. Marqueur bougé DANS le changement. */
-  window.PS_TOKENS_V="2026-08-07-k";
+  window.PS_TOKENS_V="2026-08-07-m";
 
   /* 🔴 `formules` N'EST PAS ICI, ET C'EST VOULU. J'y avais ajouté le slug pour
      régler le flash du bloc de réglages brut signalé par Ziad le 05/08 — sans
@@ -4066,7 +4066,17 @@
        pouvoir se réinscrire — le même piège, dans l'autre sens. */
     function dejaConnu(e){ return !!e && e.cle!=="cf_annuaire" && rempli(connus[e.cle]); }
     function sauterConnus(){
-      while(i<FICHE_ECRANS.length && dejaConnu(FICHE_ECRANS[i])) i++;
+      /* 🔴🔴 LE SAUT NE FRANCHIT PAS LE RÉCAPITULATIF (07/08, trouvé au banc de
+         rejeu, pas à l'écran). L'index `NOYAU` porte DEUX choses : l'écran
+         « Votre fiche est en ligne » tant qu'il n'a pas été montré, et la
+         question `FICHE_ECRANS[NOYAU]` ensuite. Sans cet arrêt, un membre dont
+         tout le noyau ET la langue sont déjà remplis sautait de 1 à 6 : il ne
+         voyait JAMAIS le récapitulatif, donc jamais le choix « C'est bon pour
+         moi / Compléter » — c'est-à-dire exactement ce que Ziad demandait. */
+      while(i<FICHE_ECRANS.length && dejaConnu(FICHE_ECRANS[i])){
+        if(i===NOYAU && !noyauMontre) break;
+        i++;
+      }
       /* 🔴🔴 GÉRER UNE FICHE N'EST PAS LA CRÉER (07/08, Ziad : « pourquoi
          m'obliger à remplir encore à chaque fois que je change masqué à
          visible ? quand je clique sur apparaître, il devrait me proposer de
@@ -4223,7 +4233,12 @@
              n'était JAMAIS posée. C'est pour ça que Ziad ne pouvait pas choisir
              « Français et Anglais » : il ne pouvait choisir aucune langue.
              ⇒ Le jalon devient un ÉTAT (`noyauMontre`), pas une position. */
-          if(a==="suite"){ ficheEnvoyer(u, rep, false); noyauMontre=true; rendre(); return; }
+          /* 🔴 `sauterConnus()` ICI AUSSI : une fois le récapitulatif montré,
+             l'index reste sur NOYAU et `rendre()` afficherait `FICHE_ECRANS[NOYAU]`
+             même si sa réponse est déjà connue. Mesuré : la langue était
+             redemandée alors qu'elle valait « Français ». QUATRIÈME chemin qui
+             bouge l'index — chacun devait recevoir la même règle. */
+          if(a==="suite"){ ficheEnvoyer(u, rep, false); noyauMontre=true; sauterConnus(); rendre(); return; }
           if(a==="passer"||a==="suivant"){
             i++; sauterConnus();
             /* `>=` et non `===` : avec le saut des champs connus, on peut
@@ -4248,8 +4263,21 @@
             /* Choix unique : on avance seul. Un clic de plus par écran, c'est
                autant d'occasions d'abandonner. */
             setTimeout(function(){
-              i++;
-              if(i===NOYAU) ficheEnvoyer(u, rep, false);
+              /* 🔴🔴 CE CHEMIN N'APPELAIT PAS `sauterConnus()` (07/08). Un choix
+                 unique avance TOUT SEUL après le clic ; j'avais ajouté le saut
+                 des champs déjà connus sur « Passer / Continuer » et sur la
+                 touche Entrée, mais pas ici. Résultat mesuré chez Ziad : il
+                 répondait à l'opt-in, la popup passait à `i=1` sans sauter, et
+                 lui redemandait son école — alors que `custom_fields.cf_ecole`
+                 valait « ESSEC » sur la même page, et que la carte l'affichait
+                 juste derrière la popup.
+                 ⇒ **Une règle ajoutée doit l'être sur TOUS les chemins qui
+                 avancent l'index**, pas sur ceux auxquels on pense d'abord.
+                 C'est la troisième fois de la journée qu'une règle en un seul
+                 exemplaire sur trois laisse le défaut à l'écran. */
+              i++; sauterConnus();
+              if(!noyauEnvoye && i>=NOYAU){ noyauEnvoye=true; ficheEnvoyer(u, rep, false); }
+              if(i>=FICHE_ECRANS.length) ficheEnvoyer(u, rep, true);
               rendre();
             },190);
           }
