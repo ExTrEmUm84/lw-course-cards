@@ -52,8 +52,10 @@
      -b : cibles de traduction nommées (le paragraphe « spams » restait anglais).
      -b (08/08, soir) : la carte débordait de l'écran sur téléphone — notre
      `max-width` avait remplacé le `max-width:100%` de LearnWorlds sur un
-     conteneur en `width:1170px`. Voir le bloc CSS. */
-  window.PS_VERIF_V = "2026-08-08-b";
+     conteneur en `width:1170px`. Voir le bloc CSS.
+     -c (08/08) : ~166px de vide au-dessus de la carte sur téléphone —
+     l'espacement de section du Site Builder, surchargé en mobile. */
+  window.PS_VERIF_V = "2026-08-08-c";
 
   var SLUG = "email-verification-pending";
 
@@ -245,8 +247,33 @@
        plateforme. **Un harnais valide une logique, jamais une cascade.** */
     "body.slug-" + SLUG + " a[href^=\"mailto:\"]{color:var(--ps-accent,#3887b4) !important;" +
       "text-decoration:none !important;font-weight:600 !important;}",
+    /* 🔴🔴 LE VIDE EN HAUT SUR TÉLÉPHONE — ET POURQUOI ON SURCHARGE AU LIEU DE
+       LIRE. Signalé par Ziad juste après le correctif de largeur : ~166px de
+       gris au-dessus de la carte, soit un cinquième de l'écran sur un iPhone,
+       AVANT d'avoir lu le premier mot. La page n'a ni barre de navigation ni
+       pied de page (une seule section `Thankyou1`, mesuré le 05/08) : ce vide
+       est donc l'espacement vertical de la section.
+       🔴 **Cette valeur n'est PAS lisible.** Cherchée dans la feuille du CDN de
+       LearnWorlds : `.learnworlds-section` n'y porte AUCUN padding vertical —
+       seulement les modificateurs `.no-padding-top` / `.no-padding-bottom`.
+       ⇒ La valeur vient du **Site Builder**, émise en CSS de page. Et le
+       balisage réel de la section (capture du 05/08, `verification-harness.html`)
+       ne porte aucun `style` inline. Autrement dit : invisible tant qu'on n'est
+       pas SUR la page, avec un compte en attente de vérification.
+       ⇒ On ne devine pas la valeur, on la REMPLACE : `!important` dans notre
+       feuille bat aussi bien une règle de page qu'un attribut `style` non
+       important. Le résultat ne dépend donc pas de ce qu'on n'a pas pu lire.
+       🔴 MOBILE SEULEMENT, et c'est un choix : sur un grand écran cet air
+       autour d'une carte unique est voulu. C'est la hauteur d'écran qui rend le
+       vide coûteux, pas la largeur — d'où la borne à 640px et rien au-delà.
+       🔴 On vise `#pageContent > section` ET `#pageContent` : sur cette page le
+       document EST cette section, donc les deux sont sûrs. Sur une page à
+       plusieurs sections ce serait faux — la règle est portée par un fichier
+       chargé sur cette seule page, jamais par une table de slugs. */
     "@media (max-width:640px){body.slug-" + SLUG + " .learnworlds-section-content{margin:0 16px;padding:32px 22px 28px;}" +
-      "body.slug-" + SLUG + " .learnworlds-heading{font-size:25px !important;}}"
+      "body.slug-" + SLUG + " .learnworlds-heading{font-size:25px !important;}" +
+      "body.slug-" + SLUG + " #pageContent{padding-top:0 !important;padding-bottom:0 !important;}" +
+      "body.slug-" + SLUG + " #pageContent > section{padding-top:20px !important;padding-bottom:28px !important;}}"
   ].join("\n");
 
   function styler() {
