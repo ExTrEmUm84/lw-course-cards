@@ -49,8 +49,11 @@
      pas » de « le cache de GitHub Pages sert encore l'ancien fichier ». Les
      deux se ressemblent exactement à l'écran — le 05/08 j'ai cru au premier,
      c'était le second. `window.PS_VERIF_V` en console tranche en une seconde.
-     -b : cibles de traduction nommées (le paragraphe « spams » restait anglais). */
-  window.PS_VERIF_V = "2026-08-08-a";
+     -b : cibles de traduction nommées (le paragraphe « spams » restait anglais).
+     -b (08/08, soir) : la carte débordait de l'écran sur téléphone — notre
+     `max-width` avait remplacé le `max-width:100%` de LearnWorlds sur un
+     conteneur en `width:1170px`. Voir le bloc CSS. */
+  window.PS_VERIF_V = "2026-08-08-b";
 
   var SLUG = "email-verification-pending";
 
@@ -187,7 +190,31 @@
        elle seule qui porte la DA. */
     "body.slug-" + SLUG + "{background:var(--ps-surface-soft,#F7F8FB);}",
     "body.slug-" + SLUG + " #pageContent > section{background:transparent;}",
-    "body.slug-" + SLUG + " .learnworlds-section-content{max-width:620px;margin:0 auto;" +
+    /* 🔴🔴 `width:auto` N'EST PAS UNE PRÉCAUTION, C'EST LE CORRECTIF — ET LE BUG
+       ÉTAIT DANS LA LIGNE D'À CÔTÉ. Signalé par Ziad sur son téléphone : la
+       carte débordait de l'écran, tout le texte rogné à droite. Mesuré dans la
+       feuille de LearnWorlds (`pages.42a2536999c30ef8cac8.css`), pas déduit :
+         .learnworlds-section-content      { max-width:100%; margin:0 auto }
+         .learnworlds-section-content.wide { width:1170px }
+       Le conteneur porte la classe `wide` — donc une largeur FIXE de 1170px —
+       et c'est `max-width:100%` qui la ramenait dans l'écran. En posant notre
+       `max-width:620px` (spécificité 0,2,1 contre 0,2,0 : on gagne), **on a
+       remplacé le filet responsive de LearnWorlds par un plafond plus haut que
+       le téléphone** : 620px de carte dans 390px de large. Invisible sur
+       desktop, où 620 < 1170.
+       ⇒ `width:auto` retire le 1170px de l'équation : la carte se dimensionne
+       sur son conteneur, et `max-width` ne fait plus que la borner en grand
+       écran. Rendu desktop **inchangé** (620px avant comme après, LW posant un
+       `*,:after,:before{box-sizing:border-box}` global — vérifié).
+       🔴 `width:100%` — l'idiome des autres fichiers du dépôt — serait FAUX
+       ICI : la règle mobile plus bas donne des gouttières en `margin:0 16px`,
+       et une marge s'ajoute EN DEHORS d'un `width:100%` ⇒ 32px de débordement.
+       C'est `auto`, précisément parce qu'on marge au lieu de padder.
+       🔴 LA LEÇON, ET ELLE DÉPASSE CE FICHIER : **poser un `max-width` sur un
+       élément dont on n'a pas lu le `width` ne le contraint pas, ça écrase la
+       contrainte de quelqu'un d'autre.** Ce que LW appelle `max-width:100%`
+       était du responsive, pas du décor. */
+    "body.slug-" + SLUG + " .learnworlds-section-content{width:auto !important;max-width:620px;margin:0 auto;" +
       "background:#fff;border:1px solid var(--ps-border,#E6E9EF);border-radius:var(--ps-r-card,16px);" +
       "padding:44px 36px 40px;box-shadow:0 10px 30px rgba(32,56,102,.07);}",
     /* Pastille de l'icône : le rond natif est gris pâle, on le passe à l'accent. */
