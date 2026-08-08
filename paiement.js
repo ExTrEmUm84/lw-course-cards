@@ -30,7 +30,7 @@
 (function () {
   "use strict";
 
-  window.PS_PAIEMENT_V = "2026-08-05-c";
+  window.PS_PAIEMENT_V = "2026-08-08-natif";
 
   /* 🔴 Le test porte sur le CHEMIN et pas sur `body.slug-…` : cette page est
      servie par LearnWorlds, pas construite dans le Site Builder, et elle ne
@@ -166,12 +166,6 @@
     S + ".payment-section .col.span_4_of_12 .flex.j-c-sb > .lw-text-color-fadeout3{"+
       "flex:1 1 100% !important;white-space:normal !important;}",
 
-    /* 🔴 Animation vide, uniquement là pour être DÉTECTÉE : Chrome déclenche
-       `animationstart` quand il autoremplit un champ, et c'est le seul signal
-       fiable qu'un gestionnaire de mots de passe est passé par là. Voir le
-       bloc `reveillerAutoremplissage()` plus bas. */
-    "@keyframes ps-autofill{from{opacity:1}to{opacity:1}}",
-    S + ".payment-section input:-webkit-autofill{animation-name:ps-autofill !important;animation-duration:.01s !important;}",
     S + ".payment-section .col.span_4_of_12 .learnworlds-main-text{font-family:var(--ps-font,Figtree,sans-serif) !important;}",
 
     /* 🔴 Sous 900 px la sticky et la grille à deux colonnes n'ont plus de sens :
@@ -295,61 +289,41 @@
   }
 
   /* ══════════════════════════════════════════════════════════════════════════
-     LE CHAMP EST REMPLI, ET LEARNWORLDS LE CROIT VIDE  (08/08)
+     🧹 RETIRÉ LE 08/08 — TOUT CE QUI TOUCHAIT AUX CHAMPS EST PARTI
      --------------------------------------------------------------------------
-     Signalé par Ziad : « ça bloque sur le mot de passe alors qu'il est bien
-     là ». Diagnostiqué en direct sur sa page, sans jamais lire la valeur du
-     champ : le message « Ce champ est requis » était rattaché à un `password`
-     dont `value.length > 0`. En émettant les seuls ÉVÈNEMENTS de saisie, sans
-     toucher à la valeur, les erreurs ont disparu instantanément.
-     ⇒ Cause : le mot de passe vient d'un gestionnaire de mots de passe (ou d'un
-     collage). Le navigateur remplit le DOM **sans émettre `input`**, et le
-     validateur de LearnWorlds n'écoute que ça. Il maintient donc « vide » dans
-     son état interne pendant que l'utilisateur voit son champ rempli.
-     🔴 CE N'EST PAS NOTRE BUG, MAIS IL NOUS COÛTE DES VENTES : il frappe
-     précisément les gens qui vont payer, et rien à l'écran ne leur dit quoi
-     faire. À signaler à LearnWorlds — leur validateur doit lire la valeur, pas
-     seulement écouter les frappes. En attendant, on le réveille.
+     Vivaient ici : `reveiller()` / `reveillerAutoremplissage()` (émission
+     d'évènements `input`/`change` sur les champs autoremplis), l'écoute
+     `animationstart`, et les deux règles CSS `@keyframes ps-autofill` +
+     `input:-webkit-autofill` qui servaient à détecter l'autoremplissage.
+     **Retirés à la demande de Ziad : « retire tt le code, remets-moi le truc en
+     mode natif ».** Ce fichier ne fait plus que de l'apparence et deux
+     traductions. Il ne lit, n'écrit et ne réveille plus aucun champ.
 
-     🔴🔴 CE QUE CE CODE NE FAIT PAS, ET NE DOIT JAMAIS FAIRE : il ne lit
-     aucune valeur, n'en écrit aucune, ne soumet rien. Il se contente de dire
-     « ce champ a été touché » — exactement ce qu'aurait produit une frappe au
-     clavier. Sur un écran de paiement, toute autre liberté serait de trop.
-     🔴 Un seul réveil par champ (`data-ps-reveille`) : ces évènements
-     déclenchent des validations, en émettre à chaque passage ferait clignoter
-     les messages d'erreur sous les doigts de l'utilisateur.
+     🔴🔴 POURQUOI C'EST UN RETRAIT ET PAS UN RENONCEMENT — LA PISTE STANDARD
+     N'AVAIT JAMAIS ÉTÉ ESSAYÉE. Le diagnostic d'origine (« LearnWorlds croit
+     vide un champ pourtant rempli, on le réveille ») a été reconnu FAUX le
+     08/08 même : le mot de passe qu'on aidait à passer n'avait pas été choisi
+     par l'utilisateur, c'était Chrome qui versait un mot de passe enregistré
+     dans le champ d'inscription. On avait donc appris au validateur à ACCEPTER
+     un fantôme.
+     ⇒ Et le mécanisme prévu par la norme pour empêcher ça — **`autocomplete=
+     "new-password"`** sur un champ de mot de passe à CRÉER — n'apparaît nulle
+     part : ni dans le code, ni dans les 450 ko de notes du projet (0
+     occurrence, vérifié). Le tableau « trois pistes mesurées » dit avoir testé
+     `autocomplete`, mais sur **Prénom/Nom** (`given-name`/`family-name`).
+     🔴 **LA LEÇON** : trois jours de machinerie d'évènements, une annulation en
+     production et une saisie mobile cassée, sans avoir essayé l'attribut d'une
+     ligne que la norme prévoit exactement pour ce cas. **Avant d'intercepter le
+     comportement d'un navigateur, vérifier qu'on lui a dit ce qu'il attend.**
+     ⏳ À REPRENDRE À FROID, DANS CET ORDRE, ET RIEN AVANT : (1) relever
+     l'attribut `autocomplete` que porte RÉELLEMENT le champ de mot de passe de
+     l'inscription — il n'a jamais été mesuré ; (2) si `new-password` manque,
+     c'est là qu'est la cause, et la corriger n'est pas une rustine ; (3) test
+     sur le TÉLÉPHONE de Ziad avant tout déploiement — c'est le mobile qui a
+     fait annuler les deux tentatives précédentes.
      ══════════════════════════════════════════════════════════════════════════ */
-  function reveiller(el) {
-    if (!el || el.dataset.psReveille) return false;
-    /* On ne touche qu'à un champ qui a DÉJÀ quelque chose : réveiller un champ
-       vide ferait apparaître l'erreur « requis » avant même que la personne
-       ait commencé à écrire. */
-    if (!el.value || !el.value.length) return false;
-    el.dataset.psReveille = "1";
-    ["input", "change"].forEach(function (t) {
-      try { el.dispatchEvent(new Event(t, { bubbles: true })); } catch (e) {}
-    });
-    return true;
-  }
 
-  function reveillerAutoremplissage() {
-    var champs = document.querySelectorAll(
-      ".payment-section input[type='password'], .payment-section input[type='text'], .payment-section input[type='email']");
-    for (var i = 0; i < champs.length; i++) reveiller(champs[i]);
-  }
-
-  /* Chrome annonce l'autoremplissage par l'animation déclarée plus haut. C'est
-     le seul signal fiable : il arrive AVANT nos relances quand le navigateur
-     remplit au chargement, et APRÈS elles quand la personne choisit une entrée
-     de son gestionnaire trente secondes plus tard. */
-  if (!window.__psAutofillLie) {
-    window.__psAutofillLie = 1;
-    document.addEventListener("animationstart", function (e) {
-      if (e.animationName === "ps-autofill") reveiller(e.target);
-    }, true);
-  }
-
-  function passer() { poser(); traduire(); degrouperPrix(); reveillerAutoremplissage(); }
+  function passer() { poser(); traduire(); degrouperPrix(); }
 
   passer();
   if (document.readyState === "loading") {
