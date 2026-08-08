@@ -19,6 +19,14 @@
    `/inscription`, où déplacer un élément casse une délégation qu'on ne voit
    pas. Uniquement du CSS, sur des sélecteurs relevés en direct.
 
+   🔴🔴 ET DEPUIS LE 08/08, IL NE TOUCHE PLUS AUCUN CHAMP NON PLUS. Ni lecture,
+   ni écriture, ni émission d'évènement : la machinerie d'autoremplissage
+   (`reveiller`, `animationstart`, `:-webkit-autofill`) a été RETIRÉE sur demande
+   de Ziad — voir le bloc « RETIRÉ LE 08/08 » plus bas, qui dit pourquoi et ce
+   qui reste à faire. **Ne rien remettre ici qui touche à un champ avant d'avoir
+   relevé l'attribut `autocomplete` du champ de mot de passe** : c'est la piste
+   standard, et elle n'a jamais été essayée.
+
    🔴 LES CONNEXIONS SOCIALES SONT RETIRÉES ICI, ET SEULEMENT ICI (demande de
    Ziad). Ailleurs elles restent le chemin le plus court vers un compte. Mais
    sur un écran de paiement, elles proposent de repartir s'authentifier au
